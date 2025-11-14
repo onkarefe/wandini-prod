@@ -31,7 +31,7 @@ export function Header({
           <img
             src={shop.brand.logo.image.url}
             alt={shop.name}
-            className='headerLogo'
+            className="headerLogo"
           />
         )}
       </NavLink>
@@ -62,44 +62,73 @@ export function HeaderMenu({
 
   return (
     <nav className={className} role="navigation">
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => (
-        <div
-          key={item.id}
-          className={item.items && item.items.length > 0 ? 'menu-item-with-sub group' : 'menu-item'}
-        >
-          <NavLink
-            className="header-menu-item"
-            end
-            onClick={close}
-            prefetch="intent"
-            to={item.url}
+      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
+        const linkUrl = normalizeMenuUrl(
+          item.url,
+          publicStoreDomain,
+          primaryDomainUrl,
+        );
+
+        return (
+          <div
+            key={item.id}
+            className={
+              item.items && item.items.length > 0
+                ? 'menu-item-with-sub group'
+                : 'menu-item'
+            }
           >
-            {item.title}
+            <NavLink
+              className="header-menu-item"
+              end
+              onClick={close}
+              prefetch="intent"
+              to={linkUrl}
+            >
+              {item.title}
+              {item.items && item.items.length > 0 && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-6 inline-block ml-1 headerChevron"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                  />
+                </svg>
+              )}
+            </NavLink>
             {item.items && item.items.length > 0 && (
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6 inline-block ml-1 headerChevron">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-              </svg>
+              <ul className="submenu">
+                {item.items.map((subItem) => {
+                  const subLinkUrl = normalizeMenuUrl(
+                    subItem.url,
+                    publicStoreDomain,
+                    primaryDomainUrl,
+                  );
+
+                  return (
+                    <li key={subItem.id}>
+                      <NavLink
+                        className="header-submenu-item"
+                        to={subLinkUrl}
+                        prefetch="intent"
+                      >
+                        {subItem.title}
+                      </NavLink>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
-
-          </NavLink>
-          {item.items && item.items.length > 0 && (
-            <ul className="submenu">
-              {item.items.map((subItem) => (
-                <li key={subItem.id}>
-                  <NavLink
-                    className="header-submenu-item"
-                    to={subItem.url}
-                    prefetch="intent"
-                  >
-                    {subItem.title}
-
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </nav>
   );
 }
@@ -159,7 +188,7 @@ function CartBadge({ count }: { count: number | null }) {
           cart,
           prevCart,
           shop,
-          url: window.location.href || '',
+          url: typeof window !== 'undefined' ? window.location.href || '' : '',
         } as CartViewPayload);
       }}
     >
@@ -237,4 +266,48 @@ function activeLinkStyle({
     fontWeight: isActive ? 'bold' : undefined,
     color: isPending ? 'grey' : 'black',
   };
+}
+
+/**
+ * Menü URL'lerini normalize eder:
+ * - myshopify.com veya primary domain ise sadece path + query + hash döner
+ * - Dış domain ise aynen bırakır
+ * Böylece her zaman kendi Hydrogen domaininde kalırsın (efeonkar-test.com).
+ */
+function normalizeMenuUrl(
+  rawUrl: string | null,
+  publicStoreDomain: string,
+  primaryDomainUrl: string,
+) {
+  if (!rawUrl) return '/';
+
+  try {
+    const primary = new URL(primaryDomainUrl);
+    const primaryHost = primary.hostname;
+
+    // publicStoreDomain "3tzgtt-7y.myshopify.com" gibi geliyor
+    const publicHost = publicStoreDomain;
+
+    // rawUrl absolute veya relative olabilir
+    const base = `https://${publicHost}`;
+    const url = new URL(rawUrl, base);
+
+    const host = url.hostname;
+
+    const isShopifyDomain =
+      host === primaryHost ||
+      host === publicHost ||
+      host.endsWith('.myshopify.com');
+
+    if (isShopifyDomain) {
+      // Sadece path + query + hash dön → /collections/... gibi
+      return url.pathname + url.search + url.hash;
+    }
+
+    // Dış domain ise dokunma
+    return rawUrl;
+  } catch {
+    // Parse edilemezse (zaten relative path vs.), olduğu gibi kullan
+    return rawUrl;
+  }
 }
