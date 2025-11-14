@@ -1,0 +1,94 @@
+.custom-product-card {
+  display: block;
+  text-decoration: none;
+  background: #fff;
+  overflow: hidden;
+  border: 1px solid #c2c2c2;
+  transition: all 0.3s;
+  color: inherit; /* metin link rengi bozulmasın */
+  position: relative;
+  flex-basis: calc(33.3% - 16px);
+  margin: 0 0 24px 0;
+}
+
+.custom-product-card:hover {
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.custom-product-card:nth-child(3n-1) {
+  margin: 0 24px 24px;
+}
+
+/* Görsel alan */
+.custom-product-card__media {
+  overflow: hidden;
+  width: 100%;
+}
+
+.custom-product-card__container {
+  display: flex;
+}
+
+.custom-product-card__slide {
+  flex: 0 0 100%;
+  min-width: 100%;
+}
+
+.custom-product-card__image {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+  border-radius: 0;
+}
+
+/* Dots */
+.custom-product-card__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 16px 0 0;
+}
+
+.custom-product-card__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #d9d9d9;
+  border: none;
+  cursor: pointer;
+}
+
+.custom-product-card__dot--active {
+  background: #444;
+}
+
+/* Metin alanı */
+.custom-product-card__body {
+  padding: 12px 14px 16px;
+}
+
+.custom-product-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111;
+  margin: 0 0 6px;
+}
+
+.custom-product-card__desc {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #555;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.custom-products-grid {
+  display: flex;
+  flex-wrap: wrap;
+}

@@ -1,0 +1,16 @@
+/**
+ * Configure Tailwind v4 in this file using CSS variables and directives:
+ * https://tailwindcss.com/docs/v4-beta#css-first-configuration
+ */
+
+@import 'tailwindcss';
+
+@theme {
+  --color-title: #272727;
+  --color-body: #585A5F;
+  --color-body-secondary: #777777;
+  --color-bg-container: #F9FAFA;
+  --color-bg-highlight: #F5EDFA;
+  --color-price-red: #C02E29;
+  --color-price-green: #51B37F;
+}

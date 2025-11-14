@@ -1,0 +1,148 @@
+.collection-filters {
+  margin: 24px 0 12px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid #c2c2c2;
+}
+
+.filters-list {
+  display: flex;
+}
+
+.filter-item {
+  min-width: 250px;
+  margin-right: 24px;
+  position: relative;
+}
+
+.filter-item__head {
+  padding: 8px 12px;
+  border: 1px solid #c2c2c2;
+  color: #505050;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.filter-item__label {
+  font-size: 16px;
+  color: #505050;
+}
+
+.is-open .filter-item__icon svg {
+  transform: rotate(180deg);
+  transition: all 0.3s;
+}
+.filter-item__icon svg {
+  height: 20px;
+  width: 20px;
+  transition: all 0.3s;
+  fill: #505050;
+}
+
+.filter-popover {
+  position: absolute;
+  z-index: 2;
+  background-color: #ffffff;
+  width: 100%;
+  border: 1px solid #c2c2c2;
+  margin-top: 12px;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.filter-option {
+  margin: 0;
+}
+
+.filter-option__label {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  border-bottom: 1px solid #c2c2c2;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.filter-option__label input {
+  margin-right: 8px;
+  height: 16px;
+  width: 16px;
+}
+
+.filters-accordion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filters-apply button {
+  padding: 8px 24px;
+  border: 1px solid #c2c2c2;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn--clear {
+  background-color: #f5f5f5;
+  color: #505050;
+  margin-right: 12px;
+}
+
+.btn--clear:hover {
+  background-color: #e0e0e0;
+}
+
+.btn--apply {
+  background-color: #504841;
+  color: #ffffff;
+}
+
+.btn--apply:hover {
+  background-color: #3e3a36;
+}
+
+.filters-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filters-chip {
+  padding: 8px 24px;
+  border-radius: px;
+  background-color: rgb(206, 206, 255);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin: 12px 12px 6px 0;
+}
+.filters-chip:hover {
+  background-color: rgb(180, 180, 255);
+}
+
+.filters-chip__icon {
+  margin-left: 6px;
+}
+
+/* Sort */
+
+.sort-Main {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: flex-end;
+  margin: 12px 0;
+}
+
+.sort-Main select{
+  padding: 8px 12px;
+  border: 1px solid #c2c2c2;
+  margin-left: 12px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}

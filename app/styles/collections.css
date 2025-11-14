@@ -1,0 +1,54 @@
+.collectionMainHeroDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  height: 50vh;
+}
+
+.collectionMainHeroDiv::before {
+  content: '';
+  position: absolute;
+  background-color: black;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.5;
+}
+
+.collectionMainHeroDiv h1 {
+  font-size: 64px;
+  color: white;
+  font-weight: bold;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.collectionMainHeroDiv p {
+  font-size: 24px;
+  color: white;
+  margin-top: 10px;
+  width: 50%;
+  position: relative;
+  z-index: 1;
+}
+
+.collectionReloadButton{
+  padding: 10px 24px;
+  border: 1px solid #000000;
+  display: block;
+  width: max-content;
+  transition: all .3s;
+  cursor: pointer;
+  margin: 8px auto 24px;
+}
+
+.collectionReloadButton:hover{
+  background-color: #000000;
+  color: #ffffff;
+}
+
