@@ -14,11 +14,49 @@ export default async function handleRequest(
   reactRouterContext: EntryContext,
   context: HydrogenRouterContextProvider,
 ) {
+  // Development ortamında localhost'a izin vermek için ekstra kaynaklar
+  const localDevSources =
+    process.env.NODE_ENV === 'development' ? ['http://localhost:*'] : [];
+
   const {nonce, header, NonceProvider} = createContentSecurityPolicy({
     shop: {
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
+
+    // Google Fonts için style-src whitelist
+    styleSrc: [
+      "'self'",
+      "'unsafe-inline'",
+      'https://cdn.shopify.com',
+      'https://fonts.googleapis.com',
+      ...localDevSources,
+    ],
+
+    // Google Fonts font dosyaları için
+    fontSrc: [
+      "'self'",
+      'https://fonts.gstatic.com',
+      'https://cdn.shopify.com',
+      'data:',
+    ],
+
+    // IMG için (Configurator crop preview base64 data URL'leri)
+    imgSrc: [
+      "'self'",
+      'data:', // canvas'tan gelen data:image/... URL'leri
+      'blob:',
+      'https://cdn.shopify.com',
+      'https://shopify.com',
+      ...localDevSources,
+    ],
+
+    // YouTube iframe embed için
+    frameSrc: [
+      "'self'",
+      'https://www.youtube.com',
+      'https://www.youtube-nocookie.com',
+    ],
   });
 
   const body = await renderToReadableStream(

@@ -66,7 +66,7 @@
 /* footer */
 
 .custom-footer {
-  border-top: 1px solid #C2C2C2;
+  border-top: 1px solid #c2c2c2;
 }
 
 .footerRow {
@@ -136,7 +136,7 @@
   color: #000000;
 }
 
-.footer-links li a{
+.footer-links li a {
   color: #777777;
   text-decoration: none;
   transition: all 0.3s;
@@ -146,42 +146,42 @@
   color: #000000;
 }
 
-.socialLinks{
+.socialLinks {
   display: flex;
   align-items: center;
 }
 
-.socialLinks svg{
+.socialLinks svg {
   width: 24px;
   height: 24px;
   margin-right: 2px;
 }
 
-.facebook{
+.facebook {
   fill: #3b5998;
 }
 
-.instagram{
-  fill: #E1306C;
+.instagram {
+  fill: #e1306c;
 }
 
-.linkedin{
-  fill: #0A66C2;
+.linkedin {
+  fill: #0a66c2;
 }
 
-.footerSubBanner{
+.footerSubBanner {
   background-color: #000000;
   color: white;
   padding: 16px;
   margin-top: 32px;
 }
 
-.footerSubBanner span{
+.footerSubBanner span {
   color: white;
   font-size: 12px;
 }
 
-.footer-subsBox{
+.footer-subsBox {
   padding: 64px 0 0;
   display: flex;
   flex-direction: column;
@@ -191,32 +191,32 @@
   margin-bottom: 64px;
 }
 
-.footer-subsBox::after{
-  content: "";
+.footer-subsBox::after {
+  content: '';
   position: absolute;
   bottom: 15px;
   left: 0;
   width: 100%;
   height: 1px;
-  background-color: #C2C2C2;
+  background-color: #c2c2c2;
   z-index: -1;
 }
 
-.footerSubsTitle{
+.footerSubsTitle {
   font-size: 32px;
   font-weight: bold;
   margin-bottom: 16px;
   text-align: center;
 }
 
-.footerSubsSubtitle{
+.footerSubsSubtitle {
   font-size: 16px;
   color: #777777;
   max-width: 700px;
   text-align: center;
 }
 
-.footerInputBox{
+.footerInputBox {
   position: relative;
   margin-top: 32px;
   width: 100%;
@@ -225,17 +225,16 @@
   background-color: white;
 }
 
-
-.footerInputBox input{
+.footerInputBox input {
   width: 100%;
   height: 40px;
   padding: 8px 16px;
-  border: 1px solid #C2C2C2;
-  font-size: 14px;  
+  border: 1px solid #c2c2c2;
+  font-size: 14px;
   border-radius: 8px;
 }
 
-.footerSubscribeButton{
+.footerSubscribeButton {
   position: absolute;
   right: 0;
   top: 3px;
@@ -248,8 +247,142 @@
   color: white;
   padding: 0 16px;
   border-radius: 0 8px 8px 0;
-  transition: all .3s;
+  transition: all 0.3s;
 }
-.footerSubscribeButton:hover{
+.footerSubscribeButton:hover {
   background-color: #444444;
+}
+
+/* xs ve sm */
+@media (max-width: 767.98px) {
+  .footer-subsBox {
+    padding: 16px;
+  }
+
+  .footerSubsTitle {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .footerInputBox {
+    margin-top: 16px;
+  }
+  .footerSubscribeButton {
+    position: relative;
+    top: auto;
+    right: auto;
+    border-radius: 8px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .footer-subsBox::after {
+    bottom: -48px;
+  }
+
+  .footerRow {
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+
+  .footer-logoCol {
+    flex-basis: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .footerLogoSubtext {
+    width: 100%;
+  }
+
+  .footer-logo-img{
+    margin-bottom: 16px;
+  }
+
+  .footerCallCenterBox{
+    margin-top: 16px;
+  }
+
+  .callCenterTitle{
+    text-align: left;
+  }
+
+  .callCenterIcon{
+    height: 42px;
+    width: 42px ;
+    margin-right: 8px;
+  }
+
+  .footerAdress{
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  .footer-sections{
+    flex-basis: 100%;
+    margin-top: 32px;
+  }
+
+  .footer-section{
+    flex-basis: 100%;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .socialLinks{
+    justify-content: center;
+  }
+  
+  .footerSubBanner{
+    margin: 0;
+    padding: 8px;
+    text-align: center;
+  }
+}
+
+/* md only: 768–1023px */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+
+  .footerRow{
+    padding: 16px;
+  }
+
+  .footer-logoCol{
+    flex-basis: 40%;
+  }
+
+  .footerLogoSubtext{
+    width: 90%;
+  }
+
+  .footerCallCenterBox{
+    margin-top: 16px;
+  }
+
+  .callCenterIcon{
+    height: 48px;
+    width: 48px;
+  }
+
+  .footer-sections{
+    flex-basis: 60%;
+  }
+}
+
+/* lg only: 1024–1279px */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  /* ... */
+}
+
+/* xl only: 1280–1535px */
+@media (min-width: 1280px) and (max-width: 1535.98px) {
+  /* ... */
+}
+
+/* 2xl and up: ≥1536px */
+@media (min-width: 1536px) {
+  /* ... */
 }

@@ -15,6 +15,39 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters }) => {
 	// Açık olan filter pill
 	const [openFilterId, setOpenFilterId] = useState<string | null>(null);
 
+	// Mobile (xs/sm) filtre paneli açık/kapalı
+	const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+	// Viewport mobile mı?
+	const [isMobileViewport, setIsMobileViewport] = useState(false);
+
+	// xs/sm/ md tespiti (<=767px)
+	useEffect(() => {
+		const mql = window.matchMedia('(max-width: 1023px)');
+
+		const apply = () => {
+			const mobile = mql.matches;
+			setIsMobileViewport(mobile);
+
+			// md+ geçince mobile panel mantığını resetle
+			if (!mobile) {
+				setIsMobileFiltersOpen(false);
+			}
+		};
+
+		apply();
+
+		// Safari uyumu için
+		if (typeof mql.addEventListener === 'function') {
+			mql.addEventListener('change', apply);
+			return () => mql.removeEventListener('change', apply);
+		} else {
+			// @ts-ignore
+			mql.addListener(apply);
+			// @ts-ignore
+			return () => mql.removeListener(apply);
+		}
+	}, []);
+
 	// URL parametrelerini state'e yaz
 	useEffect(() => {
 		const params = new URLSearchParams(location.search);
@@ -22,6 +55,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters }) => {
 
 		if (!inputs.length || !filters) {
 			setSelectedFilters({});
+			setOpenFilterId(null);
+			// URL değiştiyse mobile paneli kapat
+			setIsMobileFiltersOpen(false);
 			return;
 		}
 
@@ -43,6 +79,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters }) => {
 		}
 
 		setSelectedFilters(map);
+		setOpenFilterId(null);
+		setIsMobileFiltersOpen(false);
 	}, [location.search, filters]);
 
 	const getFilterKey = useCallback((filter: any) => filter.id as string, []);
@@ -73,6 +111,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters }) => {
 
 		navigate({ pathname: location.pathname, search: params.toString() });
 		setOpenFilterId(null);
+		setIsMobileFiltersOpen(false);
 	}, [selectedFilters, navigate, location.pathname]);
 
 	// Global Temizle
@@ -80,6 +119,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters }) => {
 		setSelectedFilters({});
 		navigate({ pathname: location.pathname, search: '' });
 		setOpenFilterId(null);
+		setIsMobileFiltersOpen(false);
 	}, [navigate, location.pathname]);
 
 	// Seçili mi?
@@ -154,85 +194,94 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters }) => {
 		});
 	});
 
+	// Mobile'da panel kapalıysa filtre akordiyonu render ETME
+	const shouldShowAccordion = !isMobileViewport || isMobileFiltersOpen;
+
 	return (
 		<div className="collection-filters">
+			{/* XS/SM: Filtre Toggle Butonu (md+ hiç render edilmiyor) */}
+			{isMobileViewport && (
+				<button
+					type="button"
+					className="filters-mobile-toggle"
+					onClick={() => setIsMobileFiltersOpen((v) => !v)}
+					aria-expanded={isMobileFiltersOpen}
+				>
+					<span className="filters-mobile-toggle__text">Filters</span>
+					<span className="filters-mobile-toggle__icon" aria-hidden="true">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M297.4 470.6C309.9 483.1 330.2 483.1 342.7 470.6L534.7 278.6C547.2 266.1 547.2 245.8 534.7 233.3C522.2 220.8 501.9 220.8 489.4 233.3L320 402.7L150.6 233.4C138.1 220.9 117.8 220.9 105.3 233.4C92.8 245.9 92.8 266.2 105.3 278.7L297.3 470.7z" /></svg>
+					</span>
+				</button>
+			)}
+
 			{/* ÜST SATIR: yan yana filter pill'ler */}
-			<div className="filters-accordion">
-				<ul className="filters-list">
-					{filters.map((filter: any) => {
-						const filterKey = filter.id;
-						const selectedCount = getSelectedCount(filterKey);
+			{shouldShowAccordion && (
+				<div className="filters-accordion">
+					<ul className="filters-list">
+						{filters.map((filter: any) => {
+							const filterKey = filter.id;
+							const selectedCount = getSelectedCount(filterKey);
 
-						return (
-							<li key={filterKey} className="filter-item">
-								{/* PILL / BUTTON */}
-								<button
-									type="button"
-									className={`filter-item__head ${openFilterId === filterKey ? 'is-open' : ''}`}
-									onClick={() => toggleFilterOpen(filterKey)}
-								>
-									<span className="filter-item__label">
-										{filter.label}
-										{selectedCount > 0 && (
-											<span className="filter-item__badge">
-												{' · ('}
-												{selectedCount}
-												{')'}
-											</span>
-										)}
-									</span>
-									<span className="filter-item__icon" aria-hidden="true">
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M297.4 470.6C309.9 483.1 330.2 483.1 342.7 470.6L534.7 278.6C547.2 266.1 547.2 245.8 534.7 233.3C522.2 220.8 501.9 220.8 489.4 233.3L320 402.7L150.6 233.4C138.1 220.9 117.8 220.9 105.3 233.4C92.8 245.9 92.8 266.2 105.3 278.7L297.3 470.7z" /></svg>
-									</span>
-								</button>
+							return (
+								<li key={filterKey} className="filter-item">
+									{/* PILL / BUTTON */}
+									<button
+										type="button"
+										className={`filter-item__head ${openFilterId === filterKey ? 'is-open' : ''}`}
+										onClick={() => toggleFilterOpen(filterKey)}
+									>
+										<span className="filter-item__label">
+											{filter.label}
+											{selectedCount > 0 && (
+												<span className="filter-item__badge">
+													{' · ('}
+													{selectedCount}
+													{')'}
+												</span>
+											)}
+										</span>
+										<span className="filter-item__icon" aria-hidden="true">
+											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+												<path d="M297.4 470.6C309.9 483.1 330.2 483.1 342.7 470.6L534.7 278.6C547.2 266.1 547.2 245.8 534.7 233.3C522.2 220.8 501.9 220.8 489.4 233.3L320 402.7L150.6 233.4C138.1 220.9 117.8 220.9 105.3 233.4C92.8 245.9 92.8 266.2 105.3 278.7L297.3 470.7z" />
+											</svg>
+										</span>
+									</button>
 
+									{openFilterId === filterKey && (
+										<div className="filter-popover">
+											<ul className="filter-options">
+												{filter.values.map((value: any) => (
+													<li key={value.id} className="filter-option">
+														<label className="filter-option__label">
+															<input
+																type="checkbox"
+																className="filter-option__checkbox"
+																checked={isActive(filterKey, value.input)}
+																onChange={() => handleFilterClick(filter, value)}
+															/>
+															<span className="filter-option__text">{value.label}</span>
+														</label>
+													</li>
+												))}
+											</ul>
+										</div>
+									)}
+								</li>
+							);
+						})}
+					</ul>
 
-								{openFilterId === filterKey && (
-									<div className="filter-popover">
-										<ul className="filter-options">
-											{filter.values.map((value: any) => (
-												<li key={value.id} className="filter-option">
-													<label className="filter-option__label">
-														<input
-															type="checkbox"
-															className="filter-option__checkbox"
-															checked={isActive(filterKey, value.input)}
-															onChange={() => handleFilterClick(filter, value)}
-														/>
-														<span className="filter-option__text">
-															{/* Count kaldırıldı */}
-															{value.label}
-														</span>
-													</label>
-												</li>
-											))}
-										</ul>
-									</div>
-								)}
-							</li>
-						);
-					})}
-				</ul>
-
-				{/* Global Uygula / Temizle */}
-				<div className="filters-apply">
-
-					<button
-						type="button"
-						onClick={handleClearFilters}
-						className="btn btn--clear"
-					>
-						Reset
-					</button>
-					<button
-						type="button"
-						onClick={handleApplyFilters}
-						className="btn btn--apply"
-					>
-						Apply
-					</button>
+					{/* Global Uygula / Temizle */}
+					<div className="filters-apply">
+						<button type="button" onClick={handleClearFilters} className="btn btn--clear">
+							Reset
+						</button>
+						<button type="button" onClick={handleApplyFilters} className="btn btn--apply">
+							Apply
+						</button>
+					</div>
 				</div>
-			</div>
+			)}
 
 			{/* ALT SATIR: seçili filtre chip'leri */}
 			{activeChips.length > 0 && (
@@ -244,9 +293,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ filters }) => {
 							className="filters-chip"
 							onClick={() => handleRemoveFilterValue(chip.filterId, chip.valueInput)}
 						>
-							<span className="filters-chip__text">
-								{chip.valueLabel}
-							</span>
+							<span className="filters-chip__text">{chip.valueLabel}</span>
 							<span className="filters-chip__icon" aria-hidden="true">
 								×
 							</span>

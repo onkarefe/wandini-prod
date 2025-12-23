@@ -15,7 +15,7 @@ interface AllProdutsProps {
 export default function AllProduts({ items }: AllProdutsProps) {
     if (!items || items.length === 0) return null;
     return (
-        <div className="container mx-auto my-[50px]">
+        <div className="container mx-auto my-[50px] md:my-0">
             <div className="seperator">
                 <h3>All Products</h3>
             </div>

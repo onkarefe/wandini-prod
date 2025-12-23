@@ -12,6 +12,7 @@
   min-width: 250px;
   margin-right: 24px;
   position: relative;
+  margin-bottom: 0;
 }
 
 .filter-item__head {
@@ -138,11 +139,99 @@
   margin: 12px 0;
 }
 
-.sort-Main select{
+.sort-Main select {
   padding: 8px 12px;
   border: 1px solid #c2c2c2;
   margin-left: 12px;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+}
+
+@media (max-width: 1023.98px) {
+  .filters-mobile-toggle {
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 12px;
+    padding: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: #fff;
+    cursor: pointer;
+  }
+
+  .filters-mobile-toggle__icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  .filters-list {
+    flex-wrap: wrap;
+  }
+
+  .filters-mobile-toggle {
+    display: flex;
+  }
+
+  /* filters are hidden on mobile by default */
+  .filters-accordion {
+    display: none;
+    padding: 16px;
+    background-color: #e0e0e0;
+  }
+
+  /* when button clicked */
+  .filters-accordion.is-mobile-open {
+    display: block;
+  }
+
+  .filters-accordion {
+    display: block;
+  }
+
+  .filters-mobile-toggle__icon {
+    transition: all 0.3s;
+  }
+
+  .filters-mobile-toggle[aria-expanded='true'] .filters-mobile-toggle__icon {
+    transform: rotate(180deg);
+  }
+
+  .collection-filters {
+    padding: 16px;
+    margin: 0;
+  }
+
+  .filter-item__head{
+    background-color: white;
+  }
+
+  .filter-item{
+    width: 100%;
+    max-width: none;
+    min-width: none;
+    margin: 0 0 16px 0;
+  }
+  
+  .filters-apply{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .filters-apply button{
+    width: 100%;
+  }
+
+  .btn--clear{
+    margin: 0;
+  }
+
+  .sort-Main{
+    padding: 16px;
+    margin: 0;
+  }
+}
+/* lg only: 1024–1279px */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
 }

@@ -177,7 +177,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
 import { useState } from 'react';
 
 export default function App() {
-  const data = useRouteLoaderData<RootLoader>('root');
+  // --- AUTH SYSTEM DISABLED ---
   const [isAuth, setIsAuth] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.sessionStorage.getItem('isAuth') === 'true';
@@ -186,7 +186,6 @@ export default function App() {
   });
   const [input, setInput] = useState('');
   const [error, setError] = useState('');
-
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (input === 'admin123') {
@@ -198,7 +197,6 @@ export default function App() {
       setError('Wrong password!');
     }
   };
-
   if (!isAuth) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
@@ -218,6 +216,7 @@ export default function App() {
       </div>
     );
   }
+  const data = useRouteLoaderData<RootLoader>('root');
 
   if (!data) {
     return <Outlet />;

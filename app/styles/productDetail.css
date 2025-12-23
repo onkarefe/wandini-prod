@@ -1,0 +1,194 @@
+.productDetailRow1 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.productDetailLeft {
+  flex-basis: calc(65% - 8px);
+  margin-right: 8px;
+}
+.productDetailRight {
+  flex-basis: calc(35% - 8px);
+  margin-left: 8px;
+}
+
+.productDetailMainContainer {
+  margin: 50px auto;
+}
+
+/* Embla Carousel Thumbs Stilleri */
+.product-image-carousel {
+  width: 100%;
+}
+.embla--main {
+  margin-bottom: 12px;
+}
+.embla--thumbs {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 0 8px 0;
+}
+.embla__slide--thumb {
+  min-width: 80px;
+  max-width: 120px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  transition: opacity 0.2s;
+}
+.embla__slide--thumb.is-selected {
+  outline: 2px solid #cacaca;
+  outline-offset: 2px;
+  opacity: 1 !important;
+}
+.embla__thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.thumbsImgBox {
+  flex-basis: calc(25% - 12px);
+  height: 125px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.thumbsImgBox img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Embla Carousel Modern Temel Stilleri */
+.embla {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.embla__container {
+  display: flex;
+  flex-direction: row;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  margin-left: -10px;
+}
+.embla__slide {
+  position: relative;
+  min-width: 100%;
+  padding-left: 10px;
+  box-sizing: border-box;
+}
+.embla__slide img {
+  display: block;
+  width: 100%;
+  height: 600px;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+/* Right1 */
+
+.productDetailTitle {
+  margin: 0 0 16px 0;
+}
+
+/* Variant Buttons */
+
+.product-options h5 {
+  font-size: 16px;
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #b9b9b9;
+  margin: 0 0 16px 0;
+  color: #424242;
+}
+
+.propertyLabelBox {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px;
+  background-color: #f9fafa;
+  margin-bottom: 16px;
+  border: 1px solid transparent;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.selectedVariant {
+  box-shadow:
+    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
+    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+  background-color: #f1f3f3;
+}
+
+.propertyRatioTitle {
+  display: flex;
+  align-items: center;
+  flex-basis: 100%;
+}
+
+.propertyRatioTitle input {
+  height: 20px;
+  width: 20px;
+  margin: 0 8px 0 0;
+  padding: 0;
+}
+
+.propertyRatioTitle input[type='radio']:checked {
+  accent-color: black;
+}
+
+.propertyBox {
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.propertyBox li {
+  position: relative;
+  padding-left: 24px;
+  width: max-content;
+}
+
+.propertyBox li::before {
+  content: '✔'; /* Tik işareti */
+  position: absolute;
+  left: 0;
+  top: 2px;
+  font-size: 16px;
+  color: rgb(175, 175, 175); /* Dilersen rengini değiştir */
+}
+
+.customAddToCartButton {
+  background-color: #000;
+  color: #fff;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  display: block;
+  width: 100%;
+}
+
+.customAddToCartButtonWrapper {
+  width: 100%;
+}
+
+.customAddToCartButton:hover {
+  background-color: #333;
+}

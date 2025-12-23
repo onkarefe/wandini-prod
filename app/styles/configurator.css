@@ -1,0 +1,395 @@
+/* configrator.css — Room + Perspective + Scene overlay (bottom + scale linked) */
+
+:root {
+  --front-vis: 70%;
+  --side-vis: 15%;
+  --wall-height: 70%;
+  --angle: 62deg;
+  --side-css-mult: 2.128;
+  --ceiling-h: 110px;
+  --floor-h: 80px;
+  --panel: #f3f4f6;
+  --front-wall: #ffffff;
+  --line: rgba(0, 0, 0, 0.08);
+  --grid-step: 36px;
+  --grid-step-strong: 180px;
+  --grid-line: 1px;
+  --grid-line-strong: 1.5px;
+  --grid-color: rgba(0, 0, 0, 0.16);
+  --grid-color-strong: rgba(0, 0, 0, 0.26);
+  --grid-opacity: 0.6;
+  --grid-tilt: 80deg;
+  --grid-size: 140vmax;
+  --grid-shift: 14%;
+  --scene-max-w: 90%;
+  --scene-max-h: 66%;
+  --scene-bottom: -40%;
+  --scene-scale: 1;
+  --scene-drop-shadow: 0px 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+.c-stage {
+  width: 100%;
+  min-height: 65vh;
+  height: auto;
+  background: var(--panel);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+@media (min-width: 1024px) {
+  .c-stage {
+    min-height: 70vh;
+  }
+}
+
+.c-room {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, #fff, var(--panel));
+  perspective: 1000px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+  isolation: isolate;
+}
+
+.c-ceiling,
+.c-floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  background: transparent !important;
+}
+.c-ceiling {
+  top: 0;
+  height: var(--ceiling-h);
+}
+.c-floor {
+  bottom: 0;
+  height: var(--floor-h);
+}
+
+.c-wall {
+  display: block;
+  position: absolute;
+  top: 50%;
+  height: var(--wall-height);
+  transform: translateY(-50%);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  z-index: 1;
+  box-shadow: none;
+}
+.c-wall-front {
+  left: 50%;
+  width: var(--front-vis);
+  background: var(--front-wall) center / cover no-repeat;
+  transform: translate(-50%, -50%) rotateY(0);
+  position: relative;
+  overflow: visible;
+  z-index: 2;
+}
+
+/* Overlay: alt-merkez, dinamik bottom + scale */
+#c-scene-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--scene-bottom);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 3;
+}
+#c-scene-overlay img,
+#c-scene-overlay svg {
+  max-width: var(--scene-max-w);
+  max-height: var(--scene-max-h);
+  width: auto;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  transform-origin: 50% 100%;
+  transform: scale(var(--scene-scale));
+  filter: drop-shadow(var(--scene-drop-shadow));
+  pointer-events: none;
+  user-select: none;
+}
+
+.c-wall-left,
+.c-wall-right {
+  width: calc(var(--side-vis) * var(--side-css-mult));
+  background-image:
+    radial-gradient(
+      200% 120% at 50% 0%,
+      rgba(0, 0, 0, 0.06),
+      rgba(0, 0, 0, 0) 60%
+    ),
+    linear-gradient(180deg, #f5f6fa, #e9ecf2);
+  background-size: cover;
+  background-position: center;
+}
+.c-wall-left {
+  left: calc(
+    50% - (var(--front-vis) / 2) - (var(--side-vis) * var(--side-css-mult))
+  );
+  transform-origin: right center;
+  transform: translateY(-50%) rotateY(var(--angle));
+}
+.c-wall-right {
+  left: calc(50% + (var(--front-vis) / 2));
+  transform-origin: left center;
+  transform: translateY(-50%) rotateY(calc(var(--angle) * -1));
+}
+
+@keyframes _noop {
+}
+.c-room::before,
+.c-room::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  width: var(--grid-size);
+  height: var(--grid-size);
+  opacity: var(--grid-opacity);
+  z-index: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      var(--grid-color) 0 var(--grid-line),
+      transparent var(--grid-line) var(--grid-step)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      var(--grid-color) 0 var(--grid-line),
+      transparent var(--grid-line) var(--grid-step)
+    ),
+    repeating-linear-gradient(
+      0deg,
+      var(--grid-color-strong) 0 var(--grid-line-strong),
+      transparent var(--grid-line-strong) var(--grid-step-strong)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      var(--grid-color-strong) 0 var(--grid-line-strong),
+      transparent var(--grid-line-strong) var(--grid-step-strong)
+    );
+}
+.c-room::before {
+  bottom: 0;
+  transform-origin: 50% 100%;
+  transform: translate(-50%, var(--grid-shift)) rotateX(var(--grid-tilt));
+  -webkit-mask-image: linear-gradient(to top, black 72%, transparent 100%);
+  mask-image: linear-gradient(to top, black 72%, transparent 100%);
+}
+.c-room::after {
+  top: 0;
+  transform-origin: 50% 0%;
+  transform: translate(-50%, calc(var(--grid-shift) * -1))
+    rotateX(calc(var(--grid-tilt) * -1));
+  -webkit-mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+}
+
+/* ==== Configurator crop alanı ==== */
+
+.configuratorContainer {
+  width: 100%;
+  min-height: 300px;
+  padding: 0;
+  background: #f3f4f6;
+  border: 1px dashed #9ca3af;
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.configuratorImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  z-index: 0;
+}
+
+/* Dış overlay blokları */
+
+.configuratorOverlay {
+  position: absolute;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.configuratorOverlayTop {
+  top: 0;
+  width: 100%;
+}
+
+.configuratorOverlayBottom {
+  left: 0;
+  width: 100%;
+}
+
+.configuratorOverlayLeft {
+  top: 0;
+}
+
+.configuratorOverlayRight {
+  top: 0;
+}
+
+/* Crop kutusu */
+
+.configuratorCropBox {
+  position: absolute;
+  border: 2px solid #10b981;
+  box-sizing: border-box;
+  background: transparent;
+  cursor: pointer;
+  z-index: 2;
+  user-select: none;
+}
+
+.configuratorCropBox--dragging {
+  cursor: move;
+}
+
+/* Cetveller */
+
+.configuratorRulerTop,
+.configuratorRulerLeft {
+  position: absolute;
+  width: 70px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 500;
+  color: #000;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+.configuratorRulerTop {
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, 0%);
+}
+
+.configuratorRulerLeft {
+  top: 50%;
+  left: 0;
+  transform: translate(0%, -50%);
+}
+
+/* Grid */
+
+.configuratorGridContainer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.configuratorGridLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+}
+
+/* ==== Button line & preview button ==== */
+
+.configratorCustomButtonLine {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.configuratorPreviewButton {
+  padding: 12px 0;
+  display: block;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 0;
+  border: 1px solid #10b981;
+  background: #10b981;
+  color: #ffffff;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+}
+
+.configuratorPreviewButton:hover {
+  background: #0f9c71;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.35);
+}
+
+.configuratorPreviewButton:active {
+  box-shadow: none;
+  transform: translateY(0);
+}
+
+.configuratorSceneOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.configuratorSceneDialog {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 1100px;
+  width: 100%;
+  max-height: 90vh;
+  padding: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+  position: relative;
+}
+
+.configuratorSceneCloseButton {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.configuratorWallImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1; /* scene overlay bunun üstüne çıkmasın istiyorsan 1 bırak,
+                 scene overlay zaten ayrı z-index ile geliyor */
+  pointer-events: none;
+}

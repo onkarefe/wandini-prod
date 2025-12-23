@@ -1,5 +1,9 @@
+import React, {useState} from 'react';
 import {redirect, useLoaderData} from 'react-router';
+import '~/styles/productDetail.css';
 import type {Route} from './+types/products.$handle';
+
+import ProductDetailTabs from '~/components/ProductDetailTabs';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -11,6 +15,9 @@ import {
 import {ProductPrice} from '~/components/ProductPrice';
 import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
+import {ProductSize} from '~/components/productSize';
+import {Configurator} from '~/components/Configurator';
+import {ConfigratorScene} from '~/components/ConfigratorScene';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
 export const meta: Route.MetaFunction = ({data}) => {
@@ -72,12 +79,96 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 function loadDeferredData({context, params}: Route.LoaderArgs) {
   // Put any API calls that is not critical to be available on first page render
   // For example: product reviews, product recommendations, social feeds.
-
   return {};
 }
 
+// Shopify rich text JSON'unu JSX'e çeviren yardımcı fonksiyon
+function renderShopifyRichText(richText: any) {
+  if (!richText || !richText.children) return null;
+
+  return richText.children.map((block: any, i: number) => {
+    if (block.type === 'paragraph') {
+      return (
+        <p key={i}>
+          {block.children.map((child: any, j: number) => child.value)}
+        </p>
+      );
+    }
+    // Diğer block tipleri için ekleme yapılabilir
+    return null;
+  });
+}
+
+// YouTube / (ileri de istersen Vimeo, MP4) videoları embed eden yardımcı fonksiyon
+function renderVideoFromUrl(rawUrl: string) {
+  if (!rawUrl) return null;
+
+  // YouTube normal link: https://www.youtube.com/watch?v=AxNNDIDHDb8
+  const ytMatch = rawUrl.match(/v=([a-zA-Z0-9_-]+)/);
+  if (ytMatch) {
+    const videoId = ytMatch[1];
+    return (
+      <div className="productVideoWrapper">
+        <iframe
+          src={`https://www.youtube.com/embed/${videoId}`}
+          title="Installation video"
+          frameBorder={0}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+
+  // YouTube kısa link: https://youtu.be/xxxxxx
+  const shortMatch = rawUrl.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
+  if (shortMatch) {
+    const videoId = shortMatch[1];
+    return (
+      <div className="productVideoWrapper">
+        <iframe
+          src={`https://www.youtube.com/embed/${videoId}`}
+          title="Installation video"
+          frameBorder={0}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+
+  // Bilinmeyen format → en azından link ver
+  return (
+    <a href={rawUrl} target="_blank" rel="noopener noreferrer">
+      Kurulum videosunu aç
+    </a>
+  );
+}
+
+type CropRect = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
 export default function Product() {
   const {product} = useLoaderData<typeof loader>();
+
+  // Configurator modu
+  const [isConfiguring, setIsConfiguring] = useState(false);
+
+  // Height ve width state
+  const [size, setSize] = useState<{width: number; height: number}>({
+    width: 0,
+    height: 0,
+  });
+
+  // Crop (Configurator'dan gelen natural piksel koordinatları)
+  const [crop, setCrop] = useState<CropRect | null>(null);
+
+  // Modal (ConfigratorScene) açık mı?
+  const [isSceneOpen, setIsSceneOpen] = useState(false);
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -95,32 +186,122 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
-  const {title, descriptionHtml} = product;
+  const {
+    title,
+    descriptionHtml,
+    productInfo,
+    deliveryAndShipping,
+    installationVideo,
+  } = product;
+
+  const tabTitles = [
+    'Description',
+    'Product Info',
+    'Delivery & Shipping',
+    'Installation Video',
+  ];
+
+  const tabContents = [
+    // Description tab
+    descriptionHtml ? (
+      <div
+        key="desc"
+        dangerouslySetInnerHTML={{__html: descriptionHtml}}
+      />
+    ) : (
+      <p key="nodesc">Açıklama yok.</p>
+    ),
+
+    // Product Info tab
+    productInfo?.value ? (
+      renderShopifyRichText(JSON.parse(productInfo.value))
+    ) : (
+      <p key="noinfo">Ürün bilgisi bulunamadı.</p>
+    ),
+
+    // Delivery & Shipping tab
+    deliveryAndShipping?.value ? (
+      renderShopifyRichText(JSON.parse(deliveryAndShipping.value))
+    ) : (
+      <p key="noshipping">Teslimat &amp; kargo bilgisi yok.</p>
+    ),
+
+    // Installation Video tab
+    installationVideo?.value
+      ? (() => {
+          try {
+            const videoObj = JSON.parse(installationVideo.value) as {
+              url?: string;
+            };
+
+            if (videoObj?.url) {
+              const videoNode = renderVideoFromUrl(videoObj.url);
+              return (
+                videoNode ?? (
+                  <p key="novideo">Kurulum videosu bulunamadı.</p>
+                )
+              );
+            }
+
+            return <p key="novideo">Kurulum videosu bulunamadı.</p>;
+          } catch {
+            return <p key="novideo">Kurulum videosu bulunamadı.</p>;
+          }
+        })()
+      : (
+        <p key="novideo">Kurulum videosu bulunamadı.</p>
+      ),
+  ];
 
   return (
-    <div className="product">
-      <ProductImage image={selectedVariant?.image} />
-      <div className="product-main">
-        <h1>{title}</h1>
-        <h1>Efe Onkar - ürün detay sayfası özelleştirme bunu tasarımı onayladıktan sonra geçicez</h1>
-        <ProductPrice
-          price={selectedVariant?.price}
-          compareAtPrice={selectedVariant?.compareAtPrice}
-        />
-        <br />
-        <ProductForm
-          productOptions={productOptions}
-          selectedVariant={selectedVariant}
-        />
-        <br />
-        <br />
-        <p>
-          <strong>Description</strong>
-        </p>
-        <br />
-        <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
-        <br />
+    <div className="container productDetailMainContainer">
+      <div className="productDetailRow1">
+        <div className="productDetailLeft">
+          {!isConfiguring ? (
+            <ProductImage images={product.images} />
+          ) : (
+            <>
+              <Configurator
+                imageUrl={product.images?.edges?.[0]?.node?.url || ''}
+                width={size.width}
+                height={size.height}
+                onCropChange={setCrop}
+                onPreviewClick={() => setIsSceneOpen(true)}
+              />
+
+              <ConfigratorScene
+                isOpen={isSceneOpen}
+                onClose={() => setIsSceneOpen(false)}
+                imageUrl={product.images?.edges?.[0]?.node?.url || ''}
+                widthCm={size.width}
+                heightCm={size.height}
+                crop={crop}
+              />
+            </>
+          )}
+
+          <ProductDetailTabs tabTitles={tabTitles} tabContents={tabContents} />
+        </div>
+
+        <div className="productDetailRight">
+          <div className="product-main">
+            <h1 className="productDetailTitle">{title}</h1>
+            <br />
+            {/* Height ve width inputları */}
+            <ProductSize onChange={setSize} />
+            <ProductForm
+              productOptions={productOptions}
+              selectedVariant={selectedVariant}
+              size={size}
+              crop={crop}
+              isConfiguring={isConfiguring}
+              onConfigure={() => setIsConfiguring(true)}
+            />
+            {/* <pre>{JSON.stringify(product, null, 2)}</pre> */}
+          </div>
+        </div>
       </div>
+
       <Analytics.ProductView
         data={{
           products: [
@@ -174,6 +355,35 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
       amount
       currencyCode
     }
+    printQuality: metafield(namespace: "custom", key: "print_quality") {
+      reference {
+        ... on Metaobject {
+          id
+          handle
+          title: field(key: "title") {
+            value
+          }
+          pricePerM2: field(key: "price_per_m2") {
+            value
+          }
+          minWidthCm: field(key: "min_width_cm") {
+            value
+          }
+          maxWidthCm: field(key: "max_width_cm") {
+            value
+          }
+          minHeightCm: field(key: "min_height_cm") {
+            value
+          }
+          maxHeightCm: field(key: "max_height_cm") {
+            value
+          }
+          properties: field(key: "properties") {
+            value
+          }
+        }
+      }
+    }
   }
 ` as const;
 
@@ -187,6 +397,17 @@ const PRODUCT_FRAGMENT = `#graphql
     description
     encodedVariantExistence
     encodedVariantAvailability
+    images(first: 20) {
+      edges {
+        node {
+          id
+          url
+          altText
+          width
+          height
+        }
+      }
+    }
     options {
       name
       optionValues {
@@ -204,15 +425,31 @@ const PRODUCT_FRAGMENT = `#graphql
         }
       }
     }
-    selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
+    selectedOrFirstAvailableVariant(
+      selectedOptions: $selectedOptions
+      ignoreUnknownOptions: true
+      caseInsensitiveMatch: true
+    ) {
       ...ProductVariant
     }
-    adjacentVariants (selectedOptions: $selectedOptions) {
+    adjacentVariants(selectedOptions: $selectedOptions) {
       ...ProductVariant
     }
     seo {
       description
       title
+    }
+    productInfo: metafield(namespace: "custom", key: "product_info") {
+      value
+      type
+    }
+    deliveryAndShipping: metafield(namespace: "custom", key: "delivery_and_shipping") {
+      value
+      type
+    }
+    installationVideo: metafield(namespace: "custom", key: "installation_video") {
+      value
+      type
     }
   }
   ${PRODUCT_VARIANT_FRAGMENT}
