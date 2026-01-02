@@ -194,34 +194,114 @@ export const HEADER_QUERY = `#graphql
     id
     name
     description
-    primaryDomain {
-      url
-    }
+    primaryDomain { url }
     brand {
       logo {
-        image {
-          url
-          altText
-          width
-          height
-        }
+        image { url altText width height }
       }
     }
   }
+
   query Header(
     $country: CountryCode
     $headerMenuHandle: String!
     $language: LanguageCode
   ) @inContext(language: $language, country: $country) {
-    shop {
-      ...Shop
-    }
+    shop { ...Shop }
+
     menu(handle: $headerMenuHandle) {
       ...Menu
     }
+
+    megaMenus: metaobjects(type: "mega_menu", first: 50) {
+      nodes {
+        id
+        type
+        handle
+
+        # ROOT fields:
+        # - trigger_handle (value)
+        # - base_collection (reference)
+        # - columns (references)
+        fields {
+          key
+          value
+
+          reference {
+            ... on Collection {
+              id
+              handle
+              title
+            }
+          }
+
+          references(first: 50) {
+            nodes {
+              ... on Metaobject {
+                id
+                type
+                handle
+
+                # COLUMN fields:
+                # - title (value)
+                # - items (references)
+                fields {
+                  key
+                  value
+
+                  references(first: 50) {
+                    nodes {
+                      ... on Metaobject {
+                        id
+                        type
+                        handle
+
+                        # ITEM fields:
+                        # - label (value)
+                        # - action_type (value)
+                        # - collection (reference)
+                        # - filter_preset (reference -> metaobject)
+                        # - sort_preset (reference -> metaobject)
+                        fields {
+                          key
+                          value
+
+                          # collection OR filter_preset OR sort_preset resolve via reference
+                          reference {
+                            ... on Collection {
+                              id
+                              handle
+                              title
+                            }
+
+                            # Filter Preset metaobject (label + taxonomy_value_gid)
+                            ... on Metaobject {
+                              id
+                              type
+                              handle
+                              fields {
+                                key
+                                value
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
+
   ${MENU_FRAGMENT}
 ` as const;
+
+
 
 export const FOOTER_QUERY = `#graphql
   query Footer(

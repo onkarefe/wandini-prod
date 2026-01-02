@@ -1,66 +1,471 @@
-.headerLogo {
-  width: 141px;
-  object-fit: cover;
+/* Header */
+
+/* app/styles/header.css */
+
+/* ===== Header Base ===== */
+.h-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: #fff;
 }
 
-/* hover toggle menu */
+.headerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+.h-headerLeft {
+  flex-basis: 15%;
+}
+.h-headerRight {
+  flex-basis: 20%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 32px;
+}
+.h-headerCenter {
+  flex-basis: 65%;
+  position: relative;
+}
 
-.submenu {
+.h-userbox {
+  transition: all 0.3s;
+}
+
+.h-userbox:hover svg {
+  fill: #000000;
+}
+
+.h-userbox svg {
+  height: 24px;
+  fill: #504841;
+  transition: all 0.3s;
+}
+
+.h-searchbox {
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.h-searchbox:hover svg {
+  fill: #000000;
+}
+.h-searchbox svg {
+  height: 20px;
+  fill: #504841;
+  transition: all 0.3s;
+}
+
+.h-cartBox {
+  position: relative;
+  display: flex;
+  width: max-content;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.h-cartCount {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ff3b30;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.h-cartBox svg {
+  height: 24px;
+  fill: #504841;
+  transition: all 0.3s;
+}
+
+.h-cartBox:hover svg {
+  fill: #000000;
+}
+/* ===== Logo ===== */
+.h-logoLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.h-logoImg {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+
+.h-logoText {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ===== Menu Root ===== */
+.h-menuRoot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* Desktop nav visible on md+ */
+.h-navDesktop {
   display: none;
-  overflow: hidden;
+  align-items: center;
+  gap: 36px;
 }
 
-.submenu li {
+.h-navLink {
+  display: flex;
+  font-weight: bold;
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.h-navLink:hover {
+  color: rgba(0, 0, 0, 1);
+}
+
+.h-navDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile toggle visible on < md */
+.h-navMobileToggleWrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+.h-mobileToggleBtn {
+  padding: 6px 12px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.h-mobileToggleBtn:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.h-navItemWrap {
+  padding: 16px 0;
+}
+
+/* ===== Mega Menu ===== */
+.h-megaWrap {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 48px;
+  box-shadow:
+    rgba(0, 0, 0, 0.16) 0px 3px 6px,
+    rgba(0, 0, 0, 0.23) 0px 3px 6px;
+}
+
+.h-megaShell {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: #fff;
+}
+
+.h-megaInner {
+  /* max-width: 1120px; */
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.h-megaGrid {
+  display: flex;
+  gap: 32px;
+}
+
+.h-megaCol {
+  flex-basis: 15%;
+}
+
+.h-megaColTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 12px;
+}
+
+.h-megaList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.h-megaLink {
+  display: block;
+  text-decoration: none;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.h-megaLink:hover {
+  color: rgba(0, 0, 0, 1);
+}
+
+.h-megaPromoCol {
+  display: none;
+}
+
+.h-megaPromoBox {
+  height: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 18px;
+}
+
+.h-megaPromoTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.h-megaPromoText {
+  margin-top: 8px;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.h-megaPromoBtn {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  text-decoration: none;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.h-megaPromoBtn:hover {
+  opacity: 0.92;
+}
+
+.h-megaHoverBuffer {
+  height: 16px;
+  background: transparent;
+}
+
+/* ===== CTAs ===== */
+.h-ctas {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.h-accountLink {
+  display: none;
+  text-decoration: none;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #000;
+}
+
+.h-accountLink:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.h-searchBtn {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: transparent;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.h-searchBtn:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.h-cartBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  text-decoration: none;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.h-cartBtn:hover {
+  opacity: 0.92;
+}
+
+.h-cartCountPlaceholder {
+  display: inline-block;
+  width: 16px;
+}
+
+/* ===== Mobile Overlay ===== */
+.h-mobileOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.h-mobileOverlayBackdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.h-mobilePanel {
+  position: relative;
+  width: min(92vw, 380px);
+  height: 100%;
+  background: #fff;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.h-mobilePanelHeader {
   padding: 8px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.h-mobilePanelTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.h-mobileCloseBtn {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.h-mobileCloseBtn:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.h-mobileNav {
+  overflow: auto;
+}
+
+.h-mobileNavList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.h-mobileNavList li {
   margin: 0;
 }
-.submenu li a {
-  color: #ffffff;
-  text-decoration: none;
+
+.h-mobileItem {
+  padding: 8px 16px;
+  border-bottom: 1px solid rgb(204, 204, 204);
 }
 
-.menu-item-with-sub {
-  position: relative;
-  padding: 12px 16px;
-  color: #777777;
-  border-radius: 0;
+.h-mobileAccordionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-basis: 40%;
 }
 
-.menu-item-with-sub:hover {
-  cursor: pointer;
-  background-color: #777777;
+.h-mobileAccordionIcon svg {
+  width: 24px;
+  fill: rgba(0, 0, 0, 0.6);
 }
 
-.menu-item-with-sub:hover .submenu {
+.h-mobileRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.h-mobileNavLink {
   display: block;
-  position: absolute;
-  top: 40px;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
-  background-color: #777777;
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 16px;
+  padding: 4px;
+  font-weight: bold;
 }
 
-.menu-item-with-sub:hover a {
-  color: #ffffff;
+.h-mobileNavLink:hover {
+  background: rgba(0, 0, 0, 0.04);
 }
 
-.headerChevron {
-  width: 16px;
-  transition: all 0.2s;
-  margin-left: 8px;
+.h-mobileMegaCol {
+  padding: 8px 4px;
 }
 
-.menu-item-with-sub:hover .headerChevron {
-  transform: rotate(180deg);
+.h-mobileMegaTitle {
+  font-weight: bold;
 }
 
-.submenu li:hover {
-  background-color: #555555;
-}
-.menu-item {
-  padding: 12px 16px;
-  color: #777777;
+/* ===== Responsive breakpoints ===== */
+@media (min-width: 1023.98px) {
+  .h-navDesktop {
+    display: inline-flex;
+  }
+
+  .h-navMobileToggleWrap {
+    display: none;
+  }
+
+  .h-accountLink {
+    display: inline-flex;
+  }
+
+  .h-megaGrid {
+    grid-template-columns: repeat(12, 1fr);
+    gap: 32px;
+  }
+
+  .h-megaCol {
+    grid-column: span 3;
+  }
+
+  .h-megaPromoCol {
+    display: block;
+    grid-column: span 3;
+  }
 }
 
 /* footer */
@@ -255,6 +660,34 @@
 
 /* xs ve sm */
 @media (max-width: 767.98px) {
+  /* header */
+
+  .headerRow {
+    justify-content: flex-start;
+    padding: 8px 16px;
+    gap: 16px;
+  }
+
+  .h-headerLeft {
+    flex-basis: calc(50% - 8px);
+    display: none;
+  }
+
+  .h-headerRight {
+    flex-basis: calc(50% - 8px);
+    order: 1;
+    justify-content: flex-start;
+  }
+
+  .h-headerCenter {
+    flex-basis: calc(50% - 8px);
+    order: 2;
+  }
+
+  .h-menuRoot {
+    justify-content: flex-end;
+  }
+
   .footer-subsBox {
     padding: 16px;
   }
@@ -298,45 +731,45 @@
     width: 100%;
   }
 
-  .footer-logo-img{
+  .footer-logo-img {
     margin-bottom: 16px;
   }
 
-  .footerCallCenterBox{
+  .footerCallCenterBox {
     margin-top: 16px;
   }
 
-  .callCenterTitle{
+  .callCenterTitle {
     text-align: left;
   }
 
-  .callCenterIcon{
+  .callCenterIcon {
     height: 42px;
-    width: 42px ;
+    width: 42px;
     margin-right: 8px;
   }
 
-  .footerAdress{
+  .footerAdress {
     margin-top: 8px;
     font-size: 12px;
   }
 
-  .footer-sections{
+  .footer-sections {
     flex-basis: 100%;
     margin-top: 32px;
   }
 
-  .footer-section{
+  .footer-section {
     flex-basis: 100%;
     text-align: center;
     margin-bottom: 16px;
   }
 
-  .socialLinks{
+  .socialLinks {
     justify-content: center;
   }
-  
-  .footerSubBanner{
+
+  .footerSubBanner {
     margin: 0;
     padding: 8px;
     text-align: center;
@@ -345,29 +778,55 @@
 
 /* md only: 768–1023px */
 @media (min-width: 768px) and (max-width: 1023.98px) {
+  /* header */
 
-  .footerRow{
+  .headerRow {
+    justify-content: flex-start;
+    padding: 8px 16px;
+    gap: 16px;
+  }
+
+  .h-headerLeft {
+    flex-basis: calc(50% - 8px);
+    display: none;
+  }
+
+  .h-headerRight {
+    flex-basis: calc(50% - 8px);
+    order: 1;
+    justify-content: flex-start;
+  }
+
+  .h-headerCenter {
+    flex-basis: calc(50% - 8px);
+    order: 2;
+    justify-content: flex-end;
+    display: flex;
+
+  }
+
+  .footerRow {
     padding: 16px;
   }
 
-  .footer-logoCol{
+  .footer-logoCol {
     flex-basis: 40%;
   }
 
-  .footerLogoSubtext{
+  .footerLogoSubtext {
     width: 90%;
   }
 
-  .footerCallCenterBox{
+  .footerCallCenterBox {
     margin-top: 16px;
   }
 
-  .callCenterIcon{
+  .callCenterIcon {
     height: 48px;
     width: 48px;
   }
 
-  .footer-sections{
+  .footer-sections {
     flex-basis: 60%;
   }
 }
