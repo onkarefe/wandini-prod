@@ -26,7 +26,7 @@ export const SEARCH_ENDPOINT = '/search';
  **/
 export function SearchFormPredictive({
   children,
-  className = 'predictive-search-form',
+  className = 'predictive-search-form customAsideSearchBox',
   ...props
 }: SearchFormPredictiveProps) {
   const fetcher = useFetcher<PredictiveSearchReturn>({key: 'search'});

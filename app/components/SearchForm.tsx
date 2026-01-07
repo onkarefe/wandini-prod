@@ -1,4 +1,5 @@
 import {useRef, useEffect} from 'react';
+import '../styles/searchPage.css';
 import {Form, type FormProps} from 'react-router';
 
 type SearchFormProps = Omit<FormProps, 'children'> & {
@@ -35,8 +36,10 @@ export function SearchForm({children, ...props}: SearchFormProps) {
     return null;
   }
 
+
+  // burası arama sonuçları sayfası
   return (
-    <Form method="get" {...props}>
+    <Form className='searchPageMainForm' method="get" {...props}>
       {children({inputRef})}
     </Form>
   );

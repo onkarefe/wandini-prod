@@ -1,0 +1,132 @@
+.searchPageMainForm {
+  display: flex;
+  flex-direction: column;
+  width: calc(33% - 12px);
+}
+
+.searchPageMainForm button {
+  padding: 8px;
+  background-color: #504841;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s;
+  margin-top: -12px;
+  margin-bottom: 12px;
+}
+
+.searchPageMainForm button:hover {
+  background-color: #000000;
+}
+
+.searchPageMainForm input {
+  width: 100%;
+  height: 40px;
+  padding: 8px 16px;
+  border: 1px solid #c2c2c2;
+  font-size: 14px;
+  border-radius: 0;
+}
+
+.searchMainH1 {
+  margin: 16px 0 !important;
+}
+
+/* productCard */
+
+.searchCutomGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.search-page-product-card {
+  display: block;
+  text-decoration: none;
+  background: #fff;
+  overflow: hidden;
+  transition: all 0.3s;
+  color: inherit; /* metin link rengi bozulmasın */
+  position: relative;
+  width: 100%;
+  flex-basis: calc(33% - 16px);
+  border: 1px solid #c2c2c2;
+}
+
+.search-page-product-card:hover {
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.search-page-product-card__media {
+  width: 100%;
+  height: 260px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.search-page-product-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.search-page-product-card__body {
+  padding: 0 16px;
+  margin: 16px 0;
+  font-weight: bold;
+}
+
+/* xs ve sm */
+@media (max-width: 767.98px) {
+  .search {
+    padding: 16px;
+  }
+
+  .searchPageMainForm {
+    width: 100%;
+  }
+
+  .search-page-product-card {
+    flex-basis: 100%;
+  }
+}
+
+/* md only: 768–1023px */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .search {
+    padding: 16px;
+  }
+  .search-page-product-card {
+    flex-basis: calc(50% - 8px);
+  }
+
+  .searchPageMainForm {
+    width: 100%;
+  }
+}
+
+/* lg only: 1024–1279px */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .search {
+    padding: 16px;
+  }
+
+   .searchPageMainForm {
+    width: 100%;
+  }
+}
+
+/* xl only: 1280–1535px */
+@media (min-width: 1280px) and (max-width: 1535.98px) {
+  /* ... */
+}
+
+/* 2xl and up: ≥1536px */
+@media (min-width: 1536px) {
+  /* ... */
+}
