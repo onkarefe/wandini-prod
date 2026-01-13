@@ -1,6 +1,7 @@
-import {Link} from 'react-router';
-import {Image, Money, Pagination} from '@shopify/hydrogen';
-import {urlWithTrackingParams, type RegularSearchReturn} from '~/lib/search';
+import { Link } from 'react-router';
+import { Image, Money, Pagination } from '@shopify/hydrogen';
+import { urlWithTrackingParams, type RegularSearchReturn } from '~/lib/search';
+import nosrIcon from '~/assets/Icons/nosrIcon.png';
 
 type SearchItems = RegularSearchReturn['result']['items'];
 type PartialSearchResult<ItemType extends keyof SearchItems> = Pick<
@@ -10,7 +11,7 @@ type PartialSearchResult<ItemType extends keyof SearchItems> = Pick<
   Pick<RegularSearchReturn, 'term'>;
 
 type SearchResultsProps = RegularSearchReturn & {
-  children: (args: SearchItems & {term: string}) => React.ReactNode;
+  children: (args: SearchItems & { term: string }) => React.ReactNode;
 };
 
 export function SearchResults({
@@ -22,7 +23,7 @@ export function SearchResults({
     return null;
   }
 
-  return children({...result.items, term});
+  return children({ ...result.items, term });
 }
 
 SearchResults.Articles = SearchResultsArticles;
@@ -63,7 +64,7 @@ function SearchResultsArticles({
   );
 }
 
-function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
+function SearchResultsPages({ term, pages }: PartialSearchResult<'pages'>) {
   if (!pages?.nodes.length) {
     return null;
   }
@@ -105,7 +106,7 @@ function SearchResultsProducts({
     <div className="search-result">
       <h2>Products</h2>
       <Pagination connection={products}>
-        {({nodes, isLoading, NextLink, PreviousLink}) => {
+        {({ nodes, isLoading, NextLink, PreviousLink }) => {
           const ItemsMarkup = nodes.map((product) => {
             const productUrl = urlWithTrackingParams({
               baseUrl: `/products/${product.handle}`,
@@ -157,5 +158,28 @@ function SearchResultsProducts({
 }
 
 function SearchResultsEmpty() {
-  return <p>No results, try a different search.</p>;
+  return (
+    <div className="noSR-mainbox">
+      <img
+        src={nosrIcon}
+        alt=""
+        aria-hidden="true"
+        className="noSR-icon"
+      />
+
+      <h2 className="noSR-title">
+        Sorry, we couldn’t find what you are looking for
+      </h2>
+
+      <p className="noSR-desc">
+        Try using simpler search terms and then filtering the results.
+        <br />
+        Still can’t find it? Contact Customer Services.
+      </p>
+
+      <a href="/" className="noSR-button">
+        Go To Homepage
+      </a>
+    </div>
+  );
 }

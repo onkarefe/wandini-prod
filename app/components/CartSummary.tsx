@@ -16,7 +16,7 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
 
   return (
     <div aria-labelledby="cart-summary" className={className}>
-      <h4>Totals</h4>
+      <h4>Totals efe</h4>
       <dl className="cart-subtotal">
         <dt>Subtotal</dt>
         <dd>

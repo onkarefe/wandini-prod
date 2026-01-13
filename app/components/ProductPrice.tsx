@@ -10,7 +10,6 @@ export function ProductPrice({
 }) {
   return (
     <div className="product-price">
-      efeonkar-ürün fiyat componenti
       {compareAtPrice ? (
         <div className="product-price-on-sale">
           {price ? <Money data={price} /> : null}

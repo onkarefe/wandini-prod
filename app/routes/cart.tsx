@@ -110,7 +110,8 @@ export default function Cart() {
 
   return (
     <div className="cart">
-      <h1>Cart</h1>
+      <h1>Cart </h1>
+      <h2>Burayı düzenleyecez ve defoult checkout sayfasından ayırabiliyorsak ayırcaz unutma ! </h2>
       <CartMain layout="page" cart={cart} />
     </div>
   );

@@ -81,6 +81,42 @@
   font-weight: bold;
 }
 
+.noSR-mainbox {
+  margin: 64px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.noSR-title {
+  margin: 16px 0 4px !important;
+  font-size: 24px;
+}
+
+.noSR-desc {
+  margin: 4px 0 32px;
+  font-size: 16px;
+  color: #555;
+}
+
+.noSR-button {
+  padding: 10px 20px;
+  background-color: #504841;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s;
+}
+
+.noSR-button:hover {
+  background-color: #000000;
+}
 /* xs ve sm */
 @media (max-width: 767.98px) {
   .search {
@@ -116,7 +152,7 @@
     padding: 16px;
   }
 
-   .searchPageMainForm {
+  .searchPageMainForm {
     width: 100%;
   }
 }

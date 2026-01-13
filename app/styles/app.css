@@ -3,9 +3,10 @@
   --cart-aside-summary-height-with-discount: 300px;
   --cart-aside-summary-height: 250px;
   --grid-item-width: 355px;
-  --header-height: 64px;
+  --header-height: 58px;
   --color-dark: #000;
   --color-light: #fff;
+  --color-aside-border: #cacaca;
   font-family: 'Archivo', sans-serif;
 }
 
@@ -43,7 +44,7 @@ aside {
 
 aside header {
   align-items: center;
-  border-bottom: 1px solid var(--color-dark);
+  border-bottom: 1px solid var(--color-aside-border);
   display: flex;
   height: var(--header-height);
   justify-content: space-between;
@@ -263,11 +264,11 @@ button.reset:hover:not(:has(> *)) {
 
 .cart-summary-aside {
   background: white;
-  border-top: 1px solid var(--color-dark);
+  border-top: 1px solid var(--color-aside-border);
   bottom: 0;
   padding-top: 0.75rem;
   position: absolute;
-  width: calc(var(--aside-width) - 40px);
+  width: calc(var(--aside-width) - 32px);
 }
 
 .cart-line-quantity {
