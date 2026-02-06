@@ -16,6 +16,9 @@ type ConfiguratorProps = {
   height: number;
   /** Natural piksel koordinatlarıyla crop sonucu (opsiyonel) */
   onCropChange?: (crop: { x: number; y: number; w: number; h: number } | null) => void;
+  /** Preview için yüklenen img referansı (opsiyonel) */
+  onImageReady?: (img: HTMLImageElement | null) => void;
+  /** Preview için yüklenen img referansı (opsiyonel) */
   /** Live preview butonuna tıklandığında tetiklenecek callback (opsiyonel) */
   onPreviewClick?: () => void;
 };
@@ -35,6 +38,7 @@ export function Configurator({
   width: realWcm,
   height: realHcm,
   onCropChange,
+  onImageReady,
   onPreviewClick,
 }: ConfiguratorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -256,7 +260,13 @@ export function Configurator({
     const w = Math.max(1, Math.round(selection.w * scaleX));
     const h = Math.max(1, Math.round(selection.h * scaleY));
 
-    onCropChange({ x, y, w, h });
+    onCropChange({
+      x: x / naturalW,
+      y: y / naturalH,
+      w: w / naturalW,
+      h: h / naturalH,
+    });
+
   }, [selection, imageLoaded, getImageRectInContainer, onCropChange]);
 
   /** Dış overlay blokları (JS updateDimOverlays mantığı) */
@@ -381,7 +391,10 @@ export function Configurator({
           src={imageUrl}
           crossOrigin="anonymous"
           alt="Product to configure"
-          onLoad={() => setImageLoaded(true)}
+          onLoad={() => {
+            setImageLoaded(true);
+            onImageReady?.(imgRef.current);
+          }}
           className="configuratorImage"
         />
 
@@ -390,15 +403,7 @@ export function Configurator({
         {renderCropBox()}
       </div>
 
-      <div className="configratorCustomButtonLine">
-        <button
-          type="button"
-          className="configuratorPreviewButton"
-          onClick={onPreviewClick}
-        >
-          Generate Live Preview
-        </button>
-      </div>
+      {/* Preview button moved to modal right panel */}
     </>
   );
 }

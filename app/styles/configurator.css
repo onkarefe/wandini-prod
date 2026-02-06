@@ -34,7 +34,6 @@
   height: auto;
   background: var(--panel);
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
   position: relative;
   overflow: hidden;
@@ -207,7 +206,6 @@
   padding: 0;
   background: #f3f4f6;
   border: 1px dashed #9ca3af;
-  border-radius: 8px;
   text-align: center;
   display: flex;
   align-items: center;
@@ -217,7 +215,7 @@
 }
 
 .configuratorImage {
-  width: 100%;
+  width: auto;
   height: 100%;
   object-fit: contain;
   display: block;
@@ -282,7 +280,6 @@
   font-weight: 500;
   color: #000;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   pointer-events: none;
 }
@@ -364,13 +361,113 @@
 
 .configuratorSceneDialog {
   background: #fff;
-  border-radius: 12px;
   max-width: 1100px;
   width: 100%;
   max-height: 90vh;
   padding: 16px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.25);
   position: relative;
+}
+
+.configuratorModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.configuratorModal {
+  background: #fff;
+  border-radius: 0;
+  width: 100%;
+  max-width: 1320px;
+  height: 90vh;
+  padding: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.configuratorModalBody {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+}
+
+.configuratorModalLeft {
+  max-height: 635px;
+  height: 100%;
+  flex-basis: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.configuratorModalRight {
+  flex-basis: 100%;
+  min-width: 0;
+  height: 100%;
+  overflow: auto;
+}
+
+.configuratorModal--preview .configuratorModalBody {
+  display: block;
+  height: 100%;
+}
+
+.configuratorModal--preview .configuratorModalBody > * {
+  height: 100%;
+}
+
+.configuratorModalIconButton {
+  position: absolute;
+  top: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.2);
+  background: #fff;
+  color: #000;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.configuratorModalCloseButton {
+  right: 16px;
+}
+
+.configuratorModalBackButton {
+  left: 16px;
+}
+
+.configuratorSceneDialog--inline {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.configuratorSceneDialog--inline .c-stage {
+  height: 100%;
+  min-height: 0;
+  max-height: calc(90vh - 96px);
+  margin-bottom: 16px;
 }
 
 .configuratorSceneCloseButton {
@@ -393,3 +490,41 @@
                  scene overlay zaten ayrı z-index ile geliyor */
   pointer-events: none;
 }
+
+
+/* ==== Configurator Quality Options (Modal) ==== */
+.configratorProps {
+  width: 100%;
+}
+
+.configratorPropsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.configratorPropsCard {
+  flex: 0 0 calc(33.333% - 10.67px);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.configratorPropsTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.configratorPropsTitle {
+  font-weight: 600;
+}
+
+.configratorPropsPrice {
+  font-size: 13px;
+  font-weight: bold;
+}
+

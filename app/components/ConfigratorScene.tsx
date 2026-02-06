@@ -19,6 +19,11 @@ type CropRect = {
 type ConfigratorSceneProps = {
   isOpen: boolean;
   onClose: () => void;
+  confirmButton?: React.ReactNode;
+  onConfirm?: () => void;
+  confirmDisabled?: boolean;
+  inline?: boolean;
+  showCloseButton?: boolean;
   imageUrl: string;
   widthCm: number; // gerçek genişlik (cm)
   heightCm: number; // gerçek yükseklik (cm)
@@ -268,12 +273,46 @@ async function createCroppedDataUrl(
     img.crossOrigin = 'anonymous';
 
     img.onload = () => {
+      console.log('[ConfigratorScene] image loaded', { src: imageUrl, naturalW: img.naturalWidth, naturalH: img.naturalHeight, crop });
       try {
+        const naturalW = img.naturalWidth || 0;
+        const naturalH = img.naturalHeight || 0;
+
+        const isRatioCrop =
+          crop.x >= 0 &&
+          crop.y >= 0 &&
+          crop.w > 0 &&
+          crop.h > 0 &&
+          crop.x <= 1 &&
+          crop.y <= 1 &&
+          crop.w <= 1 &&
+          crop.h <= 1;
+
+        const pxCrop: CropRect = isRatioCrop
+          ? {
+              x: Math.round(crop.x * naturalW),
+              y: Math.round(crop.y * naturalH),
+              w: Math.round(crop.w * naturalW),
+              h: Math.round(crop.h * naturalH),
+            }
+          : {
+              x: Math.round(crop.x),
+              y: Math.round(crop.y),
+              w: Math.round(crop.w),
+              h: Math.round(crop.h),
+            };
+
+        const safeW = Math.max(1, pxCrop.w || 0);
+        const safeH = Math.max(1, pxCrop.h || 0);
+        const safeX = Math.max(0, Math.min(pxCrop.x || 0, Math.max(0, naturalW - safeW)));
+        const safeY = Math.max(0, Math.min(pxCrop.y || 0, Math.max(0, naturalH - safeH)));
+
         const off = document.createElement('canvas');
-        off.width = crop.w;
-        off.height = crop.h;
+        off.width = safeW;
+        off.height = safeH;
         const ctx = off.getContext('2d');
         if (!ctx) {
+          console.log('[ConfigratorScene] canvas ctx missing');
           resolve(null);
           return;
         }
@@ -287,22 +326,26 @@ async function createCroppedDataUrl(
 
         ctx.drawImage(
           img,
-          crop.x,
-          crop.y,
-          crop.w,
-          crop.h,
+          safeX,
+          safeY,
+          safeW,
+          safeH,
           0,
           0,
-          crop.w,
-          crop.h,
+          safeW,
+          safeH,
         );
 
         try {
-          resolve(off.toDataURL('image/jpeg', 0.92));
+          const url = off.toDataURL('image/jpeg', 0.92);
+          console.log('[ConfigratorScene] dataUrl ok', { len: url.length });
+          resolve(url);
         } catch (err) {
           console.error('toDataURL jpeg error', err);
           try {
-            resolve(off.toDataURL());
+            const fallback = off.toDataURL();
+            console.log('[ConfigratorScene] dataUrl fallback ok', { len: fallback.length });
+            resolve(fallback);
           } catch (err2) {
             console.error('toDataURL png error', err2);
             resolve(null);
@@ -325,11 +368,17 @@ async function createCroppedDataUrl(
 
 
 
-/* ======== ANA COMPONENT ======== */
+
+
 
 export function ConfigratorScene({
   isOpen,
   onClose,
+  confirmButton,
+  onConfirm,
+  confirmDisabled,
+  inline,
+  showCloseButton = true,
   imageUrl,
   widthCm,
   heightCm,
@@ -347,6 +396,7 @@ export function ConfigratorScene({
     let cancelled = false;
 
     if (!isOpen || !crop) {
+      console.log('[ConfigratorScene] preview skip', { isOpen, crop });
       setPreviewUrl(null);
       return;
     }
@@ -405,14 +455,23 @@ export function ConfigratorScene({
       frontWallRef.current!.style.setProperty('--scene-scale', String(scale));
     };
 
-    applyLayout();
+    const raf = requestAnimationFrame(applyLayout);
 
     const handleResize = () => applyLayout();
     window.addEventListener('resize', handleResize);
+
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(() => applyLayout());
+      ro.observe(wall);
+    }
+
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener('resize', handleResize);
+      if (ro) ro.disconnect();
     };
-  }, [isOpen, widthCm]);
+  }, [isOpen, widthCm, previewUrl]);
 
   // ESC ile kapatma
   useEffect(() => {
@@ -452,7 +511,60 @@ export function ConfigratorScene({
   let sceneSrc: string | null = null;
   if (variant === 'medium') sceneSrc = sceneMedium;
   else if (variant === 'large') sceneSrc = sceneLarge;
-  else sceneSrc = sceneSmall;
+  else sceneSrc = null;
+
+  const dialogContent = (
+    <div
+      className={`configuratorSceneDialog${inline ? ' configuratorSceneDialog--inline' : ''}`}
+    >
+      {showCloseButton && (
+        <button
+          type="button"
+          className="configuratorSceneCloseButton"
+          onClick={onClose}
+          aria-label="Close preview"
+        >
+          X
+        </button>
+      )}
+
+      <div ref={stageRef} className="c-stage">
+        <div ref={roomRef} className="c-room">
+          <div className="c-ceiling" />
+          <div className="c-floor" />
+
+          <div
+            ref={frontWallRef}
+            className="c-wall c-wall-front"
+            style={frontWallStyle}
+          >
+            <div id="c-scene-overlay">
+              {sceneSrc && <img src={sceneSrc} alt="" />}
+            </div>
+          </div>
+
+          <div className="c-wall c-wall-left" />
+          <div className="c-wall c-wall-right" />
+        </div>
+      </div>
+
+      {confirmButton ? (
+        confirmButton
+      ) : onConfirm ? (
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={!!confirmDisabled}
+        >
+          Confirm &amp; Add to Cart
+        </button>
+      ) : null}
+    </div>
+  );
+
+  if (inline) {
+    return dialogContent;
+  }
 
   return (
     <div
@@ -462,36 +574,9 @@ export function ConfigratorScene({
       aria-modal="true"
       aria-label="Product preview in room"
     >
-      <div className="configuratorSceneDialog">
-        <button
-          type="button"
-          className="configuratorSceneCloseButton"
-          onClick={onClose}
-          aria-label="Close preview"
-        >
-          ×
-        </button>
-
-        <div ref={stageRef} className="c-stage">
-          <div ref={roomRef} className="c-room">
-            <div className="c-ceiling" />
-            <div className="c-floor" />
-
-            <div
-              ref={frontWallRef}
-              className="c-wall c-wall-front"
-              style={frontWallStyle}
-            >
-              <div id="c-scene-overlay">
-                {sceneSrc && <img src={sceneSrc} alt="" />}
-              </div>
-            </div>
-
-            <div className="c-wall c-wall-left" />
-            <div className="c-wall c-wall-right" />
-          </div>
-        </div>
-      </div>
+      {dialogContent}
     </div>
   );
 }
+
+
