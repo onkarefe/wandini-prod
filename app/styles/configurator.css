@@ -537,7 +537,7 @@
 /* lg only: 1024–1279px */
 @media (min-width: 1024px) and (max-width: 1279.98px) {
   .configuratorModalLeft {
-    max-height: 75%;
+    max-height: 64dvh;
   }
 
   .configratorPropsCard {
