@@ -117,18 +117,18 @@
   flex-wrap: wrap;
   gap: 16px;
   padding: 16px;
-  background-color: #f9fafa;
+  background-color: #f6f6f6;
   margin-bottom: 16px;
   border: 1px solid transparent;
+  border-left: 4px solid transparent;
   transition: all 0.3s;
   cursor: pointer;
 }
 
 .selectedVariant {
-  box-shadow:
-    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
-    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
-  background-color: #f1f3f3;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+  background-color: #fff;
+  border-left: 4px solid rgb(22, 163, 74);
 }
 
 .propertyRatioTitle {
@@ -191,4 +191,138 @@
 
 .customAddToCartButton:hover {
   background-color: #333;
+}
+
+/* Container */
+.customSizeMainBox {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+/* Field wrapper */
+.customSizeField {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  flex-basis: calc(50% - 8px);
+}
+
+.relativeInputBox {
+  position: relative;
+  height: 44px;
+  width: 100%;
+}
+
+.cmClass {
+  height: 44px;
+  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f3f3;
+  position: absolute;
+  top: 0;
+  border: 1px solid #dcdcdc;
+  right: 0;
+  color: rgb(94, 94, 94);
+}
+/* Label */
+.customSizeField label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 6px;
+  letter-spacing: 0.2px;
+}
+
+/* Input */
+.customSizeField input {
+  height: 100%;
+  width: 100%;
+  padding: 0 14px;
+  border: 1px solid #dcdcdc;
+  border-radius: 0;
+  font-size: 14px;
+  background-color: #f9fafa;
+  color: #111;
+  outline: none;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease;
+  margin: 0;
+}
+
+/* HOVER — zarif koyulaşma */
+.customSizeField input:hover {
+  border: 1px solid rgb(189, 189, 189);
+  outline: none;
+  background-color: white;
+}
+
+/* FOCUS — premium minimal glow */
+.customSizeField input:focus {
+  border: 1px solid rgb(189, 189, 189);
+  outline: none;
+  background-color: white;
+}
+
+/* Active (tıklanırken hafif basma hissi) */
+.customSizeField input:active {
+  border: 1px solid rgb(189, 189, 189);
+  outline: none;
+  background-color: white;
+}
+
+/* Remove number input arrows (Chrome, Safari, Edge) */
+.customSizeField input::-webkit-outer-spin-button,
+.customSizeField input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove number input arrows (Firefox) */
+.customSizeField input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.warning {
+  display: block;
+  color: rgb(58, 58, 58);
+}
+
+.warning svg {
+  float: left;
+  display: block;
+  margin-right: 5px;
+}
+
+@media (max-width: 767.98px) {
+}
+
+/* md only: 768–1023px */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+}
+
+/* lg only: 1024–1279px */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .productDetailMainContainer {
+    padding: 16px;
+    margin: 0;
+  }
+
+  .productDetailLeft {
+    flex-basis: calc(75% - 8px);
+  }
+
+  .productDetailRight {
+    flex-basis: calc(25% - 8px);
+  }
+
+  .productDetailTitle {
+    font-size: 20px;
+    margin: 0;
+  }
 }

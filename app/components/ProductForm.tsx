@@ -230,7 +230,7 @@ export function ProductForm({
 
       {/* CONFIGURE */}
       {!isConfiguring && (
-        <button type="button" disabled={!isSizeValid} onClick={onConfigure}>
+        <button className='customAddToCartButton' type="button" disabled={!isSizeValid} onClick={onConfigure}>
           Configure Now
         </button>
       )}

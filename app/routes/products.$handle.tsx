@@ -413,7 +413,6 @@ export default function Product() {
         <div className="productDetailRight">
           <div className="product-main">
             <h1 className="productDetailTitle">{title}</h1>
-            <br />
             {/* Height ve width inputları */}
             <ProductSize onChange={setSize} />
 

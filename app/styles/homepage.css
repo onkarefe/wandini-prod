@@ -818,25 +818,3 @@
 @media (min-width: 1536px) {
   /* ... */
 }
-
-/* İstersen “and up” varyantları da: */
-/* ≥640px (sm and up) */
-@media (min-width: 640px) {
-  /* ... */
-}
-/* ≥768px (md and up) */
-@media (min-width: 768px) {
-  /* ... */
-}
-/* ≥1024px (lg and up) */
-@media (min-width: 1024px) {
-  /* ... */
-}
-/* ≥1280px (xl and up) */
-@media (min-width: 1280px) {
-  /* ... */
-}
-/* ≥1536px (2xl and up) */
-@media (min-width: 1536px) {
-  /* ... */
-}
