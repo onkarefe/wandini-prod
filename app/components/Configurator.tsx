@@ -343,8 +343,8 @@ export function Configurator({
     // 50 cm grid
     const gridLines: React.ReactNode[] = [];
     const Wcm = Math.max(1, realWcm || 1);
-    const stepX = (50 / Wcm) * w; // 50 cm başına px
-    const vCount = Math.floor(Wcm / 50);
+    const stepX = (120 / Wcm) * w; // 50 cm başına px
+    const vCount = Math.floor(Wcm / 120);
 
     for (let k = 1; k < vCount; k++) {
       const lx = Math.round(k * stepX);

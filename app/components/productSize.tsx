@@ -6,19 +6,37 @@ type ProductSizeProps = {
 };
 
 export const ProductSize: React.FC<ProductSizeProps> = ({ onChange }) => {
-	const [width, setWidth] = useState<number>(0);
-	const [height, setHeight] = useState<number>(0);
+	const [width, setWidth] = useState<string>('0');
+	const [height, setHeight] = useState<string>('0');
+	const [isWidthEdited, setIsWidthEdited] = useState<boolean>(false);
+	const [isHeightEdited, setIsHeightEdited] = useState<boolean>(false);
+
+	const toNumber = (value: string) => (value === '' ? 0 : Number(value));
 
 	const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const value = Number(e.target.value);
+		const value = e.target.value;
 		setWidth(value);
-		if (onChange) onChange({ width: value, height });
+		setIsWidthEdited(true);
+		if (onChange) onChange({ width: toNumber(value), height: toNumber(height) });
 	};
 
 	const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const value = Number(e.target.value);
+		const value = e.target.value;
 		setHeight(value);
-		if (onChange) onChange({ width, height: value });
+		setIsHeightEdited(true);
+		if (onChange) onChange({ width: toNumber(width), height: toNumber(value) });
+	};
+
+	const handleWidthFocus = () => {
+		if (!isWidthEdited && width === '0') {
+			setWidth('');
+		}
+	};
+
+	const handleHeightFocus = () => {
+		if (!isHeightEdited && height === '0') {
+			setHeight('');
+		}
 	};
 
 	return (
@@ -31,6 +49,7 @@ export const ProductSize: React.FC<ProductSizeProps> = ({ onChange }) => {
 						type="number"
 						min={0}
 						value={width}
+						onFocus={handleWidthFocus}
 						onChange={handleWidthChange}
 					/>
 					<span className="cmClass">
@@ -47,6 +66,7 @@ export const ProductSize: React.FC<ProductSizeProps> = ({ onChange }) => {
 						type="number"
 						min={0}
 						value={height}
+						onFocus={handleHeightFocus}
 						onChange={handleHeightChange}
 					/>
 					<span className="cmClass">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Configurator } from './Configurator';
-import { ConfigratorScene } from './ConfigratorScene';
+// import { ConfigratorScene } from './ConfigratorScene';
+import { ConfigratorScene2 } from './ConfigratorScene2';
 
 type CropRect = {
   x: number;
@@ -122,7 +123,18 @@ export function ConfiguratorModal({
           </div>
         ) : (
           <div className="configuratorModalBody">
-            <ConfigratorScene
+            {/* <ConfigratorScene
+              isOpen={isPreviewOpen}
+              onClose={() => setIsPreviewOpen(false)}
+              confirmButton={confirmButton}
+              inline
+              showCloseButton={false}
+              imageUrl={imageUrl}
+              widthCm={widthCm}
+              heightCm={heightCm}
+              crop={crop}
+            /> */}
+            <ConfigratorScene2
               isOpen={isPreviewOpen}
               onClose={() => setIsPreviewOpen(false)}
               confirmButton={confirmButton}
