@@ -151,6 +151,11 @@ type CropRect = {
   h: number;
 };
 
+type SelectedQualitySummary = {
+  title: string;
+  properties: string[];
+} | null;
+
 export default function Product() {
   const { product } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
@@ -220,6 +225,27 @@ export default function Product() {
   const qualityOption = productOptions.find(
     (option) => option.name.toLowerCase() === 'quality',
   );
+
+  const selectedQualitySummary: SelectedQualitySummary = qualityOption
+    ? (() => {
+        const selectedQualityValue =
+          qualityOption.optionValues.find((value) => value.selected) ??
+          qualityOption.optionValues[0];
+        if (!selectedQualityValue) return null;
+
+        let printQuality: any;
+        if (selectedQualityValue?.firstSelectableVariant) {
+          const v = selectedQualityValue.firstSelectableVariant;
+          if ((v as any).printQuality?.reference) {
+            printQuality = (v as any).printQuality.reference;
+          }
+        }
+
+        const title = printQuality?.title?.value || selectedQualityValue.name;
+        const properties = getPropertiesForQuality(selectedQualityValue);
+        return {title, properties};
+      })()
+    : null;
 
   const qualityOptionsNode = qualityOption ? (
     <div className="configratorProps" key={qualityOption.name}>
@@ -438,6 +464,7 @@ export default function Product() {
         crop={crop}
         onCropChange={setCrop}
         qualityOptions={qualityOptionsNode}
+        selectedQualitySummary={selectedQualitySummary}
         confirmButton={confirmButton}
       />
 

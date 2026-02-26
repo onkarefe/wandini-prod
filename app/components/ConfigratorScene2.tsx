@@ -7,6 +7,11 @@ type CropRect = {
   h: number;
 };
 
+type SelectedQualitySummary = {
+  title: string;
+  properties: string[];
+} | null;
+
 type ConfigratorScene2Props = {
   isOpen: boolean;
   onClose: () => void;
@@ -17,6 +22,7 @@ type ConfigratorScene2Props = {
   widthCm: number;
   heightCm: number;
   crop: CropRect | null;
+  selectedQualitySummary?: SelectedQualitySummary;
 };
 
 type SliceItem = {
@@ -167,7 +173,9 @@ export function ConfigratorScene2({
   showCloseButton = true,
   imageUrl,
   widthCm,
+  heightCm,
   crop,
+  selectedQualitySummary,
 }: ConfigratorScene2Props) {
   if (!isOpen && !inline) return null;
 
@@ -185,7 +193,7 @@ export function ConfigratorScene2({
 
     if (!crop || widthCm <= 0) {
       setSlices([]);
-      setError('Gecerli crop veya genislik yok.');
+      setError('No valid crop or width found.');
       return;
     }
 
@@ -197,13 +205,13 @@ export function ConfigratorScene2({
         if (cancelled) return;
         setSlices(items);
         if (!items.length) {
-          setError('Parcalama sirasinda gorsel uretilemedi.');
+          setError('No preview image could be generated during slicing.');
         }
       })
       .catch(() => {
         if (cancelled) return;
         setSlices([]);
-        setError('Parcalama sirasinda hata olustu.');
+        setError('An error occurred during slicing.');
       })
       .finally(() => {
         if (cancelled) return;
@@ -217,7 +225,7 @@ export function ConfigratorScene2({
 
   return (
     <div
-      className={`configuratorSceneDialog${inline ? ' configuratorSceneDialog--inline' : ''}`}
+      className={`configuratorSceneDialog cs2-dialog${inline ? ' configuratorSceneDialog--inline' : ''}`}
     >
       {showCloseButton && (
         <button
@@ -230,35 +238,102 @@ export function ConfigratorScene2({
         </button>
       )}
 
-      <div style={{ marginBottom: '12px' }}>
-        <strong>Panel dagilimi:</strong> {widthsPreview.join(' - ')} cm
-      </div>
+      <div className="cs2-layout">
+        <div className="cs2-main">
+          {isLoading && <div className="cs2-feedback">Preparing panels...</div>}
+          {!isLoading && error && <div className="cs2-feedback">{error}</div>}
 
-      {isLoading && <div>Parcalar hazirlaniyor...</div>}
-      {!isLoading && error && <div>{error}</div>}
-
-      {!isLoading && !error && slices.length > 0 && (
-        <div style={{ display: 'grid', gap: '12px', marginBottom: '16px' }}>
-          {slices.map((slice) => (
-            <div key={slice.index}>
-              <div style={{ marginBottom: '6px' }}>
-                Parca {slice.index}: {slice.widthCm} cm
-              </div>
-              <img
-                src={slice.dataUrl}
-                alt={`Panel ${slice.index}`}
-                style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
-              />
+          {!isLoading && !error && slices.length > 0 && (
+            <div className="cs2-slices-grid">
+              {slices.map((slice) => (
+                <div key={slice.index} className="cs2-slice-item">
+                  <img
+                    src={slice.dataUrl}
+                    alt={`Panel ${slice.index}`}
+                    className="cs2-slice-image"
+                  />
+                  <div className="cs2-slice-label">
+                    {slice.index} - {slice.widthCm} cm
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
-      )}
 
-      {confirmButton ?? (
-        <button type="button" className="configuratorPreviewButton">
-          Add to cart
-        </button>
-      )}
+        <div className="cs2-sidebar" aria-label="Preview summary">
+          <div className="cs2-sidebar-card">
+            <div className="cs2-sidebar-title">Summary</div>
+
+            <div className="cs2-sidebar-stats">
+              <div className="cs2-sidebar-section cs2-sidebar-section--compact">
+                <div className="cs2-sidebar-label">Dimensions</div>
+                <div className="cs2-sidebar-value">
+                  {widthCm} cm x {heightCm} cm
+                </div>
+              </div>
+
+              <div className="cs2-sidebar-section cs2-sidebar-section--compact">
+                <div className="cs2-sidebar-label">Panel Count</div>
+                <div className="cs2-sidebar-value">
+                  {widthsPreview.length || slices.length}
+                </div>
+              </div>
+            </div>
+
+            <div className="cs2-sidebar-section">
+              <div className="cs2-sidebar-label">Print Material / Quality</div>
+              {selectedQualitySummary ? (
+                <div className="cs2-quality">
+                  <div className="cs2-sidebar-value">{selectedQualitySummary.title}</div>
+                  {selectedQualitySummary.properties.length > 0 && (
+                    <div className="cs2-quality-properties">
+                      {selectedQualitySummary.properties.map((property, index) => (
+                        <div key={`${property}-${index}`} className="cs2-quality-property">
+                          {property}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="cs2-sidebar-value cs2-sidebar-value--muted">
+                  Quality information not found.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <span className="cs2-warning" role="note">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="cs2-warning__icon"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+              />
+            </svg>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed
+            erat aliquam, luctus quam sed, consequat magna.
+          </span>
+
+          <div className="cs2-sidebar-action">
+            {confirmButton ?? (
+              <button type="button" className="configuratorPreviewButton">
+                Add to cart
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+

@@ -10,10 +10,16 @@ type CropRect = {
   h: number;
 };
 
+type SelectedQualitySummary = {
+  title: string;
+  properties: string[];
+} | null;
+
 type ConfiguratorModalProps = {
   isOpen: boolean;
   onClose: () => void;
   qualityOptions?: React.ReactNode;
+  selectedQualitySummary?: SelectedQualitySummary;
   confirmButton?: React.ReactNode;
 
   imageUrl: string;
@@ -33,6 +39,7 @@ export function ConfiguratorModal({
   crop,
   onCropChange,
   qualityOptions,
+  selectedQualitySummary,
   confirmButton,
 }: ConfiguratorModalProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -144,6 +151,7 @@ export function ConfiguratorModal({
               widthCm={widthCm}
               heightCm={heightCm}
               crop={crop}
+              selectedQualitySummary={selectedQualitySummary}
             />
           </div>
         )}
