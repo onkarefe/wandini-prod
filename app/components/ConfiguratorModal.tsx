@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Configurator } from './Configurator';
 // import { ConfigratorScene } from './ConfigratorScene';
 import { ConfigratorScene2 } from './ConfigratorScene2';
@@ -43,6 +43,38 @@ export function ConfiguratorModal({
   confirmButton,
 }: ConfiguratorModalProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const scrollY = window.scrollY;
+    const { style } = document.body;
+    const prev = {
+      overflow: style.overflow,
+      position: style.position,
+      top: style.top,
+      left: style.left,
+      right: style.right,
+      width: style.width,
+    };
+
+    style.overflow = 'hidden';
+    style.position = 'fixed';
+    style.top = `-${scrollY}px`;
+    style.left = '0';
+    style.right = '0';
+    style.width = '100%';
+
+    return () => {
+      style.overflow = prev.overflow;
+      style.position = prev.position;
+      style.top = prev.top;
+      style.left = prev.left;
+      style.right = prev.right;
+      style.width = prev.width;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

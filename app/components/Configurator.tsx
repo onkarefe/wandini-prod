@@ -51,6 +51,8 @@ export function Configurator({
   const [selection, setSelection] = useState<Selection | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const activePointerIdRef = useRef<number | null>(null);
+  const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
 
   /** img rect'ini container'a göre döndür */
   const getImageRectInContainer = useCallback(() => {
@@ -176,14 +178,31 @@ export function Configurator({
     const target = e.currentTarget as HTMLElement;
     target.setPointerCapture(e.pointerId);
 
+    activePointerIdRef.current = e.pointerId;
+    lastPointerRef.current = { x: e.clientX, y: e.clientY };
     setIsDragging(true);
     document.body.style.cursor = 'move';
   };
 
-  /** Drag hareketleri — sadece movementX / movementY ile, null-safe */
+  /** Drag hareketleri — clientX/clientY delta ile, null-safe */
   useEffect(() => {
     const handlePointerMove = (e: PointerEvent) => {
       if (!isDragging) return;
+      if (
+        activePointerIdRef.current !== null &&
+        e.pointerId !== activePointerIdRef.current
+      ) {
+        return;
+      }
+
+      e.preventDefault();
+
+      const last = lastPointerRef.current;
+      if (!last) return;
+
+      const dx = e.clientX - last.x;
+      const dy = e.clientY - last.y;
+      lastPointerRef.current = { x: e.clientX, y: e.clientY };
 
       setSelection((prev) => {
         if (!prev) return prev; // null ise dokunma
@@ -191,11 +210,11 @@ export function Configurator({
         let next: Selection = { ...prev };
 
         if (axisLock === 'x') {
-          next.x = prev.x + e.movementX;
+          next.x = prev.x + dx;
           next.y = prev.y;
         } else {
           next.x = prev.x;
-          next.y = prev.y + e.movementY;
+          next.y = prev.y + dy;
         }
 
         next = clampSelectionToImage(next, axisLock);
@@ -206,6 +225,8 @@ export function Configurator({
     const endDrag = (e: PointerEvent) => {
       if (!isDragging) return;
       setIsDragging(false);
+      activePointerIdRef.current = null;
+      lastPointerRef.current = null;
       document.body.style.cursor = '';
       try {
         (e.target as HTMLElement | null)?.releasePointerCapture?.(e.pointerId);
@@ -214,7 +235,7 @@ export function Configurator({
       }
     };
 
-    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointermove', handlePointerMove, { passive: false });
     window.addEventListener('pointerup', endDrag);
     window.addEventListener('pointercancel', endDrag);
 

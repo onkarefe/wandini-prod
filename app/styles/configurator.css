@@ -212,6 +212,8 @@
   justify-content: center;
   overflow: hidden;
   position: relative;
+  touch-action: none;
+  -ms-touch-action: none;
 }
 
 .configuratorImage {
@@ -260,6 +262,8 @@
   cursor: pointer;
   z-index: 2;
   user-select: none;
+  touch-action: none;
+  -ms-touch-action: none;
 }
 
 .configuratorCropBox--dragging {
@@ -379,6 +383,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overscroll-behavior: contain;
 }
 
 .configuratorModal {
