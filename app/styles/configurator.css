@@ -778,12 +778,129 @@
 }
 
 @media (max-width: 767.98px) {
+  .configuratorModalOverlay {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .configuratorModal {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    padding: 12px;
+  }
+
+  .configuratorModalIconButton {
+    top: 8px;
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+  }
+
+  .configuratorModalCloseButton {
+    right: 8px;
+  }
+
+  .configuratorModalBackButton {
+    left: 8px;
+  }
+
+  .configuratorModalBody {
+    gap: 12px;
+    min-height: 0;
+    height: 100%;
+    padding-top: 44px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+
+  .configuratorModalLeft {
+    max-height: none;
+    height: auto;
+    flex: 0 0 auto;
+  }
+
+  .configuratorContainer {
+    min-height: 0;
+    height: auto;
+  }
+
+  .configuratorModalRight {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .configratorPropsRow {
+    gap: 10px;
+  }
+
+  .configratorPropsCard {
+    flex: 0 0 100%;
+  }
+
+  .configuratorSceneDialog {
+    max-height: none;
+    height: 100%;
+    padding: 0;
+  }
+
+  .cs2-dialog {
+    --cs2-preview-height: min(320px, 42dvh);
+  }
+
   .cs2-layout {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .cs2-main {
+    min-height: 0;
+    height: auto;
+  }
+
+  .cs2-slices-grid {
+    min-height: var(--cs2-preview-height);
+    max-height: var(--cs2-preview-height);
+    gap: 6px;
+    padding-bottom: 6px;
   }
 
   .cs2-sidebar {
     order: 2;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .cs2-sidebar-title {
+    font-size: 14px;
+  }
+
+  .cs2-sidebar-label,
+  .cs2-sidebar-value,
+  .cs2-quality-property,
+  .cs2-slice-label {
+    font-size: 13px;
+  }
+
+  .cs2-warning {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .cs2-warning__icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .configuratorPreviewButton {
+    padding: 11px 0;
+    font-size: 13px;
   }
 }
 

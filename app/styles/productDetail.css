@@ -300,6 +300,61 @@
 }
 
 @media (max-width: 767.98px) {
+  .productDetailLeft{
+    flex-basis: 100%;
+    margin: 0 0 16px 0;
+  }
+
+  .productDetailMainContainer{
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  .embla{
+    margin-bottom: 8px !important;
+  }
+
+  .embla__slide img{
+    height: 250px;
+  }
+
+  .thumbsImgBox{
+    height: 50px;
+    flex-basis: calc(25% - 6px);
+  }
+
+  .productDetailRight{
+    flex-basis: 100%;
+    margin: 0;
+  }
+
+  .productDetailTitle{
+    font-size: 24px;
+  }
+
+  .warning{
+    font-size: 14px;
+  }
+
+  .warning svg{
+    height: 20px;
+    width: 20px;
+  }
+
+  .customSizeMainBox{
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .customSizeField{
+    flex-basis: 100%;
+  }
+
+  .propertyLabelBox{
+    gap: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+  }
 }
 
 /* md only: 768–1023px */
