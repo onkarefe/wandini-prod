@@ -12,13 +12,15 @@ type CartSummaryProps = {
 
 export function CartSummary({ cart, layout }: CartSummaryProps) {
   const className =
-    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
+    layout === 'page'
+      ? 'cart-summary-page custom-cart-summary custom-cart-summary-page'
+      : 'cart-summary-aside custom-cart-summary custom-cart-summary-aside';
 
   return (
     <div aria-labelledby="cart-summary" className={className}>
-      <dl className="cart-subtotal">
-        <dt>Subtotal</dt>
-        <dd>
+      <dl className="custom-cart-subtotal">
+        <dt className="custom-cart-subtotal-label">Subtotal</dt>
+        <dd className="custom-cart-subtotal-value">
           {cart?.cost?.subtotalAmount?.amount ? (
             <Money data={cart?.cost?.subtotalAmount} />
           ) : (
@@ -37,11 +39,10 @@ function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
   if (!checkoutUrl) return null;
 
   return (
-    <div>
-      <a href={checkoutUrl} target="_self">
-        <p>Continue to Checkout &rarr;</p>
+    <div className="custom-cart-checkout-wrap">
+      <a href={checkoutUrl} target="_self" className="custom-cart-checkout-btn">
+        Continue to Checkout <span aria-hidden="true">&rarr;</span>
       </a>
-      <br />
     </div>
   );
 }
@@ -57,16 +58,15 @@ function CartDiscounts({
       ?.map(({ code }) => code) || [];
 
   return (
-    <div>
+    <div className="custom-cart-section">
       {/* Have existing discount, display it with a remove option */}
-      <dl hidden={!codes.length}>
-        <div>
-          <dt>Discount(s)</dt>
+      <dl hidden={!codes.length} className="custom-cart-applied-list">
+        <div className="custom-cart-applied-row">
+          <dt className="custom-cart-applied-title">Discount(s)</dt>
           <UpdateDiscountForm>
-            <div className="cart-discount">
-              <code>{codes?.join(', ')}</code>
-              &nbsp;
-              <button>Remove</button>
+            <div className="custom-cart-chip-row">
+              <code className="custom-cart-chip">{codes?.join(', ')}</code>
+              <button className="custom-cart-chip-remove">Remove</button>
             </div>
           </UpdateDiscountForm>
         </div>
@@ -74,10 +74,16 @@ function CartDiscounts({
 
       {/* Show an input to apply a discount */}
       <UpdateDiscountForm discountCodes={codes}>
-        <div>
-          <input type="text" name="discountCode" placeholder="Discount code" />
-          &nbsp;
-          <button type="submit">Apply</button>
+        <div className="custom-cart-input-row">
+          <input
+            className="custom-cart-input"
+            type="text"
+            name="discountCode"
+            placeholder="Discount code"
+          />
+          <button className="custom-cart-apply-btn" type="submit">
+            Apply
+          </button>
         </div>
       </UpdateDiscountForm>
     </div>
@@ -128,19 +134,23 @@ function CartGiftCard({
   }
 
   return (
-    <div>
+    <div className="custom-cart-section">
       {/* Display applied gift cards with individual remove buttons */}
       {giftCardCodes && giftCardCodes.length > 0 && (
-        <dl>
-          <dt>Applied Gift Card(s)</dt>
+        <dl className="custom-cart-applied-list">
+          <dt className="custom-cart-applied-title">Applied Gift Card(s)</dt>
           {giftCardCodes.map((giftCard) => (
             <RemoveGiftCardForm key={giftCard.id} giftCardId={giftCard.id}>
-              <div className="cart-discount">
-                <code>***{giftCard.lastCharacters}</code>
-                &nbsp;
-                <Money data={giftCard.amountUsed} />
-                &nbsp;
-                <button type="submit">Remove</button>
+              <div className="custom-cart-chip-row">
+                <code className="custom-cart-chip">
+                  ***{giftCard.lastCharacters}
+                </code>
+                <span className="custom-cart-chip-amount">
+                  <Money data={giftCard.amountUsed} />
+                </span>
+                <button className="custom-cart-chip-remove" type="submit">
+                  Remove
+                </button>
               </div>
             </RemoveGiftCardForm>
           ))}
@@ -153,15 +163,19 @@ function CartGiftCard({
         saveAppliedCode={saveAppliedCode}
         fetcherKey="gift-card-add"
       >
-        <div>
+        <div className="custom-cart-input-row">
           <input
+            className="custom-cart-input"
             type="text"
             name="giftCardCode"
             placeholder="Gift card code"
             ref={giftCardCodeInput}
           />
-          &nbsp;
-          <button type="submit" disabled={giftCardAddFetcher.state !== 'idle'}>
+          <button
+            className="custom-cart-apply-btn"
+            type="submit"
+            disabled={giftCardAddFetcher.state !== 'idle'}
+          >
             Apply
           </button>
         </div>

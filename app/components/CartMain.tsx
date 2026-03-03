@@ -20,12 +20,15 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   // The useOptimisticCart hook applies pending actions to the cart
   // so the user immediately sees feedback when they modify the cart.
   const cart = useOptimisticCart(originalCart);
+  const {close} = useAside();
 
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const withDiscount =
     cart &&
     Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
-  const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
+  const className = `cart-main ${withDiscount ? 'with-discount' : ''} ${
+    layout === 'aside' ? 'cart-main-aside' : ''
+  }`;
   const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
 
   return (
@@ -39,8 +42,22 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
             ))}
           </ul>
         </div>
-        {cartHasItems && <CartSummary cart={cart} layout={layout} />}
+        {cartHasItems && layout !== 'aside' && (
+          <CartSummary cart={cart} layout={layout} />
+        )}
       </div>
+      {cartHasItems && layout === 'aside' && (
+        <div className="aside-cart-footer">
+          <Link
+            to="/cart"
+            onClick={close}
+            prefetch="intent"
+            className="aside-go-cart-btn"
+          >
+            Go to cart
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
