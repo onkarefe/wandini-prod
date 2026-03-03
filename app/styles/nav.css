@@ -796,7 +796,7 @@ aside header .close {
 .cart-main.cart-main-aside {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - var(--header-height) - 32px);
+  height: calc(100vh - var(--header-height) + 32px);
   max-height: none;
   overflow: hidden;
 }

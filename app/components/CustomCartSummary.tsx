@@ -75,15 +75,17 @@ function CartDiscounts({
       {/* Show an input to apply a discount */}
       <UpdateDiscountForm discountCodes={codes}>
         <div className="custom-cart-input-row">
-          <input
-            className="custom-cart-input"
-            type="text"
-            name="discountCode"
-            placeholder="Discount code"
-          />
-          <button className="custom-cart-apply-btn" type="submit">
-            Apply
-          </button>
+          <div className="custom-cart-input-wrap">
+            <input
+              className="custom-cart-input"
+              type="text"
+              name="discountCode"
+              placeholder="Discount code"
+            />
+            <button className="custom-cart-apply-btn" type="submit">
+              Apply
+            </button>
+          </div>
         </div>
       </UpdateDiscountForm>
     </div>
@@ -164,20 +166,22 @@ function CartGiftCard({
         fetcherKey="gift-card-add"
       >
         <div className="custom-cart-input-row">
-          <input
-            className="custom-cart-input"
-            type="text"
-            name="giftCardCode"
-            placeholder="Gift card code"
-            ref={giftCardCodeInput}
-          />
-          <button
-            className="custom-cart-apply-btn"
-            type="submit"
-            disabled={giftCardAddFetcher.state !== 'idle'}
-          >
-            Apply
-          </button>
+          <div className="custom-cart-input-wrap">
+            <input
+              className="custom-cart-input"
+              type="text"
+              name="giftCardCode"
+              placeholder="Gift card code"
+              ref={giftCardCodeInput}
+            />
+            <button
+              className="custom-cart-apply-btn"
+              type="submit"
+              disabled={giftCardAddFetcher.state !== 'idle'}
+            >
+              Apply
+            </button>
+          </div>
         </div>
       </UpdateGiftCardForm>
     </div>
