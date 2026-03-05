@@ -322,18 +322,19 @@ export default function Product() {
 
   const configuratorPayload = crop
     ? {
-        version: 1,
-        master_asset_id: product.masterAssetId?.value ?? '',
+        version: 1, // Payload schema version
+        master_asset_id: product.masterAssetId?.value ?? '', // Shopify metafield: source/master design asset id
         output: {
-          unit: 'mm',
-          width: Math.round(size.width * 10),
-          height: Math.round(size.height * 10),
+          unit: 'mm', // Output dimension unit
+          width: Math.round(size.width * 10), // Final print width in mm
+          height: Math.round(size.height * 10), // Final print height in mm
         },
+        // Panel count/width should be calculated in backend from output + recipe rules.
         crop_ratio: {
-          x: crop.x,
-          y: crop.y,
-          w: crop.w,
-          h: crop.h,
+          x: crop.x, // Crop start X (0..1, relative to source image)
+          y: crop.y, // Crop start Y (0..1, relative to source image)
+          w: crop.w, // Crop width (0..1, relative to source image)
+          h: crop.h, // Crop height (0..1, relative to source image)
         },
       }
     : null;

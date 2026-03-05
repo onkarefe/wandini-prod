@@ -124,7 +124,6 @@ export function ConfiguratorModal({
                 width={widthCm}
                 height={heightCm}
                 onCropChange={onCropChange}
-                onPreviewClick={() => setIsPreviewOpen(true)}
               />
             </div>
 

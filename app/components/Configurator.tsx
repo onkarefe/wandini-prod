@@ -18,9 +18,6 @@ type ConfiguratorProps = {
   onCropChange?: (crop: { x: number; y: number; w: number; h: number } | null) => void;
   /** Preview için yüklenen img referansı (opsiyonel) */
   onImageReady?: (img: HTMLImageElement | null) => void;
-  /** Preview için yüklenen img referansı (opsiyonel) */
-  /** Live preview butonuna tıklandığında tetiklenecek callback (opsiyonel) */
-  onPreviewClick?: () => void;
 };
 
 type Selection = {
@@ -29,6 +26,8 @@ type Selection = {
   w: number;
   h: number;
 };
+
+const MAX_PANEL_CM = 70;
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(Math.max(v, min), max);
@@ -39,7 +38,6 @@ export function Configurator({
   height: realHcm,
   onCropChange,
   onImageReady,
-  onPreviewClick,
 }: ConfiguratorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -361,13 +359,13 @@ export function Configurator({
       height: `${h}px`,
     };
 
-    // 50 cm grid
+    // Panel grid: max 70 cm, equal slices
     const gridLines: React.ReactNode[] = [];
     const Wcm = Math.max(1, realWcm || 1);
-    const stepX = (120 / Wcm) * w; // 50 cm başına px
-    const vCount = Math.floor(Wcm / 120);
+    const panelCount = Math.max(1, Math.ceil(Wcm / MAX_PANEL_CM));
+    const stepX = w / panelCount;
 
-    for (let k = 1; k < vCount; k++) {
+    for (let k = 1; k < panelCount; k++) {
       const lx = Math.round(k * stepX);
       gridLines.push(
         <div

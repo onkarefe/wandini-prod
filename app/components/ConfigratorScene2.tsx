@@ -31,21 +31,24 @@ type SliceItem = {
   dataUrl: string;
 };
 
+const MAX_PANEL_CM = 70;
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-function buildCmSlices(totalWidthCm: number, maxSliceCm = 120): number[] {
-  const widths: number[] = [];
-  let remaining = Math.max(0, totalWidthCm);
+function buildEqualCmSlices(totalWidthCm: number, maxSliceCm = MAX_PANEL_CM): number[] {
+  const safeWidth = Math.max(0, totalWidthCm);
+  if (safeWidth <= 0) return [];
 
-  while (remaining > 0) {
-    const current = Math.min(maxSliceCm, remaining);
-    widths.push(Number(current.toFixed(2)));
-    remaining = Number((remaining - current).toFixed(2));
-  }
+  const panelCount = Math.max(1, Math.ceil(safeWidth / maxSliceCm));
+  const panelWidth = safeWidth / panelCount;
 
-  return widths;
+  return Array.from({ length: panelCount }, () => panelWidth);
+}
+
+function formatCm(value: number): string {
+  return value.toFixed(1).replace(/\.0$/, '');
 }
 
 async function createCroppedSlices(
@@ -58,106 +61,111 @@ async function createCroppedSlices(
     img.crossOrigin = 'anonymous';
 
     img.onload = () => {
-      const naturalW = img.naturalWidth || 0;
-      const naturalH = img.naturalHeight || 0;
-      if (!naturalW || !naturalH || totalWidthCm <= 0) {
-        resolve([]);
-        return;
-      }
+      try {
+        const naturalW = img.naturalWidth || 0;
+        const naturalH = img.naturalHeight || 0;
+        if (!naturalW || !naturalH || totalWidthCm <= 0) {
+          resolve([]);
+          return;
+        }
 
-      const isRatioCrop =
-        crop.x >= 0 &&
-        crop.y >= 0 &&
-        crop.w > 0 &&
-        crop.h > 0 &&
-        crop.x <= 1 &&
-        crop.y <= 1 &&
-        crop.w <= 1 &&
-        crop.h <= 1;
+        const isRatioCrop =
+          crop.x >= 0 &&
+          crop.y >= 0 &&
+          crop.w > 0 &&
+          crop.h > 0 &&
+          crop.x <= 1 &&
+          crop.y <= 1 &&
+          crop.w <= 1 &&
+          crop.h <= 1;
 
-      const pxCrop = isRatioCrop
-        ? {
-            x: Math.round(crop.x * naturalW),
-            y: Math.round(crop.y * naturalH),
-            w: Math.round(crop.w * naturalW),
-            h: Math.round(crop.h * naturalH),
+        const pxCrop = isRatioCrop
+          ? {
+              x: Math.round(crop.x * naturalW),
+              y: Math.round(crop.y * naturalH),
+              w: Math.round(crop.w * naturalW),
+              h: Math.round(crop.h * naturalH),
+            }
+          : {
+              x: Math.round(crop.x),
+              y: Math.round(crop.y),
+              w: Math.round(crop.w),
+              h: Math.round(crop.h),
+            };
+
+        const safeW = Math.max(1, pxCrop.w || 0);
+        const safeH = Math.max(1, pxCrop.h || 0);
+        const safeX = Math.max(0, Math.min(pxCrop.x || 0, Math.max(0, naturalW - safeW)));
+        const safeY = Math.max(0, Math.min(pxCrop.y || 0, Math.max(0, naturalH - safeH)));
+
+        const cmSlices = buildEqualCmSlices(totalWidthCm, MAX_PANEL_CM);
+        if (!cmSlices.length) {
+          resolve([]);
+          return;
+        }
+
+        const pxSlices: number[] = [];
+        let remainingPx = safeW;
+        for (let i = 0; i < cmSlices.length; i++) {
+          const last = i === cmSlices.length - 1;
+          if (last) {
+            pxSlices.push(Math.max(1, remainingPx));
+            break;
           }
-        : {
-            x: Math.round(crop.x),
-            y: Math.round(crop.y),
-            w: Math.round(crop.w),
-            h: Math.round(crop.h),
-          };
 
-      const safeW = Math.max(1, pxCrop.w || 0);
-      const safeH = Math.max(1, pxCrop.h || 0);
-      const safeX = Math.max(0, Math.min(pxCrop.x || 0, Math.max(0, naturalW - safeW)));
-      const safeY = Math.max(0, Math.min(pxCrop.y || 0, Math.max(0, naturalH - safeH)));
+          const remainingPieces = cmSlices.length - i;
+          const minReservedForRest = remainingPieces - 1;
+          const maxThis = Math.max(1, remainingPx - minReservedForRest);
+          const estimated = Math.round((safeW * cmSlices[i]) / totalWidthCm);
+          const currentPx = clamp(estimated, 1, maxThis);
+          pxSlices.push(currentPx);
+          remainingPx -= currentPx;
+        }
 
-      const cmSlices = buildCmSlices(totalWidthCm, 120);
-      if (!cmSlices.length) {
+        const items: SliceItem[] = [];
+        let offsetX = safeX;
+
+        for (let i = 0; i < cmSlices.length; i++) {
+          const panelW = Math.max(1, pxSlices[i] || 1);
+          const canvas = document.createElement('canvas');
+          canvas.width = panelW;
+          canvas.height = safeH;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) continue;
+
+          ctx.drawImage(
+            img,
+            offsetX,
+            safeY,
+            panelW,
+            safeH,
+            0,
+            0,
+            panelW,
+            safeH,
+          );
+
+          let dataUrl = '';
+          try {
+            dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+          } catch {
+            dataUrl = '';
+          }
+          if (!dataUrl) continue;
+
+          items.push({
+            index: i + 1,
+            widthCm: cmSlices[i],
+            dataUrl,
+          });
+
+          offsetX += panelW;
+        }
+
+        resolve(items);
+      } catch {
         resolve([]);
-        return;
       }
-
-      const pxSlices: number[] = [];
-      let remainingPx = safeW;
-      for (let i = 0; i < cmSlices.length; i++) {
-        const last = i === cmSlices.length - 1;
-        if (last) {
-          pxSlices.push(Math.max(1, remainingPx));
-          break;
-        }
-
-        const remainingPieces = cmSlices.length - i;
-        const minReservedForRest = remainingPieces - 1;
-        const maxThis = Math.max(1, remainingPx - minReservedForRest);
-        const estimated = Math.round((safeW * cmSlices[i]) / totalWidthCm);
-        const currentPx = clamp(estimated, 1, maxThis);
-        pxSlices.push(currentPx);
-        remainingPx -= currentPx;
-      }
-
-      const items: SliceItem[] = [];
-      let offsetX = safeX;
-
-      for (let i = 0; i < cmSlices.length; i++) {
-        const panelW = Math.max(1, pxSlices[i] || 1);
-        const canvas = document.createElement('canvas');
-        canvas.width = panelW;
-        canvas.height = safeH;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) continue;
-
-        ctx.drawImage(
-          img,
-          offsetX,
-          safeY,
-          panelW,
-          safeH,
-          0,
-          0,
-          panelW,
-          safeH,
-        );
-
-        let dataUrl = '';
-        try {
-          dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-        } catch {
-          dataUrl = canvas.toDataURL();
-        }
-
-        items.push({
-          index: i + 1,
-          widthCm: cmSlices[i],
-          dataUrl,
-        });
-
-        offsetX += panelW;
-      }
-
-      resolve(items);
     };
 
     img.onerror = () => resolve([]);
@@ -184,7 +192,7 @@ export function ConfigratorScene2({
   const [error, setError] = useState<string | null>(null);
 
   const widthsPreview = useMemo(
-    () => buildCmSlices(Math.max(0, widthCm), 120),
+    () => buildEqualCmSlices(Math.max(0, widthCm), MAX_PANEL_CM),
     [widthCm],
   );
 
@@ -253,7 +261,7 @@ export function ConfigratorScene2({
                     className="cs2-slice-image"
                   />
                   <div className="cs2-slice-label">
-                    {slice.index} - {slice.widthCm} cm
+                    {slice.index} - {formatCm(slice.widthCm)} cm
                   </div>
                 </div>
               ))}
@@ -276,7 +284,7 @@ export function ConfigratorScene2({
               <div className="cs2-sidebar-section cs2-sidebar-section--compact">
                 <div className="cs2-sidebar-label">Panel Count</div>
                 <div className="cs2-sidebar-value">
-                  {widthsPreview.length || slices.length}
+                  {error ? '-' : (slices.length || widthsPreview.length)}
                 </div>
               </div>
             </div>

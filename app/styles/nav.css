@@ -814,6 +814,46 @@ aside header .close {
   background: #ffffff;
 }
 
+.emptyCartAside{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  gap: 16px;
+}
+
+.emptyCartAside svg{
+  fill: #ebebeb;
+  display: block;
+  height: 70px;
+  width: 70px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #ff3b30;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.emptyCartAside p{
+  text-align: center;
+}
+
+.asideShoping{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 8px;
+  margin-top: 16px;
+  background-color: #fc2c21;
+  color: white;
+  transition: all .3s;
+}
+
+.asideShoping:hover{
+  background-color: #fd1e13;
+}
+
 /* xs ve sm */
 @media (max-width: 767.98px) {
   /* header */

@@ -53,7 +53,7 @@ function CartEmpty({
         <div hidden={hidden}>
             <br />
             <p>
-                Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
+                efe Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
                 started!
             </p>
             <br />
