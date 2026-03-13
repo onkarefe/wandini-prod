@@ -1,13 +1,41 @@
-import {Link, useLoaderData} from 'react-router';
-import type {Route} from './+types/blogs._index';
-import {getPaginationVariables} from '@shopify/hydrogen';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import type {BlogsQuery} from 'storefrontapi.generated';
+import { Link, useLoaderData } from 'react-router';
+import type { Route } from './+types/blogs._index';
+import { Image, getPaginationVariables } from '@shopify/hydrogen';
+import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
+import type { BlogsQuery } from 'storefrontapi.generated';
+import blogMainStyles from '~/styles/blogMain.css?url';
 
-type BlogNode = BlogsQuery['blogs']['nodes'][0];
+type BlogNode = BlogsQuery['blogs']['nodes'][0] & {
+  blogCategoryDescription?: {
+    value?: string | null;
+  } | null;
+  blogCategoryImage?: {
+    reference?: {
+      image?: {
+        url: string;
+        altText?: string | null;
+        width?: number | null;
+        height?: number | null;
+      } | null;
+    } | null;
+  } | null;
+};
+
+type BlogListingField = {
+  key: string;
+  value?: string | null;
+};
+
+type BlogListingMetaobject = {
+  fields?: BlogListingField[] | null;
+};
+
+export function links() {
+  return [{ rel: 'stylesheet', href: blogMainStyles }];
+}
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Blogs`}];
+  return [{ title: `Hydrogen | Blogs` }];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -17,19 +45,19 @@ export async function loader(args: Route.LoaderArgs) {
   // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
-  return {...deferredData, ...criticalData};
+  return { ...deferredData, ...criticalData };
 }
 
 /**
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
-async function loadCriticalData({context, request}: Route.LoaderArgs) {
+async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 10,
   });
 
-  const [{blogs}] = await Promise.all([
+  const [{ blogs, blogListingContent }] = await Promise.all([
     context.storefront.query(BLOGS_QUERY, {
       variables: {
         ...paginationVariables,
@@ -38,7 +66,7 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  return {blogs};
+  return { blogs, blogListingContent };
 }
 
 /**
@@ -46,31 +74,71 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
  * fetched after the initial page load. If it's unavailable, the page should still 200.
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
-function loadDeferredData({context}: Route.LoaderArgs) {
+function loadDeferredData({ context }: Route.LoaderArgs) {
   return {};
 }
 
 export default function Blogs() {
-  const {blogs} = useLoaderData<typeof loader>();
+  const { blogs, blogListingContent } = useLoaderData<typeof loader>();
+  const heroFields = (blogListingContent?.nodes?.[0] as BlogListingMetaobject | undefined)
+    ?.fields;
+
+  const getFieldValue = (...keys: string[]) =>
+    heroFields?.find((field) => keys.includes(field.key))?.value ?? '';
+
+  const kicker = getFieldValue('label');
+  const title = getFieldValue('title', 'main_title');
+  const intro = getFieldValue('subtitle', 'sub_title');
 
   return (
-    <div className="blogs">
-      <h1>Blogs</h1>
-      <div className="blogs-grid">
-        <PaginatedResourceSection<BlogNode> connection={blogs}>
-          {({node: blog}) => (
-            <Link
-              className="blog"
-              key={blog.handle}
-              prefetch="intent"
-              to={`/blogs/${blog.handle}`}
-            >
-              <h2>{blog.title}</h2>
-            </Link>
-          )}
-        </PaginatedResourceSection>
-      </div>
-    </div>
+    <main className="blogs-page">
+      <section className="blogs-hero">
+        <div className="container mx-auto">
+          {kicker ? <p className="blogs-kicker">{kicker}</p> : null}
+          {title ? <h1 className="blogs-title">{title}</h1> : null}
+          {intro ? <p className="blogs-intro">{intro}</p> : null}
+        </div>
+      </section>
+
+      <section className="blogs-grid-section" aria-label="Blog listesi">
+        <div className="container mx-auto">
+          <PaginatedResourceSection<BlogNode> connection={blogs}>
+            {({ node: blog, index }) => (
+              <Link
+                className={`blog-card ${index === 0 ? 'blog-card--featured' : ''}`}
+                key={blog.handle}
+                prefetch="intent"
+                to={`/blogs/${blog.handle}`}
+              >
+                {blog.blogCategoryImage?.reference?.image ? (
+                  <div className="blog-card__media">
+                    <Image
+                      data={blog.blogCategoryImage.reference.image}
+                      alt={
+                        blog.blogCategoryImage.reference.image.altText ||
+                        blog.title
+                      }
+                      className="blog-card__image"
+                      sizes={index === 0 ? '100vw' : '(min-width: 960px) 50vw, 100vw'}
+                    />
+                  </div>
+                ) : null}
+                <div className="blog-card__content">
+                  <p className="blog-card__eyebrow">Blog</p>
+                  <h2 className="blog-card__title">{blog.title}</h2>
+                  <p className="blog-card__excerpt">
+                    {blog.blogCategoryDescription?.value || blog.seo?.description || ''}
+                  </p>
+                  <div className="blog-card__footer">
+                    <span className="blog-card__link">Explore articles</span>
+                  </div>
+                </div>
+              </Link>
+            )}
+          </PaginatedResourceSection>
+        </div>
+      </section>
+    </main>
   );
 }
 
@@ -102,6 +170,31 @@ const BLOGS_QUERY = `#graphql
         seo {
           title
           description
+        }
+        blogCategoryDescription: metafield(namespace: "custom", key: "blog_category_description") {
+          value
+        }
+        blogCategoryImage: metafield(namespace: "custom", key: "blog_category_image") {
+          reference {
+            ... on MediaImage {
+              image {
+                url
+                altText
+                width
+                height
+              }
+            }
+          }
+        }
+      }
+    }
+    blogListingContent: metaobjects(first: 1, type: "blog_listing_data") {
+      nodes {
+        ... on Metaobject {
+          fields {
+            key
+            value
+          }
         }
       }
     }

@@ -637,8 +637,21 @@ export type BlogsQuery = {
         seo?: StorefrontAPI.Maybe<
           Pick<StorefrontAPI.Seo, 'title' | 'description'>
         >;
+        articles: {nodes: Array<Pick<StorefrontAPI.Article, 'excerpt'>>};
+        blogCategoryImage?: StorefrontAPI.Maybe<{
+          reference?: StorefrontAPI.Maybe<{
+            image?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
+            >;
+          }>;
+        }>;
       }
     >;
+  };
+  blogListingContent: {
+    nodes: Array<{
+      fields: Array<Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'>>;
+    }>;
   };
 };
 
@@ -1615,7 +1628,7 @@ interface GeneratedQueryTypes {
     return: BlogQuery;
     variables: BlogQueryVariables;
   };
-  '#graphql\n  query Blogs(\n    $country: CountryCode\n    $endCursor: String\n    $first: Int\n    $language: LanguageCode\n    $last: Int\n    $startCursor: String\n  ) @inContext(country: $country, language: $language) {\n    blogs(\n      first: $first,\n      last: $last,\n      before: $startCursor,\n      after: $endCursor\n    ) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n        startCursor\n        endCursor\n      }\n      nodes {\n        title\n        handle\n        seo {\n          title\n          description\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query Blogs(\n    $country: CountryCode\n    $endCursor: String\n    $first: Int\n    $language: LanguageCode\n    $last: Int\n    $startCursor: String\n  ) @inContext(country: $country, language: $language) {\n    blogs(\n      first: $first,\n      last: $last,\n      before: $startCursor,\n      after: $endCursor\n    ) {\n      pageInfo {\n        hasNextPage\n        hasPreviousPage\n        startCursor\n        endCursor\n      }\n      nodes {\n        title\n        handle\n        seo {\n          title\n          description\n        }\n        articles(first: 1) {\n          nodes {\n            excerpt\n          }\n        }\n        blogCategoryImage: metafield(namespace: "custom", key: "blog_category_image") {\n          reference {\n            ... on MediaImage {\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n          }\n        }\n      }\n    }\n    blogListingContent: metaobjects(first: 1, type: "blog_listing_data") {\n      nodes {\n        ... on Metaobject {\n          fields {\n            key\n            value\n          }\n        }\n      }\n    }\n  }\n': {
     return: BlogsQuery;
     variables: BlogsQueryVariables;
   };

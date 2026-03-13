@@ -4,6 +4,15 @@ import {Image, getPaginationVariables} from '@shopify/hydrogen';
 import type {ArticleItemFragment} from 'storefrontapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import blogHandleStyles from '~/styles/blogHandle.css?url';
+
+export function links() {
+  return [{rel: 'stylesheet', href: blogHandleStyles}];
+}
+
+type BlogArticle = ArticleItemFragment & {
+  excerpt?: string | null;
+};
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [{title: `Hydrogen | ${data?.blog.title ?? ''} blog`}];
@@ -65,18 +74,35 @@ export default function Blog() {
   const {articles} = blog;
 
   return (
-    <div className="blog">
-      <h1>{blog.title}</h1>
-      <div className="blog-grid">
-        <PaginatedResourceSection<ArticleItemFragment> connection={articles}>
-          {({node: article, index}) => (
-            <ArticleItem
-              article={article}
-              key={article.id}
-              loading={index < 2 ? 'eager' : 'lazy'}
-            />
-          )}
-        </PaginatedResourceSection>
+    <div className="blog-handle-page">
+      <div className="blog-handle-hero">
+        <div className="container mx-auto">
+          <p className="blog-handle-hero__eyebrow">Category Archive</p>
+          <h1 className="blog-handle-hero__title">{blog.title}</h1>
+          {blog.seo?.description ? (
+            <p className="blog-handle-hero__intro">{blog.seo.description}</p>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="blog-handle-feed" aria-label={`${blog.title} articles`}>
+        <div className="container mx-auto">
+          <div className="blog-handle-feed__header">
+            <p className="blog-handle-feed__eyebrow">All Articles</p>
+          </div>
+          <PaginatedResourceSection<ArticleItemFragment>
+            connection={articles}
+            resourcesClassName="blog-handle-feed__list"
+          >
+            {({node: article, index}) => (
+              <ArticleItem
+                article={article as BlogArticle}
+                key={article.id}
+                loading={index < 4 ? 'eager' : 'lazy'}
+              />
+            )}
+          </PaginatedResourceSection>
+        </div>
       </div>
     </div>
   );
@@ -86,7 +112,7 @@ function ArticleItem({
   article,
   loading,
 }: {
-  article: ArticleItemFragment;
+  article: BlogArticle;
   loading?: HTMLImageElement['loading'];
 }) {
   const publishedAt = new Intl.DateTimeFormat('en-US', {
@@ -96,7 +122,10 @@ function ArticleItem({
   }).format(new Date(article.publishedAt!));
   return (
     <div className="blog-article" key={article.id}>
-      <Link to={`/blogs/${article.blog.handle}/${article.handle}`}>
+      <Link
+        className="blog-article__link"
+        to={`/blogs/${article.blog.handle}/${article.handle}`}
+      >
         {article.image && (
           <div className="blog-article-image">
             <Image
@@ -108,8 +137,17 @@ function ArticleItem({
             />
           </div>
         )}
-        <h3>{article.title}</h3>
-        <small>{publishedAt}</small>
+        <div className="blog-article__content">
+          <p className="blog-article__eyebrow">Article</p>
+          <h2 className="blog-article__title">{article.title}</h2>
+          {article.excerpt ? (
+            <p className="blog-article__excerpt">{article.excerpt}</p>
+          ) : null}
+          <div className="blog-article__footer">
+            <small className="blog-article__date">{publishedAt}</small>
+            <span className="blog-article__cta">Read article</span>
+          </div>
+        </div>
       </Link>
     </div>
   );
@@ -157,6 +195,7 @@ const BLOGS_QUERY = `#graphql
       name
     }
     contentHtml
+    excerpt
     handle
     id
     image {

@@ -1,7 +1,27 @@
-import {useLoaderData} from 'react-router';
+import {Link, useLoaderData} from 'react-router';
 import type {Route} from './+types/blogs.$blogHandle.$articleHandle';
 import {Image} from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import blogDetailStyles from '~/styles/blogDetail.css?url';
+
+export function links() {
+  return [{rel: 'stylesheet', href: blogDetailStyles}];
+}
+
+type RelatedArticle = {
+  id: string;
+  handle: string;
+  title: string;
+  excerpt?: string | null;
+  publishedAt: string;
+  image?: {
+    id: string;
+    altText?: string | null;
+    url: string;
+    width?: number | null;
+    height?: number | null;
+  } | null;
+};
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [{title: `Hydrogen | ${data?.article.title ?? ''} article`}];
@@ -52,8 +72,10 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   );
 
   const article = blog.articleByHandle;
+  const relatedArticles =
+    blog.articles?.nodes?.filter((item: RelatedArticle) => item.handle !== articleHandle) ?? [];
 
-  return {article};
+  return {article, relatedArticles, blogHandle, blogTitle: blog.title};
 }
 
 /**
@@ -66,7 +88,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 }
 
 export default function Article() {
-  const {article} = useLoaderData<typeof loader>();
+  const {article, relatedArticles, blogHandle, blogTitle} = useLoaderData<typeof loader>();
   const {title, image, contentHtml, author} = article;
 
   const publishedDate = new Intl.DateTimeFormat('en-US', {
@@ -76,20 +98,81 @@ export default function Article() {
   }).format(new Date(article.publishedAt));
 
   return (
-    <div className="article">
-      <h1>
-        {title}
-        <div>
-          <time dateTime={article.publishedAt}>{publishedDate}</time> &middot;{' '}
-          <address>{author?.name}</address>
+    <div className="blog-detail-page">
+      <div className="container mx-auto">
+        <div className="blog-detail-header-wrap">
+          <div className="blog-detail-header">
+            <p className="blog-detail-kicker">{blogTitle}</p>
+            <h1 className="blog-detail-title">{title}</h1>
+            <div className="blog-detail-meta">
+              <time dateTime={article.publishedAt}>{publishedDate}</time>
+              {author?.name ? <span>{author.name}</span> : null}
+            </div>
+          </div>
         </div>
-      </h1>
 
-      {image && <Image data={image} sizes="90vw" loading="eager" />}
-      <div
-        dangerouslySetInnerHTML={{__html: contentHtml}}
-        className="article"
-      />
+        <div className="blog-detail-shell">
+          <div className="blog-detail-main">
+          {image ? (
+            <div className="blog-detail-hero-media">
+              <Image data={image} sizes="(min-width: 1200px) 60vw, 100vw" loading="eager" />
+            </div>
+          ) : null}
+
+          <div
+            dangerouslySetInnerHTML={{__html: contentHtml}}
+            className="blog-detail-body"
+          />
+          </div>
+
+          <div className="blog-detail-sidebar">
+            <div className="blog-detail-sidebar__inner">
+              <p className="blog-detail-sidebar__eyebrow">More In This Category</p>
+              <div className="blog-detail-sidebar__list">
+                {relatedArticles.map((relatedArticle: RelatedArticle) => {
+                  const relatedDate = new Intl.DateTimeFormat('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  }).format(new Date(relatedArticle.publishedAt));
+
+                  return (
+                    <div className="blog-detail-related-card" key={relatedArticle.id}>
+                      <Link
+                        className="blog-detail-related-card__link"
+                        to={`/blogs/${blogHandle}/${relatedArticle.handle}`}
+                      >
+                        {relatedArticle.image ? (
+                          <div className="blog-detail-related-card__media">
+                            <Image
+                              alt={relatedArticle.image.altText || relatedArticle.title}
+                              data={relatedArticle.image}
+                              sizes="120px"
+                            />
+                          </div>
+                        ) : null}
+                        <div className="blog-detail-related-card__content">
+                          <p className="blog-detail-related-card__title">
+                            {relatedArticle.title}
+                          </p>
+                          {relatedArticle.excerpt ? (
+                            <p className="blog-detail-related-card__excerpt">
+                              {relatedArticle.excerpt}
+                            </p>
+                          ) : null}
+                          <span className="blog-detail-related-card__date">
+                            {relatedDate}
+                          </span>
+                        </div>
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -103,6 +186,7 @@ const ARTICLE_QUERY = `#graphql
     $language: LanguageCode
   ) @inContext(language: $language, country: $country) {
     blog(handle: $blogHandle) {
+      title
       handle
       articleByHandle(handle: $articleHandle) {
         handle
@@ -122,6 +206,22 @@ const ARTICLE_QUERY = `#graphql
         seo {
           description
           title
+        }
+      }
+      articles(first: 12) {
+        nodes {
+          id
+          handle
+          title
+          excerpt
+          publishedAt
+          image {
+            id
+            altText
+            url
+            width
+            height
+          }
         }
       }
     }
