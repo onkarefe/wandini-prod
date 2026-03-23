@@ -8,10 +8,10 @@
   --account-accent: #1f1a17;
   --account-success-bg: #edf7f0;
   --account-success-text: #24613a;
-  --account-shadow: 0 18px 44px rgba(31, 26, 23, 0.08);
-  --account-radius-lg: 24px;
-  --account-radius-md: 16px;
-  --account-radius-sm: 12px;
+  --account-shadow: 0 10px 30px rgba(31, 26, 23, 0.05);
+  --account-radius-lg: 8px;
+  --account-radius-md: 8px;
+  --account-radius-sm: 8px;
   --account-container: 1120px;
 }
 
@@ -58,8 +58,8 @@
   gap: 12px;
   padding: 8px;
   border: 1px solid var(--account-border);
-  border-radius: 999px;
-  background: var(--account-surface-soft);
+  border-radius: var(--account-radius-lg);
+  background: #fbfaf8;
 }
 
 .account-tabs__link {
@@ -68,7 +68,7 @@
   justify-content: center;
   min-height: 44px;
   padding: 0 18px;
-  border-radius: 999px;
+  border-radius: var(--account-radius-sm);
   color: var(--account-text-muted);
   text-decoration: none;
   font-size: 15px;
@@ -122,9 +122,7 @@
 }
 
 .account-orders__section--filters {
-  background:
-    linear-gradient(180deg, rgba(247, 243, 238, 0.9), rgba(255, 255, 255, 0.96)),
-    var(--account-surface);
+  background: #fcfbf9;
 }
 
 .account-orders__section-head {
@@ -155,7 +153,7 @@
   margin: 0;
   padding: 10px 14px;
   border: 1px solid var(--account-border);
-  border-radius: 999px;
+  border-radius: var(--account-radius-sm);
   font-size: 14px;
   color: var(--account-text-muted);
   background: var(--account-surface-soft);
@@ -218,7 +216,7 @@
 .account-orders__button {
   min-height: 48px;
   padding: 0 18px;
-  border-radius: 999px;
+  border-radius: var(--account-radius-sm);
   border: 1px solid transparent;
   font: inherit;
   font-weight: 600;
@@ -264,7 +262,8 @@
   padding: 24px;
   border: 1px solid var(--account-border);
   border-radius: var(--account-radius-md);
-  background: linear-gradient(180deg, #fff 0%, #fdfbf8 100%);
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(31, 26, 23, 0.03);
 }
 
 .account-orders__card + .account-orders__card {
@@ -344,7 +343,7 @@
   justify-content: center;
   min-height: 32px;
   padding: 0 12px;
-  border-radius: 999px;
+  border-radius: var(--account-radius-sm);
   border: 1px solid var(--account-border);
   background: var(--account-surface-soft);
   color: var(--account-text);
@@ -371,7 +370,7 @@
   justify-content: center;
   min-height: 44px;
   padding: 0 16px;
-  border-radius: 999px;
+  border-radius: var(--account-radius-sm);
   border: 1px solid var(--account-border);
   background: var(--account-surface);
   color: var(--account-text);
