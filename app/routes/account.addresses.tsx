@@ -11,7 +11,7 @@ import {
   useOutletContext,
   type Fetcher,
 } from 'react-router';
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 import type {Route} from './+types/account.addresses';
 import {
   UPDATE_ADDRESS_MUTATION,
@@ -333,6 +333,7 @@ function NewAddressForm() {
       addressId={'NEW_ADDRESS_ID'}
       address={newAddress}
       defaultAddress={null}
+      primaryMethod="POST"
     >
       {({stateForMethod}) => (
         <div className="account-addresses__actions">
@@ -362,6 +363,8 @@ function ExistingAddresses({
           addressId={address.id}
           address={address}
           defaultAddress={defaultAddress}
+          primaryMethod="PUT"
+          autoSubmitDefault
         >
           {({stateForMethod}) => (
             <div className="account-addresses__actions">
@@ -393,11 +396,15 @@ export function AddressForm({
   addressId,
   address,
   defaultAddress,
+  primaryMethod,
+  autoSubmitDefault = false,
   children,
 }: {
   addressId: AddressFragment['id'];
   address: CustomerAddressInput;
   defaultAddress: CustomerFragment['defaultAddress'];
+  primaryMethod: 'PUT' | 'POST';
+  autoSubmitDefault?: boolean;
   children: (props: {
     stateForMethod: (method: 'PUT' | 'POST' | 'DELETE') => Fetcher['state'];
   }) => React.ReactNode;
@@ -407,6 +414,7 @@ export function AddressForm({
   const error = action?.error?.[addressId];
   const isDefaultAddress = defaultAddress?.id === addressId;
   const idPrefix = String(addressId).replace(/[^a-zA-Z0-9_-]/g, '_');
+  const autoSubmitRef = useRef<HTMLButtonElement>(null);
   const cardClassName = [
     'account-addresses__block',
     'account-addresses__block--card',
@@ -600,6 +608,11 @@ export function AddressForm({
               defaultChecked={isDefaultAddress}
               id={`${idPrefix}-defaultAddress`}
               name="defaultAddress"
+              onChange={() => {
+                if (autoSubmitDefault) {
+                  autoSubmitRef.current?.click();
+                }
+              }}
               type="checkbox"
             />
             <label
@@ -619,6 +632,15 @@ export function AddressForm({
           {children({
             stateForMethod: (method) => (formMethod === method ? state : 'idle'),
           })}
+          <button
+            ref={autoSubmitRef}
+            className="account-addresses__auto-submit"
+            formMethod={primaryMethod}
+            tabIndex={-1}
+            type="submit"
+          >
+            Auto submit
+          </button>
         </div>
       </fieldset>
     </Form>

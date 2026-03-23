@@ -601,9 +601,9 @@
 }
 
 .account-addresses__block--card.is-default {
-  border-color: #b8d8be;
-  background: linear-gradient(180deg, #f5fbf6 0%, #ffffff 100%);
-  box-shadow: 0 8px 22px rgba(78, 128, 92, 0.08);
+  border-color: #b9d8c0;
+  background: #f3faf4;
+  box-shadow: 0 8px 22px rgba(78, 128, 92, 0.06);
 }
 
 .account-addresses__legend {
@@ -642,9 +642,9 @@
   gap: 8px;
   min-height: 34px;
   padding: 0 12px;
-  border: 1px solid #b8d8be;
+  border: 1px solid #b9d8c0;
   border-radius: var(--account-radius-sm);
-  background: #edf7f0;
+  background: #e9f6eb;
   color: #24613a;
   font-size: 13px;
   font-weight: 600;
@@ -657,7 +657,7 @@
   width: 18px;
   height: 18px;
   border-radius: 999px;
-  background: #24613a;
+  background: #2f7a45;
   color: #fff;
   font-size: 12px;
   line-height: 1;
@@ -780,4 +780,168 @@
 
 .account-addresses__button--secondary:hover:not(:disabled) {
   background: var(--account-surface-soft);
+}
+
+.account-addresses__auto-submit {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
+@media (max-width: 767.98px) {
+  .account-shell {
+    padding: 32px 16px 56px;
+  }
+
+  .account-shell__header {
+    gap: 8px;
+    padding-bottom: 20px;
+  }
+
+  .account-shell__content {
+    padding-top: 24px;
+  }
+
+  .account-tabs {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .account-tabs__link {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+    padding: 0 14px;
+  }
+
+  .account-logout {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .account-tabs__link--button {
+    width: 100%;
+  }
+
+  .account-orders__section,
+  .account-profile__section,
+  .account-addresses__section {
+    padding: 20px;
+  }
+
+  .account-orders__section-head,
+  .account-orders__card-top,
+  .account-addresses__card-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .account-orders__filter-grid,
+  .account-orders__meta,
+  .account-profile__fieldset,
+  .account-addresses__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .account-orders__actions,
+  .account-addresses__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .account-orders__button,
+  .account-addresses__button,
+  .account-profile__button,
+  .account-orders__view-link,
+  .account-orders__empty-link {
+    width: 100%;
+  }
+
+  .account-orders__card-actions {
+    justify-content: stretch;
+  }
+
+  .account-addresses__toolbar {
+    justify-content: stretch;
+  }
+
+  .account-addresses__toolbar .account-addresses__button {
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .account-shell {
+    padding: 40px 20px 64px;
+  }
+
+  .account-tabs {
+    flex-wrap: wrap;
+  }
+
+  .account-logout {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .account-tabs__link--button {
+    width: 100%;
+  }
+
+  .account-orders__section,
+  .account-profile__section,
+  .account-addresses__section {
+    padding: 24px;
+  }
+
+  .account-orders__filter-grid,
+  .account-profile__fieldset,
+  .account-addresses__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .account-orders__meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .account-shell {
+    padding: 44px 24px 68px;
+  }
+
+  .account-orders__section,
+  .account-profile__section,
+  .account-addresses__section {
+    padding: 28px;
+  }
+
+  .account-orders__meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) and (max-width: 1535.98px) {
+  .account-shell__container {
+    width: min(100%, 1160px);
+  }
+}
+
+@media (min-width: 1536px) {
+  .account-shell__container {
+    width: min(100%, 1240px);
+  }
+
+  .account-orders__section,
+  .account-profile__section,
+  .account-addresses__section {
+    padding: 36px;
+  }
 }
