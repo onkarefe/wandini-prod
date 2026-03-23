@@ -7,6 +7,11 @@ import {
 } from 'react-router';
 import type {Route} from './+types/account';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
+import accountMainStyles from '~/styles/accountMain.css?url';
+
+export function links() {
+  return [{rel: 'stylesheet', href: accountMainStyles}];
+}
 
 export function shouldRevalidate() {
   return true;
@@ -44,45 +49,49 @@ export default function AccountLayout() {
     : 'Account Details';
 
   return (
-    <div className="account">
-      <h1>{heading}</h1>
-      <br />
-      <AccountMenu />
-      <br />
-      <br />
-      <Outlet context={{customer}} />
+    <div className="account-shell">
+      <div className="account-shell__container">
+        <header className="account-shell__header">
+          <p className="account-shell__eyebrow">My account</p>
+          <h1 className="account-shell__title">{heading}</h1>
+        </header>
+        <AccountMenu />
+        <div className="account-shell__content">
+          <Outlet context={{customer}} />
+        </div>
+      </div>
     </div>
   );
 }
 
 function AccountMenu() {
-  function isActiveStyle({
+  function getTabClassName({
     isActive,
     isPending,
   }: {
     isActive: boolean;
     isPending: boolean;
   }) {
-    return {
-      fontWeight: isActive ? 'bold' : undefined,
-      color: isPending ? 'grey' : 'black',
-    };
+    return [
+      'account-tabs__link',
+      isActive ? 'is-active' : '',
+      isPending ? 'is-pending' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
   }
 
   return (
-    <nav role="navigation">
-      <NavLink to="/account/orders" style={isActiveStyle}>
-        Orders &nbsp;
+    <nav className="account-tabs" role="navigation" aria-label="Account sections">
+      <NavLink to="/account/orders" className={getTabClassName}>
+        Orders
       </NavLink>
-      &nbsp;|&nbsp;
-      <NavLink to="/account/profile" style={isActiveStyle}>
-        &nbsp; Profile &nbsp;
+      <NavLink to="/account/profile" className={getTabClassName}>
+        Profile
       </NavLink>
-      &nbsp;|&nbsp;
-      <NavLink to="/account/addresses" style={isActiveStyle}>
-        &nbsp; Addresses &nbsp;
+      <NavLink to="/account/addresses" className={getTabClassName}>
+        Addresses
       </NavLink>
-      &nbsp;|&nbsp;
       <Logout />
     </nav>
   );
@@ -91,7 +100,9 @@ function AccountMenu() {
 function Logout() {
   return (
     <Form className="account-logout" method="POST" action="/account/logout">
-      &nbsp;<button type="submit">Sign out</button>
+      <button className="account-tabs__link account-tabs__link--button" type="submit">
+        Sign out
+      </button>
     </Form>
   );
 }

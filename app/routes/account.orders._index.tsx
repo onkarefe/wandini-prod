@@ -1,20 +1,11 @@
-import {
-  Link,
-  useLoaderData,
-  useNavigation,
-  useSearchParams,
-} from 'react-router';
-import type {Route} from './+types/account.orders._index';
 import {useRef} from 'react';
+import {Link, useLoaderData, useNavigation, useSearchParams} from 'react-router';
+import {Money, flattenConnection, getPaginationVariables} from '@shopify/hydrogen';
+import type {Route} from './+types/account.orders._index';
 import {
-  Money,
-  getPaginationVariables,
-  flattenConnection,
-} from '@shopify/hydrogen';
-import {
+  ORDER_FILTER_FIELDS,
   buildOrderSearchQuery,
   parseOrderFilters,
-  ORDER_FILTER_FIELDS,
   type OrderFilterParams,
 } from '~/lib/orderFilters';
 import {CUSTOMER_ORDERS_QUERY} from '~/graphql/customer-account/CustomerOrdersQuery';
@@ -63,9 +54,11 @@ export default function Orders() {
   const {orders} = customer;
 
   return (
-    <div className="orders">
-      <OrderSearchForm currentFilters={filters} />
-      <OrdersTable orders={orders} filters={filters} />
+    <div className="account-orders">
+      <div className="account-orders__container">
+        <OrderSearchForm currentFilters={filters} />
+        <OrdersTable orders={orders} filters={filters} />
+      </div>
     </div>
   );
 }
@@ -78,38 +71,59 @@ function OrdersTable({
   filters: OrderFilterParams;
 }) {
   const hasFilters = !!(filters.name || filters.confirmationNumber);
+  const orderCount = orders?.nodes.length ?? 0;
 
   return (
-    <div className="acccount-orders" aria-live="polite">
+    <section className="account-orders__section" aria-live="polite">
+      <div className="account-orders__section-head">
+        <div>
+          <p className="account-orders__eyebrow">Order history</p>
+          <h2 className="account-orders__title">Your orders</h2>
+        </div>
+        <p className="account-orders__count">
+          {orderCount} {orderCount === 1 ? 'order' : 'orders'}
+        </p>
+      </div>
+
       {orders?.nodes.length ? (
-        <PaginatedResourceSection connection={orders}>
-          {({node: order}) => <OrderItem key={order.id} order={order} />}
-        </PaginatedResourceSection>
+        <div className="account-orders__list">
+          <PaginatedResourceSection connection={orders}>
+            {({node: order}) => <OrderItem key={order.id} order={order} />}
+          </PaginatedResourceSection>
+        </div>
       ) : (
         <EmptyOrders hasFilters={hasFilters} />
       )}
-    </div>
+    </section>
   );
 }
 
 function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
   return (
-    <div>
+    <div className="account-orders__empty">
       {hasFilters ? (
         <>
-          <p>No orders found matching your search.</p>
-          <br />
-          <p>
-            <Link to="/account/orders">Clear filters →</Link>
+          <p className="account-orders__empty-title">
+            No orders match your current filters.
           </p>
+          <p className="account-orders__empty-copy">
+            Try a different order number or clear the current search.
+          </p>
+          <Link className="account-orders__empty-link" to="/account/orders">
+            Clear filters
+          </Link>
         </>
       ) : (
         <>
-          <p>You haven&apos;t placed any orders yet.</p>
-          <br />
-          <p>
-            <Link to="/collections">Start Shopping →</Link>
+          <p className="account-orders__empty-title">
+            You haven&apos;t placed any orders yet.
           </p>
+          <p className="account-orders__empty-copy">
+            Once you place an order, it will appear here for quick tracking.
+          </p>
+          <Link className="account-orders__empty-link" to="/collections">
+            Start shopping
+          </Link>
         </>
       )}
     </div>
@@ -121,7 +135,7 @@ function OrderSearchForm({
 }: {
   currentFilters: OrderFilterParams;
 }) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
   const navigation = useNavigation();
   const isSearching =
     navigation.state !== 'idle' &&
@@ -140,8 +154,9 @@ function OrderSearchForm({
       .trim();
 
     if (name) params.set(ORDER_FILTER_FIELDS.NAME, name);
-    if (confirmationNumber)
+    if (confirmationNumber) {
       params.set(ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER, confirmationNumber);
+    }
 
     setSearchParams(params);
   };
@@ -149,40 +164,58 @@ function OrderSearchForm({
   const hasFilters = currentFilters.name || currentFilters.confirmationNumber;
 
   return (
-    <form
-      ref={formRef}
-      onSubmit={handleSubmit}
-      className="order-search-form"
-      aria-label="Search orders"
-    >
-      <fieldset className="order-search-fieldset">
-        <legend className="order-search-legend">Filter Orders</legend>
+    <section className="account-orders__section account-orders__section--filters">
+      <div className="account-orders__section-head">
+        <div>
+          <p className="account-orders__eyebrow">Find an order</p>
+          <h2 className="account-orders__title">Search & filter</h2>
+        </div>
+      </div>
 
-        <div className="order-search-inputs">
-          <input
-            type="search"
-            name={ORDER_FILTER_FIELDS.NAME}
-            placeholder="Order #"
-            aria-label="Order number"
-            defaultValue={currentFilters.name || ''}
-            className="order-search-input"
-          />
-          <input
-            type="search"
-            name={ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER}
-            placeholder="Confirmation #"
-            aria-label="Confirmation number"
-            defaultValue={currentFilters.confirmationNumber || ''}
-            className="order-search-input"
-          />
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className="account-orders__filters"
+        aria-label="Search orders"
+      >
+        <div className="account-orders__filter-grid">
+          <label className="account-orders__field">
+            <span className="account-orders__field-label">Order number</span>
+            <input
+              type="search"
+              name={ORDER_FILTER_FIELDS.NAME}
+              placeholder="Order #"
+              aria-label="Order number"
+              defaultValue={currentFilters.name || ''}
+              className="account-orders__input"
+            />
+          </label>
+
+          <label className="account-orders__field">
+            <span className="account-orders__field-label">Confirmation number</span>
+            <input
+              type="search"
+              name={ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER}
+              placeholder="Confirmation #"
+              aria-label="Confirmation number"
+              defaultValue={currentFilters.confirmationNumber || ''}
+              className="account-orders__input"
+            />
+          </label>
         </div>
 
-        <div className="order-search-buttons">
-          <button type="submit" disabled={isSearching}>
-            {isSearching ? 'Searching' : 'Search'}
+        <div className="account-orders__actions">
+          <button
+            className="account-orders__button account-orders__button--primary"
+            type="submit"
+            disabled={isSearching}
+          >
+            {isSearching ? 'Searching...' : 'Search orders'}
           </button>
+
           {hasFilters && (
             <button
+              className="account-orders__button account-orders__button--secondary"
               type="button"
               disabled={isSearching}
               onClick={() => {
@@ -190,33 +223,112 @@ function OrderSearchForm({
                 formRef.current?.reset();
               }}
             >
-              Clear
+              Clear filters
             </button>
           )}
         </div>
-      </fieldset>
-    </form>
+      </form>
+    </section>
+  );
+}
+
+function formatStatusLabel(status?: string | null) {
+  if (!status) return null;
+
+  return status
+    .toLowerCase()
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function OrderValue({order}: {order: OrderItemFragment}) {
+  return (
+    <span className="account-orders__amount">
+      <Money data={order.totalPrice} />
+    </span>
+  );
+}
+
+function StatusBadge({
+  label,
+  tone = 'neutral',
+}: {
+  label: string;
+  tone?: 'neutral' | 'success';
+}) {
+  return (
+    <span className={`account-orders__badge account-orders__badge--${tone}`}>
+      {label}
+    </span>
+  );
+}
+
+function DetailItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="account-orders__meta-item">
+      <span className="account-orders__meta-label">{label}</span>
+      <span className="account-orders__meta-value">{value}</span>
+    </div>
   );
 }
 
 function OrderItem({order}: {order: OrderItemFragment}) {
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
+  const formattedFinancialStatus = formatStatusLabel(order.financialStatus);
+  const formattedFulfillmentStatus = formatStatusLabel(fulfillmentStatus);
+
   return (
-    <>
-      <fieldset>
-        <Link to={`/account/orders/${btoa(order.id)}`}>
-          <strong>#{order.number}</strong>
-        </Link>
-        <p>{new Date(order.processedAt).toDateString()}</p>
+    <article className="account-orders__card">
+      <div className="account-orders__card-top">
+        <div className="account-orders__summary">
+          <Link className="account-orders__order-link" to={`/account/orders/${btoa(order.id)}`}>
+            Order #{order.number}
+          </Link>
+          <p className="account-orders__date">
+            Placed on {new Date(order.processedAt).toDateString()}
+          </p>
+        </div>
+
+        <OrderValue order={order} />
+      </div>
+
+      <div className="account-orders__meta">
         {order.confirmationNumber && (
-          <p>Confirmation: {order.confirmationNumber}</p>
+          <DetailItem label="Confirmation" value={order.confirmationNumber} />
         )}
-        <p>{order.financialStatus}</p>
-        {fulfillmentStatus && <p>{fulfillmentStatus}</p>}
-        <Money data={order.totalPrice} />
-        <Link to={`/account/orders/${btoa(order.id)}`}>View Order →</Link>
-      </fieldset>
-      <br />
-    </>
+
+        {formattedFinancialStatus && (
+          <DetailItem
+            label="Payment"
+            value={
+              <StatusBadge
+                label={formattedFinancialStatus}
+                tone={order.financialStatus === 'PAID' ? 'success' : 'neutral'}
+              />
+            }
+          />
+        )}
+
+        {formattedFulfillmentStatus && (
+          <DetailItem
+            label="Fulfillment"
+            value={<StatusBadge label={formattedFulfillmentStatus} />}
+          />
+        )}
+      </div>
+
+      <div className="account-orders__card-actions">
+        <Link className="account-orders__view-link" to={`/account/orders/${btoa(order.id)}`}>
+          View order
+        </Link>
+      </div>
+    </article>
   );
 }
