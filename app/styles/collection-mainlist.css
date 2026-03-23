@@ -1,0 +1,116 @@
+.collection-mainlist-page {
+  width: 100%;
+  padding: 8px;
+}
+
+.collection-mainlist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.collection-mainlist__item {
+  position: relative;
+  display: block;
+  flex: 0 0 calc(25% - 6px);
+  width: calc(25% - 6px);
+  min-height: clamp(18rem, 28vw, 30rem);
+  overflow: hidden;
+  border-radius: 8px;
+  color: #ffffff;
+  text-decoration: none;
+  isolation: isolate;
+}
+
+.collection-mainlist__image,
+.collection-mainlist__image img {
+  width: 100%;
+  height: 100%;
+}
+
+.collection-mainlist__image {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.collection-mainlist__image img {
+  display: block;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform 500ms ease, filter 300ms ease;
+}
+
+.collection-mainlist__overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.14) 38%, rgba(0, 0, 0, 0.62) 100%);
+  opacity: 1;
+  transition: opacity 260ms ease, background 260ms ease;
+  z-index: 1;
+}
+
+.collection-mainlist__title {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 2;
+  margin: 0;
+  font-size: clamp(1.25rem, 1.8vw, 2rem);
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.collection-mainlist__item:hover .collection-mainlist__overlay,
+.collection-mainlist__item:focus-visible .collection-mainlist__overlay {
+  opacity: 0.18;
+}
+
+.collection-mainlist__item:hover .collection-mainlist__image img,
+.collection-mainlist__item:focus-visible .collection-mainlist__image img {
+  transform: scale(1.02);
+  filter: saturate(1.02);
+}
+
+.collection-mainlist__item:focus-visible {
+  outline: 2px solid #111111;
+  outline-offset: 1px;
+}
+
+@media (max-width: 900px) {
+  .collection-mainlist__item {
+    flex-basis: calc(50% - 4px);
+    width: calc(50% - 4px);
+    min-height: 24rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .collection-mainlist-page {
+    padding: 6px;
+  }
+
+  .collection-mainlist {
+    gap: 6px;
+  }
+
+  .collection-mainlist__item {
+    flex-basis: 100%;
+    width: 100%;
+    min-height: 22rem;
+    border-radius: 6px;
+  }
+
+  .collection-mainlist__title {
+    left: 0.9rem;
+    right: 0.9rem;
+    bottom: 0.9rem;
+    font-size: clamp(1.1rem, 7vw, 1.45rem);
+  }
+}

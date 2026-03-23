@@ -1,6 +1,11 @@
 import {useLoaderData} from 'react-router';
 import type {Route} from './+types/pages.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import staticPagesStyles from '~/styles/staticPages.css?url';
+
+export function links() {
+  return [{rel: 'stylesheet', href: staticPagesStyles}];
+}
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [{title: `Hydrogen | ${data?.page.title ?? ''}`}];
@@ -50,7 +55,7 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
  * fetched after the initial page load. If it's unavailable, the page should still 200.
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
-function loadDeferredData({context}: Route.LoaderArgs) {
+function loadDeferredData(_: Route.LoaderArgs) {
   return {};
 }
 
@@ -58,12 +63,17 @@ export default function Page() {
   const {page} = useLoaderData<typeof loader>();
 
   return (
-    <div className="page">
-      <header>
-        <h1>{page.title}</h1>
-      </header>
-      <main dangerouslySetInnerHTML={{__html: page.body}} />
-    </div>
+    <main className="static-page">
+      <article className="static-page__article">
+        <header className="static-page__header">
+          <h1 className="static-page__title">{page.title}</h1>
+        </header>
+        <div
+          className="static-page__content"
+          dangerouslySetInnerHTML={{__html: page.body}}
+        />
+      </article>
+    </main>
   );
 }
 

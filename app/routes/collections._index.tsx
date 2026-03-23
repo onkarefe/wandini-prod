@@ -1,8 +1,18 @@
 import {useLoaderData, Link} from 'react-router';
 import type {Route} from './+types/collections._index';
-import {getPaginationVariables, Image} from '@shopify/hydrogen';
+import {Image} from '@shopify/hydrogen';
 import type {CollectionFragment} from 'storefrontapi.generated';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import collectionMainlistStyles from '~/styles/collection-mainlist.css?url';
+
+type CollectionListItem = CollectionFragment & {
+  showListing?: {
+    value?: string | null;
+  } | null;
+};
+
+export function links() {
+  return [{rel: 'stylesheet', href: collectionMainlistStyles}];
+}
 
 export async function loader(args: Route.LoaderArgs) {
   // Start fetching non-critical data without blocking time to first byte
@@ -18,19 +28,25 @@ export async function loader(args: Route.LoaderArgs) {
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
-async function loadCriticalData({context, request}: Route.LoaderArgs) {
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 4,
-  });
-
+async function loadCriticalData({context}: Route.LoaderArgs) {
   const [{collections}] = await Promise.all([
     context.storefront.query(COLLECTIONS_QUERY, {
-      variables: paginationVariables,
+      variables: {
+        first: 12,
+      },
     }),
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  return {collections};
+  return {
+    collections: {
+      ...collections,
+      nodes: collections.nodes.filter(
+        (collection: CollectionListItem) =>
+          collection.showListing?.value === 'true',
+      ),
+    },
+  };
 }
 
 /**
@@ -38,7 +54,7 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
  * fetched after the initial page load. If it's unavailable, the page should still 200.
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
-function loadDeferredData({context}: Route.LoaderArgs) {
+function loadDeferredData(_: Route.LoaderArgs) {
   return {};
 }
 
@@ -46,21 +62,17 @@ export default function Collections() {
   const {collections} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collections">
-      <h1>Collections</h1>
-      <PaginatedResourceSection<CollectionFragment>
-        connection={collections}
-        resourcesClassName="collections-grid"
-      >
-        {({node: collection, index}) => (
+    <main className="collection-mainlist-page">
+      <section className="collection-mainlist" aria-label="Collections">
+        {collections.nodes.map((collection: CollectionListItem, index: number) => (
           <CollectionItem
             key={collection.id}
             collection={collection}
             index={index}
           />
-        )}
-      </PaginatedResourceSection>
-    </div>
+        ))}
+      </section>
+    </main>
   );
 }
 
@@ -68,26 +80,28 @@ function CollectionItem({
   collection,
   index,
 }: {
-  collection: CollectionFragment;
+  collection: CollectionListItem;
   index: number;
 }) {
   return (
     <Link
-      className="collection-item"
+      className="collection-mainlist__item"
       key={collection.id}
       to={`/collections/${collection.handle}`}
       prefetch="intent"
     >
       {collection?.image && (
         <Image
+          className="collection-mainlist__image"
           alt={collection.image.altText || collection.title}
-          aspectRatio="1/1"
+          aspectRatio="4/5"
           data={collection.image}
           loading={index < 3 ? 'eager' : undefined}
           sizes="(min-width: 45em) 400px, 100vw"
         />
       )}
-      <h5>{collection.title}</h5>
+      <span className="collection-mainlist__overlay" aria-hidden="true" />
+      <h2 className="collection-mainlist__title">{collection.title}</h2>
     </Link>
   );
 }
@@ -97,6 +111,9 @@ const COLLECTIONS_QUERY = `#graphql
     id
     title
     handle
+    showListing: metafield(namespace: "custom", key: "show_listing") {
+      value
+    }
     image {
       id
       url

@@ -1,5 +1,5 @@
 import type {Route} from './+types/collections.all';
-import {useLoaderData} from 'react-router';
+import {redirect, useLoaderData} from 'react-router';
 import {getPaginationVariables, Image, Money} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {ProductItem} from '~/components/ProductItem';
@@ -10,6 +10,10 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export async function loader(args: Route.LoaderArgs) {
+  // Route is intentionally disabled for now; keep the implementation below
+  // so it can be re-enabled by removing this redirect.
+  throw redirect('/collections');
+
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
 

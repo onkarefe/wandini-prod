@@ -1,0 +1,147 @@
+.static-page {
+  width: 100%;
+  padding: clamp(2rem, 5vw, 4.5rem) clamp(1rem, 3vw, 2rem) clamp(3rem, 6vw, 5rem);
+}
+
+.static-page__article {
+  width: min(100%, 860px);
+  margin: 0 auto;
+}
+
+.static-page__header {
+  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+  padding-bottom: clamp(1rem, 2vw, 1.25rem);
+  border-bottom: 1px solid rgba(17, 17, 17, 0.1);
+}
+
+.static-page__title {
+  margin: 0;
+  color: #111111;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 0.98;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.static-page__content {
+  color: #1f1f1f;
+  font-size: clamp(1rem, 1.2vw, 1.08rem);
+  line-height: 1.8;
+}
+
+.static-page__content > :first-child {
+  margin-top: 0;
+}
+
+.static-page__content > :last-child {
+  margin-bottom: 0;
+}
+
+.static-page__content h1,
+.static-page__content h2,
+.static-page__content h3,
+.static-page__content h4,
+.static-page__content h5,
+.static-page__content h6 {
+  margin: 2.5rem 0 1rem;
+  color: #111111;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.static-page__content h1 {
+  font-size: clamp(1.9rem, 3vw, 2.8rem);
+}
+
+.static-page__content h2 {
+  font-size: clamp(1.6rem, 2.2vw, 2.2rem);
+}
+
+.static-page__content h3 {
+  font-size: clamp(1.3rem, 1.8vw, 1.6rem);
+}
+
+.static-page__content p,
+.static-page__content ul,
+.static-page__content ol,
+.static-page__content blockquote,
+.static-page__content table,
+.static-page__content figure {
+  margin: 0 0 1.25rem;
+}
+
+.static-page__content ul,
+.static-page__content ol {
+  padding-left: 1.35rem;
+}
+
+.static-page__content ul {
+  list-style: disc;
+}
+
+.static-page__content ol {
+  list-style: decimal;
+}
+
+.static-page__content li + li {
+  margin-top: 0.45rem;
+}
+
+.static-page__content a {
+  color: inherit;
+  text-underline-offset: 0.16em;
+  text-decoration-thickness: 1px;
+}
+
+.static-page__content strong {
+  color: #111111;
+  font-weight: 600;
+}
+
+.static-page__content blockquote {
+  margin-left: 0;
+  padding: 0.25rem 0 0.25rem 1rem;
+  border-left: 2px solid rgba(17, 17, 17, 0.18);
+  color: #3a3a3a;
+}
+
+.static-page__content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.static-page__content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.static-page__content th,
+.static-page__content td {
+  padding: 0.9rem 0;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.1);
+  text-align: left;
+  vertical-align: top;
+}
+
+.static-page__content hr {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid rgba(17, 17, 17, 0.1);
+}
+
+@media (max-width: 700px) {
+  .static-page {
+    padding-top: 1.5rem;
+    padding-bottom: 3rem;
+  }
+
+  .static-page__header {
+    margin-bottom: 1.5rem;
+  }
+
+  .static-page__content {
+    line-height: 1.72;
+  }
+}
