@@ -1,9 +1,10 @@
 import type {Route} from './+types/collections.all';
-import {redirect, useLoaderData} from 'react-router';
+import {useLoaderData} from 'react-router';
 import {getPaginationVariables, Image, Money} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {ProductItem} from '~/components/ProductItem';
 import type {CollectionItemFragment} from 'storefrontapi.generated';
+import {redirectToLocalePath} from '~/lib/locale';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: `Hydrogen | Products`}];
@@ -12,7 +13,7 @@ export const meta: Route.MetaFunction = () => {
 export async function loader(args: Route.LoaderArgs) {
   // Route is intentionally disabled for now; keep the implementation below
   // so it can be re-enabled by removing this redirect.
-  throw redirect('/collections');
+  throw redirectToLocalePath(args.request, '/collections');
 
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);

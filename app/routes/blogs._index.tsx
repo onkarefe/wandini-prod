@@ -1,9 +1,10 @@
-import { Link, useLoaderData } from 'react-router';
+import {useLoaderData} from 'react-router';
 import type { Route } from './+types/blogs._index';
 import { Image, getPaginationVariables } from '@shopify/hydrogen';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import type { BlogsQuery } from 'storefrontapi.generated';
 import blogMainStyles from '~/styles/blogMain.css?url';
+import {Link} from '~/lib/i18n-router';
 
 type BlogNode = BlogsQuery['blogs']['nodes'][0] & {
   blogCategoryDescription?: {

@@ -7,6 +7,7 @@ import {
 import React, {useRef, useEffect} from 'react';
 import type {PredictiveSearchReturn} from '~/lib/search';
 import {useAside} from './Aside';
+import {usePrefixPathWithLocale} from '~/lib/i18n-router';
 
 type SearchFormPredictiveChildren = (args: {
   fetchResults: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -33,20 +34,34 @@ export function SearchFormPredictive({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const aside = useAside();
+  const searchEndpoint = usePrefixPathWithLocale(SEARCH_ENDPOINT);
 
-  /** Reset the input value and blur the input */
-  function resetInput(event: React.FormEvent<HTMLFormElement>) {
+  function getSearchUrl(term: string) {
+    const searchParams = new URLSearchParams();
+
+    if (term) {
+      searchParams.set('q', term);
+    }
+
+    const queryString = searchParams.toString();
+
+    return queryString ? `${searchEndpoint}?${queryString}` : searchEndpoint;
+  }
+
+  /** Submit the predictive form by navigating to the full search page */
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     event.stopPropagation();
-    if (inputRef?.current?.value) {
-      inputRef.current.blur();
-    }
+
+    goToSearch();
   }
 
   /** Navigate to the search page with the current input value */
   function goToSearch() {
-    const term = inputRef?.current?.value;
-    void navigate(SEARCH_ENDPOINT + (term ? `?q=${term}` : ''));
+    const term = inputRef?.current?.value?.trim() ?? '';
+
+    inputRef.current?.blur();
+    void navigate(getSearchUrl(term));
     aside.close();
   }
 
@@ -54,7 +69,7 @@ export function SearchFormPredictive({
   function fetchResults(event: React.ChangeEvent<HTMLInputElement>) {
     void fetcher.submit(
       {q: event.target.value || '', limit: 5, predictive: true},
-      {method: 'GET', action: SEARCH_ENDPOINT},
+      {method: 'GET', action: searchEndpoint},
     );
   }
 
@@ -69,7 +84,12 @@ export function SearchFormPredictive({
   }
 
   return (
-    <fetcher.Form {...props} className={className} onSubmit={resetInput}>
+    <fetcher.Form
+      {...props}
+      className={className}
+      method={props.method ?? 'get'}
+      onSubmit={handleSubmit}
+    >
       {children({inputRef, fetcher, fetchResults, goToSearch})}
     </fetcher.Form>
   );

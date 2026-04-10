@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router';
+import {useNavigate} from 'react-router';
 import { type MappedProductOptions } from '@shopify/hydrogen';
 import type {
   Maybe,
@@ -7,6 +7,7 @@ import type {
 import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
 import type { ProductFragment } from 'storefrontapi.generated';
+import {Link} from '~/lib/i18n-router';
 
 type CropRect = {
   x: number;
@@ -165,8 +166,8 @@ export function ProductForm({
                         {ratio && <span>({ratio})</span>}
                       </div>
                       <ul className="propertyBox">
-                        {propertyList.map((p: string, i: number) => (
-                          <li key={i}>{p}</li>
+                        {propertyList.map((p: string) => (
+                          <li key={`${name}-${p}`}>{p}</li>
                         ))}
                       </ul>
                     </label>

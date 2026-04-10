@@ -8,20 +8,44 @@ export default function CustomGrid() {
                     <div className="cg-title">
                         New Collection
                     </div>
-                    <a href="#" className="cg-button">Discover More</a>
+                    <button
+                        type="button"
+                        className="cg-button"
+                        aria-label="Discover more coming soon"
+                        aria-disabled="true"
+                        title="Coming soon"
+                    >
+                        Discover More
+                    </button>
                 </div>
                 <div className="cg1-part2">
                     <div className="cgBox2 cgBoxMain">
                         <div className="cg-title">
                             Featured
                         </div>
-                        <a href="#" className="cg-button">Discover More</a>
+                        <button
+                            type="button"
+                            className="cg-button"
+                            aria-label="Discover more coming soon"
+                            aria-disabled="true"
+                            title="Coming soon"
+                        >
+                            Discover More
+                        </button>
                     </div>
                     <div className="cgBox3 cgBoxMain">
                         <div className="cg-title">
                             Trending
                         </div>
-                        <a href="#" className="cg-button">Discover More</a>
+                        <button
+                            type="button"
+                            className="cg-button"
+                            aria-label="Discover more coming soon"
+                            aria-disabled="true"
+                            title="Coming soon"
+                        >
+                            Discover More
+                        </button>
                     </div>
                 </div>
             </div>
@@ -31,20 +55,44 @@ export default function CustomGrid() {
                         <div className="cg-title">
                             Featured
                         </div>
-                        <a href="#" className="cg-button">Discover More</a>
+                        <button
+                            type="button"
+                            className="cg-button"
+                            aria-label="Discover more coming soon"
+                            aria-disabled="true"
+                            title="Coming soon"
+                        >
+                            Discover More
+                        </button>
                     </div>
                     <div className="cgBox5 cgBoxMain">
                         <div className="cg-title">
                             Trending
                         </div>
-                        <a href="#" className="cg-button">Discover More</a>
+                        <button
+                            type="button"
+                            className="cg-button"
+                            aria-label="Discover more coming soon"
+                            aria-disabled="true"
+                            title="Coming soon"
+                        >
+                            Discover More
+                        </button>
                     </div>
                 </div>
                 <div className="cgBox6 cgBoxMain">
                     <div className="cg-title">
                         New Collection
                     </div>
-                    <a href="#" className="cg-button">Discover More</a>
+                    <button
+                        type="button"
+                        className="cg-button"
+                        aria-label="Discover more coming soon"
+                        aria-disabled="true"
+                        title="Coming soon"
+                    >
+                        Discover More
+                    </button>
                 </div>
             </div>
         </div>

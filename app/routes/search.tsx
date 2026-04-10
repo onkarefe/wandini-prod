@@ -1,52 +1,75 @@
-// wandini1/app/routes/search.tsx
-import { useLoaderData } from 'react-router';
-import type { Route } from './+types/search';
-import { getPaginationVariables, Analytics, Pagination } from '@shopify/hydrogen';
-import { SearchForm } from '~/components/SearchForm';
-import { SearchResults } from '~/components/SearchResults';
-import SearchPageProductCard from '~/components/SearchPageProductCard';
+import {useLoaderData} from 'react-router';
+import type {Route} from './+types/search';
+import {Analytics, Pagination, getPaginationVariables} from '@shopify/hydrogen';
+import {SearchForm} from '~/components/SearchForm';
+import {SearchResults} from '~/components/SearchResults';
+import SearchProductCard from '~/components/SearchPageProductCard';
 import {
-  type RegularSearchReturn,
-  type PredictiveSearchReturn,
   getEmptyPredictiveSearchResult,
+  getEmptyRegularSearchResult,
+  type PredictiveSearchReturn,
+  type RegularSearchItems,
+  type RegularSearchReturn,
   urlWithTrackingParams,
 } from '~/lib/search';
-import type {
-  RegularSearchQuery,
-  PredictiveSearchQuery,
-} from 'storefrontapi.generated';
+import type {PredictiveSearchQuery} from 'storefrontapi.generated';
+
+type SearchPageProduct =
+  RegularSearchReturn['result']['items']['products']['nodes'][number];
 
 export const meta: Route.MetaFunction = () => {
-  return [{ title: `Hydrogen | Search` }];
+  return [{title: 'Hydrogen | Search'}];
 };
 
-export async function loader({ request, context }: Route.LoaderArgs) {
+export async function loader({request, context}: Route.LoaderArgs) {
   const url = new URL(request.url);
   const isPredictive = url.searchParams.has('predictive');
-  const searchPromise: Promise<PredictiveSearchReturn | RegularSearchReturn> =
-    isPredictive ? predictiveSearch({ request, context }) : regularSearch({ request, context });
+  const term = String(url.searchParams.get('q') || '').trim();
 
-  searchPromise.catch((error: Error) => {
+  try {
+    return isPredictive
+      ? await predictiveSearch({request, context})
+      : await regularSearch({request, context});
+  } catch (error) {
     console.error(error);
-    return { term: '', result: null, error: error.message };
-  });
 
-  return await searchPromise;
+    const errorMessage =
+      error instanceof Error ? error.message : 'Search failed unexpectedly.';
+
+    if (isPredictive) {
+      return {
+        type: 'predictive' as const,
+        term,
+        error: errorMessage,
+        result: getEmptyPredictiveSearchResult(),
+      };
+    }
+
+    return {
+      type: 'regular' as const,
+      term,
+      error: errorMessage,
+      result: getEmptyRegularSearchResult(),
+    };
+  }
 }
 
 /**
  * Renders the /search route
  */
 export default function SearchPage() {
-  const { type, term, result, error } = useLoaderData<typeof loader>();
-  if (type === 'predictive') return null;
+  const {type, term, result, error} = useLoaderData<typeof loader>();
+
+  if (type === 'predictive') {
+    return null;
+  }
 
   return (
     <div className="search container mx-auto">
       <h1 className="searchMainH1">Search</h1>
 
       <SearchForm>
-        {({ inputRef }) => (
+        {({inputRef}) => (
           <>
             <input
               defaultValue={term}
@@ -55,37 +78,35 @@ export default function SearchPage() {
               ref={inputRef}
               type="search"
             />
-            {/* NOTE: &nbsp; kaldırıldı (spacing'i CSS ile yönetmek daha doğru) */}
             <button type="submit">Search</button>
           </>
         )}
       </SearchForm>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error ? <p style={{color: 'red'}}>{error}</p> : null}
 
       {!term || !result?.total ? (
         <SearchResults.Empty />
       ) : (
         <SearchResults result={result} term={term}>
-          {({ articles, pages, products, term }) => (
+          {({articles, pages, products, term}) => (
             <div>
-              {/* PRODUCTS (New card) */}
               {products?.nodes?.length ? (
                 <div className="search-result">
                   <h2>Products</h2>
 
                   <Pagination connection={products}>
-                    {({ nodes, isLoading, NextLink, PreviousLink }) => {
+                    {({nodes, isLoading, NextLink, PreviousLink}) => {
                       return (
                         <div>
                           <div>
                             <PreviousLink>
-                              {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+                              {isLoading ? 'Loading...' : <span>Load previous</span>}
                             </PreviousLink>
                           </div>
 
-                          <div className='searchCutomGrid'>
-                            {nodes.map((product: any) => {
+                          <div className="searchCutomGrid">
+                            {nodes.map((product: SearchPageProduct) => {
                               const productUrl = urlWithTrackingParams({
                                 baseUrl: `/products/${product.handle}`,
                                 trackingParams: product.trackingParameters,
@@ -93,7 +114,7 @@ export default function SearchPage() {
                               });
 
                               return (
-                                <SearchPageProductCard
+                                <SearchProductCard
                                   key={product.id}
                                   product={product}
                                   to={productUrl}
@@ -105,7 +126,7 @@ export default function SearchPage() {
 
                           <div>
                             <NextLink>
-                              {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+                              {isLoading ? 'Loading...' : <span>Load more</span>}
                             </NextLink>
                           </div>
                         </div>
@@ -117,7 +138,6 @@ export default function SearchPage() {
                 </div>
               ) : null}
 
-              {/* PAGES + ARTICLES (same as before) */}
               <SearchResults.Pages pages={pages} term={term} />
               <SearchResults.Articles articles={articles} term={term} />
             </div>
@@ -125,14 +145,13 @@ export default function SearchPage() {
         </SearchResults>
       )}
 
-      <Analytics.SearchView data={{ searchTerm: term, searchResults: result }} />
+      <Analytics.SearchView data={{searchTerm: term, searchResults: result}} />
     </div>
   );
 }
 
 /**
  * Regular search query and fragments
- * (adjust as needed)
  */
 const SEARCH_PRODUCT_FRAGMENT = `#graphql
   fragment SearchProduct on Product {
@@ -177,8 +196,8 @@ const SEARCH_PRODUCT_FRAGMENT = `#graphql
 
 const SEARCH_PAGE_FRAGMENT = `#graphql
   fragment SearchPage on Page {
-     __typename
-     handle
+    __typename
+    handle
     id
     title
     trackingParameters
@@ -191,6 +210,9 @@ const SEARCH_ARTICLE_FRAGMENT = `#graphql
     handle
     id
     title
+    blog {
+      handle
+    }
     trackingParameters
   }
 ` as const;
@@ -270,36 +292,41 @@ async function regularSearch({
   request,
   context,
 }: Pick<Route.LoaderArgs, 'request' | 'context'>): Promise<RegularSearchReturn> {
-  const { storefront } = context;
+  const {storefront} = context;
   const url = new URL(request.url);
-  const variables = getPaginationVariables(request, { pageBy: 8 });
-  const term = String(url.searchParams.get('q') || '');
+  const variables = getPaginationVariables(request, {pageBy: 8});
+  const term = String(url.searchParams.get('q') || '').trim();
 
-  // Search articles, pages, and products for the `q` term
-  const { errors, ...items }: { errors?: Array<{ message: string }> } & RegularSearchQuery =
-    await storefront.query(SEARCH_QUERY, {
-      variables: { ...variables, term },
-    });
-
-  if (!items) {
-    throw new Error('No search data returned from Shopify API');
+  if (!term) {
+    return {
+      type: 'regular',
+      term,
+      result: getEmptyRegularSearchResult(),
+    };
   }
 
+  const queryResult = await storefront.query(SEARCH_QUERY, {
+    variables: {...variables, term},
+  });
+  const {errors, ...rawItems} = queryResult as {
+    errors?: Array<{message: string}>;
+  } & RegularSearchItems;
+  const items = rawItems as RegularSearchItems;
+
   const total = Object.values(items).reduce(
-    (acc: number, { nodes }: { nodes: Array<unknown> }) => acc + nodes.length,
+    (acc, {nodes}) => acc + nodes.length,
     0,
   );
 
   const error = errors
-    ? errors.map(({ message }: { message: string }) => message).join(', ')
+    ? errors.map(({message}) => message).join(', ')
     : undefined;
 
-  return { type: 'regular', term, error, result: { total, items } };
+  return {type: 'regular', term, error, result: {total, items}};
 }
 
 /**
  * Predictive search query and fragments
- * (adjust as needed)
  */
 const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
   fragment PredictiveArticle on Article {
@@ -429,20 +456,20 @@ async function predictiveSearch({
   request,
   context,
 }: Pick<Route.ActionArgs, 'request' | 'context'>): Promise<PredictiveSearchReturn> {
-  const { storefront } = context;
+  const {storefront} = context;
   const url = new URL(request.url);
   const term = String(url.searchParams.get('q') || '').trim();
   const limit = Number(url.searchParams.get('limit') || 10);
   const type = 'predictive';
 
-  if (!term) return { type, term, result: getEmptyPredictiveSearchResult() };
+  if (!term) {
+    return {type, term, result: getEmptyPredictiveSearchResult()};
+  }
 
-  // Predictively search articles, collections, pages, products, and queries (suggestions)
-  const { predictiveSearch: items, errors }: PredictiveSearchQuery & {
-    errors?: Array<{ message: string }>;
+  const {predictiveSearch: items, errors}: PredictiveSearchQuery & {
+    errors?: Array<{message: string}>;
   } = await storefront.query(PREDICTIVE_SEARCH_QUERY, {
     variables: {
-      // customize search options as needed
       limit,
       limitScope: 'EACH',
       term,
@@ -451,9 +478,7 @@ async function predictiveSearch({
 
   if (errors) {
     throw new Error(
-      `Shopify API errors: ${errors
-        .map(({ message }: { message: string }) => message)
-        .join(', ')}`,
+      `Shopify API errors: ${errors.map(({message}) => message).join(', ')}`,
     );
   }
 
@@ -466,5 +491,5 @@ async function predictiveSearch({
     0,
   );
 
-  return { type, term, result: { items, total } };
+  return {type, term, result: {items, total}};
 }

@@ -1,20 +1,96 @@
 // app/components/Header.tsx
 import React, { Suspense, useMemo, useState, useEffect, useCallback } from 'react';
-import { Await, NavLink, useAsyncValue } from 'react-router';
+import { Await, useAsyncValue } from 'react-router';
 import {
   type CartViewPayload,
   useAnalytics,
   useOptimisticCart,
 } from '@shopify/hydrogen';
-import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import type { CartApiQueryFragment, HeaderQuery } from 'storefrontapi.generated';
 import { useAside } from '~/components/Aside';
+import {NavLink} from '~/lib/i18n-router';
 
 import '~/styles/nav.css';
 
-type AnyObj = any;
+type FieldRecord = {
+  key?: string | null;
+  value?: string | null;
+  reference?: unknown;
+  references?: {
+    nodes: unknown[];
+  } | null;
+};
+
+type FieldContainer = {
+  fields?: FieldRecord[] | null;
+};
+
+type CollectionReference = {
+  handle?: string | null;
+  title?: string | null;
+};
+
+type MegaMenuNode = HeaderQuery['megaMenus']['nodes'][number];
+type MenuItem = NonNullable<HeaderQuery['menu']>['items'][number];
+type NavItem = MenuItem & {_href: string};
+
+function getField(node: FieldContainer | null | undefined, key: string) {
+  return node?.fields?.find((field) => field?.key === key) ?? null;
+}
+
+function getValue(node: FieldContainer | null | undefined, key: string) {
+  const value = getField(node, key)?.value;
+  return typeof value === 'string' ? value : null;
+}
+
+function getRef<T>(node: FieldContainer | null | undefined, key: string) {
+  return (getField(node, key)?.reference as T | null | undefined) ?? null;
+}
+
+function getRefs<T>(node: FieldContainer | null | undefined, key: string) {
+  const nodes = getField(node, key)?.references?.nodes;
+  return Array.isArray(nodes) ? (nodes as T[]) : [];
+}
+
+function collectionHandleFromPath(path: string) {
+  try {
+    const url = new URL(path, 'https://x.local');
+    const parts = url.pathname.split('/').filter(Boolean);
+    if (parts[0] === 'collections' && parts[1]) return parts[1];
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeToHandleLike(value: string) {
+  return (value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function buildFilterUrl(baseCollectionHandle: string, taxonomyValueGid: string) {
+  const payload = {
+    taxonomyMetafield: {
+      namespace: 'shopify',
+      key: 'color-pattern',
+      value: taxonomyValueGid,
+    },
+  };
+
+  return `/collections/${baseCollectionHandle}?f=${encodeURIComponent(JSON.stringify(payload))}`;
+}
+
+function buildSortUrl(baseCollectionHandle: string, sortValue: string) {
+  return `/collections/${baseCollectionHandle}?sort=${encodeURIComponent(sortValue)}`;
+}
 
 type HeaderProps = {
-  header: AnyObj;
+  header: HeaderQuery;
   cart: Promise<CartApiQueryFragment | null>;
   isLoggedIn: Promise<boolean>;
   publicStoreDomain: string;
@@ -47,8 +123,6 @@ export function Header({ header, cart, isLoggedIn, publicStoreDomain }: HeaderPr
 
           <div className="h-headerRight">
             <HeaderCtas
-              header={header}
-              publicStoreDomain={publicStoreDomain}
               isLoggedIn={isLoggedIn}
               cart={cart}
             />
@@ -63,28 +137,15 @@ export function HeaderMenu({
   header,
   publicStoreDomain,
 }: {
-  header: AnyObj;
+  header: HeaderQuery;
   publicStoreDomain: string;
 }) {
   const shop = header?.shop ?? null;
   const menu = header?.menu ?? null;
-
-  const megaNodes: AnyObj[] = Array.isArray(header?.megaMenus?.nodes)
-    ? header.megaMenus.nodes
-    : [];
+  const megaNodes = header.megaMenus.nodes;
+  const menuItems = menu?.items;
 
   const primaryDomainUrl: string | null = shop?.primaryDomain?.url ?? null;
-
-  const getField = (node: AnyObj, key: string) =>
-    (node?.fields || []).find((f: AnyObj) => f?.key === key) || null;
-
-  const getValue = (node: AnyObj, key: string) => getField(node, key)?.value ?? null;
-  const getRef = (node: AnyObj, key: string) => getField(node, key)?.reference ?? null;
-
-  const getRefs = (node: AnyObj, key: string) =>
-    Array.isArray(getField(node, key)?.references?.nodes)
-      ? getField(node, key).references.nodes
-      : [];
 
   const normalizeMenuUrl = useCallback(
     (rawUrl: string | null) => {
@@ -112,29 +173,8 @@ export function HeaderMenu({
     [primaryDomainUrl, publicStoreDomain],
   );
 
-  function collectionHandleFromPath(path: string) {
-    try {
-      const u = new URL(path, 'https://x.local');
-      const parts = u.pathname.split('/').filter(Boolean);
-      if (parts[0] === 'collections' && parts[1]) return parts[1];
-      return null;
-    } catch {
-      return null;
-    }
-  }
-
-  function normalizeToHandleLike(str: string) {
-    return (str || '')
-      .trim()
-      .toLowerCase()
-      .replace(/&/g, 'and')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
-  }
-
   const megaByTrigger = useMemo(() => {
-    const map = new Map<string, AnyObj>();
+    const map = new Map<string, MegaMenuNode>();
     for (const m of megaNodes) {
       const trigger = getValue(m, 'trigger_handle');
       if (trigger) map.set(trigger, m);
@@ -142,29 +182,12 @@ export function HeaderMenu({
     return map;
   }, [megaNodes]);
 
-  function buildFilterUrl(baseCollectionHandle: string, taxonomyValueGid: string) {
-    const payload = {
-      taxonomyMetafield: {
-        namespace: 'shopify',
-        key: 'color-pattern',
-        value: taxonomyValueGid,
-      },
-    };
-    const encoded = encodeURIComponent(JSON.stringify(payload));
-    return `/collections/${baseCollectionHandle}?f=${encoded}`;
-  }
-
-  function buildSortUrl(baseCollectionHandle: string, sortValue: string) {
-    return `/collections/${baseCollectionHandle}?sort=${encodeURIComponent(sortValue)}`;
-  }
-
-  const rawItems: AnyObj[] = Array.isArray(menu?.items) ? menu.items : [];
-  const navItems: AnyObj[] = useMemo(() => {
-    return rawItems.map((it: AnyObj) => {
-      const href = normalizeMenuUrl(it?.url || null);
-      return { ...it, _href: href };
+  const navItems = useMemo<NavItem[]>(() => {
+    return (menuItems ?? []).map((item) => {
+      const href = normalizeMenuUrl(item.url ?? null);
+      return {...item, _href: href};
     });
-  }, [rawItems, normalizeMenuUrl]);
+  }, [menuItems, normalizeMenuUrl]);
 
   const [openId, setOpenId] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -192,7 +215,7 @@ export function HeaderMenu({
     };
   }, [mobileOpen, closeMobile]);
 
-  function resolveMegaForItem(item: AnyObj) {
+  function resolveMegaForItem(item: NavItem) {
     const href: string = item?._href || '/';
     const byUrlHandle = collectionHandleFromPath(href);
     const byTitleHandle = normalizeToHandleLike(item?.title || '');
@@ -205,8 +228,8 @@ export function HeaderMenu({
     return null;
   }
 
-  function megaBaseHref(mega: AnyObj) {
-    const baseCollection = getRef(mega, 'base_collection');
+  function megaBaseHref(mega: MegaMenuNode) {
+    const baseCollection = getRef<CollectionReference>(mega, 'base_collection');
     const baseHandle = baseCollection?.handle;
     return baseHandle ? `/collections/${baseHandle}` : '/';
   }
@@ -214,7 +237,7 @@ export function HeaderMenu({
   return (
     <div className="h-menuRoot">
       <nav className="h-navDesktop" aria-label="Primary navigation">
-        {navItems.map((item: AnyObj) => {
+        {navItems.map((item) => {
           const href: string = item?._href || '/';
           const mega = resolveMegaForItem(item);
           const hasMega = !!mega;
@@ -236,11 +259,6 @@ export function HeaderMenu({
               {hasMega && openId === String(key) ? (
                 <MegaMenuPanel
                   mega={mega}
-                  getValue={getValue}
-                  getRef={getRef}
-                  getRefs={getRefs}
-                  buildFilterUrl={buildFilterUrl}
-                  buildSortUrl={buildSortUrl}
                 />
               ) : null}
             </div>
@@ -271,7 +289,12 @@ export function HeaderMenu({
 
           <div className="h-mobilePanel">
             <div className="h-mobilePanelHeader">
-              <NavLink to="/" className="h-logoLink" aria-label="Go to homepage">
+              <NavLink
+                to="/"
+                className="h-logoLink"
+                aria-label="Go to homepage"
+                onClick={closeMobile}
+              >
                 {shop?.brand?.logo?.image?.url ? (
                   <img
                     src={shop.brand.logo.image.url}
@@ -294,7 +317,7 @@ export function HeaderMenu({
 
             <nav className="h-mobileNav" aria-label="Mobile navigation">
               <ul className="h-mobileNavList">
-                {navItems.map((item: AnyObj) => {
+                {navItems.map((item) => {
                   const href: string = item?._href || '/';
                   const label = item?.title || 'Link';
                   const key = String(item?.id || label || href);
@@ -358,11 +381,6 @@ export function HeaderMenu({
                       >
                         <MobileMegaContent
                           mega={mega}
-                          getValue={getValue}
-                          getRef={getRef}
-                          getRefs={getRefs}
-                          buildFilterUrl={buildFilterUrl}
-                          buildSortUrl={buildSortUrl}
                           onNavigate={closeMobile}
                         />
                       </div>
@@ -380,15 +398,12 @@ export function HeaderMenu({
 
 function MegaMenuPanel({
   mega,
-  getValue,
-  getRef,
-  getRefs,
-  buildFilterUrl,
-  buildSortUrl,
-}: AnyObj) {
-  const baseCollection = getRef(mega, 'base_collection');
+}: {
+  mega: MegaMenuNode;
+}) {
+  const baseCollection = getRef<CollectionReference>(mega, 'base_collection');
   const baseHandle = baseCollection?.handle;
-  const columns: AnyObj[] = getRefs(mega, 'columns') || [];
+  const columns = getRefs<FieldContainer & {id?: string | null}>(mega, 'columns');
 
   if (!baseHandle || columns.length === 0) return null;
 
@@ -397,33 +412,33 @@ function MegaMenuPanel({
       <div className="h-megaShell">
         <div className="h-megaInner">
           <div className="h-megaGrid">
-            {columns.map((col: AnyObj) => {
+            {columns.map((col) => {
               const title = getValue(col, 'title') || '';
-              const items: AnyObj[] = getRefs(col, 'items') || [];
+              const items = getRefs<FieldContainer & {id?: string | null}>(col, 'items');
 
               return (
                 <div key={col?.id || title} className="h-megaCol">
                   <div className="h-megaColTitle">{title}</div>
                   <ul className="h-megaList">
-                    {items.map((it: AnyObj) => {
+                    {items.map((it) => {
                       const label = getValue(it, 'label') || '';
                       const action = getValue(it, 'action_type') || '';
 
                       let href = `/collections/${baseHandle}`;
 
                       if (action === 'collection') {
-                        const c = getRef(it, 'collection');
+                        const c = getRef<CollectionReference>(it, 'collection');
                         if (c?.handle) href = `/collections/${c.handle}`;
                       } else if (action === 'filter_preset') {
-                        const fp = getRef(it, 'filter_preset');
+                        const fp = getRef<FieldContainer>(it, 'filter_preset');
                         const gid =
-                          (fp?.fields || []).find((f: AnyObj) => f.key === 'taxonomy_value_gid')
-                            ?.value ?? null;
+                          fp?.fields?.find((field) => field.key === 'taxonomy_value_gid')?.value ??
+                          null;
                         if (gid) href = buildFilterUrl(baseHandle, gid);
                       } else if (action === 'sort_preset') {
-                        const sp = getRef(it, 'sort_preset');
+                        const sp = getRef<FieldContainer>(it, 'sort_preset');
                         const sortValue =
-                          (sp?.fields || []).find((f: AnyObj) => f.key === 'sort_value')?.value ??
+                          sp?.fields?.find((field) => field.key === 'sort_value')?.value ??
                           null;
                         if (sortValue) href = buildSortUrl(baseHandle, sortValue);
                       }
@@ -451,24 +466,14 @@ function MegaMenuPanel({
 
 function MobileMegaContent({
   mega,
-  getValue,
-  getRef,
-  getRefs,
-  buildFilterUrl,
-  buildSortUrl,
   onNavigate,
 }: {
-  mega: AnyObj;
-  getValue: (node: AnyObj, key: string) => string | null;
-  getRef: (node: AnyObj, key: string) => AnyObj | null;
-  getRefs: (node: AnyObj, key: string) => AnyObj[];
-  buildFilterUrl: (baseCollectionHandle: string, taxonomyValueGid: string) => string;
-  buildSortUrl: (baseCollectionHandle: string, sortValue: string) => string;
+  mega: MegaMenuNode;
   onNavigate: () => void;
 }) {
-  const baseCollection = getRef(mega, 'base_collection');
+  const baseCollection = getRef<CollectionReference>(mega, 'base_collection');
   const baseHandle = baseCollection?.handle;
-  const columns: AnyObj[] = getRefs(mega, 'columns') || [];
+  const columns = getRefs<FieldContainer & {id?: string | null}>(mega, 'columns');
 
   if (!baseHandle || columns.length === 0) {
     return (
@@ -486,34 +491,34 @@ function MobileMegaContent({
 
   return (
     <div className="h-mobileMega">
-      {columns.map((col: AnyObj) => {
+      {columns.map((col) => {
         const title = getValue(col, 'title') || '';
-        const items: AnyObj[] = getRefs(col, 'items') || [];
+        const items = getRefs<FieldContainer & {id?: string | null}>(col, 'items');
 
         return (
           <div key={col?.id || title} className="h-mobileMegaCol">
             {title ? <div className="h-mobileMegaTitle">{title}</div> : null}
 
             <ul className="h-mobileMegaList">
-              {items.map((it: AnyObj) => {
+              {items.map((it) => {
                 const label = getValue(it, 'label') || '';
                 const action = getValue(it, 'action_type') || '';
 
                 let href = `/collections/${baseHandle}`;
 
                 if (action === 'collection') {
-                  const c = getRef(it, 'collection');
+                  const c = getRef<CollectionReference>(it, 'collection');
                   if (c?.handle) href = `/collections/${c.handle}`;
                 } else if (action === 'filter_preset') {
-                  const fp = getRef(it, 'filter_preset');
+                  const fp = getRef<FieldContainer>(it, 'filter_preset');
                   const gid =
-                    (fp?.fields || []).find((f: AnyObj) => f.key === 'taxonomy_value_gid')?.value ??
+                    fp?.fields?.find((field) => field.key === 'taxonomy_value_gid')?.value ??
                     null;
                   if (gid) href = buildFilterUrl(baseHandle, gid);
                 } else if (action === 'sort_preset') {
-                  const sp = getRef(it, 'sort_preset');
+                  const sp = getRef<FieldContainer>(it, 'sort_preset');
                   const sortValue =
-                    (sp?.fields || []).find((f: AnyObj) => f.key === 'sort_value')?.value ?? null;
+                    sp?.fields?.find((field) => field.key === 'sort_value')?.value ?? null;
                   if (sortValue) href = buildSortUrl(baseHandle, sortValue);
                 }
 
@@ -534,19 +539,12 @@ function MobileMegaContent({
 }
 
 function HeaderCtas({
-  header,
-  publicStoreDomain,
   isLoggedIn,
   cart,
 }: {
-  header: AnyObj;
-  publicStoreDomain: string;
   isLoggedIn: Promise<boolean>;
   cart: Promise<CartApiQueryFragment | null>;
 }) {
-  void header;
-  void publicStoreDomain;
-
   return (
     <nav className="h-ctas" aria-label="Header actions">
       <NavLink to="/account" className="h-userbox" aria-label="Account">

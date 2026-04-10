@@ -1,4 +1,5 @@
-import {Link, useFetcher, type Fetcher} from 'react-router';
+import {useFetcher, type Fetcher} from 'react-router';
+import {Link} from '~/lib/i18n-router';
 import {Image, Money} from '@shopify/hydrogen';
 import React, {useRef, useEffect} from 'react';
 import {
@@ -7,6 +8,9 @@ import {
   type PredictiveSearchReturn,
 } from '~/lib/search';
 import {useAside} from './Aside';
+
+const PREDICTIVE_SEARCH_INPUT_SELECTOR =
+  '[data-predictive-search-input="true"]';
 
 type PredictiveSearchItems = PredictiveSearchReturn['result']['items'];
 
@@ -293,7 +297,9 @@ function usePredictiveSearch(): UsePredictiveSearchReturn {
   // capture the search input element as a ref
   useEffect(() => {
     if (!inputRef.current) {
-      inputRef.current = document.querySelector('input[type="search"]');
+      inputRef.current = document.querySelector<HTMLInputElement>(
+        PREDICTIVE_SEARCH_INPUT_SELECTOR,
+      );
     }
   }, []);
 

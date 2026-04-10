@@ -1,6 +1,6 @@
 // wandini1/app/components/SearchPageProductCard.tsx
 import React from 'react';
-import {Link} from 'react-router';
+import {Link} from '~/lib/i18n-router';
 import {Image} from '@shopify/hydrogen';
 
 type ShopifyImage =

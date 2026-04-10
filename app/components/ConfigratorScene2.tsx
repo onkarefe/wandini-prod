@@ -185,7 +185,7 @@ export function ConfigratorScene2({
   crop,
   selectedQualitySummary,
 }: ConfigratorScene2Props) {
-  if (!isOpen && !inline) return null;
+  const shouldRender = isOpen || inline;
 
   const [slices, setSlices] = useState<SliceItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -199,8 +199,16 @@ export function ConfigratorScene2({
   useEffect(() => {
     let cancelled = false;
 
+    if (!shouldRender) {
+      setIsLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
     if (!crop || widthCm <= 0) {
       setSlices([]);
+      setIsLoading(false);
       setError('No valid crop or width found.');
       return;
     }
@@ -229,7 +237,9 @@ export function ConfigratorScene2({
     return () => {
       cancelled = true;
     };
-  }, [crop, imageUrl, widthCm]);
+  }, [crop, imageUrl, shouldRender, widthCm]);
+
+  if (!shouldRender) return null;
 
   return (
     <div
@@ -296,8 +306,11 @@ export function ConfigratorScene2({
                   <div className="cs2-sidebar-value">{selectedQualitySummary.title}</div>
                   {selectedQualitySummary.properties.length > 0 && (
                     <div className="cs2-quality-properties">
-                      {selectedQualitySummary.properties.map((property, index) => (
-                        <div key={`${property}-${index}`} className="cs2-quality-property">
+                      {selectedQualitySummary.properties.map((property) => (
+                        <div
+                          key={`${selectedQualitySummary.title}-${property}`}
+                          className="cs2-quality-property"
+                        >
                           {property}
                         </div>
                       ))}

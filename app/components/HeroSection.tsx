@@ -27,9 +27,15 @@ export default function HeroSection({
                     <p className="hero-st1">{st1}</p>
                     <h1 className="hero-mainTitle">{title}</h1>
                     <p className="hero-st2">{st2}</p>
-                    <a href='#' className="defaultButton">
+                    <button
+                        type="button"
+                        className="defaultButton"
+                        aria-label="Discover more coming soon"
+                        aria-disabled="true"
+                        title="Coming soon"
+                    >
                         Discover More
-                    </a>
+                    </button>
                 </div>
             </div>
 

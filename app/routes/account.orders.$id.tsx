@@ -1,4 +1,4 @@
-import {redirect, useLoaderData} from 'react-router';
+import {useLoaderData} from 'react-router';
 import type {Route} from './+types/account.orders.$id';
 import {Money, Image} from '@shopify/hydrogen';
 import type {
@@ -6,15 +6,16 @@ import type {
   OrderQuery,
 } from 'customer-accountapi.generated';
 import {CUSTOMER_ORDER_QUERY} from '~/graphql/customer-account/CustomerOrderQuery';
+import {redirectToLocalePath} from '~/lib/locale';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [{title: `Order ${data?.order?.name}`}];
 };
 
-export async function loader({params, context}: Route.LoaderArgs) {
+export async function loader({params, context, request}: Route.LoaderArgs) {
   const {customerAccount} = context;
   if (!params.id) {
-    return redirect('/account/orders');
+    return redirectToLocalePath(request, '/account/orders');
   }
 
   const orderId = atob(params.id);

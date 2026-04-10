@@ -1,8 +1,9 @@
-import {useLoaderData, Link} from 'react-router';
+import {useLoaderData} from 'react-router';
 import type {Route} from './+types/collections._index';
 import {Image} from '@shopify/hydrogen';
 import type {CollectionFragment} from 'storefrontapi.generated';
 import collectionMainlistStyles from '~/styles/collection-mainlist.css?url';
+import {Link} from '~/lib/i18n-router';
 
 type CollectionListItem = CollectionFragment & {
   showListing?: {

@@ -1,5 +1,6 @@
-import {redirect} from 'react-router';
+import type {Route} from './+types/account._index';
+import {redirectToLocalePath} from '~/lib/locale';
 
-export async function loader() {
-  return redirect('/account/orders');
+export async function loader({request}: Route.LoaderArgs) {
+  return redirectToLocalePath(request, '/account/orders');
 }

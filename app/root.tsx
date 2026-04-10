@@ -18,6 +18,7 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import navStyles from '~/styles/nav.css?url';
 import { PageLayout } from './components/PageLayout';
+import {getLocaleFromI18n} from '~/lib/locale';
 
 export type RootLoader = typeof loader;
 
@@ -87,6 +88,7 @@ export async function loader(args: Route.LoaderArgs) {
   return {
     ...deferredData,
     ...criticalData,
+    selectedLocale: getLocaleFromI18n(args.context.storefront.i18n),
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
       storefront,
@@ -153,9 +155,11 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
 export function Layout({ children }: { children?: React.ReactNode }) {
   const nonce = useNonce();
+  const data = useRouteLoaderData<RootLoader>('root');
+  const lang = data?.selectedLocale?.htmlLang ?? 'en';
 
   return (
-    <html lang="en">
+    <html lang={lang}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -178,44 +182,44 @@ import { useState } from 'react';
 
 export default function App() {
   // --- AUTH SYSTEM DISABLED ---
-  const [isAuth, setIsAuth] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.sessionStorage.getItem('isAuth') === 'true';
-    }
-    return false;
-  });
-  const [input, setInput] = useState('');
-  const [error, setError] = useState('');
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input === 'admin123') {
-      setIsAuth(true);
-      if (typeof window !== 'undefined') {
-        window.sessionStorage.setItem('isAuth', 'true');
-      }
-    } else {
-      setError('Wrong password!');
-    }
-  };
-  if (!isAuth) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
-        <form onSubmit={handleLogin} style={{ background: '#fff', padding: 32, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-          <h2 style={{ marginBottom: 16 }}>Enter Password</h2>
-          <input
-            type="password"
-            value={input}
-            onChange={e => { setInput(e.target.value); setError(''); }}
-            placeholder="Password"
-            style={{ padding: 8, width: 200, marginBottom: 12, border: '1px solid #ccc', borderRadius: 4 }}
-          />
-          <br />
-          <button type="submit" style={{ padding: '8px 24px', borderRadius: 4, background: '#222', color: '#fff', border: 'none' }}>Login</button>
-          {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
-        </form>
-      </div>
-    );
-  }
+  // const [isAuth, setIsAuth] = useState(() => {
+  //   if (typeof window !== 'undefined') {
+  //     return window.sessionStorage.getItem('isAuth') === 'true';
+  //   }
+  //   return false;
+  // });
+  // const [input, setInput] = useState('');
+  // const [error, setError] = useState('');
+  // const handleLogin = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (input === 'admin123') {
+  //     setIsAuth(true);
+  //     if (typeof window !== 'undefined') {
+  //       window.sessionStorage.setItem('isAuth', 'true');
+  //     }
+  //   } else {
+  //     setError('Wrong password!');
+  //   }
+  // };
+  // if (!isAuth) {
+  //   return (
+  //     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
+  //       <form onSubmit={handleLogin} style={{ background: '#fff', padding: 32, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+  //         <h2 style={{ marginBottom: 16 }}>Enter Password</h2>
+  //         <input
+  //           type="password"
+  //           value={input}
+  //           onChange={e => { setInput(e.target.value); setError(''); }}
+  //           placeholder="Password"
+  //           style={{ padding: 8, width: 200, marginBottom: 12, border: '1px solid #ccc', borderRadius: 4 }}
+  //         />
+  //         <br />
+  //         <button type="submit" style={{ padding: '8px 24px', borderRadius: 4, background: '#222', color: '#fff', border: 'none' }}>Login</button>
+  //         {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
+  //       </form>
+  //     </div>
+  //   );
+  // }
   //yukarıyı aç şifreyi aktif et
   const data = useRouteLoaderData<RootLoader>('root');
 

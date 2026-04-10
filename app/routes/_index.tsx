@@ -1,7 +1,8 @@
-import { Await, useLoaderData, Link } from 'react-router';
+import {Await, useLoaderData} from 'react-router';
 import type { Route } from './+types/_index';
 import { Suspense } from 'react';
 import { Image } from '@shopify/hydrogen';
+import {Link} from '~/lib/i18n-router';
 import type {
   FeaturedCollectionFragment,
   RecommendedProductsQuery,
@@ -41,6 +42,63 @@ function safeJsonArray(input: unknown): string[] {
   } catch {
     return [];
   }
+}
+
+type MetaobjectImageLike = {
+  url: string;
+  altText?: string;
+  width?: number;
+  height?: number;
+};
+
+function normalizeReferenceImage(
+  reference: unknown,
+  fallbackAltText?: string,
+): MetaobjectImageLike | null {
+  if (!reference || typeof reference !== 'object') {
+    return null;
+  }
+
+  const imageReference =
+    'image' in reference &&
+    reference.image &&
+    typeof reference.image === 'object' &&
+    'url' in reference.image &&
+    typeof reference.image.url === 'string'
+      ? (reference.image as {
+          url: string;
+          altText?: unknown;
+          width?: unknown;
+          height?: unknown;
+        })
+      : null;
+
+  if (imageReference) {
+    return {
+      url: imageReference.url,
+      altText:
+        'altText' in imageReference && typeof imageReference.altText === 'string'
+          ? imageReference.altText
+          : undefined,
+      width:
+        'width' in imageReference && typeof imageReference.width === 'number'
+          ? imageReference.width
+          : undefined,
+      height:
+        'height' in imageReference && typeof imageReference.height === 'number'
+          ? imageReference.height
+          : undefined,
+    };
+  }
+
+  if ('url' in reference && typeof reference.url === 'string') {
+    return {
+      url: reference.url,
+      altText: fallbackAltText,
+    };
+  }
+
+  return null;
 }
 
 
@@ -154,8 +212,7 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
       const id = `prod${idx}`;
       groups[id] = groups[id] ?? { id };
       if (type === 'img') {
-        const ref = f.reference;
-        const img = ref?.image ?? (ref?.url ? { url: ref.url, altText: f.value ?? '' } : null);
+        const img = normalizeReferenceImage(f.reference, f.value ?? '');
         if (img) {
           groups[id].image = {
             url: img.url,

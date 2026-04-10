@@ -1,13 +1,13 @@
 import {
   data as remixData,
   Form,
-  NavLink,
   Outlet,
   useLoaderData,
 } from 'react-router';
 import type {Route} from './+types/account';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
 import accountMainStyles from '~/styles/accountMain.css?url';
+import {NavLink} from '~/lib/i18n-router';
 
 export function links() {
   return [{rel: 'stylesheet', href: accountMainStyles}];

@@ -33,7 +33,7 @@ export default function UspBar({ items, className }: UspBarProps) {
       className={cx("uspbar !p-0", className)}
     >
       <div className="container mx-auto">
-        <ul role="list" className="uspbar__list">
+        <ul className="uspbar__list">
           {items.map((item, idx) => {
             const key = item.title ? `${item.title}-${idx}` : `usp-${idx}`;
             const hasImg = Boolean(item.icon?.url);

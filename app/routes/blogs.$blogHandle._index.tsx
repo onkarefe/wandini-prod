@@ -1,10 +1,11 @@
-import {Link, useLoaderData} from 'react-router';
+import {useLoaderData} from 'react-router';
 import type {Route} from './+types/blogs.$blogHandle._index';
 import {Image, getPaginationVariables} from '@shopify/hydrogen';
 import type {ArticleItemFragment} from 'storefrontapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogHandleStyles from '~/styles/blogHandle.css?url';
+import {Link} from '~/lib/i18n-router';
 
 export function links() {
   return [{rel: 'stylesheet', href: blogHandleStyles}];

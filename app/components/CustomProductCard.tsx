@@ -28,14 +28,17 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
     if (!emblaApi) return;
     onSelect();
     emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
   }, [emblaApi, onSelect]);
 
   return (
     <a href={productUrl} className="custom-product-card" aria-label={title}>
       <div className="custom-product-card__media" ref={emblaRef}>
         <div className="custom-product-card__container">
-          {displayImages.map((img, idx) => (
-            <div className="custom-product-card__slide" key={idx}>
+          {displayImages.map((img) => (
+            <div className="custom-product-card__slide" key={img.url}>
               <img
                 src={img.url}
                 alt={img.altText || title}
@@ -49,9 +52,9 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
 
       {/* Dots */}
       <div className="custom-product-card__dots">
-        {displayImages.map((_, i) => (
+        {displayImages.map((img, i) => (
           <button
-            key={i}
+            key={`dot-${img.url}`}
             type="button"
             aria-label={`Go to slide ${i + 1}`}
             className={

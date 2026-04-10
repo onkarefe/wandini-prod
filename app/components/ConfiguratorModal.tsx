@@ -83,19 +83,19 @@ export function ConfiguratorModal({
     onClose();
   };
 
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
-  };
-
   return (
-    <div
-      className="configuratorModalOverlay"
-      onClick={handleOverlayClick}
-    >
+    <div className="configuratorModalOverlay" role="presentation">
+      <button
+        type="button"
+        className="configuratorModalBackdrop"
+        onClick={handleClose}
+        aria-label="Close configurator"
+      />
       <div
         className={`configuratorModal${isPreviewOpen ? ' configuratorModal--preview' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Product configurator"
       >
         <button
           type="button"

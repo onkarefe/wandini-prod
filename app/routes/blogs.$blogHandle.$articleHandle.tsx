@@ -1,21 +1,22 @@
-import {Link, useLoaderData} from 'react-router';
+import {useLoaderData} from 'react-router';
 import type {Route} from './+types/blogs.$blogHandle.$articleHandle';
 import {Image} from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogDetailStyles from '~/styles/blogDetail.css?url';
+import {Link} from '~/lib/i18n-router';
 
 export function links() {
   return [{rel: 'stylesheet', href: blogDetailStyles}];
 }
 
 type RelatedArticle = {
-  id: string;
+  id?: string | null;
   handle: string;
   title: string;
   excerpt?: string | null;
   publishedAt: string;
   image?: {
-    id: string;
+    id?: string | null;
     altText?: string | null;
     url: string;
     width?: number | null;
@@ -73,7 +74,7 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
 
   const article = blog.articleByHandle;
   const relatedArticles =
-    blog.articles?.nodes?.filter((item: RelatedArticle) => item.handle !== articleHandle) ?? [];
+    blog.articles?.nodes?.filter((item) => item.handle !== articleHandle) ?? [];
 
   return {article, relatedArticles, blogHandle, blogTitle: blog.title};
 }
@@ -129,7 +130,7 @@ export default function Article() {
             <div className="blog-detail-sidebar__inner">
               <p className="blog-detail-sidebar__eyebrow">More In This Category</p>
               <div className="blog-detail-sidebar__list">
-                {relatedArticles.map((relatedArticle: RelatedArticle) => {
+                {relatedArticles.map((relatedArticle) => {
                   const relatedDate = new Intl.DateTimeFormat('en-US', {
                     year: 'numeric',
                     month: 'long',
@@ -137,7 +138,10 @@ export default function Article() {
                   }).format(new Date(relatedArticle.publishedAt));
 
                   return (
-                    <div className="blog-detail-related-card" key={relatedArticle.id}>
+                    <div
+                      className="blog-detail-related-card"
+                      key={relatedArticle.id ?? relatedArticle.handle}
+                    >
                       <Link
                         className="blog-detail-related-card__link"
                         to={`/blogs/${blogHandle}/${relatedArticle.handle}`}

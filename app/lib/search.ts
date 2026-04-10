@@ -10,9 +10,22 @@ type ResultWithItems<Type extends 'predictive' | 'regular', Items> = {
   result: {total: number; items: Items};
 };
 
+export type SearchArticleResultNode =
+  RegularSearchQuery['articles']['nodes'][number] & {
+    blog?: {
+      handle: string;
+    } | null;
+  };
+
+export type RegularSearchItems = Omit<RegularSearchQuery, 'articles'> & {
+  articles: Omit<RegularSearchQuery['articles'], 'nodes'> & {
+    nodes: SearchArticleResultNode[];
+  };
+};
+
 export type RegularSearchReturn = ResultWithItems<
   'regular',
-  RegularSearchQuery
+  RegularSearchItems
 >;
 export type PredictiveSearchReturn = ResultWithItems<
   'predictive',
@@ -31,6 +44,29 @@ export function getEmptyPredictiveSearchResult(): PredictiveSearchReturn['result
       products: [],
       pages: [],
       queries: [],
+    },
+  };
+}
+
+export function getEmptyRegularSearchResult(): RegularSearchReturn['result'] {
+  return {
+    total: 0,
+    items: {
+      articles: {
+        nodes: [],
+      } as RegularSearchItems['articles'],
+      pages: {
+        nodes: [],
+      } as RegularSearchItems['pages'],
+      products: {
+        nodes: [],
+        pageInfo: {
+          hasNextPage: false,
+          hasPreviousPage: false,
+          startCursor: null,
+          endCursor: null,
+        },
+      } as RegularSearchItems['products'],
     },
   };
 }
@@ -68,7 +104,7 @@ export function urlWithTrackingParams({
 }: UrlWithTrackingParams) {
   let search = new URLSearchParams({
     ...extraParams,
-    q: encodeURIComponent(term),
+    q: term,
   }).toString();
 
   if (trackingParams) {

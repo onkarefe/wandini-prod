@@ -173,28 +173,28 @@ function computeComposition(inputs: CompositionInputs): CompositionResult {
     ...(inputs?.config || {}),
   };
 
-  const W_s = Math.max(1, inputs.stageW || 1);
-  const H_s = Math.max(1, inputs.stageH || 1);
-  const W_r = Math.max(1, inputs.realWcm || 1);
-  const H_r = Math.max(1, inputs.realHcm || 1);
-  const r = aspectRatio(W_r, H_r);
+  const stageWidth = Math.max(1, inputs.stageW || 1);
+  const stageHeight = Math.max(1, inputs.stageH || 1);
+  const realWidth = Math.max(1, inputs.realWcm || 1);
+  const realHeight = Math.max(1, inputs.realHcm || 1);
+  const r = aspectRatio(realWidth, realHeight);
 
   const { frontVis, sideVis, capH, capV, minF } = computeFrontVis(
     r,
-    W_r,
-    W_s,
-    H_s,
+    realWidth,
+    stageWidth,
+    stageHeight,
     cfg,
   );
 
-  const fFinal = cfg.HARD_CAP ? Math.min(frontVis, capH, capV) : frontVis;
-  const wallHeight = computeWallHeightFromRatio(fFinal, r, W_s, H_s, cfg);
+  const finalFrontVis = cfg.HARD_CAP ? Math.min(frontVis, capH, capV) : frontVis;
+  const wallHeight = computeWallHeightFromRatio(finalFrontVis, r, stageWidth, stageHeight, cfg);
 
   return {
     ratio: r,
-    frontVis: fFinal,
-    wallHeight: wallHeight,
-    sideVis: sideVis,
+    frontVis: finalFrontVis,
+    wallHeight,
+    sideVis,
     limits: {
       minFrontVis: minF,
       capHorizontal: capH,
@@ -273,7 +273,6 @@ async function createCroppedDataUrl(
     img.crossOrigin = 'anonymous';
 
     img.onload = () => {
-      console.log('[ConfigratorScene] image loaded', { src: imageUrl, naturalW: img.naturalWidth, naturalH: img.naturalHeight, crop });
       try {
         const naturalW = img.naturalWidth || 0;
         const naturalH = img.naturalHeight || 0;
@@ -312,7 +311,6 @@ async function createCroppedDataUrl(
         off.height = safeH;
         const ctx = off.getContext('2d');
         if (!ctx) {
-          console.log('[ConfigratorScene] canvas ctx missing');
           resolve(null);
           return;
         }
@@ -338,13 +336,11 @@ async function createCroppedDataUrl(
 
         try {
           const url = off.toDataURL('image/jpeg', 0.92);
-          console.log('[ConfigratorScene] dataUrl ok', { len: url.length });
           resolve(url);
         } catch (err) {
           console.error('toDataURL jpeg error', err);
           try {
             const fallback = off.toDataURL();
-            console.log('[ConfigratorScene] dataUrl fallback ok', { len: fallback.length });
             resolve(fallback);
           } catch (err2) {
             console.error('toDataURL png error', err2);
@@ -396,12 +392,11 @@ export function ConfigratorScene({
     let cancelled = false;
 
     if (!isOpen || !crop) {
-      console.log('[ConfigratorScene] preview skip', { isOpen, crop });
       setPreviewUrl(null);
       return;
     }
 
-    (async () => {
+    void (async () => {
       const url = await createCroppedDataUrl(imageUrl, crop);
       if (!cancelled) {
         setPreviewUrl(url);
@@ -485,12 +480,6 @@ export function ConfigratorScene({
     return () => window.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
 
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   if (!isOpen) return null;
 
   // Duvar görüntüsü: öncelik crop; yoksa tam görsel
@@ -516,6 +505,9 @@ export function ConfigratorScene({
   const dialogContent = (
     <div
       className={`configuratorSceneDialog${inline ? ' configuratorSceneDialog--inline' : ''}`}
+      role={inline ? undefined : 'dialog'}
+      aria-modal={inline ? undefined : true}
+      aria-label={inline ? undefined : 'Product preview in room'}
     >
       {showCloseButton && (
         <button
@@ -567,13 +559,13 @@ export function ConfigratorScene({
   }
 
   return (
-    <div
-      className="configuratorSceneOverlay"
-      onClick={handleOverlayClick}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Product preview in room"
-    >
+    <div className="configuratorSceneOverlay" role="presentation">
+      <button
+        type="button"
+        className="configuratorSceneBackdrop"
+        onClick={onClose}
+        aria-label="Close preview"
+      />
       {dialogContent}
     </div>
   );

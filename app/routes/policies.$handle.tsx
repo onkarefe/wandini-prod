@@ -1,6 +1,7 @@
-import {Link, useLoaderData} from 'react-router';
+import {useLoaderData} from 'react-router';
 import type {Route} from './+types/policies.$handle';
 import {type Shop} from '@shopify/hydrogen/storefront-api-types';
+import {Link} from '~/lib/i18n-router';
 
 type SelectedPolicies = keyof Pick<
   Shop,

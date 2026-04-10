@@ -558,6 +558,15 @@
   align-items: center;
 }
 
+.socialLinksButton {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
 .socialLinks svg {
   width: 24px;
   height: 24px;

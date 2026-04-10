@@ -1,5 +1,46 @@
 import {redirect} from 'react-router';
 import type {Route} from './+types/discount.$code';
+import {getLocaleFromRequest, prefixPathWithLocale} from '~/lib/locale';
+
+const INTERNAL_REDIRECT_ORIGIN = 'https://wandini.internal';
+
+function getSafeRedirectPath(redirectParam: string | null) {
+  const trimmedRedirect = redirectParam?.trim();
+
+  if (
+    !trimmedRedirect ||
+    !trimmedRedirect.startsWith('/') ||
+    trimmedRedirect.startsWith('//') ||
+    trimmedRedirect.includes('\\')
+  ) {
+    return '/';
+  }
+
+  try {
+    const redirectUrl = new URL(trimmedRedirect, INTERNAL_REDIRECT_ORIGIN);
+
+    if (redirectUrl.origin !== INTERNAL_REDIRECT_ORIGIN) {
+      return '/';
+    }
+
+    return `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
+  } catch {
+    return '/';
+  }
+}
+
+function buildRedirectUrl(
+  redirectPath: string,
+  searchParams: URLSearchParams,
+) {
+  const redirectUrl = new URL(redirectPath, INTERNAL_REDIRECT_ORIGIN);
+
+  for (const [key, value] of searchParams) {
+    redirectUrl.searchParams.append(key, value);
+  }
+
+  return `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
+}
 
 /**
  * Automatically applies a discount found on the url
@@ -18,31 +59,40 @@ export async function loader({request, context, params}: Route.LoaderArgs) {
 
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
-  let redirectParam =
-    searchParams.get('redirect') || searchParams.get('return_to') || '/';
-
-  if (redirectParam.includes('//')) {
-    // Avoid redirecting to external URLs to prevent phishing attacks
-    redirectParam = '/';
-  }
+  const redirectPath = getSafeRedirectPath(
+    searchParams.get('redirect') || searchParams.get('return_to') || '/',
+  );
 
   searchParams.delete('redirect');
   searchParams.delete('return_to');
 
-  const redirectUrl = `${redirectParam}?${searchParams}`;
+  const redirectUrl = buildRedirectUrl(
+    prefixPathWithLocale(redirectPath, getLocaleFromRequest(request)),
+    searchParams,
+  );
 
   if (!code) {
     return redirect(redirectUrl);
   }
 
-  const result = await cart.updateDiscountCodes([code]);
-  const headers = cart.setCartId(result.cart.id);
+  try {
+    const result = await cart.updateDiscountCodes([code]);
+    const cartId = result.cart?.id;
 
-  // Using set-cookie on a 303 redirect will not work if the domain origin have port number (:3000)
-  // If there is no cart id and a new cart id is created in the progress, it will not be set in the cookie
-  // on localhost:3000
-  return redirect(redirectUrl, {
-    status: 303,
-    headers,
-  });
+    if (!cartId) {
+      return redirect(redirectUrl, {status: 303});
+    }
+
+    const headers = cart.setCartId(cartId);
+
+    // Using set-cookie on a 303 redirect will not work if the domain origin have port number (:3000)
+    // If there is no cart id and a new cart id is created in the progress, it will not be set in the cookie
+    // on localhost:3000
+    return redirect(redirectUrl, {
+      status: 303,
+      headers,
+    });
+  } catch {
+    return redirect(redirectUrl, {status: 303});
+  }
 }

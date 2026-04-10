@@ -1,5 +1,5 @@
 import {useRef} from 'react';
-import {Link, useLoaderData, useNavigation, useSearchParams} from 'react-router';
+import {useLoaderData, useNavigation, useSearchParams} from 'react-router';
 import {Money, flattenConnection, getPaginationVariables} from '@shopify/hydrogen';
 import type {Route} from './+types/account.orders._index';
 import {
@@ -14,6 +14,7 @@ import type {
   OrderItemFragment,
 } from 'customer-accountapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {Link} from '~/lib/i18n-router';
 
 type OrdersLoaderData = {
   customer: CustomerOrdersFragment;

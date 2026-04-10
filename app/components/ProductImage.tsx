@@ -1,25 +1,24 @@
-
-
-
 import useEmblaCarousel from 'embla-carousel-react';
-import { useCallback, useEffect, useState } from 'react';
-import { Image } from '@shopify/hydrogen';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+import {Image} from '@shopify/hydrogen';
+import type {ProductFragment} from 'storefrontapi.generated';
 import '../styles/customProductCard.css';
 import '../styles/productDetail.css';
 
-// images: Product['images']
+type ProductImages = ProductFragment['images'];
+type ProductImageNode = NonNullable<ProductImages>['edges'][number]['node'];
 
-
-
-export function ProductImage({ images }: { images: any }) {
+export function ProductImage({
+  images,
+}: {
+  images: ProductImages | null | undefined;
+}) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
-  if (!images || !images.edges || images.edges.length === 0) {
-    return <div className="product-image" />;
-  }
-  const imageNodes = images.edges.map(({ node }: any) => node);
+  const [emblaRef, emblaApi] = useEmblaCarousel({loop: false});
+  const imageNodes = useMemo<ProductImageNode[]>(() => {
+    return (images?.edges ?? []).map(({node}) => node);
+  }, [images]);
 
-  // Swipe ile ana görsel değişince thumbnail'ı güncelle
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     setSelectedIndex(emblaApi.selectedScrollSnap());
@@ -27,24 +26,40 @@ export function ProductImage({ images }: { images: any }) {
 
   useEffect(() => {
     if (!emblaApi) return;
+
+    onSelect();
     emblaApi.on('select', onSelect);
-    // İlk renderda da doğru indexte başlasın
-    emblaApi.scrollTo(selectedIndex);
+
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
   }, [emblaApi, onSelect]);
 
-  // Thumbnail'a tıklayınca ana slider'ı güncelle
-  const onThumbClick = (idx: number) => {
-    setSelectedIndex(idx);
-    if (emblaApi) emblaApi.scrollTo(idx);
-  };
+  const onThumbClick = useCallback(
+    (index: number) => {
+      setSelectedIndex(index);
+      emblaApi?.scrollTo(index);
+    },
+    [emblaApi],
+  );
+
+  useEffect(() => {
+    if (selectedIndex <= imageNodes.length - 1) return;
+
+    setSelectedIndex(0);
+    emblaApi?.scrollTo(0);
+  }, [emblaApi, imageNodes.length, selectedIndex]);
+
+  if (imageNodes.length === 0) {
+    return <div className="product-image" aria-hidden="true" />;
+  }
 
   return (
     <div className="product-image-carousel">
-      {/* Ana büyük görsel swipe edilebilir */}
-      <div className="embla embla--main" ref={emblaRef} style={{ marginBottom: 16 }}>
+      <div className="embla embla--main" ref={emblaRef} style={{marginBottom: 16}}>
         <div className="embla__container">
-          {imageNodes.map((img: any, idx: number) => (
-            <div className="embla__slide" key={img.id}>
+          {imageNodes.map((img, index) => (
+            <div className="embla__slide" key={img.id ?? img.url ?? `product-image-${index}`}>
               <Image
                 alt={img.altText || 'Product Image'}
                 aspectRatio="1/1"
@@ -55,24 +70,30 @@ export function ProductImage({ images }: { images: any }) {
           ))}
         </div>
       </div>
-      {/* Thumbnail bar - ilk 4 küçük görsel */}
-      <div className="thumbs-bar">
-        {imageNodes.slice(0, 4).map((img: any, idx: number) => (
-          <div
-            key={img.id + '-thumb'}
-            className='thumbsImgBox'
-            onClick={() => onThumbClick(idx)}
-            style={{
-              border: idx === selectedIndex ? '2px solid #b4b4b4ff' : '2px solid #eee',
-              opacity: idx === selectedIndex ? 1 : 0.5,
-            }}
-          >
-            <img
-              src={img.url}
-              alt={img.altText || 'Product Thumbnail'}
-            />
-          </div>
-        ))}
+
+      <div className="thumbs-bar" role="tablist" aria-label="Product image thumbnails">
+        {imageNodes.slice(0, 4).map((img, index) => {
+          const isSelected = index === selectedIndex;
+
+          return (
+            <button
+              key={`${img.id ?? img.url ?? `product-image-${index}`}-thumb`}
+              type="button"
+              className="thumbsImgBox"
+              onClick={() => onThumbClick(index)}
+              aria-label={`Show product image ${index + 1}`}
+              aria-pressed={isSelected}
+              style={{
+                padding: 0,
+                background: 'transparent',
+                border: isSelected ? '2px solid #b4b4b4ff' : '2px solid #eee',
+                opacity: isSelected ? 1 : 0.5,
+              }}
+            >
+              <img src={img.url} alt={img.altText || 'Product Thumbnail'} />
+            </button>
+          );
+        })}
       </div>
     </div>
   );

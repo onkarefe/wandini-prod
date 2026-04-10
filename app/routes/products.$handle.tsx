@@ -3,7 +3,7 @@ import { redirect, useLoaderData, useNavigate } from 'react-router';
 import '~/styles/productDetail.css';
 import type { Route } from './+types/products.$handle';
 
-import ProductDetailTabs from '~/components/ProductDetailTabs';
+import { ProductDetailTabs } from '~/components/ProductDetailTabs';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -18,6 +18,7 @@ import { ProductSize } from '~/components/productSize';
 import { AddToCartButton } from '~/components/AddToCartButton';
 import { ConfiguratorModal } from '~/components/ConfiguratorModal';
 import { redirectIfHandleIsLocalized } from '~/lib/redirect';
+import {usePrefixPathWithLocale} from '~/lib/i18n-router';
 
 export const meta: Route.MetaFunction = ({ data }) => {
   return [
@@ -85,11 +86,17 @@ function loadDeferredData({ context, params }: Route.LoaderArgs) {
 function renderShopifyRichText(richText: any) {
   if (!richText || !richText.children) return null;
 
-  return richText.children.map((block: any, i: number) => {
+  return richText.children.map((block: any) => {
     if (block.type === 'paragraph') {
+      const paragraphText = block.children
+        ?.map((child: any) => child.value)
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+
       return (
-        <p key={i}>
-          {block.children.map((child: any, j: number) => child.value)}
+        <p key={paragraphText || 'paragraph'}>
+          {block.children.map((child: any) => child.value)}
         </p>
       );
     }
@@ -156,9 +163,39 @@ type SelectedQualitySummary = {
   properties: string[];
 } | null;
 
+type ShopifyRichTextChild = {
+  value?: string | null;
+};
+
+type ShopifyRichTextBlock = {
+  type?: string | null;
+  children?: ShopifyRichTextChild[] | null;
+};
+
+type ShopifyRichText = {
+  children?: ShopifyRichTextBlock[] | null;
+};
+
+type InstallationVideoValue = {
+  url?: string | null;
+};
+
+function parseJsonMetafield<T>(value?: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
+}
+
 export default function Product() {
   const { product } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
+  const cartPath = usePrefixPathWithLocale('/cart');
 
   // Configurator modu
   const [isConfiguring, setIsConfiguring] = useState(false);
@@ -202,6 +239,16 @@ export default function Product() {
     deliveryAndShipping,
     installationVideo,
   } = product;
+
+  const parsedProductInfo = parseJsonMetafield<ShopifyRichText>(
+    productInfo?.value,
+  );
+  const parsedDeliveryAndShipping = parseJsonMetafield<ShopifyRichText>(
+    deliveryAndShipping?.value,
+  );
+  const parsedInstallationVideo = parseJsonMetafield<InstallationVideoValue>(
+    installationVideo?.value,
+  );
 
   function getPropertiesForQuality(value: any) {
     if (value?.firstSelectableVariant?.printQuality?.reference?.properties?.value) {
@@ -341,11 +388,13 @@ export default function Product() {
 
   const confirmButton =
     selectedVariant && configuratorPayload ? (
-      <AddToCartButton
-        disabled={!selectedVariant.availableForSale || !isSizeValid || !crop}
-        onClick={() => {
-          setTimeout(() => navigate('/cart'), 0);
-        }}
+        <AddToCartButton
+          disabled={!selectedVariant.availableForSale || !isSizeValid || !crop}
+          onClick={() => {
+          setTimeout(() => {
+            void navigate(cartPath);
+          }, 0);
+          }}
         lines={[
           {
             merchandiseId: selectedVariant.id,
@@ -371,6 +420,18 @@ export default function Product() {
     'Installation Video',
   ];
 
+  const productInfoContent = parsedProductInfo
+    ? renderShopifyRichText(parsedProductInfo)
+    : null;
+
+  const deliveryAndShippingContent = parsedDeliveryAndShipping
+    ? renderShopifyRichText(parsedDeliveryAndShipping)
+    : null;
+
+  const installationVideoNode = parsedInstallationVideo?.url
+    ? renderVideoFromUrl(parsedInstallationVideo.url)
+    : null;
+
   const tabContents = [
     // Description tab
     descriptionHtml ? (
@@ -383,26 +444,24 @@ export default function Product() {
     ),
 
     // Product Info tab
-    productInfo?.value ? (
-      renderShopifyRichText(JSON.parse(productInfo.value))
+    productInfoContent ? (
+      productInfoContent
     ) : (
       <p key="noinfo">Ürün bilgisi bulunamadı.</p>
     ),
 
     // Delivery & Shipping tab
-    deliveryAndShipping?.value ? (
-      renderShopifyRichText(JSON.parse(deliveryAndShipping.value))
+    deliveryAndShippingContent ? (
+      deliveryAndShippingContent
     ) : (
       <p key="noshipping">Teslimat &amp; kargo bilgisi yok.</p>
     ),
 
     // Installation Video tab
-    installationVideo?.value
+    parsedInstallationVideo?.url
       ? (() => {
         try {
-          const videoObj = JSON.parse(installationVideo.value) as {
-            url?: string;
-          };
+          const videoObj = parsedInstallationVideo;
 
           if (videoObj?.url) {
             const videoNode = renderVideoFromUrl(videoObj.url);
