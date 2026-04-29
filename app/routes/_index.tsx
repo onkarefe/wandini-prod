@@ -226,7 +226,17 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
       } else if (type === 'subtitle') {
         groups[id].subtitle = f.value ?? '';
       } else if (type === 'link') {
-        groups[id].link = f.value ?? '';
+        const collectionHandle =
+          f.reference &&
+            typeof f.reference === 'object' &&
+            'handle' in f.reference &&
+            typeof f.reference.handle === 'string'
+            ? f.reference.handle
+            : null;
+
+        groups[id].link = collectionHandle
+          ? `/collections/${collectionHandle}`
+          : (f.value ?? '');
       }
     }
     allProducts = Object.keys(groups)
@@ -421,6 +431,10 @@ export const GET_ALL_PRODUCTS_METAOBJECT_QUERY = `#graphql
                   width
                   height
                 }
+              }
+              ... on Collection {
+                id
+                handle
               }
             }
           }

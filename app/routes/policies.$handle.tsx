@@ -3,6 +3,63 @@ import type {Route} from './+types/policies.$handle';
 import {type Shop} from '@shopify/hydrogen/storefront-api-types';
 import {Link} from '~/lib/i18n-router';
 
+const BLOCKED_HTML_TAGS = [
+  'script',
+  'iframe',
+  'object',
+  'embed',
+  'form',
+  'input',
+  'textarea',
+  'select',
+  'option',
+  'button',
+  'link',
+  'meta',
+  'base',
+] as const;
+
+function sanitizeInlineStyles(html: string) {
+  return html.replace(/\sstyle\s*=\s*(["'])(.*?)\1/gi, (_match, quote, rawStyle) => {
+    const sanitizedStyle = String(rawStyle)
+      .replace(/expression\s*\([^)]*\)/gi, '')
+      .replace(/url\s*\(\s*(['"]?)\s*javascript:[^)]+\1\s*\)/gi, '')
+      .replace(/-moz-binding\s*:[^;]+;?/gi, '')
+      .trim();
+
+    return sanitizedStyle ? ` style=${quote}${sanitizedStyle}${quote}` : '';
+  });
+}
+
+function sanitizePolicyHtml(html: string | null | undefined) {
+  if (!html) {
+    return '';
+  }
+
+  let sanitizedHtml = html;
+
+  for (const tagName of BLOCKED_HTML_TAGS) {
+    const blockTagPattern = new RegExp(
+      `<${tagName}\\b[^>]*>[\\s\\S]*?<\\/${tagName}>`,
+      'gi',
+    );
+    const selfClosingTagPattern = new RegExp(`<${tagName}\\b[^>]*\\/?>`, 'gi');
+
+    sanitizedHtml = sanitizedHtml
+      .replace(blockTagPattern, '')
+      .replace(selfClosingTagPattern, '');
+  }
+
+  sanitizedHtml = sanitizeInlineStyles(sanitizedHtml)
+    .replace(/\son[a-z-]+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, '')
+    .replace(
+      /\s(href|src|xlink:href|formaction|poster|srcdoc)\s*=\s*(["'])\s*(javascript:|vbscript:|data:(?!image\/))[\s\S]*?\2/gi,
+      (_match, attributeName, quote) => ` ${attributeName}=${quote}#${quote}`,
+    );
+
+  return sanitizedHtml;
+}
+
 type SelectedPolicies = keyof Pick<
   Shop,
   'privacyPolicy' | 'shippingPolicy' | 'termsOfService' | 'refundPolicy'
@@ -39,7 +96,12 @@ export async function loader({params, context}: Route.LoaderArgs) {
     throw new Response('Could not find the policy', {status: 404});
   }
 
-  return {policy};
+  return {
+    policy: {
+      ...policy,
+      body: sanitizePolicyHtml(policy.body),
+    },
+  };
 }
 
 export default function Policy() {

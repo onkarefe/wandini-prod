@@ -27,6 +27,7 @@ export const meta: Route.MetaFunction = () => {
 
 export async function loader({request, context}: Route.LoaderArgs) {
   const {customerAccount} = context;
+  customerAccount.handleAuthStatus();
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 20,
   });
@@ -44,7 +45,7 @@ export async function loader({request, context}: Route.LoaderArgs) {
   });
 
   if (errors?.length || !data?.customer) {
-    throw Error('Customer orders not found');
+    throw new Response('Customer orders not found', {status: 404});
   }
 
   return {customer: data.customer, filters};

@@ -32,6 +32,44 @@ export const meta: Route.MetaFunction = () => {
   return [{title: 'Addresses'}];
 };
 
+const NEW_ADDRESS_ID = 'NEW_ADDRESS_ID';
+
+const ADDRESS_ERROR_MESSAGES = {
+  generic: 'We could not process this address request right now. Please try again.',
+  create: 'We could not create this address right now. Please try again.',
+  update: 'We could not update this address right now. Please try again.',
+  delete: 'We could not delete this address right now. Please try again.',
+  unauthorized: 'Please sign in again to manage your addresses.',
+  invalidRequest: 'We could not process this address request. Please refresh and try again.',
+  methodNotAllowed: 'This address request method is not allowed.',
+} as const;
+
+function getAddressErrorMessage(error: unknown, fallback: string) {
+  if (import.meta.env.DEV && error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
+}
+
+function addressErrorResponse(
+  addressId: string | null | undefined,
+  error: unknown,
+  fallback: string,
+  status = 400,
+) {
+  const safeAddressId = addressId || NEW_ADDRESS_ID;
+
+  return data<ActionResponse>(
+    {
+      error: {
+        [safeAddressId]: getAddressErrorMessage(error, fallback),
+      },
+    },
+    {status},
+  );
+}
+
 export async function loader({context}: Route.LoaderArgs) {
   context.customerAccount.handleAuthStatus();
 
@@ -48,17 +86,21 @@ export async function action({request, context}: Route.ActionArgs) {
       ? String(form.get('addressId'))
       : null;
     if (!addressId) {
-      throw new Error('You must provide an address id.');
+      return addressErrorResponse(
+        NEW_ADDRESS_ID,
+        null,
+        ADDRESS_ERROR_MESSAGES.invalidRequest,
+      );
     }
 
     // this will ensure redirecting to login never happen for mutatation
     const isLoggedIn = await customerAccount.isLoggedIn();
     if (!isLoggedIn) {
-      return data(
-        {error: {[addressId]: 'Unauthorized'}},
-        {
-          status: 401,
-        },
+      return addressErrorResponse(
+        addressId,
+        null,
+        ADDRESS_ERROR_MESSAGES.unauthorized,
+        401,
       );
     }
 
@@ -119,19 +161,10 @@ export async function action({request, context}: Route.ActionArgs) {
             defaultAddress,
           };
         } catch (error: unknown) {
-          if (error instanceof Error) {
-            return data(
-              {error: {[addressId]: error.message}},
-              {
-                status: 400,
-              },
-            );
-          }
-          return data(
-            {error: {[addressId]: error}},
-            {
-              status: 400,
-            },
+          return addressErrorResponse(
+            addressId,
+            error,
+            ADDRESS_ERROR_MESSAGES.create,
           );
         }
       }
@@ -169,19 +202,10 @@ export async function action({request, context}: Route.ActionArgs) {
             defaultAddress,
           };
         } catch (error: unknown) {
-          if (error instanceof Error) {
-            return data(
-              {error: {[addressId]: error.message}},
-              {
-                status: 400,
-              },
-            );
-          }
-          return data(
-            {error: {[addressId]: error}},
-            {
-              status: 400,
-            },
+          return addressErrorResponse(
+            addressId,
+            error,
+            ADDRESS_ERROR_MESSAGES.update,
           );
         }
       }
@@ -213,46 +237,28 @@ export async function action({request, context}: Route.ActionArgs) {
 
           return {error: null, deletedAddress: addressId};
         } catch (error: unknown) {
-          if (error instanceof Error) {
-            return data(
-              {error: {[addressId]: error.message}},
-              {
-                status: 400,
-              },
-            );
-          }
-          return data(
-            {error: {[addressId]: error}},
-            {
-              status: 400,
-            },
+          return addressErrorResponse(
+            addressId,
+            error,
+            ADDRESS_ERROR_MESSAGES.delete,
           );
         }
       }
 
       default: {
-        return data(
-          {error: {[addressId]: 'Method not allowed'}},
-          {
-            status: 405,
-          },
+        return addressErrorResponse(
+          addressId,
+          null,
+          ADDRESS_ERROR_MESSAGES.methodNotAllowed,
+          405,
         );
       }
     }
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      return data(
-        {error: error.message},
-        {
-          status: 400,
-        },
-      );
-    }
-    return data(
-      {error},
-      {
-        status: 400,
-      },
+    return addressErrorResponse(
+      NEW_ADDRESS_ID,
+      error,
+      ADDRESS_ERROR_MESSAGES.generic,
     );
   }
 }
@@ -330,7 +336,7 @@ function NewAddressForm() {
 
   return (
     <AddressForm
-      addressId={'NEW_ADDRESS_ID'}
+      addressId={NEW_ADDRESS_ID}
       address={newAddress}
       defaultAddress={null}
       primaryMethod="POST"

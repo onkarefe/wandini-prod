@@ -242,14 +242,19 @@ export default function App() {
 
 export function ErrorBoundary() {
   const error = useRouteError();
-  let errorMessage = 'Unknown error';
+  const isDevelopment = import.meta.env.DEV;
+  let errorMessage = 'Something went wrong.';
   let errorStatus = 500;
 
   if (isRouteErrorResponse(error)) {
-    errorMessage = error?.data?.message ?? error.data;
     errorStatus = error.status;
+    if (isDevelopment) {
+      errorMessage = error?.data?.message ?? error.data ?? errorMessage;
+    }
   } else if (error instanceof Error) {
-    errorMessage = error.message;
+    if (isDevelopment) {
+      errorMessage = error.message;
+    }
   }
 
   return (

@@ -17,6 +17,22 @@ import type {PredictiveSearchQuery} from 'storefrontapi.generated';
 type SearchPageProduct =
   RegularSearchReturn['result']['items']['products']['nodes'][number];
 
+const DEFAULT_PREDICTIVE_SEARCH_LIMIT = 5;
+const MAX_PREDICTIVE_SEARCH_LIMIT = 10;
+
+function getPredictiveSearchLimit(rawLimit: string | null) {
+  const parsedLimit = Number(rawLimit);
+
+  if (!Number.isFinite(parsedLimit)) {
+    return DEFAULT_PREDICTIVE_SEARCH_LIMIT;
+  }
+
+  return Math.min(
+    MAX_PREDICTIVE_SEARCH_LIMIT,
+    Math.max(1, Math.floor(parsedLimit)),
+  );
+}
+
 export const meta: Route.MetaFunction = () => {
   return [{title: 'Hydrogen | Search'}];
 };
@@ -32,9 +48,9 @@ export async function loader({request, context}: Route.LoaderArgs) {
       : await regularSearch({request, context});
   } catch (error) {
     console.error(error);
-
-    const errorMessage =
-      error instanceof Error ? error.message : 'Search failed unexpectedly.';
+    const errorMessage = import.meta.env.DEV && error instanceof Error
+      ? error.message
+      : 'Search is temporarily unavailable.';
 
     if (isPredictive) {
       return {
@@ -459,7 +475,7 @@ async function predictiveSearch({
   const {storefront} = context;
   const url = new URL(request.url);
   const term = String(url.searchParams.get('q') || '').trim();
-  const limit = Number(url.searchParams.get('limit') || 10);
+  const limit = getPredictiveSearchLimit(url.searchParams.get('limit'));
   const type = 'predictive';
 
   if (!term) {

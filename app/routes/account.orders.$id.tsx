@@ -14,11 +14,20 @@ export const meta: Route.MetaFunction = ({data}) => {
 
 export async function loader({params, context, request}: Route.LoaderArgs) {
   const {customerAccount} = context;
+  customerAccount.handleAuthStatus();
+
   if (!params.id) {
     return redirectToLocalePath(request, '/account/orders');
   }
 
-  const orderId = atob(params.id);
+  let orderId: string;
+
+  try {
+    orderId = atob(params.id);
+  } catch {
+    throw new Response('Order not found', {status: 404});
+  }
+
   const {data, errors}: {data: OrderQuery; errors?: Array<{message: string}>} =
     await customerAccount.query(CUSTOMER_ORDER_QUERY, {
       variables: {
@@ -28,7 +37,7 @@ export async function loader({params, context, request}: Route.LoaderArgs) {
     });
 
   if (errors?.length || !data?.order) {
-    throw new Error('Order not found');
+    throw new Response('Order not found', {status: 404});
   }
 
   const {order} = data;
@@ -96,24 +105,19 @@ export default function OrderRoute() {
             <tr>
               <th scope="col">Product</th>
               <th scope="col">Price</th>
-              <th scope="col">Quantity</th>
               <th scope="col">Total</th>
             </tr>
           </thead>
           <tbody>
-            {lineItems.map((lineItem, lineItemIndex) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <OrderLineRow key={lineItemIndex} lineItem={lineItem} />
+            {lineItems.map((lineItem) => (
+              <OrderLineRow key={lineItem.id} lineItem={lineItem} />
             ))}
           </tbody>
           <tfoot>
             {((discountValue && discountValue.amount) ||
               discountPercentage) && (
               <tr>
-                <th scope="row" colSpan={3}>
-                  <p>Discounts</p>
-                </th>
-                <th scope="row">
+                <th scope="row" colSpan={2}>
                   <p>Discounts</p>
                 </th>
                 <td>
@@ -126,10 +130,7 @@ export default function OrderRoute() {
               </tr>
             )}
             <tr>
-              <th scope="row" colSpan={3}>
-                <p>Subtotal</p>
-              </th>
-              <th scope="row">
+              <th scope="row" colSpan={2}>
                 <p>Subtotal</p>
               </th>
               <td>
@@ -137,21 +138,15 @@ export default function OrderRoute() {
               </td>
             </tr>
             <tr>
-              <th scope="row" colSpan={3}>
+              <th scope="row" colSpan={2}>
                 Tax
-              </th>
-              <th scope="row">
-                <p>Tax</p>
               </th>
               <td>
                 <Money data={order.totalTax!} />
               </td>
             </tr>
             <tr>
-              <th scope="row" colSpan={3}>
-                Total
-              </th>
-              <th scope="row">
+              <th scope="row" colSpan={2}>
                 <p>Total</p>
               </th>
               <td>
@@ -195,7 +190,40 @@ export default function OrderRoute() {
   );
 }
 
+function getLineItemDisplayTotal(lineItem: OrderLineItemFullFragment) {
+  if (lineItem.totalPriceWithDiscounts) {
+    return lineItem.totalPriceWithDiscounts;
+  }
+
+  if (lineItem.totalPrice) {
+    return lineItem.totalPrice;
+  }
+
+  if (lineItem.currentTotalPrice) {
+    return lineItem.currentTotalPrice;
+  }
+
+  if (!lineItem.price) {
+    return null;
+  }
+
+  const unitPriceAmount = Number(lineItem.price.amount);
+  const totalDiscountAmount = Number(lineItem.totalDiscount?.amount ?? 0);
+
+  if (!Number.isFinite(unitPriceAmount) || !Number.isFinite(totalDiscountAmount)) {
+    return lineItem.price;
+  }
+
+  return {
+    amount: Math.max(0, unitPriceAmount * lineItem.quantity - totalDiscountAmount)
+      .toFixed(2),
+    currencyCode: lineItem.price.currencyCode,
+  };
+}
+
 function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
+  const lineTotal = getLineItemDisplayTotal(lineItem);
+
   return (
     <tr key={lineItem.id}>
       <td>
@@ -214,9 +242,8 @@ function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
       <td>
         <Money data={lineItem.price!} />
       </td>
-      <td>{lineItem.quantity}</td>
       <td>
-        <Money data={lineItem.totalDiscount!} />
+        {lineTotal ? <Money data={lineTotal} /> : <span>-</span>}
       </td>
     </tr>
   );

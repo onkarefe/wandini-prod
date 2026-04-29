@@ -19,6 +19,7 @@ export function shouldRevalidate() {
 
 export async function loader({context}: Route.LoaderArgs) {
   const {customerAccount} = context;
+  customerAccount.handleAuthStatus();
   const {data, errors} = await customerAccount.query(CUSTOMER_DETAILS_QUERY, {
     variables: {
       language: customerAccount.i18n.language,
@@ -26,7 +27,7 @@ export async function loader({context}: Route.LoaderArgs) {
   });
 
   if (errors?.length || !data?.customer) {
-    throw new Error('Customer not found');
+    throw new Response('Customer not found', {status: 404});
   }
 
   return remixData(

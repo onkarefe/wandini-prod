@@ -7,6 +7,23 @@ import {
 } from '@shopify/hydrogen';
 import type {EntryContext} from 'react-router';
 
+function toHttpsOrigin(value?: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const url =
+      value.startsWith('http://') || value.startsWith('https://')
+        ? new URL(value)
+        : new URL(`https://${value}`);
+
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
 export default async function handleRequest(
   request: Request,
   responseStatusCode: number,
@@ -17,6 +34,11 @@ export default async function handleRequest(
   // Development ortamında localhost'a izin vermek için ekstra kaynaklar
   const localDevSources =
     process.env.NODE_ENV === 'development' ? ['http://localhost:*'] : [];
+  const checkoutOrigin = toHttpsOrigin(context.env.PUBLIC_CHECKOUT_DOMAIN);
+  const storeOrigin = toHttpsOrigin(context.env.PUBLIC_STORE_DOMAIN);
+  const formActionSources = ["'self'", checkoutOrigin, storeOrigin].filter(
+    Boolean,
+  );
 
   const {nonce, header, NonceProvider} = createContentSecurityPolicy({
     shop: {
@@ -57,6 +79,10 @@ export default async function handleRequest(
       'https://www.youtube.com',
       'https://www.youtube-nocookie.com',
     ],
+    objectSrc: ["'none'"],
+    baseUri: ["'self'"],
+    formAction: formActionSources,
+    manifestSrc: ["'self'"],
   });
 
   const body = await renderToReadableStream(

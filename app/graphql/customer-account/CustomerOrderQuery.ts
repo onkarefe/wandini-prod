@@ -22,6 +22,15 @@ export const CUSTOMER_ORDER_QUERY = `#graphql
     price {
       ...OrderMoney
     }
+    currentTotalPrice {
+      ...OrderMoney
+    }
+    totalPrice {
+      ...OrderMoney
+    }
+    totalPriceWithDiscounts {
+      ...OrderMoney
+    }
     discountAllocations {
       allocatedAmount {
         ...OrderMoney

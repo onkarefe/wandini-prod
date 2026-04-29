@@ -19,6 +19,19 @@ export const meta: Route.MetaFunction = () => {
   return [{title: 'Profile'}];
 };
 
+const PROFILE_ERROR_MESSAGES = {
+  update: 'We could not update your profile right now. Please try again.',
+  methodNotAllowed: 'This profile request method is not allowed.',
+} as const;
+
+function getProfileErrorMessage(error: unknown, fallback: string) {
+  if (import.meta.env.DEV && error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
+}
+
 export async function loader({context}: Route.LoaderArgs) {
   context.customerAccount.handleAuthStatus();
 
@@ -29,7 +42,13 @@ export async function action({request, context}: Route.ActionArgs) {
   const {customerAccount} = context;
 
   if (request.method !== 'PUT') {
-    return data({error: 'Method not allowed'}, {status: 405});
+    return data<ActionResponse>(
+      {
+        error: PROFILE_ERROR_MESSAGES.methodNotAllowed,
+        customer: null,
+      },
+      {status: 405},
+    );
   }
 
   const form = await request.formData();
@@ -61,6 +80,10 @@ export async function action({request, context}: Route.ActionArgs) {
       throw new Error(errors[0].message);
     }
 
+    if (data?.customerUpdate?.userErrors?.length) {
+      throw new Error(data.customerUpdate.userErrors[0].message);
+    }
+
     if (!data?.customerUpdate?.customer) {
       throw new Error('Customer profile update failed.');
     }
@@ -69,12 +92,13 @@ export async function action({request, context}: Route.ActionArgs) {
       error: null,
       customer: data?.customerUpdate?.customer,
     };
-  } catch (error: any) {
-    return data(
-      {error: error.message, customer: null},
+  } catch (error: unknown) {
+    return data<ActionResponse>(
       {
-        status: 400,
+        error: getProfileErrorMessage(error, PROFILE_ERROR_MESSAGES.update),
+        customer: null,
       },
+      {status: 400},
     );
   }
 }

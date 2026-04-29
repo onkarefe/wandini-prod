@@ -1,9 +1,14 @@
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import type { CartLayout } from '~/components/CartMain';
 import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFetcher } from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
+import {
+  getGiftCardStorageKey,
+  getPersistedGiftCardCodes,
+  rememberGiftCardCode,
+} from '~/lib/cartGiftCardCodeStorage';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -29,7 +34,10 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
         </dd>
       </dl>
       <CartDiscounts discountCodes={cart?.discountCodes} />
-      <CartGiftCard giftCardCodes={cart?.appliedGiftCards} />
+      <CartGiftCard
+        cartId={cart?.id}
+        giftCardCodes={cart?.appliedGiftCards}
+      />
       <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
     </div>
   );
@@ -113,13 +121,24 @@ function UpdateDiscountForm({
 }
 
 function CartGiftCard({
+  cartId,
   giftCardCodes,
 }: {
+  cartId?: string | null;
   giftCardCodes: CartApiQueryFragment['appliedGiftCards'] | undefined;
 }) {
-  const appliedGiftCardCodes = useRef<string[]>([]);
   const giftCardCodeInput = useRef<HTMLInputElement>(null);
   const giftCardAddFetcher = useFetcher({ key: 'gift-card-add' });
+  const storageKey = getGiftCardStorageKey(cartId);
+  const [persistedGiftCardCodes, setPersistedGiftCardCodes] = useState<
+    string[]
+  >([]);
+
+  useEffect(() => {
+    setPersistedGiftCardCodes(
+      getPersistedGiftCardCodes(storageKey, giftCardCodes),
+    );
+  }, [giftCardCodes, storageKey]);
 
   // Clear the gift card code input after the gift card is added
   useEffect(() => {
@@ -129,10 +148,7 @@ function CartGiftCard({
   }, [giftCardAddFetcher.data]);
 
   function saveAppliedCode(code: string) {
-    const formattedCode = code.replace(/\s/g, ''); // Remove spaces
-    if (!appliedGiftCardCodes.current.includes(formattedCode)) {
-      appliedGiftCardCodes.current.push(formattedCode);
-    }
+    setPersistedGiftCardCodes(rememberGiftCardCode(storageKey, code));
   }
 
   return (
@@ -161,7 +177,7 @@ function CartGiftCard({
 
       {/* Show an input to apply a gift card */}
       <UpdateGiftCardForm
-        giftCardCodes={appliedGiftCardCodes.current}
+        giftCardCodes={persistedGiftCardCodes}
         saveAppliedCode={saveAppliedCode}
         fetcherKey="gift-card-add"
       >

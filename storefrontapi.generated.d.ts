@@ -440,14 +440,15 @@ export type GetAllProductsMetaobjectQuery = {
         fields: Array<
           Pick<StorefrontAPI.MetaobjectField, 'key' | 'value' | 'type'> & {
             reference?: StorefrontAPI.Maybe<
-              Pick<StorefrontAPI.MediaImage, 'id'> & {
-                image?: StorefrontAPI.Maybe<
-                  Pick<
-                    StorefrontAPI.Image,
-                    'url' | 'altText' | 'width' | 'height'
-                  >
-                >;
-              }
+              | Pick<StorefrontAPI.Collection, 'id' | 'handle'>
+              | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                  image?: StorefrontAPI.Maybe<
+                    Pick<
+                      StorefrontAPI.Image,
+                      'url' | 'altText' | 'width' | 'height'
+                    >
+                  >;
+                })
             >;
           }
         >;
@@ -1634,7 +1635,7 @@ interface GeneratedQueryTypes {
     return: UspBarIconsQuery;
     variables: UspBarIconsQueryVariables;
   };
-  '#graphql\n  query GetAllProductsMetaobject {\n    metaobjects(type: "all_products", first: 15) {\n      edges {\n        node {\n          id\n          handle\n          type\n          fields {\n            key\n            value\n            type\n            reference {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query GetAllProductsMetaobject {\n    metaobjects(type: "all_products", first: 15) {\n      edges {\n        node {\n          id\n          handle\n          type\n          fields {\n            key\n            value\n            type\n            reference {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on Collection {\n                id\n                handle\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: GetAllProductsMetaobjectQuery;
     variables: GetAllProductsMetaobjectQueryVariables;
   };

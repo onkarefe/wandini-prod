@@ -22,12 +22,15 @@ export class AppSession implements HydrogenSession {
   }
 
   static async init(request: Request, secrets: string[]) {
+    const isSecure = new URL(request.url).protocol === 'https:';
+
     const storage = createCookieSessionStorage({
       cookie: {
         name: 'session',
         httpOnly: true,
         path: '/',
         sameSite: 'lax',
+        secure: isSecure,
         secrets,
       },
     });

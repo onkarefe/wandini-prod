@@ -5,7 +5,39 @@ import { CartForm, useOptimisticCart } from '@shopify/hydrogen';
 import { CustomCart } from '~/components/customCart';
 import { CartUpsellCard } from '~/components/CartUpsellCard';
 import { CartSummary as CustomCartSummary } from '~/components/CustomCartSummary';
+import {getLocaleFromRequest, prefixPathWithLocale} from '~/lib/locale';
 import '~/styles/cart.css';
+
+const INTERNAL_REDIRECT_ORIGIN = 'https://wandini.internal';
+
+function getSafeRedirectPath(redirectParam: FormDataEntryValue | null) {
+  if (typeof redirectParam !== 'string') {
+    return null;
+  }
+
+  const trimmedRedirect = redirectParam.trim();
+
+  if (
+    !trimmedRedirect ||
+    !trimmedRedirect.startsWith('/') ||
+    trimmedRedirect.startsWith('//') ||
+    trimmedRedirect.includes('\\')
+  ) {
+    return null;
+  }
+
+  try {
+    const redirectUrl = new URL(trimmedRedirect, INTERNAL_REDIRECT_ORIGIN);
+
+    if (redirectUrl.origin !== INTERNAL_REDIRECT_ORIGIN) {
+      return null;
+    }
+
+    return `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
+  } catch {
+    return null;
+  }
+}
 
 export const meta: Route.MetaFunction = () => {
   return [{ title: `Hydrogen | Cart` }];
@@ -21,7 +53,17 @@ export async function action({ request, context }: Route.ActionArgs) {
   const { action, inputs } = CartForm.getFormInput(formData);
 
   if (!action) {
-    throw new Error('No action provided');
+    return data(
+      {
+        cart: null,
+        errors: [{message: 'No action provided'}],
+        warnings: [],
+        analytics: {
+          cartId: null,
+        },
+      },
+      {status: 400},
+    );
   }
 
   let status = 200;
@@ -77,17 +119,30 @@ export async function action({ request, context }: Route.ActionArgs) {
       break;
     }
     default:
-      throw new Error(`${action} cart action is not defined`);
+      return data(
+        {
+          cart: null,
+          errors: [{message: `${action} cart action is not defined`}],
+          warnings: [],
+          analytics: {
+            cartId: null,
+          },
+        },
+        {status: 400},
+      );
   }
 
   const cartId = result?.cart?.id;
   const headers = cartId ? cart.setCartId(result.cart.id) : new Headers();
   const { cart: cartResult, errors, warnings } = result;
 
-  const redirectTo = formData.get('redirectTo') ?? null;
-  if (typeof redirectTo === 'string') {
+  const redirectTo = getSafeRedirectPath(formData.get('redirectTo'));
+  if (redirectTo) {
     status = 303;
-    headers.set('Location', redirectTo);
+    headers.set(
+      'Location',
+      prefixPathWithLocale(redirectTo, getLocaleFromRequest(request)),
+    );
   }
 
   return data(
