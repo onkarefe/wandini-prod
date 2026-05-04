@@ -10,8 +10,9 @@ type AdminGraphqlResponse<T> = {
 };
 
 type WishlistEnv = {
-  PUBLIC_STORE_DOMAIN?: string;
-  SHOPIFY_ADMIN_API_ACCESS_TOKEN?: string;
+  SHOPIFY_SHOP?: string;
+  SHOPIFY_CLIENT_ID?: string;
+  SHOPIFY_CLIENT_SECRET?: string;
 };
 
 type CustomerWishlistQuery = {
@@ -37,29 +38,95 @@ type MetafieldsSetMutation = {
   };
 };
 
-function toAdminApiUrl(storeDomain: string) {
-  const origin = storeDomain.startsWith('http')
-    ? new URL(storeDomain).origin
-    : `https://${storeDomain}`;
+type AdminAccessToken = {
+  accessToken: string;
+  expiresAt: number;
+};
 
-  return `${origin}/admin/api/${ADMIN_API_VERSION}/graphql.json`;
-}
+let cachedAdminAccessToken: AdminAccessToken | null = null;
 
 function getWishlistConfig(env: WishlistEnv) {
-  const storeDomain = env.PUBLIC_STORE_DOMAIN;
-  const adminToken = env.SHOPIFY_ADMIN_API_ACCESS_TOKEN;
+  const shop = env.SHOPIFY_SHOP;
+  const clientId = env.SHOPIFY_CLIENT_ID;
+  const clientSecret = env.SHOPIFY_CLIENT_SECRET;
 
-  if (!storeDomain) {
-    throw new Error('PUBLIC_STORE_DOMAIN is required for wishlist requests.');
+  if (!shop) {
+    throw new Error('SHOPIFY_SHOP is required for wishlist requests.');
   }
 
-  if (!adminToken) {
+  if (!clientId) {
+    throw new Error('SHOPIFY_CLIENT_ID is required for wishlist requests.');
+  }
+
+  if (!clientSecret) {
+    throw new Error('SHOPIFY_CLIENT_SECRET is required for wishlist requests.');
+  }
+
+  return {shop, clientId, clientSecret};
+}
+
+function toShopOrigin(shop: string) {
+  return shop.startsWith('http') ? new URL(shop).origin : `https://${shop}`;
+}
+
+function toAdminApiUrl(shop: string) {
+  return `${toShopOrigin(shop)}/admin/api/${ADMIN_API_VERSION}/graphql.json`;
+}
+
+function toAdminAccessTokenUrl(shop: string) {
+  return `${toShopOrigin(shop)}/admin/oauth/access_token`;
+}
+
+async function getAdminAccessToken(env: WishlistEnv) {
+  const {shop, clientId, clientSecret} = getWishlistConfig(env);
+
+  if (
+    cachedAdminAccessToken &&
+    Date.now() < cachedAdminAccessToken.expiresAt - 60_000
+  ) {
+    return {shop, accessToken: cachedAdminAccessToken.accessToken};
+  }
+
+  const response = await fetch(toAdminAccessTokenUrl(shop), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
+  });
+
+  if (!response.ok) {
+    const responseText = await response.text();
     throw new Error(
-      'SHOPIFY_ADMIN_API_ACCESS_TOKEN is required for wishlist requests.',
+      `Wishlist token request failed with status ${response.status}: ${responseText}`,
     );
   }
 
-  return {storeDomain, adminToken};
+  const payload = (await response.json()) as {
+    access_token?: string;
+    expires_in?: number;
+    error?: string;
+    error_description?: string;
+  };
+
+  if (!payload.access_token) {
+    throw new Error(
+      payload.error_description ||
+        payload.error ||
+        'Wishlist token request returned no access token.',
+    );
+  }
+
+  cachedAdminAccessToken = {
+    accessToken: payload.access_token,
+    expiresAt: Date.now() + (payload.expires_in ?? 3600) * 1000,
+  };
+
+  return {shop, accessToken: payload.access_token};
 }
 
 async function adminGraphql<T>({
@@ -71,12 +138,12 @@ async function adminGraphql<T>({
   query: string;
   variables?: Record<string, unknown>;
 }): Promise<T> {
-  const {storeDomain, adminToken} = getWishlistConfig(env);
-  const response = await fetch(toAdminApiUrl(storeDomain), {
+  const {shop, accessToken} = await getAdminAccessToken(env);
+  const response = await fetch(toAdminApiUrl(shop), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Shopify-Access-Token': adminToken,
+      'X-Shopify-Access-Token': accessToken,
     },
     body: JSON.stringify({query, variables}),
   });

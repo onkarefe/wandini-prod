@@ -74,8 +74,9 @@ export async function action({request, context}: Route.ActionArgs) {
   try {
     const wishlist = await addProductToCustomerWishlist({
       env: context.env as {
-        PUBLIC_STORE_DOMAIN?: string;
-        SHOPIFY_ADMIN_API_ACCESS_TOKEN?: string;
+        SHOPIFY_SHOP?: string;
+        SHOPIFY_CLIENT_ID?: string;
+        SHOPIFY_CLIENT_SECRET?: string;
       },
       customerId: data.customer.id,
       productId,
