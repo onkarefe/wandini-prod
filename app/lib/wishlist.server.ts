@@ -4,6 +4,7 @@ const WISHLIST_KEY = 'wishlist';
 const WISHLIST_TYPE = 'list.product_reference';
 const WISHLIST_MAX_ITEMS = 128;
 const DEFAULT_SHOPIFY_SHOP = '3tzgtt-7y.myshopify.com';
+const WISHLIST_DEBUG_VERSION = 'wishlist-debug-v2';
 
 type AdminGraphqlResponse<T> = {
   data?: T;
@@ -51,16 +52,16 @@ function getWishlistConfig(env: WishlistEnv) {
   const clientId = env.SHOPIFY_CLIENT_ID;
   const clientSecret = env.SHOPIFY_CLIENT_SECRET;
 
-  if (!shop) {
-    throw new Error('SHOPIFY_SHOP is required for wishlist requests.');
-  }
-
   if (!clientId) {
-    throw new Error('SHOPIFY_CLIENT_ID is required for wishlist requests.');
+    throw new Error(
+      `SHOPIFY_CLIENT_ID is required for wishlist requests. ${WISHLIST_DEBUG_VERSION}`,
+    );
   }
 
   if (!clientSecret) {
-    throw new Error('SHOPIFY_CLIENT_SECRET is required for wishlist requests.');
+    throw new Error(
+      `SHOPIFY_CLIENT_SECRET is required for wishlist requests. ${WISHLIST_DEBUG_VERSION}`,
+    );
   }
 
   return {shop, clientId, clientSecret};
@@ -103,7 +104,7 @@ async function getAdminAccessToken(env: WishlistEnv) {
   if (!response.ok) {
     const responseText = await response.text();
     throw new Error(
-      `Wishlist token request failed with status ${response.status}: ${responseText}`,
+      `Wishlist token request failed with status ${response.status}: ${responseText} ${WISHLIST_DEBUG_VERSION}`,
     );
   }
 
@@ -118,7 +119,7 @@ async function getAdminAccessToken(env: WishlistEnv) {
     throw new Error(
       payload.error_description ||
         payload.error ||
-        'Wishlist token request returned no access token.',
+        `Wishlist token request returned no access token. ${WISHLIST_DEBUG_VERSION}`,
     );
   }
 
@@ -150,7 +151,9 @@ async function adminGraphql<T>({
   });
 
   if (!response.ok) {
-    throw new Error(`Wishlist admin request failed with status ${response.status}.`);
+    throw new Error(
+      `Wishlist admin request failed with status ${response.status}. ${WISHLIST_DEBUG_VERSION}`,
+    );
   }
 
   const payload = (await response.json()) as AdminGraphqlResponse<T>;
@@ -160,7 +163,9 @@ async function adminGraphql<T>({
   }
 
   if (!payload.data) {
-    throw new Error('Wishlist admin request returned no data.');
+    throw new Error(
+      `Wishlist admin request returned no data. ${WISHLIST_DEBUG_VERSION}`,
+    );
   }
 
   return payload.data;
@@ -263,7 +268,7 @@ export async function addProductToCustomerWishlist({
 
   if (data.metafieldsSet.userErrors.length > 0) {
     throw new Error(
-      data.metafieldsSet.userErrors.map((error) => error.message).join(', '),
+      `${data.metafieldsSet.userErrors.map((error) => error.message).join(', ')} ${WISHLIST_DEBUG_VERSION}`,
     );
   }
 
