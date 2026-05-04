@@ -680,8 +680,13 @@ export type BlogsQuery = {
 
 export type CustomProductCardFieldsFragment = Pick<
   StorefrontAPI.Product,
-  'id' | 'handle' | 'title' | 'description'
-> & {images: {nodes: Array<Pick<StorefrontAPI.Image, 'url' | 'altText'>>}};
+  'id' | 'handle' | 'title'
+> & {
+  priceRange: {
+    minVariantPrice: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+  };
+  images: {nodes: Array<Pick<StorefrontAPI.Image, 'url' | 'altText'>>};
+};
 
 export type CustomCollectionQueryVariables = StorefrontAPI.Exact<{
   handle: StorefrontAPI.Scalars['String']['input'];
@@ -723,10 +728,13 @@ export type CustomCollectionQuery = {
           }
         >;
         nodes: Array<
-          Pick<
-            StorefrontAPI.Product,
-            'id' | 'handle' | 'title' | 'description'
-          > & {
+          Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
+            priceRange: {
+              minVariantPrice: Pick<
+                StorefrontAPI.MoneyV2,
+                'amount' | 'currencyCode'
+              >;
+            };
             images: {
               nodes: Array<Pick<StorefrontAPI.Image, 'url' | 'altText'>>;
             };
@@ -1659,7 +1667,7 @@ interface GeneratedQueryTypes {
     return: BlogsQuery;
     variables: BlogsQueryVariables;
   };
-  '#graphql\n  #graphql\n  fragment CustomProductCardFields on Product {\n    id\n    handle\n    title\n    description\n    images(first: 3) {\n      nodes {\n        url\n        altText\n      }\n    }\n  }\n\n  query CustomCollection(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n    $filters: [ProductFilter!]\n    $sortKey: ProductCollectionSortKeys\n    $reverse: Boolean\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      description\n      image {\n        url\n        altText\n        width\n        height\n      }\n      products(\n        first: $first,\n        last: $last,\n        before: $startCursor,\n        after: $endCursor,\n        filters: $filters,\n        sortKey: $sortKey,\n        reverse: $reverse\n      ) {\n        filters {\n          id\n          label\n          type\n          values {\n            id\n            label\n            count\n            input\n          }\n        }\n        nodes {\n          ...CustomProductCardFields\n        }\n        pageInfo {\n          hasPreviousPage\n          hasNextPage\n          endCursor\n          startCursor\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  #graphql\n  fragment CustomProductCardFields on Product {\n    id\n    handle\n    title\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    images(first: 3) {\n      nodes {\n        url\n        altText\n      }\n    }\n  }\n\n  query CustomCollection(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n    $filters: [ProductFilter!]\n    $sortKey: ProductCollectionSortKeys\n    $reverse: Boolean\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      description\n      image {\n        url\n        altText\n        width\n        height\n      }\n      products(\n        first: $first,\n        last: $last,\n        before: $startCursor,\n        after: $endCursor,\n        filters: $filters,\n        sortKey: $sortKey,\n        reverse: $reverse\n      ) {\n        filters {\n          id\n          label\n          type\n          values {\n            id\n            label\n            count\n            input\n          }\n        }\n        nodes {\n          ...CustomProductCardFields\n        }\n        pageInfo {\n          hasPreviousPage\n          hasNextPage\n          endCursor\n          startCursor\n        }\n      }\n    }\n  }\n': {
     return: CustomCollectionQuery;
     variables: CustomCollectionQueryVariables;
   };

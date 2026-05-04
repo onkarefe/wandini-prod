@@ -1,23 +1,65 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
+import {useFetcher, useLocation} from 'react-router';
 import '../styles/customProductCard.css';
 
+type ProductPrice = {
+  amount: string;
+  currencyCode: string;
+};
+
 interface CustomProductCardProps {
+  productId: string;
   title: string;
-  description?: string;
   images: { url: string; altText?: string }[];
   productUrl: string;
+  minPrice?: ProductPrice;
+  isLoggedIn?: boolean;
+}
+
+function formatPriceLabel(price?: ProductPrice): string | null {
+  if (!price) return null;
+
+  const amount = Number(price.amount);
+  const fallbackAmount = Number.isFinite(amount)
+    ? new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+        maximumFractionDigits: 2,
+      }).format(amount)
+    : price.amount;
+
+  try {
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: price.currencyCode,
+      minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+      maximumFractionDigits: 2,
+    }).format(Number.isFinite(amount) ? amount : Number(price.amount));
+
+    return `${formattedAmount} / m²`;
+  } catch {
+    return `${fallbackAmount} ${price.currencyCode} / m²`;
+  }
 }
 
 export const CustomProductCard: React.FC<CustomProductCardProps> = ({
+  productId,
   title,
-  description,
   images,
   productUrl,
+  minPrice,
+  isLoggedIn = false,
 }) => {
   const displayImages = images.slice(0, 3);
+  const fetcher = useFetcher<{
+    ok?: boolean;
+    loginUrl?: string;
+    message?: string;
+  }>();
+  const location = useLocation();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start' });
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const priceLabel = formatPriceLabel(minPrice);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -32,6 +74,36 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
       emblaApi.off('select', onSelect);
     };
   }, [emblaApi, onSelect]);
+
+  useEffect(() => {
+    if (!fetcher.data?.loginUrl) return;
+    window.location.href = fetcher.data.loginUrl;
+  }, [fetcher.data]);
+
+  const handleWishlistClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!isLoggedIn) {
+      const returnTo = `${location.pathname}${location.search}${location.hash}`;
+      window.location.href = `/account/login?returnTo=${encodeURIComponent(returnTo)}`;
+      return;
+    }
+
+    const formData = new FormData();
+    formData.set('productId', productId);
+    fetcher.submit(formData, {
+      method: 'post',
+      action: '/api/wishlist',
+    });
+  };
+
+  const wishlistButtonLabel =
+    fetcher.state !== 'idle'
+      ? 'Ekleniyor...'
+      : fetcher.data?.ok
+        ? 'Favoriye eklendi'
+        : 'Favoriye ekle';
 
   return (
     <a href={productUrl} className="custom-product-card" aria-label={title}>
@@ -71,7 +143,17 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
 
       <div className="custom-product-card__body">
         <h3 className="custom-product-card__title">{title}</h3>
-        {description && <p className="custom-product-card__desc">{description}</p>}
+        {priceLabel ? (
+          <p className="custom-product-card__price">{priceLabel}</p>
+        ) : null}
+        <button
+          type="button"
+          className="custom-product-card__wishlist"
+          onClick={handleWishlistClick}
+          disabled={fetcher.state !== 'idle'}
+        >
+          {wishlistButtonLabel}
+        </button>
       </div>
     </a>
   );

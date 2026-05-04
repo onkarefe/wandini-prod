@@ -5,7 +5,7 @@
   justify-content: center;
   text-align: center;
   position: relative;
-  height: 50vh;
+  height: 30vh;
 }
 
 .collectionMainHeroDiv::before {
@@ -16,11 +16,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  opacity: 0.5;
+  opacity: 0.35;
 }
 
 .collectionMainHeroDiv h1 {
-  font-size: 64px;
+  font-size: 48px;
   color: white;
   font-weight: bold;
   margin: 0;
@@ -50,6 +50,52 @@
 .collectionReloadButton:hover {
   background-color: #000000;
   color: #ffffff;
+}
+
+.collection-products-shell {
+  position: relative;
+}
+
+.collection-products-shell.is-updating .custom-products-grid,
+.collection-products-shell.is-updating .collectionReloadButton {
+  opacity: 0.35;
+  transition: opacity 0.15s ease;
+}
+
+.collection-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.collection-loader__logo {
+  width: 132px;
+  height: auto;
+  animation: wandiniLoaderPulse 0.5s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+
+@keyframes wandiniLoaderPulse {
+  from {
+    opacity: 0.7;
+    transform: translateY(0) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collection-loader__logo {
+    animation: none;
+  }
 }
 
 @media (max-width: 767.98px) {

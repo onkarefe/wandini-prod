@@ -4,11 +4,14 @@ import {CustomProductCard} from './CustomProductCard';
 type CustomProductGridItem = {
   id: string;
   title: string;
-  description?: string | null;
   images?: Array<{
     url: string;
     altText?: string | null;
   }> | null;
+  minPrice?: {
+    amount: string;
+    currencyCode: string;
+  } | null;
   productUrl?: string;
   handle?: string;
 };
@@ -28,8 +31,8 @@ export function CustomProductGrid({products}: CustomProductGridProps) {
         return (
           <CustomProductCard
             key={product.id}
+            productId={product.id}
             title={product.title}
-            description={product.description ?? undefined}
             images={
               product.images?.map((image) => ({
                 url: image.url,
@@ -37,6 +40,7 @@ export function CustomProductGrid({products}: CustomProductGridProps) {
               })) ?? []
             }
             productUrl={productUrl}
+            minPrice={product.minPrice ?? undefined}
           />
         );
       })}

@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {flushSync} from 'react-dom';
 import {useLocation, useNavigate} from 'react-router';
 import type {CustomCollectionQuery} from 'storefrontapi.generated';
 import {
@@ -33,9 +34,7 @@ export function FilterBar({filters}: FilterBarProps) {
   const location = useLocation();
 
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({});
-  const [openFilterId, setOpenFilterId] = useState<string | null>(null);
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
-  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
 
   const validInputsByFilterId = useMemo(() => {
     const map = new Map<string, Set<string>>();
@@ -56,10 +55,13 @@ export function FilterBar({filters}: FilterBarProps) {
 
   const navigateWithParams = useCallback(
     (params: URLSearchParams) => {
-      void navigate({
-        pathname: location.pathname,
-        search: params.toString(),
-      });
+      void navigate(
+        {
+          pathname: location.pathname,
+          search: params.toString(),
+        },
+        {preventScrollReset: true},
+      );
     },
     [location.pathname, navigate],
   );
@@ -71,43 +73,11 @@ export function FilterBar({filters}: FilterBarProps) {
   }, [location.search]);
 
   useEffect(() => {
-    const mediaQueryList = window.matchMedia('(max-width: 1023px)');
-
-    const syncViewportState = () => {
-      const isMobile = mediaQueryList.matches;
-
-      setIsMobileViewport(isMobile);
-
-      if (!isMobile) {
-        setIsMobileFiltersOpen(false);
-      }
-    };
-
-    syncViewportState();
-
-    if (typeof mediaQueryList.addEventListener === 'function') {
-      mediaQueryList.addEventListener('change', syncViewportState);
-
-      return () => {
-        mediaQueryList.removeEventListener('change', syncViewportState);
-      };
-    }
-
-    mediaQueryList.addListener(syncViewportState);
-
-    return () => {
-      mediaQueryList.removeListener(syncViewportState);
-    };
-  }, []);
-
-  useEffect(() => {
     const params = new URLSearchParams(location.search);
     const activeInputs = params.getAll('f');
 
     if (!activeInputs.length) {
       setSelectedFilters({});
-      setOpenFilterId(null);
-      setIsMobileFiltersOpen(false);
       return;
     }
 
@@ -130,57 +100,50 @@ export function FilterBar({filters}: FilterBarProps) {
     }
 
     setSelectedFilters(nextSelectedFilters);
-    setOpenFilterId(null);
-    setIsMobileFiltersOpen(false);
   }, [filters, location.search, validInputsByFilterId]);
 
   const handleFilterClick = useCallback(
     (filterId: string, input: string) => {
-      setSelectedFilters((currentSelectedFilters) => {
-        const currentValues = currentSelectedFilters[filterId] ?? [];
-        const nextValues = currentValues.includes(input)
-          ? currentValues.filter((value) => value !== input)
-          : [...currentValues, input];
+      const currentValues = selectedFilters[filterId] ?? [];
+      const nextValues = currentValues.includes(input)
+        ? currentValues.filter((value) => value !== input)
+        : [...currentValues, input];
+      const nextSelectedFilters =
+        nextValues.length === 0
+          ? {...selectedFilters}
+          : {
+              ...selectedFilters,
+              [filterId]: nextValues,
+            };
 
-        if (nextValues.length === 0) {
-          const nextSelectedFilters = {...currentSelectedFilters};
+      if (nextValues.length === 0) {
+        delete nextSelectedFilters[filterId];
+      }
 
-          delete nextSelectedFilters[filterId];
+      const params = getBaseParams();
 
-          return nextSelectedFilters;
-        }
+      replaceCollectionFilterParams(
+        params,
+        flattenSelectedFilters(nextSelectedFilters),
+      );
 
-        return {
-          ...currentSelectedFilters,
-          [filterId]: nextValues,
-        };
+      flushSync(() => {
+        setSelectedFilters(nextSelectedFilters);
       });
+      navigateWithParams(params);
     },
-    [],
+    [getBaseParams, navigateWithParams, selectedFilters],
   );
-
-  const handleApplyFilters = useCallback(() => {
-    const params = getBaseParams();
-
-    replaceCollectionFilterParams(
-      params,
-      flattenSelectedFilters(selectedFilters),
-    );
-
-    navigateWithParams(params);
-    setOpenFilterId(null);
-    setIsMobileFiltersOpen(false);
-  }, [getBaseParams, navigateWithParams, selectedFilters]);
 
   const handleClearFilters = useCallback(() => {
     const params = getBaseParams();
 
     params.delete('f');
 
-    setSelectedFilters({});
+    flushSync(() => {
+      setSelectedFilters({});
+    });
     navigateWithParams(params);
-    setOpenFilterId(null);
-    setIsMobileFiltersOpen(false);
   }, [getBaseParams, navigateWithParams]);
 
   const isActive = useCallback(
@@ -216,7 +179,9 @@ export function FilterBar({filters}: FilterBarProps) {
         flattenSelectedFilters(nextSelectedFilters),
       );
 
-      setSelectedFilters(nextSelectedFilters);
+      flushSync(() => {
+        setSelectedFilters(nextSelectedFilters);
+      });
       navigateWithParams(params);
     },
     [getBaseParams, navigateWithParams, selectedFilters],
@@ -254,134 +219,124 @@ export function FilterBar({filters}: FilterBarProps) {
     return null;
   }
 
-  const shouldShowAccordion = !isMobileViewport || isMobileFiltersOpen;
+  const activeFilterCount = activeChips.length;
 
   return (
     <div className="collection-filters">
-      {isMobileViewport ? (
+      <div className="filters-bar">
         <button
           type="button"
-          className="filters-mobile-toggle"
-          onClick={() => setIsMobileFiltersOpen((value) => !value)}
-          aria-expanded={isMobileFiltersOpen}
+          className={`filters-bar__trigger ${isMegaMenuOpen ? 'is-open' : ''}`}
+          onClick={() => setIsMegaMenuOpen((value) => !value)}
+          aria-expanded={isMegaMenuOpen}
         >
-          <span className="filters-mobile-toggle__text">Filters</span>
-          <span className="filters-mobile-toggle__icon" aria-hidden="true">
+          <span className="filters-bar__trigger-icon" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-              <path d="M297.4 470.6C309.9 483.1 330.2 483.1 342.7 470.6L534.7 278.6C547.2 266.1 547.2 245.8 534.7 233.3C522.2 220.8 501.9 220.8 489.4 233.3L320 402.7L150.6 233.4C138.1 220.9 117.8 220.9 105.3 233.4C92.8 245.9 92.8 266.2 105.3 278.7L297.3 470.7z" />
+              <path d="M96 160C96 142.3 110.3 128 128 128L512 128C529.7 128 544 142.3 544 160C544 177.7 529.7 192 512 192L128 192C110.3 192 96 177.7 96 160zM96 320C96 302.3 110.3 288 128 288L512 288C529.7 288 544 302.3 544 320C544 337.7 529.7 352 512 352L128 352C110.3 352 96 337.7 96 320zM544 480C544 497.7 529.7 512 512 512L128 512C110.3 512 96 497.7 96 480C96 462.3 110.3 448 128 448L512 448C529.7 448 544 462.3 544 480z" />
             </svg>
           </span>
+          <span className="filters-bar__trigger-label">Filters</span>
         </button>
-      ) : null}
 
-      {shouldShowAccordion ? (
-        <div className="filters-accordion">
-          <ul className="filters-list">
+        {activeFilterCount > 0 ? (
+          <button
+            type="button"
+            className="filters-bar__reset"
+            onClick={handleClearFilters}
+          >
+            Reset
+          </button>
+        ) : null}
+      </div>
+
+      {isMegaMenuOpen ? (
+        <div className="filters-mega" aria-label="Product filters">
+          <div className="filters-mega__head">
+            <div className="filters-mega__status">
+              {activeFilterCount > 0 ? `${activeFilterCount} selected` : 'All filters'}
+            </div>
+            <button
+              type="button"
+              className="filters-mega__close"
+              onClick={() => setIsMegaMenuOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+
+          <div className="filters-mega__grid">
             {filters.map((filter) => {
               const selectedCount = getSelectedCount(filter.id);
 
               return (
-                <li key={filter.id} className="filter-item">
-                  <button
-                    type="button"
-                    className={`filter-item__head ${
-                      openFilterId === filter.id ? 'is-open' : ''
-                    }`}
-                    onClick={() =>
-                      setOpenFilterId((currentOpenFilterId) =>
-                        currentOpenFilterId === filter.id ? null : filter.id,
-                      )
-                    }
-                  >
-                    <span className="filter-item__label">
-                      {filter.label}
-                      {selectedCount > 0 ? (
-                        <span className="filter-item__badge">
-                          {' ('}
-                          {selectedCount}
-                          {')'}
-                        </span>
-                      ) : null}
+                <section key={filter.id} className="filter-group">
+                  <div className="filter-group__head">
+                    <h3 className="filter-group__title">{filter.label}</h3>
+                    <span className="filter-group__meta">
+                      {selectedCount > 0
+                        ? `${selectedCount} selected`
+                        : `${filter.values.length} options`}
                     </span>
-                    <span className="filter-item__icon" aria-hidden="true">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-                        <path d="M297.4 470.6C309.9 483.1 330.2 483.1 342.7 470.6L534.7 278.6C547.2 266.1 547.2 245.8 534.7 233.3C522.2 220.8 501.9 220.8 489.4 233.3L320 402.7L150.6 233.4C138.1 220.9 117.8 220.9 105.3 233.4C92.8 245.9 92.8 266.2 105.3 278.7L297.3 470.7z" />
-                      </svg>
-                    </span>
-                  </button>
+                  </div>
 
-                  {openFilterId === filter.id ? (
-                    <div className="filter-popover">
-                      <ul className="filter-options">
-                        {filter.values.map((value: FilterValue) => {
-                          const input = getFilterValueInput(value);
+                  <ul className="filter-group__options">
+                    {filter.values.map((value: FilterValue) => {
+                      const input = getFilterValueInput(value);
 
-                          if (!input) {
-                            return null;
-                          }
+                      if (!input) {
+                        return null;
+                      }
 
-                          return (
-                            <li key={value.id} className="filter-option">
-                              <label className="filter-option__label">
-                                <input
-                                  type="checkbox"
-                                  className="filter-option__checkbox"
-                                  checked={isActive(filter.id, input)}
-                                  onChange={() =>
-                                    handleFilterClick(filter.id, input)
-                                  }
-                                />
-                                <span className="filter-option__text">
-                                  {value.label}
-                                </span>
-                              </label>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  ) : null}
-                </li>
+                      return (
+                        <li key={value.id} className="filter-group__option">
+                          <label className="filter-group__option-label">
+                            <input
+                              type="checkbox"
+                              className="filter-group__checkbox"
+                              checked={isActive(filter.id, input)}
+                              onChange={() => handleFilterClick(filter.id, input)}
+                            />
+                            <span
+                              className="filter-group__checkbox-ui"
+                              aria-hidden="true"
+                            />
+                            <span className="filter-group__option-text">
+                              {value.label}
+                            </span>
+                            {typeof value.count === 'number' ? (
+                              <span className="filter-group__option-count">
+                                {value.count}
+                              </span>
+                            ) : null}
+                          </label>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
               );
             })}
-          </ul>
-
-          <div className="filters-apply">
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              className="btn btn--clear"
-            >
-              Reset
-            </button>
-            <button
-              type="button"
-              onClick={handleApplyFilters}
-              className="btn btn--apply"
-            >
-              Apply
-            </button>
           </div>
-        </div>
-      ) : null}
 
-      {activeChips.length > 0 ? (
-        <div className="filters-chips">
-          {activeChips.map((chip) => (
-            <button
-              key={`${chip.filterId}-${chip.valueInput}`}
-              type="button"
-              className="filters-chip"
-              onClick={() =>
-                handleRemoveFilterValue(chip.filterId, chip.valueInput)
-              }
-            >
-              <span className="filters-chip__text">{chip.valueLabel}</span>
-              <span className="filters-chip__icon" aria-hidden="true">
-                x
-              </span>
-            </button>
-          ))}
+          {activeChips.length > 0 ? (
+            <div className="filters-selected">
+              {activeChips.map((chip) => (
+                <button
+                  key={`${chip.filterId}-${chip.valueInput}`}
+                  type="button"
+                  className="filters-selected__chip"
+                  onClick={() =>
+                    handleRemoveFilterValue(chip.filterId, chip.valueInput)
+                  }
+                >
+                  <span className="filters-selected__chip-text">{chip.valueLabel}</span>
+                  <span className="filters-selected__chip-icon" aria-hidden="true">
+                    x
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

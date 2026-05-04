@@ -1,10 +1,17 @@
 import type {ChangeEvent} from 'react';
-import {redirect, useLoaderData, useLocation, useNavigate} from 'react-router';
+import {
+  redirect,
+  useLoaderData,
+  useLocation,
+  useNavigate,
+  useNavigation,
+} from 'react-router';
 import {Analytics, getPaginationVariables} from '@shopify/hydrogen';
 import type {
   CustomCollectionQuery,
   CustomCollectionQueryVariables,
 } from 'storefrontapi.generated';
+import wandiniLogo from '~/assets/logos/wandini_Logo.webp';
 import {CustomProductCard} from '~/components/CustomProductCard';
 import {FilterBar} from '~/components/filterBar';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
@@ -43,7 +50,7 @@ async function loadCriticalData({
   request,
 }: Route.LoaderArgs) {
   const {handle} = params;
-  const {storefront} = context;
+  const {storefront, customerAccount} = context;
 
   if (!handle) {
     throw redirectToLocalePath(request, '/collections');
@@ -55,15 +62,18 @@ async function loadCriticalData({
   const {reverse, sortKey} = getCollectionSortVariables(selectedSort);
   const filters = parseCollectionFilters(url.searchParams);
 
-  const data = (await storefront.query(CUSTOM_COLLECTION_QUERY, {
-    variables: {
-      handle,
-      ...paginationVariables,
-      filters,
-      sortKey,
-      reverse,
-    },
-  })) as CustomCollectionQuery;
+  const [data, isLoggedIn] = await Promise.all([
+    storefront.query(CUSTOM_COLLECTION_QUERY, {
+      variables: {
+        handle,
+        ...paginationVariables,
+        filters,
+        sortKey,
+        reverse,
+      },
+    }) as Promise<CustomCollectionQuery>,
+    customerAccount.isLoggedIn(),
+  ]);
 
   const collection = data.collection;
 
@@ -73,7 +83,7 @@ async function loadCriticalData({
 
   redirectIfHandleIsLocalized(request, {handle, data: collection});
 
-  return {collection};
+  return {collection, isLoggedIn};
 }
 
 function loadDeferredData() {
@@ -81,8 +91,9 @@ function loadDeferredData() {
 }
 
 export default function Collection() {
-  const {collection} = useLoaderData<typeof loader>();
+  const {collection, isLoggedIn} = useLoaderData<typeof loader>();
   const navigate = useNavigate();
+  const navigation = useNavigation();
   const location = useLocation();
 
   const hasFilters =
@@ -91,6 +102,10 @@ export default function Collection() {
   const selectedSort = getSelectedCollectionSort(
     new URLSearchParams(location.search).get('sort'),
   );
+  const isCollectionUpdating =
+    navigation.state !== 'idle' &&
+    navigation.location?.pathname === location.pathname &&
+    navigation.location.search !== location.search;
 
   const handleSortChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextSort = getSelectedCollectionSort(event.target.value);
@@ -145,23 +160,49 @@ export default function Collection() {
       </div>
 
       {collection.products ? (
-        <PaginatedResourceSection<CollectionProduct>
-          connection={collection.products}
-          resourcesClassName="custom-products-grid container mx-auto"
+        <div
+          className={`collection-products-shell ${
+            isCollectionUpdating ? 'is-updating' : ''
+          }`}
         >
-          {({node: product}) => (
-            <CustomProductCard
-              key={product.id}
-              title={product.title}
-              description={product.description}
-              images={product.images.nodes.map((image) => ({
-                url: image.url,
-                altText: image.altText ?? undefined,
-              }))}
-              productUrl={`/products/${product.handle}`}
-            />
-          )}
-        </PaginatedResourceSection>
+          <PaginatedResourceSection<CollectionProduct>
+            connection={collection.products}
+            resourcesClassName="custom-products-grid container mx-auto"
+          >
+            {({node: product}) => (
+              <CustomProductCard
+                key={product.id}
+                productId={product.id}
+                title={product.title}
+                images={product.images.nodes.map((image) => ({
+                  url: image.url,
+                  altText: image.altText ?? undefined,
+                }))}
+                productUrl={`/products/${product.handle}`}
+                minPrice={
+                  product.priceRange?.minVariantPrice
+                    ? {
+                        amount: product.priceRange.minVariantPrice.amount,
+                        currencyCode:
+                          product.priceRange.minVariantPrice.currencyCode,
+                      }
+                    : undefined
+                }
+                isLoggedIn={isLoggedIn}
+              />
+            )}
+          </PaginatedResourceSection>
+
+          {isCollectionUpdating ? (
+            <div className="collection-loader" aria-live="polite" aria-busy="true">
+              <img
+                src={wandiniLogo}
+                alt="Wandini loading"
+                className="collection-loader__logo"
+              />
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       <Analytics.CollectionView
@@ -248,7 +289,12 @@ const CUSTOM_PRODUCT_CARD_FRAGMENT = `#graphql
     id
     handle
     title
-    description
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+    }
     images(first: 3) {
       nodes {
         url
