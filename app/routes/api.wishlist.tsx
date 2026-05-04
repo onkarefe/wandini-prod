@@ -33,6 +33,7 @@ export async function action({request, context}: Route.ActionArgs) {
       {
         ok: false,
         loginUrl: getLoginUrl(request),
+        message: 'Login required.',
       },
       {status: 401},
     );
@@ -82,6 +83,7 @@ export async function action({request, context}: Route.ActionArgs) {
 
     return Response.json({
       ok: true,
+      message: 'Product added to wishlist.',
       wishlistCount: wishlist.length,
     });
   } catch (error) {

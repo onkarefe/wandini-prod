@@ -103,6 +103,20 @@
   opacity: 0.7;
 }
 
+.custom-product-card__wishlist-feedback {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.custom-product-card__wishlist-feedback--success {
+  color: #1f1f1f;
+}
+
+.custom-product-card__wishlist-feedback--error {
+  color: #b42318;
+}
+
 .custom-products-grid {
   display: flex;
   flex-wrap: wrap;

@@ -105,6 +105,16 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
         ? 'Favoriye eklendi'
         : 'Favoriye ekle';
 
+  const wishlistFeedback =
+    fetcher.state !== 'idle'
+      ? 'Istek gonderiliyor...'
+      : fetcher.data?.message ?? null;
+
+  const wishlistFeedbackClassName =
+    fetcher.data?.ok
+      ? 'custom-product-card__wishlist-feedback custom-product-card__wishlist-feedback--success'
+      : 'custom-product-card__wishlist-feedback custom-product-card__wishlist-feedback--error';
+
   return (
     <a href={productUrl} className="custom-product-card" aria-label={title}>
       <div className="custom-product-card__media" ref={emblaRef}>
@@ -154,6 +164,9 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
         >
           {wishlistButtonLabel}
         </button>
+        {wishlistFeedback ? (
+          <p className={wishlistFeedbackClassName}>{wishlistFeedback}</p>
+        ) : null}
       </div>
     </a>
   );
