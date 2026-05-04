@@ -274,3 +274,61 @@ export async function addProductToCustomerWishlist({
 
   return nextWishlist;
 }
+
+export async function toggleProductInCustomerWishlist({
+  env,
+  customerId,
+  productId,
+}: {
+  env: WishlistEnv;
+  customerId: string;
+  productId: string;
+}) {
+  const currentWishlist = await getCustomerWishlistProductIds({env, customerId});
+  const isCurrentlyWishlisted = currentWishlist.includes(productId);
+  const nextWishlist = isCurrentlyWishlisted
+    ? currentWishlist.filter((currentProductId) => currentProductId !== productId)
+    : normalizeWishlistProductIds([productId, ...currentWishlist]);
+
+  const data = await adminGraphql<MetafieldsSetMutation>({
+    env,
+    query: `#graphql
+      mutation SetCustomerWishlist($metafields: [MetafieldsSetInput!]!) {
+        metafieldsSet(metafields: $metafields) {
+          metafields {
+            key
+            namespace
+            value
+          }
+          userErrors {
+            field
+            message
+            code
+          }
+        }
+      }
+    `,
+    variables: {
+      metafields: [
+        {
+          ownerId: customerId,
+          namespace: WISHLIST_NAMESPACE,
+          key: WISHLIST_KEY,
+          type: WISHLIST_TYPE,
+          value: JSON.stringify(nextWishlist),
+        },
+      ],
+    },
+  });
+
+  if (data.metafieldsSet.userErrors.length > 0) {
+    throw new Error(
+      `${data.metafieldsSet.userErrors.map((error) => error.message).join(', ')} ${WISHLIST_DEBUG_VERSION}`,
+    );
+  }
+
+  return {
+    wishlist: nextWishlist,
+    wishlisted: !isCurrentlyWishlisted,
+  };
+}

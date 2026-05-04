@@ -16,6 +16,7 @@ interface CustomProductCardProps {
   minPrice?: ProductPrice;
   isLoggedIn?: boolean;
   isWishlisted?: boolean;
+  onWishlistChange?: (wishlisted: boolean) => void;
 }
 
 function HeartOutlineIcon() {
@@ -67,12 +68,14 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   minPrice,
   isLoggedIn = false,
   isWishlisted = false,
+  onWishlistChange,
 }) => {
   const displayImages = images.slice(0, 3);
   const fetcher = useFetcher<{
     ok?: boolean;
     loginUrl?: string;
     message?: string;
+    wishlisted?: boolean;
   }>();
   const location = useLocation();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start' });
@@ -104,18 +107,17 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   }, [fetcher.data]);
 
   useEffect(() => {
-    if (fetcher.data?.ok) {
-      setWishlisted(true);
+    if (!fetcher.data?.ok || typeof fetcher.data.wishlisted !== 'boolean') {
+      return;
     }
-  }, [fetcher.data]);
+
+    setWishlisted(fetcher.data.wishlisted);
+    onWishlistChange?.(fetcher.data.wishlisted);
+  }, [fetcher.data, onWishlistChange]);
 
   const handleWishlistClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
-
-    if (wishlisted) {
-      return;
-    }
 
     if (!isLoggedIn) {
       const returnTo = `${location.pathname}${location.search}${location.hash}`;

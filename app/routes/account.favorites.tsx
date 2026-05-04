@@ -1,3 +1,4 @@
+import {useEffect, useState} from 'react';
 import {useLoaderData} from 'react-router';
 import type {Route} from './+types/account.favorites';
 import {CustomProductCard} from '~/components/CustomProductCard';
@@ -95,19 +96,24 @@ export async function loader({context}: Route.LoaderArgs) {
 
 export default function AccountFavorites() {
   const {favorites} = useLoaderData<typeof loader>();
+  const [favoriteProducts, setFavoriteProducts] = useState(favorites);
+
+  useEffect(() => {
+    setFavoriteProducts(favorites);
+  }, [favorites]);
 
   return (
     <div className="account-favorites">
       <section className="account-profile__section">
         <h2 className="account-profile__title">My favorites</h2>
 
-        {favorites.length === 0 ? (
+        {favoriteProducts.length === 0 ? (
           <p className="account-addresses__empty">
             You have not added any favorite products yet.
           </p>
         ) : (
           <div className="custom-products-grid">
-            {favorites.map((product) => (
+            {favoriteProducts.map((product) => (
               <CustomProductCard
                 key={product.id}
                 productId={product.id}
@@ -127,6 +133,15 @@ export default function AccountFavorites() {
                 }
                 isLoggedIn
                 isWishlisted
+                onWishlistChange={(wishlisted) => {
+                  if (!wishlisted) {
+                    setFavoriteProducts((currentProducts) =>
+                      currentProducts.filter(
+                        (currentProduct) => currentProduct.id !== product.id,
+                      ),
+                    );
+                  }
+                }}
               />
             ))}
           </div>

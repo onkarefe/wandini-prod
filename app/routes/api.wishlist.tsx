@@ -1,5 +1,5 @@
 import type {Route} from './+types/api.wishlist';
-import {addProductToCustomerWishlist} from '~/lib/wishlist.server';
+import {toggleProductInCustomerWishlist} from '~/lib/wishlist.server';
 
 const CUSTOMER_WISHLIST_OWNER_QUERY = `#graphql
   query WishlistCustomerOwner($language: LanguageCode)
@@ -72,7 +72,7 @@ export async function action({request, context}: Route.ActionArgs) {
   }
 
   try {
-    const wishlist = await addProductToCustomerWishlist({
+    const result = await toggleProductInCustomerWishlist({
       env: context.env as {
         SHOPIFY_SHOP?: string;
         SHOPIFY_CLIENT_ID?: string;
@@ -84,8 +84,11 @@ export async function action({request, context}: Route.ActionArgs) {
 
     return Response.json({
       ok: true,
-      message: 'Product added to wishlist.',
-      wishlistCount: wishlist.length,
+      message: result.wishlisted
+        ? 'Product added to wishlist.'
+        : 'Product removed from wishlist.',
+      wishlistCount: result.wishlist.length,
+      wishlisted: result.wishlisted,
     });
   } catch (error) {
     return Response.json(
