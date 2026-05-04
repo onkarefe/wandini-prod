@@ -22,6 +22,7 @@ import {
   getSelectedCollectionSort,
   normalizeCollectionSortParam,
 } from '~/lib/collectionParams';
+import {getCustomerWishlistProductIds} from '~/lib/wishlist.server';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {redirectToLocalePath} from '~/lib/locale';
 import type {Route} from './+types/collections.$handle';
@@ -32,6 +33,15 @@ type CollectionProduct = CollectionData['products']['nodes'][number];
 type CollectionFilterInput = NonNullable<
   CustomCollectionQueryVariables['filters']
 >;
+
+const CUSTOMER_WISHLIST_OWNER_QUERY = `#graphql
+  query WishlistCustomerOwner($language: LanguageCode)
+  @inContext(language: $language) {
+    customer {
+      id
+    }
+  }
+` as const;
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
@@ -61,8 +71,9 @@ async function loadCriticalData({
   const selectedSort = getSelectedCollectionSort(url.searchParams.get('sort'));
   const {reverse, sortKey} = getCollectionSortVariables(selectedSort);
   const filters = parseCollectionFilters(url.searchParams);
+  const isLoggedIn = await customerAccount.isLoggedIn();
 
-  const [data, isLoggedIn] = await Promise.all([
+  const [data, wishlistProductIds] = await Promise.all([
     storefront.query(CUSTOM_COLLECTION_QUERY, {
       variables: {
         handle,
@@ -72,7 +83,15 @@ async function loadCriticalData({
         reverse,
       },
     }) as Promise<CustomCollectionQuery>,
-    customerAccount.isLoggedIn(),
+    loadWishlistProductIds({
+      customerAccount,
+      env: context.env as {
+        SHOPIFY_SHOP?: string;
+        SHOPIFY_CLIENT_ID?: string;
+        SHOPIFY_CLIENT_SECRET?: string;
+      },
+      isLoggedIn,
+    }),
   ]);
 
   const collection = data.collection;
@@ -83,7 +102,7 @@ async function loadCriticalData({
 
   redirectIfHandleIsLocalized(request, {handle, data: collection});
 
-  return {collection, isLoggedIn};
+  return {collection, isLoggedIn, wishlistProductIds};
 }
 
 function loadDeferredData() {
@@ -91,10 +110,11 @@ function loadDeferredData() {
 }
 
 export default function Collection() {
-  const {collection, isLoggedIn} = useLoaderData<typeof loader>();
+  const {collection, isLoggedIn, wishlistProductIds} = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const navigation = useNavigation();
   const location = useLocation();
+  const wishlistProductIdSet = new Set(wishlistProductIds);
 
   const hasFilters =
     Array.isArray(collection.products.filters) &&
@@ -189,6 +209,7 @@ export default function Collection() {
                     : undefined
                 }
                 isLoggedIn={isLoggedIn}
+                isWishlisted={wishlistProductIdSet.has(product.id)}
               />
             )}
           </PaginatedResourceSection>
@@ -215,6 +236,43 @@ export default function Collection() {
       />
     </div>
   );
+}
+
+async function loadWishlistProductIds({
+  customerAccount,
+  env,
+  isLoggedIn,
+}: {
+  customerAccount: Route.LoaderArgs['context']['customerAccount'];
+  env: {
+    SHOPIFY_SHOP?: string;
+    SHOPIFY_CLIENT_ID?: string;
+    SHOPIFY_CLIENT_SECRET?: string;
+  };
+  isLoggedIn: boolean;
+}) {
+  if (!isLoggedIn) {
+    return [];
+  }
+
+  const {data, errors} = await customerAccount.query(CUSTOMER_WISHLIST_OWNER_QUERY, {
+    variables: {
+      language: customerAccount.i18n.language,
+    },
+  });
+
+  if (errors?.length || !data?.customer?.id) {
+    return [];
+  }
+
+  try {
+    return await getCustomerWishlistProductIds({
+      env,
+      customerId: data.customer.id,
+    });
+  } catch {
+    return [];
+  }
 }
 
 function parseCollectionFilters(
