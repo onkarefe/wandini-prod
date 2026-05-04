@@ -90,6 +90,9 @@ function AccountMenu() {
       <NavLink to="/account/profile" className={getTabClassName}>
         Profile
       </NavLink>
+      <NavLink to="/account/favorites" className={getTabClassName}>
+        Favorites
+      </NavLink>
       <NavLink to="/account/addresses" className={getTabClassName}>
         Addresses
       </NavLink>

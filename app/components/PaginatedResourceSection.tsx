@@ -15,26 +15,26 @@ export function PaginatedResourceSection<NodesType>({
 }) {
   return (
     <Pagination connection={connection}>
-      {({ nodes, isLoading, PreviousLink, NextLink }) => {
+      {({ nodes, PreviousLink, NextLink }) => {
         const resourcesMarkup = nodes.map((node, index) =>
           children({ node, index }),
         );
 
         return (
-          <div>
-            <PreviousLink>
-              {isLoading ? 'Loading...' : <span className='collectionReloadButton'>Load previous</span>}
-            </PreviousLink>
-            {resourcesClassName ? (
-              <div className={resourcesClassName}>{resourcesMarkup}</div>
-            ) : (
-              resourcesMarkup
-            )}
-            <NextLink>
-              {isLoading ? 'Loading...' : <span className='collectionReloadButton'>Load more +</span>}
-            </NextLink>
-          </div>
-        );
+            <div>
+              <PreviousLink>
+                <span className="collectionReloadButton">Load previous</span>
+              </PreviousLink>
+              {resourcesClassName ? (
+                <div className={resourcesClassName}>{resourcesMarkup}</div>
+              ) : (
+                resourcesMarkup
+              )}
+              <NextLink>
+                <span className="collectionReloadButton">Load more +</span>
+              </NextLink>
+            </div>
+          );
       }}
     </Pagination>
   );
