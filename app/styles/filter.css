@@ -2,6 +2,42 @@
   margin: 20px 0 18px;
 }
 
+.collection-filters.is-updating {
+  position: relative;
+}
+
+.collection-filters__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(255, 253, 249, 0.6);
+  backdrop-filter: blur(3px);
+  pointer-events: none;
+}
+
+.collection-filters__overlay-spinner {
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  border: 1.5px solid rgba(23, 23, 23, 0.18);
+  border-top-color: #171717;
+  border-radius: 999px;
+  animation: filters-overlay-spin 0.7s linear infinite;
+}
+
+.collection-filters__overlay-text {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #171717;
+}
+
 .filters-bar {
   display: flex;
   align-items: center;
@@ -39,6 +75,10 @@
   border-color: #171717;
   background: #171717;
   color: #ffffff;
+}
+
+.filters-bar__trigger.is-updating {
+  border-color: rgba(17, 17, 17, 0.22);
 }
 
 .filters-bar__trigger-label {
@@ -97,10 +137,21 @@
   border-color: #171717;
 }
 
+.filters-bar__reset:disabled,
+.filters-selected__chip:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
 .filters-mega {
   margin-top: 14px;
   border: 1px solid rgba(17, 17, 17, 0.12);
   background: linear-gradient(180deg, #fffdf9 0%, #ffffff 100%);
+  transition: opacity 0.2s ease;
+}
+
+.collection-filters.is-updating .filters-mega {
+  opacity: 0.78;
 }
 
 .filters-mega__head {
@@ -172,6 +223,27 @@
 .filter-group__options {
   display: grid;
   gap: 2px;
+  max-height: calc(5 * 43px);
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(23, 23, 23, 0.28) transparent;
+}
+
+.filter-group__options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filter-group__options::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filter-group__options::-webkit-scrollbar-thumb {
+  background: rgba(23, 23, 23, 0.22);
+}
+
+.filter-group__options::-webkit-scrollbar-thumb:hover {
+  background: rgba(23, 23, 23, 0.38);
 }
 
 .filter-group__option {
@@ -217,6 +289,10 @@
   box-shadow: inset 0 0 0 3px #ffffff;
 }
 
+.filter-group__checkbox:disabled + .filter-group__checkbox-ui {
+  opacity: 0.6;
+}
+
 .filter-group__option-text {
   min-width: 0;
   font-size: 13px;
@@ -259,6 +335,11 @@
 .filters-selected__chip:hover {
   border-color: rgba(17, 17, 17, 0.3);
   background: #fbf9f5;
+}
+
+.filters-selected__chip:disabled:hover {
+  border-color: rgba(17, 17, 17, 0.12);
+  background: #ffffff;
 }
 
 .filters-selected__chip-text {
@@ -311,6 +392,25 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+}
+
+@keyframes filters-loading-pulse {
+  0%,
+  100% {
+    transform: scale(0.75);
+    opacity: 0.45;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes filters-overlay-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 1279.98px) {

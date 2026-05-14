@@ -21,8 +21,9 @@ export async function loader({request, context}: Route.LoaderArgs) {
 
 function robotsTxtData({url, shopId}: {shopId?: string; url?: string}) {
   const sitemapUrl = url ? `${url}/sitemap.xml` : undefined;
+  const similarSitemapUrl = url ? `${url}/sitemap-similar-products.xml` : undefined;
 
-  return `
+  const body = `
 User-agent: *
 ${generalDisallowRules({sitemapUrl, shopId})}
 
@@ -54,7 +55,9 @@ Crawl-Delay: 10
 
 User-agent: Pinterest
 Crawl-delay: 1
-`.trim();
+ `.trim();
+
+  return similarSitemapUrl ? `${body}\nSitemap: ${similarSitemapUrl}` : body;
 }
 
 /**

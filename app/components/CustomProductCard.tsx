@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
-import {useFetcher, useLocation} from 'react-router';
+import {useFetcher, useLocation, useNavigate} from 'react-router';
 import '../styles/customProductCard.css';
 
 type ProductPrice = {
@@ -13,6 +13,10 @@ interface CustomProductCardProps {
   title: string;
   images: { url: string; altText?: string }[];
   productUrl: string;
+  showSimilarMotifsButton?: boolean;
+  similarProductsUrl?: string;
+  similarProductsSourceTitle?: string;
+  similarProductsSourceImageUrl?: string;
   minPrice?: ProductPrice;
   isLoggedIn?: boolean;
   isWishlisted?: boolean;
@@ -65,6 +69,10 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   title,
   images,
   productUrl,
+  showSimilarMotifsButton = false,
+  similarProductsUrl,
+  similarProductsSourceTitle,
+  similarProductsSourceImageUrl,
   minPrice,
   isLoggedIn = false,
   isWishlisted = false,
@@ -78,6 +86,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
     wishlisted?: boolean;
   }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start' });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [wishlisted, setWishlisted] = useState(isWishlisted);
@@ -191,6 +200,27 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
         <h3 className="custom-product-card__title">{title}</h3>
         {priceLabel ? (
           <p className="custom-product-card__price">{priceLabel}</p>
+        ) : null}
+        {showSimilarMotifsButton ? (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+
+              if (similarProductsUrl) {
+                void navigate(similarProductsUrl, {
+                  state: {
+                    sourceProductTitle: similarProductsSourceTitle ?? title,
+                    sourceProductImageUrl:
+                      similarProductsSourceImageUrl ?? images[0]?.url ?? null,
+                  },
+                });
+              }
+            }}
+          >
+            Show Similar Motifs
+          </button>
         ) : null}
       </div>
     </a>

@@ -81,8 +81,9 @@ export const meta: Route.MetaFunction = ({ data }) => {
   return [
     { title: `Hydrogen | ${data?.product.title ?? ''}` },
     {
+      tagName: 'link',
       rel: 'canonical',
-      href: `/products/${data?.product.handle}`,
+      href: data?.canonicalUrl ?? `/products/${data?.product.handle}`,
     },
   ];
 };
@@ -123,7 +124,10 @@ async function loadCriticalData({ context, params, request }: Route.LoaderArgs) 
   // The API handle might be localized, so redirect to the localized handle
   redirectIfHandleIsLocalized(request, { handle, data: product });
 
+  const url = new URL(request.url);
+
   return {
+    canonicalUrl: `${url.origin}${url.pathname}`,
     product: {
       ...product,
       descriptionHtml: sanitizeProductDescriptionHtml(product.descriptionHtml),

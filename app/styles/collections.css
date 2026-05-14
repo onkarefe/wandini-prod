@@ -6,6 +6,7 @@
   text-align: center;
   position: relative;
   height: 30vh;
+  margin-bottom: 32px;
 }
 
 .collectionMainHeroDiv::before {

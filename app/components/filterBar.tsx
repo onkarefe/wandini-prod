@@ -19,6 +19,7 @@ type SelectedFilters = Record<string, string[]>;
 
 interface FilterBarProps {
   filters: CollectionFilters;
+  isUpdating?: boolean;
 }
 
 function getFilterValueInput(value: Pick<FilterValue, 'input'>): string | null {
@@ -29,7 +30,7 @@ function flattenSelectedFilters(selectedFilters: SelectedFilters): string[] {
   return Object.values(selectedFilters).flatMap((values) => values);
 }
 
-export function FilterBar({filters}: FilterBarProps) {
+export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -104,6 +105,10 @@ export function FilterBar({filters}: FilterBarProps) {
 
   const handleFilterClick = useCallback(
     (filterId: string, input: string) => {
+      if (isUpdating) {
+        return;
+      }
+
       const currentValues = selectedFilters[filterId] ?? [];
       const nextValues = currentValues.includes(input)
         ? currentValues.filter((value) => value !== input)
@@ -132,10 +137,14 @@ export function FilterBar({filters}: FilterBarProps) {
       });
       navigateWithParams(params);
     },
-    [getBaseParams, navigateWithParams, selectedFilters],
+    [getBaseParams, isUpdating, navigateWithParams, selectedFilters],
   );
 
   const handleClearFilters = useCallback(() => {
+    if (isUpdating) {
+      return;
+    }
+
     const params = getBaseParams();
 
     params.delete('f');
@@ -144,7 +153,7 @@ export function FilterBar({filters}: FilterBarProps) {
       setSelectedFilters({});
     });
     navigateWithParams(params);
-  }, [getBaseParams, navigateWithParams]);
+  }, [getBaseParams, isUpdating, navigateWithParams]);
 
   const isActive = useCallback(
     (filterId: string, input: string) => {
@@ -162,6 +171,10 @@ export function FilterBar({filters}: FilterBarProps) {
 
   const handleRemoveFilterValue = useCallback(
     (filterId: string, valueInput: string) => {
+      if (isUpdating) {
+        return;
+      }
+
       const currentValues = selectedFilters[filterId] ?? [];
       const nextValues = currentValues.filter((value) => value !== valueInput);
       const nextSelectedFilters: SelectedFilters = {...selectedFilters};
@@ -184,7 +197,7 @@ export function FilterBar({filters}: FilterBarProps) {
       });
       navigateWithParams(params);
     },
-    [getBaseParams, navigateWithParams, selectedFilters],
+    [getBaseParams, isUpdating, navigateWithParams, selectedFilters],
   );
 
   const activeChips = useMemo(() => {
@@ -221,12 +234,24 @@ export function FilterBar({filters}: FilterBarProps) {
 
   const activeFilterCount = activeChips.length;
 
-  return (
-    <div className="collection-filters">
+    return (
+    <div
+      className={`collection-filters ${isUpdating ? 'is-updating' : ''}`}
+      aria-busy={isUpdating}
+    >
+      {isUpdating ? (
+        <div className="collection-filters__overlay" aria-live="polite">
+          <span className="collection-filters__overlay-spinner" aria-hidden="true" />
+          <span className="collection-filters__overlay-text">Updating filters</span>
+        </div>
+      ) : null}
+
       <div className="filters-bar">
         <button
           type="button"
-          className={`filters-bar__trigger ${isMegaMenuOpen ? 'is-open' : ''}`}
+          className={`filters-bar__trigger ${isMegaMenuOpen ? 'is-open' : ''} ${
+            isUpdating ? 'is-updating' : ''
+          }`}
           onClick={() => setIsMegaMenuOpen((value) => !value)}
           aria-expanded={isMegaMenuOpen}
         >
@@ -243,6 +268,7 @@ export function FilterBar({filters}: FilterBarProps) {
             type="button"
             className="filters-bar__reset"
             onClick={handleClearFilters}
+            disabled={isUpdating}
           >
             Reset
           </button>
@@ -250,11 +276,15 @@ export function FilterBar({filters}: FilterBarProps) {
       </div>
 
       {isMegaMenuOpen ? (
-        <div className="filters-mega" aria-label="Product filters">
-          <div className="filters-mega__head">
-            <div className="filters-mega__status">
-              {activeFilterCount > 0 ? `${activeFilterCount} selected` : 'All filters'}
-            </div>
+          <div className="filters-mega" aria-label="Product filters">
+            <div className="filters-mega__head">
+              <div className="filters-mega__status">
+                {isUpdating
+                  ? 'Updating products'
+                  : activeFilterCount > 0
+                    ? `${activeFilterCount} selected`
+                    : 'All filters'}
+              </div>
             <button
               type="button"
               className="filters-mega__close"
@@ -295,6 +325,7 @@ export function FilterBar({filters}: FilterBarProps) {
                               className="filter-group__checkbox"
                               checked={isActive(filter.id, input)}
                               onChange={() => handleFilterClick(filter.id, input)}
+                              disabled={isUpdating}
                             />
                             <span
                               className="filter-group__checkbox-ui"
@@ -328,6 +359,7 @@ export function FilterBar({filters}: FilterBarProps) {
                   onClick={() =>
                     handleRemoveFilterValue(chip.filterId, chip.valueInput)
                   }
+                  disabled={isUpdating}
                 >
                   <span className="filters-selected__chip-text">{chip.valueLabel}</span>
                   <span className="filters-selected__chip-icon" aria-hidden="true">

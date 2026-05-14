@@ -22,6 +22,7 @@ import {
   getSelectedCollectionSort,
   normalizeCollectionSortParam,
 } from '~/lib/collectionParams';
+import {buildSimilarProductsPath} from '~/lib/similar-products';
 import {getCustomerWishlistProductIds} from '~/lib/wishlist.server';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {redirectToLocalePath} from '~/lib/locale';
@@ -30,6 +31,14 @@ import '../styles/collections.css';
 
 type CollectionData = NonNullable<CustomCollectionQuery['collection']>;
 type CollectionProduct = CollectionData['products']['nodes'][number];
+type CollectionProductWithSimilarFields = CollectionProduct & {
+  mainMotif?: {
+    value?: string | null;
+  } | null;
+  mainTheme?: {
+    value?: string | null;
+  } | null;
+};
 type CollectionFilterInput = NonNullable<
   CustomCollectionQueryVariables['filters']
 >;
@@ -115,17 +124,31 @@ export default function Collection() {
   const navigation = useNavigation();
   const location = useLocation();
   const wishlistProductIdSet = new Set(wishlistProductIds);
+  const currentSearchParams = new URLSearchParams(location.search);
+  const currentBaseSearch = normalizeCollectionSortParam(
+    clearCollectionPaginationParams(new URLSearchParams(currentSearchParams)),
+  ).toString();
+  const nextSearchParams = navigation.location
+    ? new URLSearchParams(navigation.location.search)
+    : null;
+  const nextBaseSearch = nextSearchParams
+    ? normalizeCollectionSortParam(
+        clearCollectionPaginationParams(new URLSearchParams(nextSearchParams)),
+      ).toString()
+    : '';
 
   const hasFilters =
     Array.isArray(collection.products.filters) &&
     collection.products.filters.length > 0;
   const selectedSort = getSelectedCollectionSort(
-    new URLSearchParams(location.search).get('sort'),
+    currentSearchParams.get('sort'),
   );
   const isCollectionUpdating =
     navigation.state !== 'idle' &&
     navigation.location?.pathname === location.pathname &&
     navigation.location.search !== location.search;
+  const isFilterUpdating =
+    isCollectionUpdating && nextBaseSearch !== currentBaseSearch;
 
   const handleSortChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextSort = getSelectedCollectionSort(event.target.value);
@@ -161,7 +184,12 @@ export default function Collection() {
       </div>
 
       <div className="container mx-auto">
-        {hasFilters ? <FilterBar filters={collection.products.filters} /> : null}
+        {hasFilters ? (
+          <FilterBar
+            filters={collection.products.filters}
+            isUpdating={isFilterUpdating}
+          />
+        ) : null}
 
         <div className="sort-Main">
           <label htmlFor="sort-select">Sort:</label>
@@ -189,29 +217,54 @@ export default function Collection() {
             connection={collection.products}
             resourcesClassName="custom-products-grid container mx-auto"
           >
-            {({node: product}) => (
-              <CustomProductCard
-                key={product.id}
-                productId={product.id}
-                title={product.title}
-                images={product.images.nodes.map((image) => ({
-                  url: image.url,
-                  altText: image.altText ?? undefined,
-                }))}
-                productUrl={`/products/${product.handle}`}
-                minPrice={
-                  product.priceRange?.minVariantPrice
-                    ? {
-                        amount: product.priceRange.minVariantPrice.amount,
-                        currencyCode:
-                          product.priceRange.minVariantPrice.currencyCode,
-                      }
-                    : undefined
-                }
-                isLoggedIn={isLoggedIn}
-                isWishlisted={wishlistProductIdSet.has(product.id)}
-              />
-            )}
+            {({node: product}) => {
+              const productWithSimilarFields =
+                product as CollectionProductWithSimilarFields;
+              const hasMainMotif = Boolean(
+                productWithSimilarFields.mainMotif?.value?.trim(),
+              );
+              const hasMainTheme = Boolean(
+                productWithSimilarFields.mainTheme?.value?.trim(),
+              );
+              const similarProductsUrl =
+                hasMainMotif && hasMainTheme
+                  ? buildSimilarProductsPath({
+                      mainMotif: productWithSimilarFields.mainMotif?.value ?? '',
+                      mainTheme: productWithSimilarFields.mainTheme?.value ?? '',
+                      productCategory: collection.handle,
+                    })
+                  : null;
+
+              return (
+                <CustomProductCard
+                  key={product.id}
+                  productId={product.id}
+                  title={product.title}
+                  images={product.images.nodes.map((image) => ({
+                    url: image.url,
+                    altText: image.altText ?? undefined,
+                  }))}
+                  productUrl={`/products/${product.handle}`}
+                  showSimilarMotifsButton={hasMainMotif && hasMainTheme}
+                  similarProductsUrl={similarProductsUrl ?? undefined}
+                  similarProductsSourceTitle={product.title}
+                  similarProductsSourceImageUrl={
+                    product.images.nodes[0]?.url ?? undefined
+                  }
+                  minPrice={
+                    product.priceRange?.minVariantPrice
+                      ? {
+                          amount: product.priceRange.minVariantPrice.amount,
+                          currencyCode:
+                            product.priceRange.minVariantPrice.currencyCode,
+                        }
+                      : undefined
+                  }
+                  isLoggedIn={isLoggedIn}
+                  isWishlisted={wishlistProductIdSet.has(product.id)}
+                />
+              );
+            }}
           </PaginatedResourceSection>
 
           {isCollectionUpdating ? (
@@ -347,6 +400,12 @@ const CUSTOM_PRODUCT_CARD_FRAGMENT = `#graphql
     id
     handle
     title
+    mainMotif: metafield(namespace: "custom", key: "main_motif") {
+      value
+    }
+    mainTheme: metafield(namespace: "custom", key: "main_theme") {
+      value
+    }
     priceRange {
       minVariantPrice {
         amount
