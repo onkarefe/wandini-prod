@@ -77,14 +77,201 @@ function sanitizeProductDescriptionHtml(html: string | null | undefined) {
   return sanitizedHtml;
 }
 
+const PRODUCT_META_BRAND = 'Wandini';
+const PRODUCT_META_DESCRIPTION_MAX_LENGTH = 160;
+
+type ProductMetaInput = {
+  title?: string | null;
+  vendor?: string | null;
+  handle?: string | null;
+  description?: string | null;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  } | null;
+  images?: {
+    edges?: Array<{
+      node?: {
+        url?: string | null;
+      } | null;
+    } | null> | null;
+  } | null;
+};
+
+function normalizeMetaText(value?: string | null) {
+  if (!value) {
+    return '';
+  }
+
+  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function truncateMetaDescription(value: string) {
+  if (value.length <= PRODUCT_META_DESCRIPTION_MAX_LENGTH) {
+    return value;
+  }
+
+  const clipped = value.slice(0, PRODUCT_META_DESCRIPTION_MAX_LENGTH + 1);
+  const lastSpaceIndex = clipped.lastIndexOf(' ');
+  const truncated =
+    lastSpaceIndex > 80 ? clipped.slice(0, lastSpaceIndex) : clipped.slice(0, PRODUCT_META_DESCRIPTION_MAX_LENGTH);
+
+  return `${truncated.trim()}...`;
+}
+
+function getProductMetaTitle(product?: ProductMetaInput | null) {
+  const seoTitle = normalizeMetaText(product?.seo?.title);
+
+  if (seoTitle) {
+    return seoTitle;
+  }
+
+  const productTitle = normalizeMetaText(product?.title);
+  const brand = normalizeMetaText(product?.vendor) || PRODUCT_META_BRAND;
+
+  if (!productTitle) {
+    return brand;
+  }
+
+  return productTitle.toLowerCase().includes(brand.toLowerCase())
+    ? productTitle
+    : `${productTitle} | ${brand}`;
+}
+
+function getProductMetaDescription(product?: ProductMetaInput | null) {
+  const description =
+    normalizeMetaText(product?.seo?.description) ||
+    normalizeMetaText(product?.description);
+
+  return description ? truncateMetaDescription(description) : null;
+}
+
+function getProductMetaImage(product?: ProductMetaInput | null) {
+  return product?.images?.edges?.find((edge) => edge?.node?.url)?.node?.url ?? null;
+}
+
+type ProductStructuredDataInput = ProductMetaInput & {
+  selectedOrFirstAvailableVariant?: {
+    availableForSale?: boolean | null;
+    price?: {
+      amount?: string | null;
+      currencyCode?: string | null;
+    } | null;
+    sku?: string | null;
+  } | null;
+};
+
+function getProductImageUrls(product?: ProductMetaInput | null) {
+  return (
+    product?.images?.edges
+      ?.map((edge) => edge?.node?.url)
+      .filter((url): url is string => Boolean(url)) ?? []
+  );
+}
+
+function buildProductJsonLd(
+  product: ProductStructuredDataInput,
+  canonicalUrl: string,
+) {
+  const description = getProductMetaDescription(product);
+  const imageUrls = getProductImageUrls(product);
+  const brand = normalizeMetaText(product.vendor);
+  const sku = normalizeMetaText(product.selectedOrFirstAvailableVariant?.sku);
+  const price = product.selectedOrFirstAvailableVariant?.price?.amount;
+  const priceCurrency =
+    product.selectedOrFirstAvailableVariant?.price?.currencyCode;
+  const offer =
+    price && priceCurrency
+      ? {
+          '@type': 'Offer',
+          url: canonicalUrl,
+          price,
+          priceCurrency,
+          availability: product.selectedOrFirstAvailableVariant?.availableForSale
+            ? 'https://schema.org/InStock'
+            : 'https://schema.org/OutOfStock',
+          itemCondition: 'https://schema.org/NewCondition',
+        }
+      : null;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.title,
+    ...(description ? {description} : {}),
+    ...(imageUrls.length > 0 ? {image: imageUrls} : {}),
+    ...(brand ? {brand: {'@type': 'Brand', name: brand}} : {}),
+    ...(sku ? {sku} : {}),
+    ...(offer ? {offers: offer} : {}),
+  };
+}
+
+function getBreadcrumbHomeUrl(canonicalUrl: string) {
+  const url = new URL(canonicalUrl);
+  const [firstSegment] = url.pathname.split('/').filter(Boolean);
+
+  return firstSegment?.toLowerCase() === 'de-de'
+    ? `${url.origin}/de-de`
+    : `${url.origin}/`;
+}
+
+function buildProductBreadcrumbJsonLd(
+  product: ProductStructuredDataInput,
+  canonicalUrl: string,
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: getBreadcrumbHomeUrl(canonicalUrl),
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: product.title,
+        item: canonicalUrl,
+      },
+    ],
+  };
+}
+
+function stringifyJsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 export const meta: Route.MetaFunction = ({ data }) => {
+  const product = data?.product;
+  const title = getProductMetaTitle(product);
+  const description = getProductMetaDescription(product);
+  const imageUrl = getProductMetaImage(product);
+  const canonicalUrl =
+    data?.canonicalUrl ?? `/products/${product?.handle ?? ''}`;
+
   return [
-    { title: `Hydrogen | ${data?.product.title ?? ''}` },
+    {title},
+    ...(description ? [{name: 'description', content: description}] : []),
+    {name: 'robots', content: 'index,follow'},
     {
       tagName: 'link',
       rel: 'canonical',
-      href: data?.canonicalUrl ?? `/products/${data?.product.handle}`,
+      href: canonicalUrl,
     },
+    {property: 'og:type', content: 'product'},
+    {property: 'og:title', content: title},
+    ...(description ? [{property: 'og:description', content: description}] : []),
+    {property: 'og:url', content: canonicalUrl},
+    ...(imageUrl ? [{property: 'og:image', content: imageUrl}] : []),
+    {
+      name: 'twitter:card',
+      content: imageUrl ? 'summary_large_image' : 'summary',
+    },
+    {name: 'twitter:title', content: title},
+    ...(description ? [{name: 'twitter:description', content: description}] : []),
+    ...(imageUrl ? [{name: 'twitter:image', content: imageUrl}] : []),
   ];
 };
 
@@ -257,9 +444,11 @@ function parseJsonMetafield<T>(value?: string | null) {
 }
 
 export default function Product() {
-  const { product } = useLoaderData<typeof loader>();
+  const { product, canonicalUrl } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const cartPath = usePrefixPathWithLocale('/cart');
+  const productJsonLd = buildProductJsonLd(product, canonicalUrl);
+  const breadcrumbJsonLd = buildProductBreadcrumbJsonLd(product, canonicalUrl);
 
   // Configurator modu
   const [isConfiguring, setIsConfiguring] = useState(false);
@@ -549,13 +738,21 @@ export default function Product() {
 
   return (
     <div className="container productDetailMainContainer">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{__html: stringifyJsonLd(productJsonLd)}}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
+      />
       {/* bütün datayı kontrol için gerekiyorsa aç */}
       {/* <pre style={{ whiteSpace: 'pre-wrap' }}>
         {JSON.stringify(product, null, 2)}
       </pre> */}
       <div className="productDetailRow1">
         <div className="productDetailLeft">
-          <ProductImage images={product.images} />
+          <ProductImage images={product.images} productTitle={title} />
 
           <ProductDetailTabs tabTitles={tabTitles} tabContents={tabContents} />
         </div>

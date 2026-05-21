@@ -10,11 +10,14 @@ type ProductImageNode = NonNullable<ProductImages>['edges'][number]['node'];
 
 export function ProductImage({
   images,
+  productTitle,
 }: {
   images: ProductImages | null | undefined;
+  productTitle?: string | null;
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [emblaRef, emblaApi] = useEmblaCarousel({loop: false});
+  const fallbackAlt = productTitle?.trim() || 'Product Image';
   const imageNodes = useMemo<ProductImageNode[]>(() => {
     return (images?.edges ?? []).map(({node}) => node);
   }, [images]);
@@ -61,7 +64,7 @@ export function ProductImage({
           {imageNodes.map((img, index) => (
             <div className="embla__slide" key={img.id ?? img.url ?? `product-image-${index}`}>
               <Image
-                alt={img.altText || 'Product Image'}
+                alt={img.altText || fallbackAlt}
                 aspectRatio="1/1"
                 data={img}
                 sizes="(min-width: 1024px) 50vw, 100vw"
@@ -90,7 +93,10 @@ export function ProductImage({
                 opacity: isSelected ? 1 : 0.5,
               }}
             >
-              <img src={img.url} alt={img.altText || 'Product Thumbnail'} />
+              <img
+                src={img.url}
+                alt={img.altText || `${fallbackAlt} thumbnail ${index + 1}`}
+              />
             </button>
           );
         })}
