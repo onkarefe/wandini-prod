@@ -42,6 +42,34 @@ type CollectionProductWithSimilarFields = CollectionProduct & {
 type CollectionFilterInput = NonNullable<
   CustomCollectionQueryVariables['filters']
 >;
+type CollectionSeoFields = {
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  } | null;
+};
+type CollectionMetaInput = {
+  title?: string | null;
+  description?: string | null;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  } | null;
+  image?: {
+    url?: string | null;
+  } | null;
+};
+type CollectionWithSeo = CollectionData & CollectionSeoFields;
+type CollectionItemListElement = {
+  '@type': 'ListItem';
+  position: number;
+  url: string;
+  name: string;
+  image?: string;
+};
+
+const COLLECTION_META_BRAND = 'Wandini';
+const COLLECTION_META_DESCRIPTION_MAX_LENGTH = 160;
 
 const CUSTOMER_WISHLIST_OWNER_QUERY = `#graphql
   query WishlistCustomerOwner($language: LanguageCode)
@@ -58,9 +86,186 @@ function hasNoisyCollectionParams(searchParams: URLSearchParams) {
   return NOISY_COLLECTION_PARAMS.some((param) => searchParams.has(param));
 }
 
+function normalizeMetaText(value?: string | null) {
+  if (!value) {
+    return '';
+  }
+
+  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function truncateMetaDescription(value: string) {
+  if (value.length <= COLLECTION_META_DESCRIPTION_MAX_LENGTH) {
+    return value;
+  }
+
+  const clipped = value.slice(0, COLLECTION_META_DESCRIPTION_MAX_LENGTH + 1);
+  const lastSpaceIndex = clipped.lastIndexOf(' ');
+  const truncated =
+    lastSpaceIndex > 80
+      ? clipped.slice(0, lastSpaceIndex)
+      : clipped.slice(0, COLLECTION_META_DESCRIPTION_MAX_LENGTH);
+
+  return `${truncated.trim()}...`;
+}
+
+function getCollectionMetaTitle(collection?: CollectionMetaInput | null) {
+  const seoTitle = normalizeMetaText(collection?.seo?.title);
+
+  if (seoTitle) {
+    return seoTitle;
+  }
+
+  const collectionTitle = normalizeMetaText(collection?.title);
+
+  if (!collectionTitle) {
+    return COLLECTION_META_BRAND;
+  }
+
+  return collectionTitle.toLowerCase().includes(COLLECTION_META_BRAND.toLowerCase())
+    ? collectionTitle
+    : `${collectionTitle} | ${COLLECTION_META_BRAND}`;
+}
+
+function getCollectionMetaDescription(collection?: CollectionMetaInput | null) {
+  const description =
+    normalizeMetaText(collection?.seo?.description) ||
+    normalizeMetaText(collection?.description);
+
+  return description ? truncateMetaDescription(description) : null;
+}
+
+function getCollectionMetaImage(collection?: CollectionMetaInput | null) {
+  return collection?.image?.url ?? null;
+}
+
+function buildCollectionPageJsonLd(
+  collection: CollectionMetaInput,
+  canonicalUrl: string,
+) {
+  const name = normalizeMetaText(collection.title) || getCollectionMetaTitle(collection);
+  const description = getCollectionMetaDescription(collection);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name,
+    ...(description ? {description} : {}),
+    url: canonicalUrl,
+  };
+}
+
+function getBreadcrumbHomeUrl(canonicalUrl: string) {
+  const url = new URL(canonicalUrl);
+  const [firstSegment] = url.pathname.split('/').filter(Boolean);
+
+  return firstSegment?.toLowerCase() === 'de-de'
+    ? `${url.origin}/de-de`
+    : `${url.origin}/`;
+}
+
+function buildCollectionBreadcrumbJsonLd(
+  collection: CollectionMetaInput,
+  canonicalUrl: string,
+) {
+  const name = normalizeMetaText(collection.title) || getCollectionMetaTitle(collection);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: getBreadcrumbHomeUrl(canonicalUrl),
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name,
+        item: canonicalUrl,
+      },
+    ],
+  };
+}
+
+function getCollectionLocalePrefix(canonicalUrl: string) {
+  const url = new URL(canonicalUrl);
+  const [firstSegment] = url.pathname.split('/').filter(Boolean);
+
+  return firstSegment && /^[a-z]{2}-[a-z]{2}$/i.test(firstSegment)
+    ? `/${firstSegment.toLowerCase()}`
+    : '';
+}
+
+function getCollectionProductUrl(
+  canonicalUrl: string,
+  productHandle?: string | null,
+) {
+  const handle = normalizeMetaText(productHandle);
+
+  if (!handle) {
+    return null;
+  }
+
+  const url = new URL(canonicalUrl);
+  const localePrefix = getCollectionLocalePrefix(canonicalUrl);
+
+  return `${url.origin}${localePrefix}/products/${handle}`;
+}
+
+function buildCollectionItemListJsonLd(
+  products: CollectionProduct[],
+  canonicalUrl: string,
+) {
+  const itemListElement: CollectionItemListElement[] = [];
+
+  products.forEach((product, index) => {
+    const url = getCollectionProductUrl(canonicalUrl, product.handle);
+    const name = normalizeMetaText(product.title);
+
+    if (!url || !name) {
+      return;
+    }
+
+    const image = product.images.nodes.find((imageNode) => imageNode.url)?.url;
+
+    itemListElement.push({
+      '@type': 'ListItem',
+      position: index + 1,
+      url,
+      name,
+      ...(image ? {image} : {}),
+    });
+  });
+
+  if (itemListElement.length === 0) {
+    return null;
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement,
+  };
+}
+
+function stringifyJsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 export const meta: Route.MetaFunction = ({data, params}) => {
+  const collection = data?.collection;
+  const title = getCollectionMetaTitle(collection);
+  const description = getCollectionMetaDescription(collection);
+  const imageUrl = getCollectionMetaImage(collection);
+  const canonicalUrl =
+    data?.canonicalUrl ?? `/collections/${params.handle ?? ''}`;
+
   return [
-    {title: `Hydrogen | ${data?.collection.title ?? ''} Collection`},
+    {title},
+    ...(description ? [{name: 'description', content: description}] : []),
     {
       name: 'robots',
       content: data?.isNoisyCollectionUrl ? 'noindex,follow' : 'index,follow',
@@ -68,8 +273,20 @@ export const meta: Route.MetaFunction = ({data, params}) => {
     {
       tagName: 'link',
       rel: 'canonical',
-      href: data?.canonicalUrl ?? `/collections/${params.handle ?? ''}`,
+      href: canonicalUrl,
     },
+    {property: 'og:type', content: 'website'},
+    {property: 'og:title', content: title},
+    ...(description ? [{property: 'og:description', content: description}] : []),
+    {property: 'og:url', content: canonicalUrl},
+    ...(imageUrl ? [{property: 'og:image', content: imageUrl}] : []),
+    {
+      name: 'twitter:card',
+      content: imageUrl ? 'summary_large_image' : 'summary',
+    },
+    {name: 'twitter:title', content: title},
+    ...(description ? [{name: 'twitter:description', content: description}] : []),
+    ...(imageUrl ? [{name: 'twitter:image', content: imageUrl}] : []),
   ];
 };
 
@@ -122,7 +339,7 @@ async function loadCriticalData({
     }),
   ]);
 
-  const collection = data.collection;
+  const collection = data.collection as CollectionWithSeo | null | undefined;
 
   if (!collection) {
     throw new Response(`Collection ${handle} not found`, {status: 404});
@@ -144,7 +361,8 @@ function loadDeferredData() {
 }
 
 export default function Collection() {
-  const {collection, isLoggedIn, wishlistProductIds} = useLoaderData<typeof loader>();
+  const {collection, canonicalUrl, isNoisyCollectionUrl, isLoggedIn, wishlistProductIds} =
+    useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const navigation = useNavigation();
   const location = useLocation();
@@ -188,9 +406,36 @@ export default function Collection() {
       search: params.toString(),
     });
   };
+  const collectionPageJsonLd = isNoisyCollectionUrl
+    ? null
+    : buildCollectionPageJsonLd(collection, canonicalUrl);
+  const breadcrumbJsonLd = isNoisyCollectionUrl
+    ? null
+    : buildCollectionBreadcrumbJsonLd(collection, canonicalUrl);
+  const itemListJsonLd = isNoisyCollectionUrl
+    ? null
+    : buildCollectionItemListJsonLd(collection.products.nodes, canonicalUrl);
 
   return (
     <div className="collection">
+      {collectionPageJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: stringifyJsonLd(collectionPageJsonLd)}}
+        />
+      ) : null}
+      {breadcrumbJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
+        />
+      ) : null}
+      {itemListJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: stringifyJsonLd(itemListJsonLd)}}
+        />
+      ) : null}
       <div
         className="collectionMainHeroDiv"
         style={
@@ -465,6 +710,10 @@ const CUSTOM_COLLECTION_QUERY = `#graphql
       handle
       title
       description
+      seo {
+        description
+        title
+      }
       image {
         url
         altText
