@@ -195,12 +195,11 @@ export const meta: Route.MetaFunction = ({data, params}) => {
   const description =
     seoIdentity?.description ??
     'Explore related designs selected by motif, theme, and category.';
-  const robots = data?.seoSignals.seoEligible ? 'index,follow' : 'noindex,follow';
 
   return [
     {title},
     {name: 'description', content: description},
-    {name: 'robots', content: robots},
+    {name: 'robots', content: 'noindex,follow'},
     {
       tagName: 'link',
       rel: 'canonical',

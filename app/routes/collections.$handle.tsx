@@ -52,8 +52,25 @@ const CUSTOMER_WISHLIST_OWNER_QUERY = `#graphql
   }
 ` as const;
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
+const NOISY_COLLECTION_PARAMS = ['sort', 'f', 'cursor', 'direction'] as const;
+
+function hasNoisyCollectionParams(searchParams: URLSearchParams) {
+  return NOISY_COLLECTION_PARAMS.some((param) => searchParams.has(param));
+}
+
+export const meta: Route.MetaFunction = ({data, params}) => {
+  return [
+    {title: `Hydrogen | ${data?.collection.title ?? ''} Collection`},
+    {
+      name: 'robots',
+      content: data?.isNoisyCollectionUrl ? 'noindex,follow' : 'index,follow',
+    },
+    {
+      tagName: 'link',
+      rel: 'canonical',
+      href: data?.canonicalUrl ?? `/collections/${params.handle ?? ''}`,
+    },
+  ];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -77,6 +94,8 @@ async function loadCriticalData({
 
   const paginationVariables = getPaginationVariables(request, {pageBy: 9});
   const url = new URL(request.url);
+  const canonicalUrl = `${url.origin}${url.pathname}`;
+  const isNoisyCollectionUrl = hasNoisyCollectionParams(url.searchParams);
   const selectedSort = getSelectedCollectionSort(url.searchParams.get('sort'));
   const {reverse, sortKey} = getCollectionSortVariables(selectedSort);
   const filters = parseCollectionFilters(url.searchParams);
@@ -111,7 +130,13 @@ async function loadCriticalData({
 
   redirectIfHandleIsLocalized(request, {handle, data: collection});
 
-  return {collection, isLoggedIn, wishlistProductIds};
+  return {
+    collection,
+    canonicalUrl,
+    isNoisyCollectionUrl,
+    isLoggedIn,
+    wishlistProductIds,
+  };
 }
 
 function loadDeferredData() {

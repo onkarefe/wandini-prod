@@ -16,7 +16,10 @@ export type ActionResponse = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Profile'}];
+  return [
+    {title: 'Profile'},
+    {name: 'robots', content: 'noindex,follow'},
+  ];
 };
 
 const PROFILE_ERROR_MESSAGES = {

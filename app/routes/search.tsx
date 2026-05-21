@@ -34,7 +34,10 @@ function getPredictiveSearchLimit(rawLimit: string | null) {
 }
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Hydrogen | Search'}];
+  return [
+    {title: 'Hydrogen | Search'},
+    {name: 'robots', content: 'noindex,follow'},
+  ];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {

@@ -37,7 +37,10 @@ const CUSTOMER_WISHLIST_OWNER_QUERY = `#graphql
 ` as const;
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Favorites'}];
+  return [
+    {title: 'Favorites'},
+    {name: 'robots', content: 'noindex,follow'},
+  ];
 };
 
 export async function loader({context}: Route.LoaderArgs) {

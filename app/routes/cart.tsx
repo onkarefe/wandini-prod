@@ -40,7 +40,10 @@ function getSafeRedirectPath(redirectParam: FormDataEntryValue | null) {
 }
 
 export const meta: Route.MetaFunction = () => {
-  return [{ title: `Hydrogen | Cart` }];
+  return [
+    { title: `Hydrogen | Cart` },
+    {name: 'robots', content: 'noindex,follow'},
+  ];
 };
 
 export const headers: HeadersFunction = ({ actionHeaders }) => actionHeaders;

@@ -29,7 +29,10 @@ export type ActionResponse = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Addresses'}];
+  return [
+    {title: 'Addresses'},
+    {name: 'robots', content: 'noindex,follow'},
+  ];
 };
 
 const NEW_ADDRESS_ID = 'NEW_ADDRESS_ID';

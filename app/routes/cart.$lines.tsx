@@ -8,6 +8,10 @@ type CartCheckoutConfirmation = {
   lineCount: number;
 };
 
+export const meta: Route.MetaFunction = () => {
+  return [{name: 'robots', content: 'noindex,follow'}];
+};
+
 function parseCartLines(lines: string) {
   const linesMap: Array<{merchandiseId: string; quantity: number}> = [];
 

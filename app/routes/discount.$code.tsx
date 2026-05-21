@@ -5,6 +5,10 @@ import {Link} from '~/lib/i18n-router';
 
 const INTERNAL_REDIRECT_ORIGIN = 'https://wandini.internal';
 
+export const meta: Route.MetaFunction = () => {
+  return [{name: 'robots', content: 'noindex,follow'}];
+};
+
 function getSafeRedirectPath(redirectParam: string | null) {
   const trimmedRedirect = redirectParam?.trim();
 

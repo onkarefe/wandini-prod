@@ -13,7 +13,7 @@ export async function loader({
     locales: ['DE-DE'],
     getLink: ({type, baseUrl, handle, locale}) => {
       if (!locale) return `${baseUrl}/${type}/${handle}`;
-      return `${baseUrl}/${locale}/${type}/${handle}`;
+      return `${baseUrl}/${locale.toLowerCase()}/${type}/${handle}`;
     },
   });
 

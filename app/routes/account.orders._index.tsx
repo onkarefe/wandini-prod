@@ -22,7 +22,10 @@ type OrdersLoaderData = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Orders'}];
+  return [
+    {title: 'Orders'},
+    {name: 'robots', content: 'noindex,follow'},
+  ];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {

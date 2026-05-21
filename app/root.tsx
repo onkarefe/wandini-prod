@@ -225,7 +225,7 @@ export default function App() {
     appContent
   );
 
-  const showAuthOverlay = isHydrated && !isAuth;
+  const showAuthOverlay = import.meta.env.DEV && isHydrated && !isAuth;
 
   return (
     <>

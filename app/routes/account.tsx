@@ -13,6 +13,10 @@ export function links() {
   return [{rel: 'stylesheet', href: accountMainStyles}];
 }
 
+export const meta: Route.MetaFunction = () => {
+  return [{name: 'robots', content: 'noindex,follow'}];
+};
+
 export function shouldRevalidate() {
   return true;
 }

@@ -21,11 +21,10 @@ export async function loader({request, context}: Route.LoaderArgs) {
 
 function robotsTxtData({url, shopId}: {shopId?: string; url?: string}) {
   const sitemapUrl = url ? `${url}/sitemap.xml` : undefined;
-  const similarSitemapUrl = url ? `${url}/sitemap-similar-products.xml` : undefined;
 
   const body = `
 User-agent: *
-${generalDisallowRules({sitemapUrl, shopId})}
+${generalDisallowRules({shopId})}
 
 # Google adsbot ignores robots.txt unless specifically named!
 User-agent: adsbot-google
@@ -44,11 +43,11 @@ Disallow: /
 
 User-agent: AhrefsBot
 Crawl-delay: 10
-${generalDisallowRules({sitemapUrl, shopId})}
+${generalDisallowRules({shopId})}
 
 User-agent: AhrefsSiteAudit
 Crawl-delay: 10
-${generalDisallowRules({sitemapUrl, shopId})}
+${generalDisallowRules({shopId})}
 
 User-agent: MJ12bot
 Crawl-Delay: 10
@@ -57,7 +56,7 @@ User-agent: Pinterest
 Crawl-delay: 1
  `.trim();
 
-  return similarSitemapUrl ? `${body}\nSitemap: ${similarSitemapUrl}` : body;
+  return sitemapUrl ? `${body}\nSitemap: ${sitemapUrl}` : body;
 }
 
 /**
@@ -66,10 +65,8 @@ Crawl-delay: 1
  */
 function generalDisallowRules({
   shopId,
-  sitemapUrl,
 }: {
   shopId?: string;
-  sitemapUrl?: string;
 }) {
   return `Disallow: /admin
 Disallow: /cart
@@ -102,12 +99,8 @@ Disallow: /policies/
 Disallow: /*/*?*ls=*&ls=*
 Disallow: /*/*?*ls%3D*%3Fls%3D*
 Disallow: /*/*?*ls%3d*%3fls%3d*
-Disallow: /search
-Allow: /search/
-Disallow: /search/?*
 Disallow: /apple-app-site-association
-Disallow: /.well-known/shopify/monorail
-${sitemapUrl ? `Sitemap: ${sitemapUrl}` : ''}`;
+Disallow: /.well-known/shopify/monorail`;
 }
 
 const ROBOTS_QUERY = `#graphql
