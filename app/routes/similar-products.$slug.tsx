@@ -59,126 +59,6 @@ function getLocalePrefixFromPathname(pathname: string) {
   return '';
 }
 
-function buildStructuredDataContext(
-  canonicalUrl: string,
-  target: {
-    categoryHandle: string;
-    collectionTitle: string | null;
-    mainTheme: string;
-    mainMotif: string;
-  },
-) {
-  const url = new URL(canonicalUrl);
-  const localePrefix = getLocalePrefixFromPathname(url.pathname);
-  const categoryLabel = buildSimilarCategoryLabel(
-    target.collectionTitle,
-    target.categoryHandle,
-  );
-  const seoIdentity = buildSeoIdentity(target);
-  const homeUrl = localePrefix ? `${url.origin}${localePrefix}` : `${url.origin}/`;
-  const categoryUrl = `${url.origin}${localePrefix}/collections/${target.categoryHandle}`;
-
-  return {
-    homeUrl,
-    categoryUrl,
-    categoryLabel,
-    currentUrl: canonicalUrl,
-    seoIdentity,
-  };
-}
-
-function buildBreadcrumbListJsonLd({
-  homeUrl,
-  categoryUrl,
-  categoryLabel,
-  currentUrl,
-  seoTitle,
-}: {
-  homeUrl: string;
-  categoryUrl: string;
-  categoryLabel: string;
-  currentUrl: string;
-  seoTitle: string;
-}) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: homeUrl,
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: categoryLabel,
-        item: categoryUrl,
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: seoTitle,
-        item: currentUrl,
-      },
-    ],
-  };
-}
-
-function buildCollectionPageJsonLd({
-  currentUrl,
-  title,
-  description,
-}: {
-  currentUrl: string;
-  title: string;
-  description: string;
-}) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: title,
-    url: currentUrl,
-    description,
-  };
-}
-
-function buildItemListJsonLd({
-  currentUrl,
-  localePrefix,
-  origin,
-  products,
-}: {
-  currentUrl: string;
-  localePrefix: string;
-  origin: string;
-  products: SimilarProductsBaseProduct[];
-}) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    url: currentUrl,
-    itemListOrder: 'https://schema.org/ItemListOrderAscending',
-    numberOfItems: products.length,
-    itemListElement: products.map((product, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      url: `${origin}${localePrefix}/products/${product.handle}`,
-      item: {
-        '@type': 'Thing',
-        name: product.title,
-        url: `${origin}${localePrefix}/products/${product.handle}`,
-        ...(product.images?.nodes?.[0]?.url
-          ? {
-              image: product.images.nodes[0].url,
-            }
-          : {}),
-      },
-    })),
-  };
-}
-
 type LoadMoreResponse = {
   ok: boolean;
   target: Awaited<ReturnType<typeof loader>>['target'];
@@ -279,10 +159,6 @@ export default function SimilarProductsSlugPage() {
       }
     | undefined;
   const seoIdentity = buildSeoIdentity(initialData.target);
-  const structuredDataContext = buildStructuredDataContext(
-    initialData.canonicalUrl,
-    initialData.target,
-  );
   const relatedCollectionHref = `${getLocalePrefixFromPathname(
     new URL(initialData.canonicalUrl).pathname,
   )}/collections/${initialData.target.categoryHandle}`;
@@ -290,30 +166,6 @@ export default function SimilarProductsSlugPage() {
     initialData.target.collectionTitle,
     initialData.target.categoryHandle,
   );
-  const breadcrumbJsonLd = buildBreadcrumbListJsonLd({
-    homeUrl: structuredDataContext.homeUrl,
-    categoryUrl: structuredDataContext.categoryUrl,
-    categoryLabel: structuredDataContext.categoryLabel,
-    currentUrl: structuredDataContext.currentUrl,
-    seoTitle: structuredDataContext.seoIdentity.heading,
-  });
-  const collectionPageJsonLd = initialData.seoSignals.seoEligible
-    ? buildCollectionPageJsonLd({
-        currentUrl: structuredDataContext.currentUrl,
-        title: structuredDataContext.seoIdentity.heading,
-        description: initialData.introContent ?? structuredDataContext.seoIdentity.description,
-      })
-    : null;
-  const itemListJsonLd = initialData.seoSignals.seoEligible
-    ? buildItemListJsonLd({
-        currentUrl: structuredDataContext.currentUrl,
-        localePrefix: getLocalePrefixFromPathname(
-          new URL(initialData.canonicalUrl).pathname,
-        ),
-        origin: new URL(initialData.canonicalUrl).origin,
-        products: initialData.items,
-      })
-    : null;
 
   useEffect(() => {
     setItems(initialData.items);
@@ -345,23 +197,6 @@ export default function SimilarProductsSlugPage() {
 
   return (
     <div className="collection">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{__html: JSON.stringify(breadcrumbJsonLd)}}
-      />
-      {collectionPageJsonLd ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{__html: JSON.stringify(collectionPageJsonLd)}}
-        />
-      ) : null}
-      {itemListJsonLd ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{__html: JSON.stringify(itemListJsonLd)}}
-        />
-      ) : null}
-
       <div
         className="collectionMainHeroDiv"
         style={
