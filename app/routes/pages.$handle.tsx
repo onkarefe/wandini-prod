@@ -18,6 +18,65 @@ const BLOCKED_HTML_TAGS = [
   'meta',
   'base',
 ] as const;
+const PAGE_META_BRAND = 'Wandini';
+const PAGE_META_DESCRIPTION_MAX_LENGTH = 160;
+
+type PageMetaInput = {
+  title?: string | null;
+  body?: string | null;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  } | null;
+};
+
+function normalizeMetaText(value?: string | null) {
+  if (!value) {
+    return '';
+  }
+
+  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function truncateMetaDescription(value: string) {
+  if (value.length <= PAGE_META_DESCRIPTION_MAX_LENGTH) {
+    return value;
+  }
+
+  const clipped = value.slice(0, PAGE_META_DESCRIPTION_MAX_LENGTH + 1);
+  const lastSpaceIndex = clipped.lastIndexOf(' ');
+  const truncated =
+    lastSpaceIndex > 80
+      ? clipped.slice(0, lastSpaceIndex)
+      : clipped.slice(0, PAGE_META_DESCRIPTION_MAX_LENGTH);
+
+  return `${truncated.trim()}...`;
+}
+
+function getPageMetaTitle(page?: PageMetaInput | null) {
+  const seoTitle = normalizeMetaText(page?.seo?.title);
+
+  if (seoTitle) {
+    return seoTitle;
+  }
+
+  const pageTitle = normalizeMetaText(page?.title);
+
+  if (!pageTitle) {
+    return PAGE_META_BRAND;
+  }
+
+  return pageTitle.toLowerCase().includes(PAGE_META_BRAND.toLowerCase())
+    ? pageTitle
+    : `${pageTitle} | ${PAGE_META_BRAND}`;
+}
+
+function getPageMetaDescription(page?: PageMetaInput | null) {
+  const description =
+    normalizeMetaText(page?.seo?.description) || normalizeMetaText(page?.body);
+
+  return description ? truncateMetaDescription(description) : null;
+}
 
 function sanitizeInlineStyles(html: string) {
   return html.replace(/\sstyle\s*=\s*(["'])(.*?)\1/gi, (_match, quote, rawStyle) => {
@@ -64,8 +123,29 @@ export function links() {
   return [{rel: 'stylesheet', href: staticPagesStyles}];
 }
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.page.title ?? ''}`}];
+export const meta: Route.MetaFunction = ({data, params}) => {
+  const page = data?.page;
+  const title = getPageMetaTitle(page);
+  const description = getPageMetaDescription(page);
+  const canonicalUrl = data?.canonicalUrl ?? `/pages/${params.handle ?? ''}`;
+
+  return [
+    {title},
+    ...(description ? [{name: 'description', content: description}] : []),
+    {name: 'robots', content: 'index,follow'},
+    {
+      tagName: 'link',
+      rel: 'canonical',
+      href: canonicalUrl,
+    },
+    {property: 'og:type', content: 'website'},
+    {property: 'og:title', content: title},
+    ...(description ? [{property: 'og:description', content: description}] : []),
+    {property: 'og:url', content: canonicalUrl},
+    {name: 'twitter:card', content: 'summary'},
+    {name: 'twitter:title', content: title},
+    ...(description ? [{name: 'twitter:description', content: description}] : []),
+  ];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -101,8 +181,10 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   }
 
   redirectIfHandleIsLocalized(request, {handle: params.handle, data: page});
+  const url = new URL(request.url);
 
   return {
+    canonicalUrl: `${url.origin}${url.pathname}`,
     page: {
       ...page,
       body: sanitizeShopifyPageHtml(page.body),

@@ -15,8 +15,72 @@ type BlogArticle = ArticleItemFragment & {
   excerpt?: string | null;
 };
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.blog.title ?? ''} blog`}];
+const BLOG_META_BRAND = 'Wandini';
+
+type BlogMetaInput = {
+  title?: string | null;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  } | null;
+};
+
+function normalizeMetaText(value?: string | null) {
+  if (!value) {
+    return '';
+  }
+
+  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function getBlogMetaTitle(blog?: BlogMetaInput | null) {
+  const seoTitle = normalizeMetaText(blog?.seo?.title);
+
+  if (seoTitle) {
+    return seoTitle;
+  }
+
+  const blogTitle = normalizeMetaText(blog?.title);
+
+  if (!blogTitle) {
+    return BLOG_META_BRAND;
+  }
+
+  return blogTitle.toLowerCase().includes(BLOG_META_BRAND.toLowerCase())
+    ? blogTitle
+    : `${blogTitle} | ${BLOG_META_BRAND}`;
+}
+
+function getBlogMetaDescription(blog?: BlogMetaInput | null) {
+  const description = normalizeMetaText(blog?.seo?.description);
+
+  return description || null;
+}
+
+export const meta: Route.MetaFunction = ({data, params}) => {
+  const blog = data?.blog;
+  const title = getBlogMetaTitle(blog);
+  const description = getBlogMetaDescription(blog);
+  const canonicalUrl =
+    data?.canonicalUrl ?? `/blogs/${params.blogHandle ?? ''}`;
+
+  return [
+    {title},
+    ...(description ? [{name: 'description', content: description}] : []),
+    {name: 'robots', content: 'index,follow'},
+    {
+      tagName: 'link',
+      rel: 'canonical',
+      href: canonicalUrl,
+    },
+    {property: 'og:type', content: 'website'},
+    {property: 'og:title', content: title},
+    ...(description ? [{property: 'og:description', content: description}] : []),
+    {property: 'og:url', content: canonicalUrl},
+    {name: 'twitter:card', content: 'summary'},
+    {name: 'twitter:title', content: title},
+    ...(description ? [{name: 'twitter:description', content: description}] : []),
+  ];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -57,8 +121,9 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   }
 
   redirectIfHandleIsLocalized(request, {handle: params.blogHandle, data: blog});
+  const url = new URL(request.url);
 
-  return {blog};
+  return {blog, canonicalUrl: `${url.origin}${url.pathname}`};
 }
 
 /**

@@ -81,8 +81,213 @@ type RelatedArticle = {
   } | null;
 };
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.article.title ?? ''} article`}];
+const ARTICLE_META_BRAND = 'Wandini';
+const ARTICLE_META_DESCRIPTION_MAX_LENGTH = 160;
+
+type ArticleMetaInput = {
+  title?: string | null;
+  contentHtml?: string | null;
+  publishedAt?: string | null;
+  author?: {
+    name?: string | null;
+  } | null;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  } | null;
+  image?: {
+    url?: string | null;
+  } | null;
+};
+
+function normalizeMetaText(value?: string | null) {
+  if (!value) {
+    return '';
+  }
+
+  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function truncateMetaDescription(value: string) {
+  if (value.length <= ARTICLE_META_DESCRIPTION_MAX_LENGTH) {
+    return value;
+  }
+
+  const clipped = value.slice(0, ARTICLE_META_DESCRIPTION_MAX_LENGTH + 1);
+  const lastSpaceIndex = clipped.lastIndexOf(' ');
+  const truncated =
+    lastSpaceIndex > 80
+      ? clipped.slice(0, lastSpaceIndex)
+      : clipped.slice(0, ARTICLE_META_DESCRIPTION_MAX_LENGTH);
+
+  return `${truncated.trim()}...`;
+}
+
+function getArticleMetaTitle(article?: ArticleMetaInput | null) {
+  const seoTitle = normalizeMetaText(article?.seo?.title);
+
+  if (seoTitle) {
+    return seoTitle;
+  }
+
+  const articleTitle = normalizeMetaText(article?.title);
+
+  if (!articleTitle) {
+    return ARTICLE_META_BRAND;
+  }
+
+  return articleTitle.toLowerCase().includes(ARTICLE_META_BRAND.toLowerCase())
+    ? articleTitle
+    : `${articleTitle} | ${ARTICLE_META_BRAND}`;
+}
+
+function getArticleMetaDescription(article?: ArticleMetaInput | null) {
+  const description =
+    normalizeMetaText(article?.seo?.description) ||
+    normalizeMetaText(article?.contentHtml);
+
+  return description ? truncateMetaDescription(description) : null;
+}
+
+function getArticleMetaImage(article?: ArticleMetaInput | null) {
+  return article?.image?.url ?? null;
+}
+
+function getArticleLocalePrefix(canonicalUrl: string) {
+  const url = new URL(canonicalUrl);
+  const [firstSegment] = url.pathname.split('/').filter(Boolean);
+
+  return firstSegment && /^[a-z]{2}-[a-z]{2}$/i.test(firstSegment)
+    ? `/${firstSegment.toLowerCase()}`
+    : '';
+}
+
+function getArticleHomeUrl(canonicalUrl: string) {
+  const url = new URL(canonicalUrl);
+  const localePrefix = getArticleLocalePrefix(canonicalUrl);
+
+  return `${url.origin}${localePrefix || '/'}`;
+}
+
+function getArticleBlogUrl(canonicalUrl: string, blogHandle?: string | null) {
+  const handle = normalizeMetaText(blogHandle);
+
+  if (!handle) {
+    return null;
+  }
+
+  const url = new URL(canonicalUrl);
+  const localePrefix = getArticleLocalePrefix(canonicalUrl);
+
+  return `${url.origin}${localePrefix}/blogs/${handle}`;
+}
+
+function buildArticleJsonLd(
+  article: ArticleMetaInput,
+  canonicalUrl: string,
+) {
+  const headline = normalizeMetaText(article.title);
+
+  if (!headline) {
+    return null;
+  }
+
+  const description = getArticleMetaDescription(article);
+  const image = getArticleMetaImage(article);
+  const datePublished = normalizeMetaText(article.publishedAt);
+  const authorName = normalizeMetaText(article.author?.name);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline,
+    ...(description ? {description} : {}),
+    ...(image ? {image} : {}),
+    ...(datePublished ? {datePublished} : {}),
+    ...(authorName ? {author: {'@type': 'Person', name: authorName}} : {}),
+    url: canonicalUrl,
+  };
+}
+
+function buildArticleBreadcrumbJsonLd({
+  article,
+  blogHandle,
+  blogTitle,
+  canonicalUrl,
+}: {
+  article: ArticleMetaInput;
+  blogHandle?: string | null;
+  blogTitle?: string | null;
+  canonicalUrl: string;
+}) {
+  const articleName = normalizeMetaText(article.title);
+  const blogUrl = getArticleBlogUrl(canonicalUrl, blogHandle);
+
+  if (!articleName || !blogUrl) {
+    return null;
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: getArticleHomeUrl(canonicalUrl),
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: normalizeMetaText(blogTitle) || 'Blog',
+        item: blogUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: articleName,
+        item: canonicalUrl,
+      },
+    ],
+  };
+}
+
+function stringifyJsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
+export const meta: Route.MetaFunction = ({data, params}) => {
+  const article = data?.article;
+  const title = getArticleMetaTitle(article);
+  const description = getArticleMetaDescription(article);
+  const imageUrl = getArticleMetaImage(article);
+  const canonicalUrl =
+    data?.canonicalUrl ??
+    `/blogs/${params.blogHandle ?? ''}/${params.articleHandle ?? ''}`;
+
+  return [
+    {title},
+    ...(description ? [{name: 'description', content: description}] : []),
+    {name: 'robots', content: 'index,follow'},
+    {
+      tagName: 'link',
+      rel: 'canonical',
+      href: canonicalUrl,
+    },
+    {property: 'og:type', content: 'article'},
+    {property: 'og:title', content: title},
+    ...(description ? [{property: 'og:description', content: description}] : []),
+    {property: 'og:url', content: canonicalUrl},
+    ...(imageUrl ? [{property: 'og:image', content: imageUrl}] : []),
+    {
+      name: 'twitter:card',
+      content: imageUrl ? 'summary_large_image' : 'summary',
+    },
+    {name: 'twitter:title', content: title},
+    ...(description ? [{name: 'twitter:description', content: description}] : []),
+    ...(imageUrl ? [{name: 'twitter:image', content: imageUrl}] : []),
+  ];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -132,8 +337,10 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   const article = blog.articleByHandle;
   const relatedArticles =
     blog.articles?.nodes?.filter((item) => item.handle !== articleHandle) ?? [];
+  const url = new URL(request.url);
 
   return {
+    canonicalUrl: `${url.origin}${url.pathname}`,
     article: {
       ...article,
       contentHtml: sanitizeBlogArticleHtml(article.contentHtml),
@@ -154,8 +361,16 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 }
 
 export default function Article() {
-  const {article, relatedArticles, blogHandle, blogTitle} = useLoaderData<typeof loader>();
+  const {article, relatedArticles, blogHandle, blogTitle, canonicalUrl} =
+    useLoaderData<typeof loader>();
   const {title, image, contentHtml, author} = article;
+  const articleJsonLd = buildArticleJsonLd(article, canonicalUrl);
+  const breadcrumbJsonLd = buildArticleBreadcrumbJsonLd({
+    article,
+    blogHandle,
+    blogTitle,
+    canonicalUrl,
+  });
 
   const publishedDate = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -165,6 +380,18 @@ export default function Article() {
 
   return (
     <div className="blog-detail-page">
+      {articleJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: stringifyJsonLd(articleJsonLd)}}
+        />
+      ) : null}
+      {breadcrumbJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
+        />
+      ) : null}
       <div className="container mx-auto">
         <div className="blog-detail-header-wrap">
           <div className="blog-detail-header">

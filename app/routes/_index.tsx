@@ -1,8 +1,9 @@
-import {Await, useLoaderData} from 'react-router';
+import {Await, useLoaderData, useRouteLoaderData} from 'react-router';
 import type { Route } from './+types/_index';
 import { Suspense } from 'react';
 import { Image } from '@shopify/hydrogen';
 import {Link} from '~/lib/i18n-router';
+import type {RootLoader} from '~/root';
 import type {
   FeaturedCollectionFragment,
   RecommendedProductsQuery,
@@ -16,8 +17,161 @@ import CustomOrder from '~/components/CustomOrder';
 import CustomerRevs from '~/components/CustomerRevs';
 import homepageStyles from '~/styles/homepage.css?url';
 
-export const meta: Route.MetaFunction = () => {
-  return [{ title: 'Hydrogen | Home' }];
+const HOMEPAGE_META_BRAND = 'Wandini';
+const HOMEPAGE_META_DESCRIPTION_MAX_LENGTH = 160;
+
+type HomepageImageLike = {
+  url?: string | null;
+};
+
+type HomepageHeroInput = {
+  title?: string | null;
+  st1?: string | null;
+  st2?: string | null;
+  backgroundImage?: HomepageImageLike | string | null;
+};
+
+type HomepageShopInput = {
+  name?: string | null;
+  description?: string | null;
+  brand?: {
+    logo?: {
+      image?: {
+        url?: string | null;
+      } | null;
+    } | null;
+  } | null;
+};
+
+function normalizeMetaText(value?: string | null) {
+  if (!value) {
+    return '';
+  }
+
+  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function truncateMetaDescription(value: string) {
+  if (value.length <= HOMEPAGE_META_DESCRIPTION_MAX_LENGTH) {
+    return value;
+  }
+
+  const clipped = value.slice(0, HOMEPAGE_META_DESCRIPTION_MAX_LENGTH + 1);
+  const lastSpaceIndex = clipped.lastIndexOf(' ');
+  const truncated =
+    lastSpaceIndex > 80
+      ? clipped.slice(0, lastSpaceIndex)
+      : clipped.slice(0, HOMEPAGE_META_DESCRIPTION_MAX_LENGTH);
+
+  return `${truncated.trim()}...`;
+}
+
+function getHomepageMetaTitle(hero?: HomepageHeroInput | null) {
+  const heroTitle = normalizeMetaText(hero?.title);
+
+  if (!heroTitle) {
+    return HOMEPAGE_META_BRAND;
+  }
+
+  return heroTitle.toLowerCase().includes(HOMEPAGE_META_BRAND.toLowerCase())
+    ? heroTitle
+    : `${heroTitle} | ${HOMEPAGE_META_BRAND}`;
+}
+
+function getHomepageMetaDescription(hero?: HomepageHeroInput | null) {
+  const description = [hero?.st1, hero?.st2]
+    .map((value) => normalizeMetaText(value))
+    .filter(Boolean)
+    .join(' ');
+
+  return description ? truncateMetaDescription(description) : null;
+}
+
+function getHomepageImageUrl(hero?: HomepageHeroInput | null) {
+  const backgroundImage = hero?.backgroundImage;
+
+  if (backgroundImage && typeof backgroundImage === 'object') {
+    return backgroundImage.url ?? null;
+  }
+
+  return typeof backgroundImage === 'string' && /^https?:\/\//i.test(backgroundImage)
+    ? backgroundImage
+    : null;
+}
+
+function getShopName(shop?: HomepageShopInput | null) {
+  return normalizeMetaText(shop?.name) || HOMEPAGE_META_BRAND;
+}
+
+function getShopLogoUrl(shop?: HomepageShopInput | null) {
+  return shop?.brand?.logo?.image?.url ?? null;
+}
+
+function buildWebsiteJsonLd({
+  canonicalUrl,
+  shop,
+}: {
+  canonicalUrl: string;
+  shop?: HomepageShopInput | null;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: getShopName(shop),
+    url: canonicalUrl,
+  };
+}
+
+function buildOrganizationJsonLd({
+  canonicalUrl,
+  shop,
+}: {
+  canonicalUrl: string;
+  shop?: HomepageShopInput | null;
+}) {
+  const logo = getShopLogoUrl(shop);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: getShopName(shop),
+    url: canonicalUrl,
+    ...(logo ? {logo} : {}),
+  };
+}
+
+function stringifyJsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
+export const meta: Route.MetaFunction = ({data}) => {
+  const title = getHomepageMetaTitle(data?.hero);
+  const description = getHomepageMetaDescription(data?.hero);
+  const imageUrl = getHomepageImageUrl(data?.hero);
+  const canonicalUrl = data?.canonicalUrl ?? '/';
+
+  return [
+    {title},
+    ...(description ? [{name: 'description', content: description}] : []),
+    {name: 'robots', content: 'index,follow'},
+    {
+      tagName: 'link',
+      rel: 'canonical',
+      href: canonicalUrl,
+    },
+    {property: 'og:type', content: 'website'},
+    {property: 'og:title', content: title},
+    ...(description ? [{property: 'og:description', content: description}] : []),
+    {property: 'og:url', content: canonicalUrl},
+    ...(imageUrl ? [{property: 'og:image', content: imageUrl}] : []),
+    {
+      name: 'twitter:card',
+      content: imageUrl ? 'summary_large_image' : 'summary',
+    },
+    {name: 'twitter:title', content: title},
+    ...(description ? [{name: 'twitter:description', content: description}] : []),
+    ...(imageUrl ? [{name: 'twitter:image', content: imageUrl}] : []),
+  ];
 };
 
 export function links() {
@@ -106,7 +260,7 @@ function normalizeReferenceImage(
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
-async function loadCriticalData({ context }: Route.LoaderArgs) {
+async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const [{ collections }, heroRes, uspRes, allProductsRes] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(HERO_QUERY),
@@ -253,7 +407,10 @@ async function loadCriticalData({ context }: Route.LoaderArgs) {
       });
   }
 
+  const url = new URL(request.url);
+
   return {
+    canonicalUrl: `${url.origin}${url.pathname}`,
     hero,
     featuredCollection: collections.nodes[0],
     uspItems,
@@ -284,8 +441,27 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
+  const rootData = useRouteLoaderData<RootLoader>('root');
+  const shop = rootData?.header?.shop;
+  const websiteJsonLd = buildWebsiteJsonLd({
+    canonicalUrl: data.canonicalUrl,
+    shop,
+  });
+  const organizationJsonLd = buildOrganizationJsonLd({
+    canonicalUrl: data.canonicalUrl,
+    shop,
+  });
+
   return (
     <div className="home">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{__html: stringifyJsonLd(websiteJsonLd)}}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{__html: stringifyJsonLd(organizationJsonLd)}}
+      />
       <HeroSection
         title={data.hero.title}
         st1={data.hero.st1}

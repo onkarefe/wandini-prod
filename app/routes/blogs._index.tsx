@@ -31,12 +31,98 @@ type BlogListingMetaobject = {
   fields?: BlogListingField[] | null;
 };
 
+const BLOGS_META_BRAND = 'Wandini';
+const BLOGS_META_DESCRIPTION_MAX_LENGTH = 160;
+
+function normalizeMetaText(value?: string | null) {
+  if (!value) {
+    return '';
+  }
+
+  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function truncateMetaDescription(value: string) {
+  if (value.length <= BLOGS_META_DESCRIPTION_MAX_LENGTH) {
+    return value;
+  }
+
+  const clipped = value.slice(0, BLOGS_META_DESCRIPTION_MAX_LENGTH + 1);
+  const lastSpaceIndex = clipped.lastIndexOf(' ');
+  const truncated =
+    lastSpaceIndex > 80
+      ? clipped.slice(0, lastSpaceIndex)
+      : clipped.slice(0, BLOGS_META_DESCRIPTION_MAX_LENGTH);
+
+  return `${truncated.trim()}...`;
+}
+
+function getBlogListingFields(
+  blogListingContent?: BlogsQuery['blogListingContent'] | null,
+) {
+  return (blogListingContent?.nodes?.[0] as BlogListingMetaobject | undefined)
+    ?.fields;
+}
+
+function getBlogListingFieldValue(
+  fields: BlogListingField[] | null | undefined,
+  ...keys: string[]
+) {
+  return fields?.find((field) => keys.includes(field.key))?.value ?? '';
+}
+
+function getBlogsMetaTitle(blogListingContent?: BlogsQuery['blogListingContent'] | null) {
+  const fields = getBlogListingFields(blogListingContent);
+  const title = normalizeMetaText(
+    getBlogListingFieldValue(fields, 'title', 'main_title'),
+  );
+
+  if (!title) {
+    return `Blogs | ${BLOGS_META_BRAND}`;
+  }
+
+  return title.toLowerCase().includes(BLOGS_META_BRAND.toLowerCase())
+    ? title
+    : `${title} | ${BLOGS_META_BRAND}`;
+}
+
+function getBlogsMetaDescription(
+  blogListingContent?: BlogsQuery['blogListingContent'] | null,
+) {
+  const fields = getBlogListingFields(blogListingContent);
+  const description = normalizeMetaText(
+    getBlogListingFieldValue(fields, 'subtitle', 'sub_title'),
+  );
+
+  return description ? truncateMetaDescription(description) : null;
+}
+
 export function links() {
   return [{ rel: 'stylesheet', href: blogMainStyles }];
 }
 
-export const meta: Route.MetaFunction = () => {
-  return [{ title: `Hydrogen | Blogs` }];
+export const meta: Route.MetaFunction = ({data}) => {
+  const title = getBlogsMetaTitle(data?.blogListingContent);
+  const description = getBlogsMetaDescription(data?.blogListingContent);
+  const canonicalUrl = data?.canonicalUrl ?? '/blogs';
+
+  return [
+    {title},
+    ...(description ? [{name: 'description', content: description}] : []),
+    {name: 'robots', content: 'index,follow'},
+    {
+      tagName: 'link',
+      rel: 'canonical',
+      href: canonicalUrl,
+    },
+    {property: 'og:type', content: 'website'},
+    {property: 'og:title', content: title},
+    ...(description ? [{property: 'og:description', content: description}] : []),
+    {property: 'og:url', content: canonicalUrl},
+    {name: 'twitter:card', content: 'summary'},
+    {name: 'twitter:title', content: title},
+    ...(description ? [{name: 'twitter:description', content: description}] : []),
+  ];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -67,7 +153,13 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  return { blogs, blogListingContent };
+  const url = new URL(request.url);
+
+  return {
+    blogs,
+    blogListingContent,
+    canonicalUrl: `${url.origin}${url.pathname}`,
+  };
 }
 
 /**
@@ -81,11 +173,10 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 
 export default function Blogs() {
   const { blogs, blogListingContent } = useLoaderData<typeof loader>();
-  const heroFields = (blogListingContent?.nodes?.[0] as BlogListingMetaobject | undefined)
-    ?.fields;
+  const heroFields = getBlogListingFields(blogListingContent);
 
   const getFieldValue = (...keys: string[]) =>
-    heroFields?.find((field) => keys.includes(field.key))?.value ?? '';
+    getBlogListingFieldValue(heroFields, ...keys);
 
   const kicker = getFieldValue('label');
   const title = getFieldValue('title', 'main_title');
