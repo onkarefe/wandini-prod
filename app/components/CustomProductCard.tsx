@@ -136,7 +136,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
 
     const formData = new FormData();
     formData.set('productId', productId);
-    fetcher.submit(formData, {
+    void fetcher.submit(formData, {
       method: 'post',
       action: '/api/wishlist',
     });
