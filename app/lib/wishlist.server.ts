@@ -3,7 +3,6 @@ const WISHLIST_NAMESPACE = 'custom';
 const WISHLIST_KEY = 'wishlist';
 const WISHLIST_TYPE = 'list.product_reference';
 const WISHLIST_MAX_ITEMS = 128;
-const DEFAULT_SHOPIFY_SHOP = '3tzgtt-7y.myshopify.com';
 const WISHLIST_DEBUG_VERSION = 'wishlist-debug-v2';
 
 type AdminGraphqlResponse<T> = {
@@ -48,9 +47,15 @@ type AdminAccessToken = {
 let cachedAdminAccessToken: AdminAccessToken | null = null;
 
 function getWishlistConfig(env: WishlistEnv) {
-  const shop = env.SHOPIFY_SHOP ?? DEFAULT_SHOPIFY_SHOP;
+  const shop = env.SHOPIFY_SHOP;
   const clientId = env.SHOPIFY_CLIENT_ID;
   const clientSecret = env.SHOPIFY_CLIENT_SECRET;
+
+  if (!shop) {
+    throw new Error(
+      `SHOPIFY_SHOP is required for wishlist requests. ${WISHLIST_DEBUG_VERSION}`,
+    );
+  }
 
   if (!clientId) {
     throw new Error(
