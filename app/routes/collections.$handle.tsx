@@ -71,15 +71,6 @@ type CollectionItemListElement = {
 const COLLECTION_META_BRAND = 'Wandini';
 const COLLECTION_META_DESCRIPTION_MAX_LENGTH = 160;
 
-const CUSTOMER_WISHLIST_OWNER_QUERY = `#graphql
-  query WishlistCustomerOwner($language: LanguageCode)
-  @inContext(language: $language) {
-    customer {
-      id
-    }
-  }
-` as const;
-
 const NOISY_COLLECTION_PARAMS = ['sort', 'f', 'cursor', 'direction'] as const;
 
 function hasNoisyCollectionParams(searchParams: URLSearchParams) {
@@ -328,15 +319,7 @@ async function loadCriticalData({
         reverse,
       },
     }) as Promise<CustomCollectionQuery>,
-    loadWishlistProductIds({
-      customerAccount,
-      env: context.env as {
-        SHOPIFY_SHOP?: string;
-        SHOPIFY_CLIENT_ID?: string;
-        SHOPIFY_CLIENT_SECRET?: string;
-      },
-      isLoggedIn,
-    }),
+    getCustomerWishlistProductIds({}),
   ]);
 
   const collection = data.collection as CollectionWithSeo | null | undefined;
@@ -559,43 +542,6 @@ export default function Collection() {
       />
     </div>
   );
-}
-
-async function loadWishlistProductIds({
-  customerAccount,
-  env,
-  isLoggedIn,
-}: {
-  customerAccount: Route.LoaderArgs['context']['customerAccount'];
-  env: {
-    SHOPIFY_SHOP?: string;
-    SHOPIFY_CLIENT_ID?: string;
-    SHOPIFY_CLIENT_SECRET?: string;
-  };
-  isLoggedIn: boolean;
-}) {
-  if (!isLoggedIn) {
-    return [];
-  }
-
-  const {data, errors} = await customerAccount.query(CUSTOMER_WISHLIST_OWNER_QUERY, {
-    variables: {
-      language: customerAccount.i18n.language,
-    },
-  });
-
-  if (errors?.length || !data?.customer?.id) {
-    return [];
-  }
-
-  try {
-    return await getCustomerWishlistProductIds({
-      env,
-      customerId: data.customer.id,
-    });
-  } catch {
-    return [];
-  }
 }
 
 function parseCollectionFilters(

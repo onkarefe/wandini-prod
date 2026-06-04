@@ -9,7 +9,9 @@ const RESOURCE_ROUTE_IDS = new Set([
   'routes/sitemap.$type.$page[.xml]',
 ]);
 
-const allRoutes = await flatRoutes({ignoredRouteFiles: ['**/locale.tsx']});
+const allRoutes = await flatRoutes({
+  ignoredRouteFiles: ['**/locale.tsx', '**/*.bak'],
+});
 const resourceRoutes = allRoutes.filter((routeEntry) =>
   RESOURCE_ROUTE_IDS.has(routeEntry.id ?? ''),
 );
