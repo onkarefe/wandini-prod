@@ -523,6 +523,119 @@ export type GetAllProductsMetaobjectQuery = {
   };
 };
 
+export type CustomGridMetaobjectsQueryVariables = StorefrontAPI.Exact<{
+  [key: string]: never;
+}>;
+
+export type CustomGridMetaobjectsQuery = {
+  metaobjects: {
+    nodes: Array<
+      Pick<StorefrontAPI.Metaobject, 'id' | 'handle'> & {
+        fields: Array<
+          Pick<StorefrontAPI.MetaobjectField, 'key' | 'value' | 'type'> & {
+            reference?: StorefrontAPI.Maybe<
+              | Pick<StorefrontAPI.Collection, 'id' | 'handle' | 'title'>
+              | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+              | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                  image?: StorefrontAPI.Maybe<
+                    Pick<
+                      StorefrontAPI.Image,
+                      'url' | 'altText' | 'width' | 'height'
+                    >
+                  >;
+                })
+            >;
+            references?: StorefrontAPI.Maybe<{
+              nodes: Array<
+                | Pick<StorefrontAPI.Collection, 'id' | 'handle' | 'title'>
+                | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+                | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                    image?: StorefrontAPI.Maybe<
+                      Pick<
+                        StorefrontAPI.Image,
+                        'url' | 'altText' | 'width' | 'height'
+                      >
+                    >;
+                  })
+              >;
+            }>;
+          }
+        >;
+      }
+    >;
+  };
+};
+
+export type ShowcaseBannerMetaobjectQueryVariables = StorefrontAPI.Exact<{
+  [key: string]: never;
+}>;
+
+export type ShowcaseBannerMetaobjectQuery = {
+  metaobjects: {
+    nodes: Array<
+      Pick<StorefrontAPI.Metaobject, 'id' | 'handle'> & {
+        fields: Array<
+          Pick<StorefrontAPI.MetaobjectField, 'key' | 'value' | 'type'> & {
+            reference?: StorefrontAPI.Maybe<
+              | Pick<StorefrontAPI.Collection, 'id' | 'handle' | 'title'>
+              | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+              | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                  image?: StorefrontAPI.Maybe<
+                    Pick<
+                      StorefrontAPI.Image,
+                      'url' | 'altText' | 'width' | 'height'
+                    >
+                  >;
+                })
+            >;
+          }
+        >;
+      }
+    >;
+  };
+};
+
+export type CustomerReviewsMetaobjectQueryVariables = StorefrontAPI.Exact<{
+  [key: string]: never;
+}>;
+
+export type CustomerReviewsMetaobjectQuery = {
+  metaobjects: {
+    nodes: Array<
+      Pick<StorefrontAPI.Metaobject, 'id' | 'handle' | 'type'> & {
+        fields: Array<
+          Pick<StorefrontAPI.MetaobjectField, 'key' | 'value' | 'type'> & {
+            reference?: StorefrontAPI.Maybe<
+              | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+              | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                  image?: StorefrontAPI.Maybe<
+                    Pick<
+                      StorefrontAPI.Image,
+                      'url' | 'altText' | 'width' | 'height'
+                    >
+                  >;
+                })
+            >;
+            references?: StorefrontAPI.Maybe<{
+              nodes: Array<
+                | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+                | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                    image?: StorefrontAPI.Maybe<
+                      Pick<
+                        StorefrontAPI.Image,
+                        'url' | 'altText' | 'width' | 'height'
+                      >
+                    >;
+                  })
+              >;
+            }>;
+          }
+        >;
+      }
+    >;
+  };
+};
+
 export type FeaturedCollectionFragment = Pick<
   StorefrontAPI.Collection,
   'id' | 'title' | 'handle'
@@ -1748,6 +1861,18 @@ interface GeneratedQueryTypes {
   '#graphql\n  query GetAllProductsMetaobject {\n    metaobjects(type: "all_products", first: 15) {\n      edges {\n        node {\n          id\n          handle\n          type\n          fields {\n            key\n            value\n            type\n            reference {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on Collection {\n                id\n                handle\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: GetAllProductsMetaobjectQuery;
     variables: GetAllProductsMetaobjectQueryVariables;
+  };
+  '#graphql\n  query CustomGridMetaobjects {\n    metaobjects(type: "custom_grid", first: 1) {\n      nodes {\n        id\n        handle\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n            ... on Collection {\n              id\n              handle\n              title\n            }\n          }\n          references(first: 6) {\n            nodes {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                id\n                url\n              }\n              ... on Collection {\n                id\n                handle\n                title\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+    return: CustomGridMetaobjectsQuery;
+    variables: CustomGridMetaobjectsQueryVariables;
+  };
+  '#graphql\n  query ShowcaseBannerMetaobject {\n    metaobjects(type: "showcase_banner", first: 1) {\n      nodes {\n        id\n        handle\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n            ... on Collection {\n              id\n              handle\n              title\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+    return: ShowcaseBannerMetaobjectQuery;
+    variables: ShowcaseBannerMetaobjectQueryVariables;
+  };
+  '#graphql\n  query CustomerReviewsMetaobject {\n    metaobjects(type: "customer_reviews", first: 1) {\n      nodes {\n        id\n        handle\n        type\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n          }\n          references(first: 10) {\n            nodes {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                id\n                url\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+    return: CustomerReviewsMetaobjectQuery;
+    variables: CustomerReviewsMetaobjectQueryVariables;
   };
   '#graphql\n  fragment FeaturedCollection on Collection {\n    id\n    title\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n    handle\n  }\n  query FeaturedCollection($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    collections(first: 1, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...FeaturedCollection\n      }\n    }\n  }\n': {
     return: FeaturedCollectionQuery;

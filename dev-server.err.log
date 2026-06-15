@@ -1,0 +1,50 @@
+
+Environment variables injected into MiniOxygen:
+
+PUBLIC_STOREFRONT_ID                    from local .env
+PUBLIC_STOREFRONT_API_TOKEN             from local .env
+PUBLIC_STORE_DOMAIN                     from local .env
+PRIVATE_STOREFRONT_API_TOKEN            from local .env
+PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID   from local .env
+PUBLIC_CUSTOMER_ACCOUNT_API_URL         from local .env
+SHOP_ID                                 from local .env
+SESSION_SECRET                          from local .env
+╭─ success ────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  View wandini-prod app: http://localhost:3001/                               │
+│                                                                              │
+│  View GraphiQL API browser:                                                  │
+│  http://localhost:3001/graphiql                                              │
+│                                                                              │
+│  View server network requests:                                               │
+│  http://localhost:3001/subrequest-profiler                                   │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  There are 12 new @shopify/hydrogen versions available.                      │
+│                                                                              │
+│  Current: 2025.7.0 | Latest: 2026.4.3                                        │
+│                                                                              │
+│  The next 5 version(s) include                                               │
+│    • 2025.7.1 - New Shopify cookie system, React Router 7.12, and analytics  │
+│      improvements                                                            │
+│    • 2025.10.0 - Storefront API 2025-10, React 19 support, and new cart      │
+│      mutations                                                               │
+│    • 2025.10.1 - CLI lockfile improvements and bug fix                       │
+│    • 2026.1.0 - Storefront API 2026-01 and Customer Account API 2026-01      │
+│    • 2026.1.1 - Security and dependency updates                              │
+│    • ...more                                                                 │
+│                                                                              │
+│  Next steps                                                                  │
+│    • Run `npx shopify hydrogen upgrade` or `npx shopify hydrogen upgrade     │
+│      --version 2026.4.3`                                                     │
+│    • Read release notes at https://hydrogen.shopify.dev/releases             │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+  HEAD  200  render  /  3094ms
+   GET  200  render  /  42ms
+  HEAD  200  render  /  233ms
+   GET  200  render  /  261ms

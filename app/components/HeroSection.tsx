@@ -13,6 +13,17 @@ export default function HeroSection({
     st2: string;
     backgroundImage: HeroImage;
 }) {
+    const scrollToProducts = () => {
+        const productsSection = document.getElementById('all-products-section');
+
+        if (!productsSection) return;
+
+        window.scrollTo({
+            top: productsSection.getBoundingClientRect().top + window.scrollY - 100,
+            behavior: 'smooth',
+        });
+    };
+
     return (
         <section className="relative overflow-hidden !p-0">
             <div className="relative overflow-hidden mainHeroDiv"
@@ -23,19 +34,21 @@ export default function HeroSection({
                     backgroundRepeat: 'no-repeat',
                 }}
             >
-                <div className="hero-TitleBox">
-                    <p className="hero-st1">{st1}</p>
-                    <h1 className="hero-mainTitle">{title}</h1>
-                    <p className="hero-st2">{st2}</p>
-                    <button
-                        type="button"
-                        className="defaultButton"
-                        aria-label="Discover more coming soon"
-                        aria-disabled="true"
-                        title="Coming soon"
-                    >
-                        Discover More
-                    </button>
+                <div className="container mx-auto hero-ContentContainer">
+                    <div className="hero-TitleBox">
+                        <p className="hero-st1">{st1}</p>
+                        <h1 className="hero-mainTitle">{title}</h1>
+                        <p className="hero-st2">{st2}</p>
+                        <button
+                            type="button"
+                            className="defaultButton"
+                            aria-label="Mehr entdecken"
+                            title="Mehr entdecken"
+                            onClick={scrollToProducts}
+                        >
+                            Mehr entdecken
+                        </button>
+                    </div>
                 </div>
             </div>
 

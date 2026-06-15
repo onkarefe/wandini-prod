@@ -12,7 +12,7 @@ import { ProductItem } from '~/components/ProductItem';
 import HeroSection from '~/components/HeroSection';
 import UspBar from '~/components/UspBar';
 import AllProduts from '~/components/AllProduts';
-import CustomGrid from '~/components/CustomGrid';
+import CustomGrid, {type CustomGridItem} from '~/components/CustomGrid';
 import CustomOrder from '~/components/CustomOrder';
 import CustomerRevs from '~/components/CustomerRevs';
 import homepageStyles from '~/styles/homepage.css?url';
@@ -198,6 +198,28 @@ function safeJsonArray(input: unknown): string[] {
   }
 }
 
+function safeJsonUnknownArray(input: unknown): unknown[] {
+  if (typeof input !== 'string') return [];
+  try {
+    const parsed = JSON.parse(input);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function parseMaybeJsonValue(value: unknown) {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
 type MetaobjectImageLike = {
   url: string;
   altText?: string;
@@ -261,11 +283,22 @@ function normalizeReferenceImage(
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({ context, request }: Route.LoaderArgs) {
-  const [{ collections }, heroRes, uspRes, allProductsRes] = await Promise.all([
+  const [
+    { collections },
+    heroRes,
+    uspRes,
+    allProductsRes,
+    customGridRes,
+    showcaseBannerRes,
+    customerReviewsRes,
+  ] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(HERO_QUERY),
     context.storefront.query(USPBAR_QUERY),
     context.storefront.query(GET_ALL_PRODUCTS_METAOBJECT_QUERY),
+    context.storefront.query(CUSTOM_GRID_QUERY),
+    context.storefront.query(SHOWCASE_BANNER_QUERY),
+    context.storefront.query(CUSTOMER_REVIEWS_QUERY),
   ]);
 
   const nodes = heroRes?.metaobjects?.nodes ?? [];
@@ -353,9 +386,15 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     image: { url: string; altText?: string; width?: number; height?: number } | null;
     link: string;
   }> = [];
+  let allProductsSectionTitle = 'All Products';
 
   const allProductsNode = allProductsRes?.metaobjects?.edges?.[0]?.node;
   if (allProductsNode && Array.isArray(allProductsNode.fields)) {
+    const sectionTitleField = allProductsNode.fields.find(
+      (field) => field.key === 'section_title',
+    );
+    allProductsSectionTitle = sectionTitleField?.value || allProductsSectionTitle;
+
     const groups: Record<string, ProductGroup> = {};
     for (const f of allProductsNode.fields) {
       const key = String(f.key || '');
@@ -407,6 +446,120 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       });
   }
 
+  const customGridNode = customGridRes?.metaobjects?.nodes?.[0];
+  const customGridFields = Array.isArray(customGridNode?.fields)
+    ? customGridNode.fields
+    : [];
+  const customGridFieldMap = Object.fromEntries(
+    customGridFields.map((field) => [field.key, field]),
+  );
+  const customGridTitles = safeJsonArray(customGridFieldMap.titles?.value);
+  const customGridLinks =
+    customGridFieldMap.links?.references?.nodes?.filter(Boolean) ?? [];
+  const customGridImages =
+    customGridFieldMap.background_images?.references?.nodes?.filter(Boolean) ??
+    [];
+
+  const customGridItems: CustomGridItem[] = Array.from({length: 6})
+    .map((_, index) => {
+      const linkReference = customGridLinks[index];
+      const collectionHandle =
+        linkReference &&
+        typeof linkReference === 'object' &&
+        'handle' in linkReference &&
+        typeof linkReference.handle === 'string'
+          ? linkReference.handle
+          : null;
+      const image = normalizeReferenceImage(
+        customGridImages[index],
+        customGridTitles[index] ?? '',
+      );
+
+      return {
+        id: `custom-grid-${index + 1}`,
+        title: customGridTitles[index] ?? '',
+        image,
+        link: collectionHandle ? `/collections/${collectionHandle}` : '',
+      };
+    })
+    .filter((item) => item.title || item.image || item.link);
+
+  const showcaseBannerNode = showcaseBannerRes?.metaobjects?.nodes?.[0];
+  const showcaseBannerFields = Array.isArray(showcaseBannerNode?.fields)
+    ? showcaseBannerNode.fields
+    : [];
+  const showcaseBannerFieldMap = Object.fromEntries(
+    showcaseBannerFields.map((field) => [field.key, field]),
+  );
+  const showcaseBannerTitle =
+    showcaseBannerFieldMap.banner_title?.value ?? '';
+  const showcaseBannerLinkReference =
+    showcaseBannerFieldMap.banner_button_link?.reference;
+  const showcaseBannerCollectionHandle =
+    showcaseBannerLinkReference &&
+    typeof showcaseBannerLinkReference === 'object' &&
+    'handle' in showcaseBannerLinkReference &&
+    typeof showcaseBannerLinkReference.handle === 'string'
+      ? showcaseBannerLinkReference.handle
+      : null;
+  const showcaseBanner = {
+    title: showcaseBannerTitle,
+    subtitle: showcaseBannerFieldMap.banner_subtitle?.value ?? '',
+    buttonText: showcaseBannerFieldMap.banner_button_text?.value ?? '',
+    buttonLink: showcaseBannerCollectionHandle
+      ? `/collections/${showcaseBannerCollectionHandle}`
+      : '',
+    image:
+      normalizeReferenceImage(
+        showcaseBannerFieldMap.banner_background_image?.reference,
+        showcaseBannerTitle,
+      ) ?? null,
+  };
+
+  const customerReviewsNode = customerReviewsRes?.metaobjects?.nodes?.[0];
+  const customerReviewsFields = Array.isArray(customerReviewsNode?.fields)
+    ? customerReviewsNode.fields
+    : [];
+  const customerReviewsFieldMap = Object.fromEntries(
+    customerReviewsFields.map((field: any) => [field.key, field]),
+  );
+  const customerNames = safeJsonArray(
+    customerReviewsFieldMap.customer_name?.value,
+  );
+  const customerComments = safeJsonArray(
+    customerReviewsFieldMap.customer_comment?.value,
+  );
+  const customerImages =
+    customerReviewsFieldMap.image?.references?.nodes?.filter(Boolean) ?? [];
+  const customerStars = safeJsonUnknownArray(
+    customerReviewsFieldMap.stars?.value,
+  ).map(parseMaybeJsonValue);
+  const customerReviewCount = Math.max(
+    customerNames.length,
+    customerComments.length,
+    customerImages.length,
+    customerStars.length,
+  );
+  const customerReviews = Array.from({length: customerReviewCount})
+    .map((_, index) => ({
+      id: `customer-review-${index + 1}`,
+      customerName: customerNames[index] ?? '',
+      customerComment: customerComments[index] ?? '',
+      image:
+        normalizeReferenceImage(
+          customerImages[index],
+          customerNames[index] ?? '',
+        ) ?? null,
+      stars: customerStars[index] ?? null,
+    }))
+    .filter(
+      (review) =>
+        review.customerName ||
+        review.customerComment ||
+        review.image ||
+        review.stars,
+    );
+
   const url = new URL(request.url);
 
   return {
@@ -416,6 +569,10 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     uspItems,
     uspNode,
     allProducts,
+    allProductsSectionTitle,
+    customGridItems,
+    showcaseBanner,
+    customerReviews,
   };
 }
 
@@ -469,10 +626,13 @@ export default function Homepage() {
         backgroundImage={data.hero.backgroundImage}
       />
       <UspBar items={data.uspItems} node={data.uspNode} />
-      <AllProduts items={data.allProducts ?? []} />
-      <CustomGrid />
-      <CustomOrder />
-      <CustomerRevs />
+      <AllProduts
+        items={data.allProducts ?? []}
+        sectionTitle={data.allProductsSectionTitle}
+      />
+      <CustomGrid items={data.customGridItems ?? []} />
+      <CustomOrder showcaseBanner={data.showcaseBanner} />
+      <CustomerRevs reviews={data.customerReviews ?? []} />
     </div>
   );
 }
@@ -611,6 +771,149 @@ export const GET_ALL_PRODUCTS_METAOBJECT_QUERY = `#graphql
               ... on Collection {
                 id
                 handle
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+` as const;
+
+const CUSTOM_GRID_QUERY = `#graphql
+  query CustomGridMetaobjects {
+    metaobjects(type: "custom_grid", first: 1) {
+      nodes {
+        id
+        handle
+        fields {
+          key
+          value
+          type
+          reference {
+            ... on MediaImage {
+              id
+              image {
+                url
+                altText
+                width
+                height
+              }
+            }
+            ... on GenericFile {
+              id
+              url
+            }
+            ... on Collection {
+              id
+              handle
+              title
+            }
+          }
+          references(first: 6) {
+            nodes {
+              ... on MediaImage {
+                id
+                image {
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+              ... on GenericFile {
+                id
+                url
+              }
+              ... on Collection {
+                id
+                handle
+                title
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+` as const;
+
+const SHOWCASE_BANNER_QUERY = `#graphql
+  query ShowcaseBannerMetaobject {
+    metaobjects(type: "showcase_banner", first: 1) {
+      nodes {
+        id
+        handle
+        fields {
+          key
+          value
+          type
+          reference {
+            ... on MediaImage {
+              id
+              image {
+                url
+                altText
+                width
+                height
+              }
+            }
+            ... on GenericFile {
+              id
+              url
+            }
+            ... on Collection {
+              id
+              handle
+              title
+            }
+          }
+        }
+      }
+    }
+  }
+` as const;
+
+const CUSTOMER_REVIEWS_QUERY = `#graphql
+  query CustomerReviewsMetaobject {
+    metaobjects(type: "customer_reviews", first: 1) {
+      nodes {
+        id
+        handle
+        type
+        fields {
+          key
+          value
+          type
+          reference {
+            ... on MediaImage {
+              id
+              image {
+                url
+                altText
+                width
+                height
+              }
+            }
+            ... on GenericFile {
+              id
+              url
+            }
+          }
+          references(first: 10) {
+            nodes {
+              ... on MediaImage {
+                id
+                image {
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+              ... on GenericFile {
+                id
+                url
               }
             }
           }

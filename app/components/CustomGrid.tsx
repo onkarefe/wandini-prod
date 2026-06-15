@@ -1,100 +1,126 @@
-import React from 'react';
+import type {CSSProperties} from 'react';
+import {Link} from '~/lib/i18n-router';
 
-export default function CustomGrid() {
-    return (
-        <div className="container mx-auto">
-            <div className="cg-line1">
-                <div className="cgBox1 cgBoxMain">
-                    <div className="cg-title">
-                        New Collection
-                    </div>
-                    <button
-                        type="button"
-                        className="cg-button"
-                        aria-label="Discover more coming soon"
-                        aria-disabled="true"
-                        title="Coming soon"
-                    >
-                        Discover More
-                    </button>
-                </div>
-                <div className="cg1-part2">
-                    <div className="cgBox2 cgBoxMain">
-                        <div className="cg-title">
-                            Featured
-                        </div>
-                        <button
-                            type="button"
-                            className="cg-button"
-                            aria-label="Discover more coming soon"
-                            aria-disabled="true"
-                            title="Coming soon"
-                        >
-                            Discover More
-                        </button>
-                    </div>
-                    <div className="cgBox3 cgBoxMain">
-                        <div className="cg-title">
-                            Trending
-                        </div>
-                        <button
-                            type="button"
-                            className="cg-button"
-                            aria-label="Discover more coming soon"
-                            aria-disabled="true"
-                            title="Coming soon"
-                        >
-                            Discover More
-                        </button>
-                    </div>
-                </div>
+export type CustomGridItem = {
+  id: string;
+  title: string;
+  image: {
+    url: string;
+    altText?: string;
+    width?: number;
+    height?: number;
+  } | null;
+  link: string;
+};
+
+interface CustomGridProps {
+  items?: CustomGridItem[];
+}
+
+const TILE_CLASS_NAMES = [
+  'cgBox1',
+  'cgBox2',
+  'cgBox3',
+  'cgBox4',
+  'cgBox5',
+  'cgBox6',
+] as const;
+
+function getTileStyle(imageUrl?: string): CSSProperties | undefined {
+  return imageUrl
+    ? {
+        backgroundImage: `url("${imageUrl}")`,
+      }
+    : undefined;
+}
+
+function CustomGridTile({
+  item,
+  index,
+}: {
+  item: CustomGridItem;
+  index: number;
+}) {
+  const tileClassName = TILE_CLASS_NAMES[index] ?? TILE_CLASS_NAMES[0];
+
+  return (
+    <div
+      className={`${tileClassName} cgBoxMain`}
+      style={getTileStyle(item.image?.url)}
+    >
+      <div className="cg-title">{item.title}</div>
+      {item.link ? (
+        <Link className="cg-button" to={item.link}>
+          Discover More
+        </Link>
+      ) : (
+        <button
+          type="button"
+          className="cg-button"
+          aria-label="Discover more coming soon"
+          aria-disabled="true"
+          title="Coming soon"
+        >
+          Discover More
+        </button>
+      )}
+    </div>
+  );
+}
+
+export default function CustomGrid({items = []}: CustomGridProps) {
+  const tiles = items.slice(0, TILE_CLASS_NAMES.length);
+  const firstStackTiles = [
+    {item: tiles[1], index: 1},
+    {item: tiles[2], index: 2},
+  ].filter(
+    (tile): tile is {item: CustomGridItem; index: number} => Boolean(tile.item),
+  );
+  const secondStackTiles = [
+    {item: tiles[3], index: 3},
+    {item: tiles[4], index: 4},
+  ].filter(
+    (tile): tile is {item: CustomGridItem; index: number} => Boolean(tile.item),
+  );
+
+  if (tiles.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="container mx-auto">
+      {tiles[0] || firstStackTiles.length > 0 ? (
+        <div className="cg-line1">
+          {tiles[0] ? <CustomGridTile item={tiles[0]} index={0} /> : null}
+          {firstStackTiles.length > 0 ? (
+            <div className="cg1-part2">
+              {firstStackTiles.map((tile) => (
+                <CustomGridTile
+                  key={tile.item.id}
+                  item={tile.item}
+                  index={tile.index}
+                />
+              ))}
             </div>
-            <div className="cg-line2">
-                <div className="cg2-part2">
-                    <div className="cgBox4 cgBoxMain">
-                        <div className="cg-title">
-                            Featured
-                        </div>
-                        <button
-                            type="button"
-                            className="cg-button"
-                            aria-label="Discover more coming soon"
-                            aria-disabled="true"
-                            title="Coming soon"
-                        >
-                            Discover More
-                        </button>
-                    </div>
-                    <div className="cgBox5 cgBoxMain">
-                        <div className="cg-title">
-                            Trending
-                        </div>
-                        <button
-                            type="button"
-                            className="cg-button"
-                            aria-label="Discover more coming soon"
-                            aria-disabled="true"
-                            title="Coming soon"
-                        >
-                            Discover More
-                        </button>
-                    </div>
-                </div>
-                <div className="cgBox6 cgBoxMain">
-                    <div className="cg-title">
-                        New Collection
-                    </div>
-                    <button
-                        type="button"
-                        className="cg-button"
-                        aria-label="Discover more coming soon"
-                        aria-disabled="true"
-                        title="Coming soon"
-                    >
-                        Discover More
-                    </button>
-                </div>
-            </div>
+          ) : null}
         </div>
-    );
+      ) : null}
+      {secondStackTiles.length > 0 || tiles[5] ? (
+        <div className="cg-line2">
+          {secondStackTiles.length > 0 ? (
+            <div className="cg2-part2">
+              {secondStackTiles.map((tile) => (
+                <CustomGridTile
+                  key={tile.item.id}
+                  item={tile.item}
+                  index={tile.index}
+                />
+              ))}
+            </div>
+          ) : null}
+          {tiles[5] ? <CustomGridTile item={tiles[5]} index={5} /> : null}
+        </div>
+      ) : null}
+    </div>
+  );
 }
