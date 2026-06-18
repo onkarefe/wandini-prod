@@ -138,20 +138,16 @@
 
 .uspbar__icon {
   display: grid;
-  flex: 0 0 56px;
-  width: 56px;
-  height: 56px;
-  padding: 9px;
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
   place-items: center;
-  background: #fafafa;
-  border: 1px solid #d9d9d9;
-  border-radius: 6px;
 }
 
 .uspbar__img {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
 }
 
@@ -728,10 +724,9 @@
   }
 
   .uspbar__icon {
-    flex-basis: 48px;
-    width: 48px;
-    height: 48px;
-    padding: 8px;
+    flex-basis: 60px;
+    width: 60px;
+    height: 60px;
   }
 
   .uspbar__title {
@@ -908,9 +903,9 @@
   }
 
   .uspbar__icon {
-    flex-basis: 50px;
-    width: 50px;
-    height: 50px;
+    flex-basis: 60px;
+    width: 60px;
+    height: 60px;
   }
 
   .uspbar__title {
@@ -997,9 +992,9 @@
   }
 
   .uspbar__icon {
-    flex-basis: 52px;
-    width: 52px;
-    height: 52px;
+    flex-basis: 60px;
+    width: 60px;
+    height: 60px;
   }
 
   .uspbar__title {
