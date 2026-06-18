@@ -18,3 +18,4 @@ Port 3000 is in use, trying another one...
 [2m14:57:23[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/HeroSection.tsx[22m
 [2m14:57:28[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/AllProduts.tsx[22m
 [2m14:58:39[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mapp/components/HeroSection.tsx[22m
+[2m16:01:00[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/server/server-bundle-analyzer.html[22m

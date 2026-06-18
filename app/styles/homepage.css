@@ -1,7 +1,8 @@
 /* Hero Section */
 
 .mainHeroDiv {
-  --hero-overlay: linear-gradient(
+  --hero-overlay:
+    linear-gradient(
       90deg,
       rgba(12, 12, 12, 0.52) 0%,
       rgba(12, 12, 12, 0.36) 34%,
@@ -91,49 +92,91 @@
 /* uspbar */
 
 .uspbar {
-  background-color: #f9fafa;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  background: #ffffff;
+  border-block: 1px solid #ececec;
+}
+
+.uspbar__container {
+  width: 100%;
+  max-width: 1440px;
+  padding-inline: 32px;
 }
 
 .uspbar__list {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  flex-wrap: wrap;
+  margin: 0;
+  padding: 20px 0;
+  list-style: none;
 }
 
 .uspbar__item {
-  flex-basis: 24%;
-  padding: 0 16px;
+  position: relative;
   display: flex;
-  align-items: flex-start;
+  flex: 1 1 0;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 30px;
+}
+
+.uspbar__item + .uspbar__item::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1px;
+  height: 48px;
+  background: #e7e7e7;
+  content: '';
+  transform: translateY(-50%);
 }
 
 .uspbar__icon {
-  margin-right: 16px;
+  display: grid;
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  padding: 9px;
+  place-items: center;
+  background: #fafafa;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
 }
 
 .uspbar__img {
-  width: 80px;
-  object-fit: contain;
   display: block;
-  margin-right: 16px;
-  position: relative;
-  bottom: -5px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .uspbar__text {
+  flex: 0 1 auto;
+  min-width: 0;
   font-family: 'Archivo', sans-serif;
+  line-height: 1.35;
 }
 
 .uspbar__title {
-  font-size: 16px;
+  margin: 0;
+  color: #191919;
+  font-size: 17px;
   font-weight: 600;
-  margin-bottom: 2px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .uspbar__subtitle {
-  font-size: 14px;
+  margin: 5px 0 0;
+  color: #666666;
+  font-size: 16px;
+  font-weight: 450;
+  white-space: nowrap;
 }
 
 /* all products */
@@ -602,7 +645,6 @@
   }
 }
 
-
 /* Customer Revs Section */
 
 /* Tailwind ↔︎ CSS breakpoint eşlemesi
@@ -658,18 +700,46 @@
 
   /* uspbar */
 
-  .uspbar__item {
-    flex-basis: 100%;
-    margin-bottom: 16px;
-    padding: 0;
+  .uspbar {
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 
-  .uspbar__img {
-    width: 40px;
+  .uspbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .uspbar__list {
+    width: max-content;
+    padding: 16px 0;
+  }
+
+  .uspbar__container {
+    width: max-content;
+    max-width: none;
+    padding-inline: 20px;
+  }
+
+  .uspbar__item {
+    flex: 0 0 285px;
+    min-width: 285px;
+    justify-content: flex-start;
+    padding: 0 22px;
+  }
+
+  .uspbar__icon {
+    flex-basis: 48px;
+    width: 48px;
+    height: 48px;
+    padding: 8px;
   }
 
   .uspbar__title {
-    font-size: 14px;
+    font-size: 16px;
+  }
+
+  .uspbar__subtitle {
+    font-size: 13px;
   }
 
   /* all-products-list */
@@ -810,7 +880,6 @@
   .showcaseSlice-image {
     height: 100%;
   }
-
 }
 
 /* md only: 768–1023px */
@@ -834,21 +903,22 @@
   }
 
   .uspbar__item {
-    flex-basis: 25%;
-    padding: 8px;
+    gap: 13px;
+    padding-inline: 20px;
   }
 
-  .uspbar__img {
-    width: 60px;
-    height: auto;
+  .uspbar__icon {
+    flex-basis: 50px;
+    width: 50px;
+    height: 50px;
   }
 
   .uspbar__title {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .uspbar__subtitle {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .all-product-link:nth-child(2) {
@@ -917,27 +987,27 @@
   .showcaseSlice-image {
     height: 100%;
   }
-
 }
 
 /* lg only: 1024–1279px */
 @media (min-width: 1024px) and (max-width: 1279.98px) {
   .uspbar__item {
-    flex-basis: 25%;
-    padding: 8px;
+    gap: 14px;
+    padding-inline: 24px;
   }
 
-  .uspbar__img {
-    width: 60px;
-    height: auto;
+  .uspbar__icon {
+    flex-basis: 52px;
+    width: 52px;
+    height: 52px;
   }
 
   .uspbar__title {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .uspbar__subtitle {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .cg-line1 {
@@ -960,7 +1030,6 @@
   .cgBox5 {
     height: 292px;
   }
-
 }
 
 /* xl only: 1280–1535px */
