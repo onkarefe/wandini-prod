@@ -6,11 +6,13 @@ export default function HeroSection({
     title,
     st1,
     st2,
+    buttonText,
     backgroundImage,
 }: {
     title: string;
     st1: string;
     st2: string;
+    buttonText: string;
     backgroundImage: HeroImage;
 }) {
     const scrollToProducts = () => {
@@ -42,11 +44,11 @@ export default function HeroSection({
                         <button
                             type="button"
                             className="defaultButton"
-                            aria-label="Mehr entdecken"
-                            title="Mehr entdecken"
+                            aria-label={buttonText}
+                            title={buttonText}
                             onClick={scrollToProducts}
                         >
-                            Mehr entdecken
+                            {buttonText}
                         </button>
                     </div>
                 </div>
