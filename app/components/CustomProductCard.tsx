@@ -39,6 +39,19 @@ function HeartFilledIcon() {
   );
 }
 
+function SimilarMotifsIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 640 640"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M352 528L128 528C119.2 528 112 520.8 112 512L112 288C112 279.2 119.2 272 128 272L176 272L176 224L128 224C92.7 224 64 252.7 64 288L64 512C64 547.3 92.7 576 128 576L352 576C387.3 576 416 547.3 416 512L416 464L368 464L368 512C368 520.8 360.8 528 352 528zM288 368C279.2 368 272 360.8 272 352L272 128C272 119.2 279.2 112 288 112L512 112C520.8 112 528 119.2 528 128L528 352C528 360.8 520.8 368 512 368L288 368zM224 352C224 387.3 252.7 416 288 416L512 416C547.3 416 576 387.3 576 352L576 128C576 92.7 547.3 64 512 64L288 64C252.7 64 224 92.7 224 128L224 352z" />
+    </svg>
+  );
+}
+
 function formatPriceLabel(price?: ProductPrice): string | null {
   if (!price) return null;
 
@@ -143,10 +156,11 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   };
   const isPending = fetcher.state !== 'idle';
   const wishlistButtonLabel = wishlisted
-    ? 'Favorilere eklendi'
+    ? 'Aus Favoriten entfernen'
     : isPending
-      ? 'Favorilere ekleniyor'
-      : 'Favorilere ekle';
+      ? 'Favoriten werden aktualisiert'
+      : 'Zu Favoriten hinzufügen';
+  const similarMotifsButtonLabel = 'Ähnliche Motive anzeigen';
 
   return (
     <a href={productUrl} className="custom-product-card" aria-label={title}>
@@ -158,10 +172,34 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
         onClick={handleWishlistClick}
         disabled={isPending}
         aria-label={wishlistButtonLabel}
-        title={wishlistButtonLabel}
+        data-tooltip={wishlistButtonLabel}
       >
         {wishlisted ? <HeartFilledIcon /> : <HeartOutlineIcon />}
       </button>
+      {showSimilarMotifsButton ? (
+        <button
+          type="button"
+          className="custom-product-card__similar-motifs"
+          aria-label={similarMotifsButtonLabel}
+          data-tooltip={similarMotifsButtonLabel}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (similarProductsUrl) {
+              void navigate(similarProductsUrl, {
+                state: {
+                  sourceProductTitle: similarProductsSourceTitle ?? title,
+                  sourceProductImageUrl:
+                    similarProductsSourceImageUrl ?? images[0]?.url ?? null,
+                },
+              });
+            }
+          }}
+        >
+          <SimilarMotifsIcon />
+        </button>
+      ) : null}
       <div className="custom-product-card__media" ref={emblaRef}>
         <div className="custom-product-card__container">
           {displayImages.map((img) => (
@@ -200,27 +238,6 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
         <h3 className="custom-product-card__title">{title}</h3>
         {priceLabel ? (
           <p className="custom-product-card__price">{priceLabel}</p>
-        ) : null}
-        {showSimilarMotifsButton ? (
-          <button
-            type="button"
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-
-              if (similarProductsUrl) {
-                void navigate(similarProductsUrl, {
-                  state: {
-                    sourceProductTitle: similarProductsSourceTitle ?? title,
-                    sourceProductImageUrl:
-                      similarProductsSourceImageUrl ?? images[0]?.url ?? null,
-                  },
-                });
-              }
-            }}
-          >
-            Show Similar Motifs
-          </button>
         ) : null}
       </div>
     </a>
