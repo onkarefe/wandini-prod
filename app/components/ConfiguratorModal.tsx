@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Configurator } from './Configurator';
-// import { ConfigratorScene } from './ConfigratorScene';
-import { ConfigratorScene2 } from './ConfigratorScene2';
+import React, {useEffect, useState} from 'react';
+import {Configurator} from './Configurator';
+import {ConfigratorScene2} from './ConfigratorScene2';
 
 type CropRect = {
   x: number;
@@ -15,17 +14,33 @@ type SelectedQualitySummary = {
   properties: string[];
 } | null;
 
+export type ConfiguratorMaterialOption = {
+  id: string;
+  title: string;
+  pricePerSquareMeter: string;
+  priceBeforeDiscount: string | null;
+  calculatedPrice: string;
+  properties: string[];
+  isBestseller: boolean;
+  selected: boolean;
+  exists: boolean;
+  variantUriQuery: string;
+};
+
+type ConfiguratorStep = 'crop' | 'materials' | 'preview';
+
 type ConfiguratorModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  qualityOptions?: React.ReactNode;
+  materialOptions: ConfiguratorMaterialOption[];
+  onMaterialSelect: (
+    material: ConfiguratorMaterialOption,
+  ) => void | Promise<void>;
   selectedQualitySummary?: SelectedQualitySummary;
   confirmButton?: React.ReactNode;
-
   imageUrl: string;
   widthCm: number;
   heightCm: number;
-
   crop: CropRect | null;
   onCropChange: (crop: CropRect | null) => void;
 };
@@ -38,17 +53,21 @@ export function ConfiguratorModal({
   heightCm,
   crop,
   onCropChange,
-  qualityOptions,
+  materialOptions,
+  onMaterialSelect,
   selectedQualitySummary,
   confirmButton,
 }: ConfiguratorModalProps) {
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [step, setStep] = useState<ConfiguratorStep>('crop');
+  const [selectingMaterialId, setSelectingMaterialId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!isOpen) return;
 
     const scrollY = window.scrollY;
-    const { style } = document.body;
+    const {style} = document.body;
     const prev = {
       overflow: style.overflow,
       position: style.position,
@@ -79,45 +98,65 @@ export function ConfiguratorModal({
   if (!isOpen) return null;
 
   const handleClose = () => {
-    setIsPreviewOpen(false);
+    setStep('crop');
+    setSelectingMaterialId(null);
     onClose();
+  };
+
+  const handleBack = () => {
+    setStep((currentStep) =>
+      currentStep === 'preview' ? 'materials' : 'crop',
+    );
+  };
+
+  const handleMaterialSelect = async (
+    material: ConfiguratorMaterialOption,
+  ) => {
+    if (!material.exists || selectingMaterialId) return;
+
+    setSelectingMaterialId(material.id);
+    try {
+      await onMaterialSelect(material);
+      setStep('preview');
+    } finally {
+      setSelectingMaterialId(null);
+    }
   };
 
   return (
     <div className="configuratorModalOverlay" role="presentation">
-      <button
-        type="button"
+      <div
         className="configuratorModalBackdrop"
-        onClick={handleClose}
-        aria-label="Close configurator"
+        aria-hidden="true"
       />
       <div
-        className={`configuratorModal${isPreviewOpen ? ' configuratorModal--preview' : ''}`}
+        className={`configuratorModal configuratorModal--${step}`}
         role="dialog"
         aria-modal="true"
-        aria-label="Product configurator"
+        aria-label="Produktkonfigurator"
       >
         <button
           type="button"
           className="configuratorModalIconButton configuratorModalCloseButton"
           onClick={handleClose}
-          aria-label="Close"
+          aria-label="Schließen"
         >
           X
         </button>
-        {isPreviewOpen && (
+
+        {step !== 'crop' && (
           <button
             type="button"
             className="configuratorModalIconButton configuratorModalBackButton"
-            onClick={() => setIsPreviewOpen(false)}
-            aria-label="Back"
+            onClick={handleBack}
+            aria-label="Zurück"
           >
             &lt;
           </button>
         )}
-        {/* BODY */}
-        {!isPreviewOpen ? (
-          <div className="configuratorModalBody">
+
+        {step === 'crop' && (
+          <div className="configuratorModalBody configuratorModalBody--crop">
             <div className="configuratorModalLeft">
               <Configurator
                 imageUrl={imageUrl}
@@ -127,54 +166,106 @@ export function ConfiguratorModal({
               />
             </div>
 
-            <div className="configuratorModalRight">
-              {/* <div>
-                <strong>Selected size</strong>
-                <div>
-                  {widthCm} cm × {heightCm} cm
-                </div>
-              </div> */}
-
-              {/* <div style={{marginTop: '1rem'}}>
-                <strong>Crop status</strong>
-                <div>
-                  {crop ? 'Crop selected' : 'No crop selected'}
-                </div>
-              </div> */}
-
-              {qualityOptions && (
-                <div>
-                  {qualityOptions}
-                </div>
-              )}
-              <div style={{marginTop: '16px'}}>
-                <button
-                  type="button"
-                  className="configuratorPreviewButton"
-                  disabled={!crop}
-                  onClick={() => setIsPreviewOpen(true)}
-                >
-                  Confirm &amp; Generate Live Preview
-                </button>
-              </div>
+            <div className="configuratorCropActions">
+              <button
+                type="button"
+                className="configuratorPreviewButton"
+                disabled={!crop}
+                onClick={() => setStep('materials')}
+              >
+                Weiter zur Materialauswahl
+              </button>
             </div>
           </div>
-        ) : (
+        )}
+
+        {step === 'materials' && (
+          <div className="configuratorModalBody configuratorModalBody--materials">
+            <section
+              className="configuratorMaterials"
+              aria-labelledby="configurator-materials-title"
+            >
+              <header className="configuratorMaterialsHeader">
+                <span className="configuratorMaterialsEyebrow">
+                  Schritt 2 von 3
+                </span>
+                <h2 id="configurator-materials-title">
+                  Druckmaterial auswählen
+                </h2>
+                <p>
+                  Wählen Sie die passende Druckqualität für Ihre Wandfläche von{' '}
+                  {widthCm} × {heightCm} cm.
+                </p>
+              </header>
+
+              <div className="configuratorMaterialsGrid">
+                {materialOptions.map((material) => {
+                  const isSelecting = selectingMaterialId === material.id;
+                  const isSelectionPending = selectingMaterialId !== null;
+
+                  return (
+                    <article
+                      key={material.id}
+                      className={`configuratorMaterialCard${
+                        material.selected
+                          ? ' configuratorMaterialCard--selected'
+                          : ''
+                      }`}
+                    >
+                      <div className="configuratorMaterialPrice">
+                        {material.priceBeforeDiscount && (
+                          <del>{material.priceBeforeDiscount}</del>
+                        )}
+                        <div className="configuratorMaterialCurrentPrice">
+                          <strong>{material.pricePerSquareMeter}</strong>
+                          <span>pro m²</span>
+                        </div>
+                      </div>
+
+                      <div className="configuratorMaterialTitleRow">
+                        <h3>{material.title}</h3>
+                        {material.isBestseller && (
+                          <span className="configuratorMaterialBestseller">
+                            <span aria-hidden="true">★</span>
+                            Bestseller
+                          </span>
+                        )}
+                      </div>
+
+                      <ul className="configuratorMaterialFeatures">
+                        {material.properties.map((property) => (
+                          <li key={`${material.id}-${property}`}>{property}</li>
+                        ))}
+                      </ul>
+
+                      <div className="configuratorMaterialTotal">
+                        <span>Preis für Ihre Maße</span>
+                        <strong>{material.calculatedPrice}</strong>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="configuratorMaterialSelectButton"
+                        disabled={!material.exists || isSelectionPending}
+                        onClick={() => void handleMaterialSelect(material)}
+                      >
+                        {isSelecting
+                          ? 'Wird ausgewählt…'
+                          : 'Material auswählen'}
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {step === 'preview' && (
           <div className="configuratorModalBody">
-            {/* <ConfigratorScene
-              isOpen={isPreviewOpen}
-              onClose={() => setIsPreviewOpen(false)}
-              confirmButton={confirmButton}
-              inline
-              showCloseButton={false}
-              imageUrl={imageUrl}
-              widthCm={widthCm}
-              heightCm={heightCm}
-              crop={crop}
-            /> */}
             <ConfigratorScene2
-              isOpen={isPreviewOpen}
-              onClose={() => setIsPreviewOpen(false)}
+              isOpen
+              onClose={() => setStep('materials')}
               confirmButton={confirmButton}
               inline
               showCloseButton={false}
@@ -190,5 +281,3 @@ export function ConfiguratorModal({
     </div>
   );
 }
-
-

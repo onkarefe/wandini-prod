@@ -52,6 +52,15 @@ export function Configurator({
   const activePointerIdRef = useRef<number | null>(null);
   const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
 
+  /** Never carry pixel-based layout state from one product image to another. */
+  useEffect(() => {
+    setImageLoaded(false);
+    setSelection(null);
+    setIsDragging(false);
+    activePointerIdRef.current = null;
+    lastPointerRef.current = null;
+  }, [imageUrl]);
+
   /** img rect'ini container'a göre döndür */
   const getImageRectInContainer = useCallback(() => {
     const container = containerRef.current;
@@ -409,10 +418,15 @@ export function Configurator({
           ref={imgRef}
           src={imageUrl}
           crossOrigin="anonymous"
-          alt="Product to configure"
+          alt="Produkt zur Konfiguration"
           onLoad={() => {
             setImageLoaded(true);
             onImageReady?.(imgRef.current);
+          }}
+          onError={() => {
+            setImageLoaded(false);
+            setSelection(null);
+            onImageReady?.(null);
           }}
           className="configuratorImage"
         />

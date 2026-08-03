@@ -8,6 +8,10 @@ import { AddToCartButton } from './AddToCartButton';
 import { useAside } from './Aside';
 import type { ProductFragment } from 'storefrontapi.generated';
 import {Link} from '~/lib/i18n-router';
+import {
+  calculateConfiguratorAreaM2,
+  calculateConfiguratorBillingUnits,
+} from '~/lib/configurator-pricing';
 
 type CropRect = {
   x: number;
@@ -67,18 +71,9 @@ export function ProductForm({
   // -----------------------------
   const isSizeValid = size.width > 0 && size.height > 0;
 
-  // -----------------------------
-  // BILLING (UNCHANGED)
-  // -----------------------------
-  const BILLING_UNIT_M2 = 0.01;
-
-  const areaM2 = isSizeValid
-    ? (size.width * size.height) / 10_000
-    : 0;
-
-  const billingUnits = isSizeValid
-    ? Math.max(1, Math.ceil(areaM2 / BILLING_UNIT_M2))
-    : 0;
+  // One Shopify quantity represents 0.01 m². See configurator-pricing.ts.
+  const areaM2 = calculateConfiguratorAreaM2(size.width, size.height);
+  const billingUnits = calculateConfiguratorBillingUnits(areaM2);
 
   // -----------------------------
   // ✅ CONFIGURATOR PAYLOAD
@@ -118,7 +113,7 @@ export function ProductForm({
 
           return (
             <div className="product-options" key={option.name}>
-              <h5>Select Material</h5>
+              <h5>Material auswählen</h5>
               <div>
                 {option.optionValues.map((value) => {
                   const { name, variantUriQuery, selected, exists } = value;
@@ -264,7 +259,7 @@ export function ProductForm({
             },
           ]}
         >
-          Add to Shopping Cart
+          In den Warenkorb
         </AddToCartButton>
       )}
     </div>

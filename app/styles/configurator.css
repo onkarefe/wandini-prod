@@ -217,8 +217,10 @@
 }
 
 .configuratorImage {
+  max-width: 100%;
+  max-height: 100%;
   width: auto;
-  height: 100%;
+  height: auto;
   object-fit: contain;
   display: block;
   z-index: 0;
@@ -419,6 +421,22 @@
   /* overflow: hidden; */
 }
 
+.configuratorModal--crop {
+  /*
+   * 680px modal - 32px padding - 16px gap - 48px action = 584px.
+   * On shorter screens, keep 64px above/below the modal so the external
+   * close button remains reachable. The source image is scaled down only;
+   * its intrinsic aspect ratio is never changed.
+   */
+  --configurator-crop-image-max-height: clamp(
+    96px,
+    calc(100dvh - 224px),
+    584px
+  );
+  height: auto;
+  max-height: min(680px, calc(100dvh - 128px));
+}
+
 .configuratorModalBody {
   flex: 1 1 auto;
   display: flex;
@@ -426,6 +444,276 @@
   gap: 16px;
   height: 100%;
   min-height: 0;
+}
+
+.configuratorModalBody--crop {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.configuratorModalBody--crop .configuratorModalLeft {
+  max-height: none;
+  height: auto;
+  align-items: center;
+}
+
+.configuratorModalBody--crop .configuratorContainer {
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-height: var(--configurator-crop-image-max-height);
+  box-sizing: border-box;
+  align-self: center;
+}
+
+.configuratorModalBody--crop .configuratorImage {
+  max-width: 100%;
+  max-height: var(--configurator-crop-image-max-height);
+  width: auto;
+  height: auto;
+}
+
+.configuratorCropActions {
+  width: 100%;
+}
+
+.configuratorCropActions .configuratorPreviewButton {
+  min-height: 48px;
+}
+
+.configuratorModalBody--materials {
+  display: block;
+  overflow-y: auto;
+}
+
+.configuratorMaterials {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.configuratorMaterialsHeader {
+  max-width: 720px;
+}
+
+.configuratorMaterialsEyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: #0f8a64;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.configuratorMaterialsHeader h2 {
+  margin: 0;
+  color: #171717;
+  font-size: clamp(24px, 2vw, 32px);
+  line-height: 1.15;
+}
+
+.configuratorMaterialsHeader p {
+  margin: 8px 0 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.configuratorMaterialsGrid {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.configuratorMaterialCard {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #dedede;
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 24px rgba(17, 17, 17, 0.04);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.configuratorMaterialCard:hover {
+  border-color: #b8b8b8;
+  box-shadow: 0 12px 30px rgba(17, 17, 17, 0.09);
+  transform: translateY(-2px);
+}
+
+.configuratorMaterialCard--selected {
+  border-color: #10b981;
+  box-shadow:
+    0 0 0 1px #10b981,
+    0 12px 30px rgba(16, 185, 129, 0.12);
+}
+
+.configuratorMaterialPrice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 3px;
+  min-height: 54px;
+  color: #171717;
+}
+
+.configuratorMaterialPrice del {
+  color: #929292;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration-thickness: 1px;
+}
+
+.configuratorMaterialCurrentPrice {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.configuratorMaterialPrice strong {
+  font-size: clamp(22px, 2vw, 28px);
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.configuratorMaterialPrice span {
+  color: #707070;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.configuratorMaterialTitleRow {
+  min-height: 30px;
+  margin: 16px 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.configuratorMaterialCard h3 {
+  margin: 0;
+  color: #171717;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.configuratorMaterialBestseller {
+  padding: 5px 8px;
+  border: 1px solid rgba(203, 166, 74, 0.55);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #171717 0%, #3c3525 100%);
+  color: #f8dc8c;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 5px 14px rgba(17, 17, 17, 0.16);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.configuratorMaterialBestseller span {
+  color: #ffd66b;
+  font-size: 10px;
+}
+
+.configuratorMaterialFeatures {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #555;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.configuratorMaterialFeatures li {
+  position: relative;
+  padding-left: 17px;
+}
+
+.configuratorMaterialFeatures li::before {
+  content: '';
+  position: absolute;
+  top: 0.55em;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.configuratorMaterialTotal {
+  margin-top: auto;
+  padding-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.configuratorMaterialTotal span {
+  color: #777;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.configuratorMaterialTotal strong {
+  color: #171717;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.configuratorMaterialSelectButton {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid #171717;
+  border-radius: 8px;
+  background: #171717;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    opacity 160ms ease;
+}
+
+.configuratorMaterialSelectButton:hover:not(:disabled) {
+  border-color: #333;
+  background: #333;
+}
+
+.configuratorMaterialSelectButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .configuratorModalLeft {
@@ -807,6 +1095,17 @@
     padding: 12px;
   }
 
+  .configuratorModal--crop {
+    --configurator-crop-image-max-height: clamp(
+      140px,
+      calc(100dvh - 128px),
+      584px
+    );
+    height: auto;
+    max-height: 100dvh;
+    align-self: center;
+  }
+
   .configuratorModalIconButton {
     top: 8px;
     width: 34px;
@@ -831,6 +1130,40 @@
     flex-wrap: nowrap;
   }
 
+  .configuratorModalBody--crop {
+    height: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+  }
+
+  .configuratorModalBody--crop .configuratorModalLeft {
+    min-height: 0;
+    height: auto;
+  }
+
+  .configuratorModalBody--materials {
+    display: block;
+    padding-right: 2px;
+  }
+
+  .configuratorMaterials {
+    gap: 16px;
+  }
+
+  .configuratorMaterialsHeader h2 {
+    font-size: 24px;
+  }
+
+  .configuratorMaterialsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .configuratorMaterialCard {
+    padding: 16px;
+  }
+
   .configuratorModalLeft {
     max-height: none;
     height: auto;
@@ -840,6 +1173,12 @@
   .configuratorContainer {
     min-height: 0;
     height: auto;
+  }
+
+  .configuratorModalBody--crop .configuratorContainer {
+    min-height: 0;
+    height: auto;
+    max-height: var(--configurator-crop-image-max-height);
   }
 
   .configuratorModalRight {
@@ -937,6 +1276,14 @@
   .configuratorModal{
     max-width: 1024px;
     max-height: 575px;
+  }
+
+  .configuratorModal--crop {
+    --configurator-crop-image-max-height: clamp(
+      96px,
+      calc(100dvh - 224px),
+      479px
+    );
   }
 
   .configuratorModalLeft{

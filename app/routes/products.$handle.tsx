@@ -16,9 +16,18 @@ import { ProductImage } from '~/components/ProductImage';
 import { ProductForm } from '~/components/ProductForm';
 import { ProductSize } from '~/components/productSize';
 import { AddToCartButton } from '~/components/AddToCartButton';
-import { ConfiguratorModal } from '~/components/ConfiguratorModal';
+import {
+  ConfiguratorModal,
+  type ConfiguratorMaterialOption,
+} from '~/components/ConfiguratorModal';
 import { redirectIfHandleIsLocalized } from '~/lib/redirect';
 import {usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {
+  calculateConfiguratorAreaM2,
+  calculateConfiguratorBillingUnits,
+  calculateConfiguratorLineTotal,
+  resolveConfiguratorPricePerM2,
+} from '~/lib/configurator-pricing';
 
 const BLOCKED_HTML_TAGS = [
   'script',
@@ -490,6 +499,14 @@ export default function Product() {
     size.width > 0 && size.height > 0
       ? (size.width * size.height) / 10_000
       : 0;
+  const isSizeValid = size.width > 0 && size.height > 0;
+  const BILLING_UNIT_M2 = 0.01;
+  const areaM2 = isSizeValid
+    ? (size.width * size.height) / 10_000
+    : 0;
+  const billingUnits = isSizeValid
+    ? Math.max(1, Math.ceil(areaM2 / BILLING_UNIT_M2))
+    : 0;
   const startingTotalPrice = materialStartingPrice
     ? wallAreaM2 * materialStartingPrice.amount
     : 0;
@@ -555,78 +572,63 @@ export default function Product() {
       })()
     : null;
 
-  const qualityOptionsNode = qualityOption ? (
-    <div className="configratorProps" key={qualityOption.name}>
-      <div className="configratorPropsRow">
-        {qualityOption.optionValues.map((value) => {
-          const { name, variantUriQuery, selected, exists } = value;
+  const materialOptions: ConfiguratorMaterialOption[] = qualityOption
+    ? [...qualityOption.optionValues]
+      .sort((firstValue, secondValue) => {
+        const firstPrice = Number(
+          firstValue.firstSelectableVariant?.price?.amount,
+        );
+        const secondPrice = Number(
+          secondValue.firstSelectableVariant?.price?.amount,
+        );
 
-          let printQuality: any;
-          let m2Price: string | null = null;
-          let m2Currency = '';
+        return (
+          (Number.isFinite(firstPrice) ? firstPrice : Number.POSITIVE_INFINITY) -
+          (Number.isFinite(secondPrice)
+            ? secondPrice
+            : Number.POSITIVE_INFINITY)
+        );
+      })
+      .map((value) => {
+        const {name, variantUriQuery, selected, exists} = value;
+        const variant = value.firstSelectableVariant;
+        const printQuality = (variant as any)?.printQuality?.reference;
+        const title = printQuality?.title?.value || name;
+        const unitPrice = Number(variant?.price?.amount);
+        const priceBeforeDiscount = Number(
+          printQuality?.priceWithoutDiscount?.value,
+        );
+        const currencyCode = variant?.price?.currencyCode;
+        const hasPrice =
+          Number.isFinite(unitPrice) && unitPrice >= 0 && Boolean(currencyCode);
+        const hasPriceBeforeDiscount =
+          hasPrice &&
+          Number.isFinite(priceBeforeDiscount) &&
+          priceBeforeDiscount > unitPrice;
 
-          if (value?.firstSelectableVariant) {
-            const v = value.firstSelectableVariant;
-            if ((v as any).printQuality?.reference) {
-              printQuality = (v as any).printQuality.reference;
-            }
-            if (v.price?.amount && v.price?.currencyCode) {
-              m2Price = (Number(v.price.amount) * 100).toFixed(2);
-              m2Currency = v.price.currencyCode;
-            }
-          }
-          if (
-            !m2Currency &&
-            selectedVariant?.price?.amount &&
-            selectedVariant?.price?.currencyCode
-          ) {
-            m2Price = (Number(selectedVariant.price.amount) * 100).toFixed(2);
-            m2Currency = selectedVariant.price.currencyCode;
-          }
-
-          const title = printQuality?.title?.value || name;
-
-          return (
-            <label
-              key={qualityOption.name + name}
-              className={`configratorPropsCard${selected ? ' selectedVariant' : ''}`}
-            >
-              <div className="configratorPropsTitleRow">
-                <input
-                  type="radio"
-                  checked={selected}
-                  disabled={!exists}
-                  onChange={() => {
-                    if (!selected) {
-                      void navigate(`?${variantUriQuery}`, {
-                        replace: true,
-                        preventScrollReset: true,
-                      });
-                    }
-                  }}
-                />
-                <span className="configratorPropsTitle">{title}</span>
-              </div>
-              {!!m2Price && (
-                <div className="configratorPropsPrice">
-                  {m2Price} {m2Currency} /m²
-                </div>
-              )}
-            </label>
-          );
-        })}
-      </div>
-    </div>
-  ) : null;
-
-  const isSizeValid = size.width > 0 && size.height > 0;
-  const BILLING_UNIT_M2 = 0.01;
-  const areaM2 = isSizeValid
-    ? (size.width * size.height) / 10_000
-    : 0;
-  const billingUnits = isSizeValid
-    ? Math.max(1, Math.ceil(areaM2 / BILLING_UNIT_M2))
-    : 0;
+        return {
+          id: `${qualityOption.name}-${name}`,
+          title,
+          pricePerSquareMeter: hasPrice
+            ? formatMaterialPrice(unitPrice, String(currencyCode))
+            : '—',
+          priceBeforeDiscount: hasPriceBeforeDiscount
+            ? formatMaterialPrice(
+                priceBeforeDiscount,
+                String(currencyCode),
+              )
+            : null,
+          calculatedPrice: hasPrice && isSizeValid
+            ? formatMaterialPrice(unitPrice * areaM2, String(currencyCode))
+            : '—',
+          properties: getPropertiesForQuality(value),
+          isBestseller: title.trim().toLowerCase() === 'premium',
+          selected,
+          exists,
+          variantUriQuery,
+        };
+      })
+    : [];
 
   const configuratorPayload = crop
     ? {
@@ -670,7 +672,7 @@ export default function Product() {
           },
         ]}
       >
-        Confirm & Add to Cart
+        Bestätigen &amp; in den Warenkorb
       </AddToCartButton>
     ) : null;
 
@@ -819,7 +821,15 @@ export default function Product() {
         heightCm={size.height}
         crop={crop}
         onCropChange={setCrop}
-        qualityOptions={qualityOptionsNode}
+        materialOptions={materialOptions}
+        onMaterialSelect={async (material) => {
+          if (material.selected) return;
+
+          await navigate(`?${material.variantUriQuery}`, {
+            replace: true,
+            preventScrollReset: true,
+          });
+        }}
         selectedQualitySummary={selectedQualitySummary}
         confirmButton={confirmButton}
       />

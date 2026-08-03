@@ -209,7 +209,7 @@ export function ConfigratorScene2({
     if (!crop || widthCm <= 0) {
       setSlices([]);
       setIsLoading(false);
-      setError('No valid crop or width found.');
+      setError('Kein gültiger Bildausschnitt oder keine gültige Breite gefunden.');
       return;
     }
 
@@ -221,13 +221,13 @@ export function ConfigratorScene2({
         if (cancelled) return;
         setSlices(items);
         if (!items.length) {
-          setError('No preview image could be generated during slicing.');
+          setError('Beim Aufteilen konnte kein Vorschaubild erstellt werden.');
         }
       })
       .catch(() => {
         if (cancelled) return;
         setSlices([]);
-        setError('An error occurred during slicing.');
+        setError('Beim Aufteilen ist ein Fehler aufgetreten.');
       })
       .finally(() => {
         if (cancelled) return;
@@ -250,7 +250,7 @@ export function ConfigratorScene2({
           type="button"
           className="configuratorSceneCloseButton"
           onClick={onClose}
-          aria-label="Close preview"
+          aria-label="Vorschau schließen"
         >
           X
         </button>
@@ -258,7 +258,9 @@ export function ConfigratorScene2({
 
       <div className="cs2-layout">
         <div className="cs2-main">
-          {isLoading && <div className="cs2-feedback">Preparing panels...</div>}
+          {isLoading && (
+            <div className="cs2-feedback">Bahnen werden vorbereitet…</div>
+          )}
           {!isLoading && error && <div className="cs2-feedback">{error}</div>}
 
           {!isLoading && !error && slices.length > 0 && (
@@ -267,7 +269,7 @@ export function ConfigratorScene2({
                 <div key={slice.index} className="cs2-slice-item">
                   <img
                     src={slice.dataUrl}
-                    alt={`Panel ${slice.index}`}
+                    alt={`Bahn ${slice.index}`}
                     className="cs2-slice-image"
                   />
                   <div className="cs2-slice-label">
@@ -279,20 +281,20 @@ export function ConfigratorScene2({
           )}
         </div>
 
-        <div className="cs2-sidebar" aria-label="Preview summary">
+        <div className="cs2-sidebar" aria-label="Vorschau-Zusammenfassung">
           <div className="cs2-sidebar-card">
-            <div className="cs2-sidebar-title">Summary</div>
+            <div className="cs2-sidebar-title">Zusammenfassung</div>
 
             <div className="cs2-sidebar-stats">
               <div className="cs2-sidebar-section cs2-sidebar-section--compact">
-                <div className="cs2-sidebar-label">Dimensions</div>
+                <div className="cs2-sidebar-label">Maße</div>
                 <div className="cs2-sidebar-value">
                   {widthCm} cm x {heightCm} cm
                 </div>
               </div>
 
               <div className="cs2-sidebar-section cs2-sidebar-section--compact">
-                <div className="cs2-sidebar-label">Panel Count</div>
+                <div className="cs2-sidebar-label">Anzahl der Bahnen</div>
                 <div className="cs2-sidebar-value">
                   {error ? '-' : (slices.length || widthsPreview.length)}
                 </div>
@@ -300,7 +302,7 @@ export function ConfigratorScene2({
             </div>
 
             <div className="cs2-sidebar-section">
-              <div className="cs2-sidebar-label">Print Material / Quality</div>
+              <div className="cs2-sidebar-label">Druckmaterial / Qualität</div>
               {selectedQualitySummary ? (
                 <div className="cs2-quality">
                   <div className="cs2-sidebar-value">{selectedQualitySummary.title}</div>
@@ -319,7 +321,7 @@ export function ConfigratorScene2({
                 </div>
               ) : (
                 <div className="cs2-sidebar-value cs2-sidebar-value--muted">
-                  Quality information not found.
+                  Keine Qualitätsinformationen verfügbar.
                 </div>
               )}
             </div>
@@ -341,14 +343,14 @@ export function ConfigratorScene2({
                 d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
               />
             </svg>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed
-            erat aliquam, luctus quam sed, consequat magna.
+            Bitte planen Sie bei Ihrer Bestellung umlaufend 6 cm Beschnittzugabe
+            für eine passgenaue Montage ein.
           </span>
 
           <div className="cs2-sidebar-action">
             {confirmButton ?? (
               <button type="button" className="configuratorPreviewButton">
-                Add to cart
+                In den Warenkorb
               </button>
             )}
           </div>

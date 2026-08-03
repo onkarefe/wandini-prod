@@ -348,13 +348,13 @@ async function createCroppedDataUrl(
           }
         }
       } catch (err) {
-        console.error('createCroppedDataUrl genel hata:', err);
+        console.error('Allgemeiner Fehler beim Erstellen des Bildausschnitts:', err);
         resolve(null);
       }
     };
 
     img.onerror = (err) => {
-      console.error('createCroppedDataUrl image load error:', err);
+      console.error('Fehler beim Laden des Bildes für den Bildausschnitt:', err);
       resolve(null);
     };
 
@@ -507,14 +507,14 @@ export function ConfigratorScene({
       className={`configuratorSceneDialog${inline ? ' configuratorSceneDialog--inline' : ''}`}
       role={inline ? undefined : 'dialog'}
       aria-modal={inline ? undefined : true}
-      aria-label={inline ? undefined : 'Product preview in room'}
+      aria-label={inline ? undefined : 'Produktvorschau im Raum'}
     >
       {showCloseButton && (
         <button
           type="button"
           className="configuratorSceneCloseButton"
           onClick={onClose}
-          aria-label="Close preview"
+          aria-label="Vorschau schließen"
         >
           X
         </button>
@@ -548,7 +548,7 @@ export function ConfigratorScene({
           onClick={onConfirm}
           disabled={!!confirmDisabled}
         >
-          Confirm &amp; Add to Cart
+          Bestätigen &amp; in den Warenkorb
         </button>
       ) : null}
     </div>
@@ -564,7 +564,7 @@ export function ConfigratorScene({
         type="button"
         className="configuratorSceneBackdrop"
         onClick={onClose}
-        aria-label="Close preview"
+        aria-label="Vorschau schließen"
       />
       {dialogContent}
     </div>
