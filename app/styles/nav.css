@@ -553,38 +553,6 @@
   color: #000000;
 }
 
-.socialLinks {
-  display: flex;
-  align-items: center;
-}
-
-.socialLinksButton {
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-}
-
-.socialLinks svg {
-  width: 24px;
-  height: 24px;
-  margin-right: 2px;
-}
-
-.facebook {
-  fill: #3b5998;
-}
-
-.instagram {
-  fill: #e1306c;
-}
-
-.linkedin {
-  fill: #0a66c2;
-}
-
 .footerSubBanner {
   background-color: #000000;
   color: white;
@@ -969,10 +937,6 @@ aside header .close {
     flex-basis: 100%;
     text-align: center;
     margin-bottom: 16px;
-  }
-
-  .socialLinks {
-    justify-content: center;
   }
 
   .footerSubBanner {

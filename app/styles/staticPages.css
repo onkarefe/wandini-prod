@@ -1,33 +1,35 @@
 .static-page {
   width: 100%;
-  padding: clamp(2rem, 5vw, 4.5rem) clamp(1rem, 3vw, 2rem) clamp(3rem, 6vw, 5rem);
+  padding: 56px 0 72px;
+  background: #ffffff;
+  color: #272727;
 }
 
 .static-page__article {
-  width: min(100%, 860px);
-  margin: 0 auto;
+  width: 100%;
 }
 
 .static-page__header {
-  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
-  padding-bottom: clamp(1rem, 2vw, 1.25rem);
-  border-bottom: 1px solid rgba(17, 17, 17, 0.1);
+  margin: 0 0 32px;
+  padding: 0 0 20px;
+  border-bottom: 1px solid #e5e5e5;
 }
 
 .static-page__title {
   margin: 0;
-  color: #111111;
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  line-height: 0.98;
+  color: #272727;
+  font-size: clamp(2rem, 3vw, 2.5rem);
   font-weight: 600;
-  letter-spacing: -0.045em;
-  text-wrap: balance;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 .static-page__content {
-  color: #1f1f1f;
-  font-size: clamp(1rem, 1.2vw, 1.08rem);
-  line-height: 1.8;
+  width: 100%;
+  color: #585a5f;
+  font-size: 1rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
 }
 
 .static-page__content > :first-child {
@@ -44,36 +46,42 @@
 .static-page__content h4,
 .static-page__content h5,
 .static-page__content h6 {
-  margin: 2.5rem 0 1rem;
-  color: #111111;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  margin: 32px 0 12px;
+  color: #272727;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 .static-page__content h1 {
-  font-size: clamp(1.9rem, 3vw, 2.8rem);
+  font-size: 1.75rem;
 }
 
 .static-page__content h2 {
-  font-size: clamp(1.6rem, 2.2vw, 2.2rem);
+  font-size: 1.5rem;
 }
 
 .static-page__content h3 {
-  font-size: clamp(1.3rem, 1.8vw, 1.6rem);
+  font-size: 1.25rem;
+}
+
+.static-page__content h4,
+.static-page__content h5,
+.static-page__content h6 {
+  font-size: 1rem;
 }
 
 .static-page__content p,
 .static-page__content ul,
 .static-page__content ol,
 .static-page__content blockquote,
-.static-page__content table,
-.static-page__content figure {
-  margin: 0 0 1.25rem;
+.static-page__content table {
+  margin: 0 0 16px;
 }
 
 .static-page__content ul,
 .static-page__content ol {
-  padding-left: 1.35rem;
+  padding-left: 24px;
 }
 
 .static-page__content ul {
@@ -84,64 +92,75 @@
   list-style: decimal;
 }
 
-.static-page__content li + li {
-  margin-top: 0.45rem;
+.static-page__content li {
+  margin: 0 0 8px;
 }
 
 .static-page__content a {
-  color: inherit;
-  text-underline-offset: 0.16em;
+  color: #272727;
+  text-decoration: underline;
   text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
-.static-page__content strong {
-  color: #111111;
+.static-page__content a:hover {
+  color: #000000;
+}
+
+.static-page__content strong,
+.static-page__content b {
+  color: #272727;
   font-weight: 600;
 }
 
 .static-page__content blockquote {
-  margin-left: 0;
-  padding: 0.25rem 0 0.25rem 1rem;
-  border-left: 2px solid rgba(17, 17, 17, 0.18);
-  color: #3a3a3a;
-}
-
-.static-page__content img {
-  display: block;
-  max-width: 100%;
-  height: auto;
+  padding-left: 16px;
+  border-left: 2px solid #d8d8d8;
 }
 
 .static-page__content table {
+  display: block;
   width: 100%;
+  overflow-x: auto;
   border-collapse: collapse;
 }
 
 .static-page__content th,
 .static-page__content td {
-  padding: 0.9rem 0;
-  border-bottom: 1px solid rgba(17, 17, 17, 0.1);
+  padding: 12px 16px 12px 0;
+  border-bottom: 1px solid #e5e5e5;
   text-align: left;
   vertical-align: top;
 }
 
 .static-page__content hr {
-  margin: 2rem 0;
+  margin: 32px 0;
   border: 0;
-  border-top: 1px solid rgba(17, 17, 17, 0.1);
+  border-top: 1px solid #e5e5e5;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1023.98px) {
   .static-page {
-    padding-top: 1.5rem;
-    padding-bottom: 3rem;
+    padding: 40px 16px 56px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .static-page {
+    padding-top: 32px;
+    padding-bottom: 48px;
   }
 
   .static-page__header {
-    margin-bottom: 1.5rem;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+
+  .static-page__title {
+    font-size: 1.75rem;
   }
 
   .static-page__content {
-    line-height: 1.72;
+    line-height: 1.65;
   }
 }

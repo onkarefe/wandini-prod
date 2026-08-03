@@ -206,7 +206,7 @@ export default function Page() {
 
   return (
     <main className="static-page">
-      <article className="static-page__article">
+      <article className="static-page__article container mx-auto">
         <header className="static-page__header">
           <h1 className="static-page__title">{page.title}</h1>
         </header>
