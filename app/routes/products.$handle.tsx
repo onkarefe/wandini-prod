@@ -356,52 +356,6 @@ function renderShopifyRichText(richText: any) {
   });
 }
 
-// YouTube / (ileri de istersen Vimeo, MP4) videoları embed eden yardımcı fonksiyon
-function renderVideoFromUrl(rawUrl: string) {
-  if (!rawUrl) return null;
-
-  // YouTube normal link: https://www.youtube.com/watch?v=AxNNDIDHDb8
-  const ytMatch = rawUrl.match(/v=([a-zA-Z0-9_-]+)/);
-  if (ytMatch) {
-    const videoId = ytMatch[1];
-    return (
-      <div className="productVideoWrapper">
-        <iframe
-          src={`https://www.youtube.com/embed/${videoId}`}
-          title="Installation video"
-          frameBorder={0}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        />
-      </div>
-    );
-  }
-
-  // YouTube kısa link: https://youtu.be/xxxxxx
-  const shortMatch = rawUrl.match(/youtu\.be\/([a-zA-Z0-9_-]+)/);
-  if (shortMatch) {
-    const videoId = shortMatch[1];
-    return (
-      <div className="productVideoWrapper">
-        <iframe
-          src={`https://www.youtube.com/embed/${videoId}`}
-          title="Installation video"
-          frameBorder={0}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        />
-      </div>
-    );
-  }
-
-  // Bilinmeyen format → en azından link ver
-  return (
-    <a href={rawUrl} target="_blank" rel="noopener noreferrer">
-      Kurulum videosunu aç
-    </a>
-  );
-}
-
 type CropRect = {
   x: number;
   y: number;
@@ -425,10 +379,6 @@ type ShopifyRichTextBlock = {
 
 type ShopifyRichText = {
   children?: ShopifyRichTextBlock[] | null;
-};
-
-type InstallationVideoValue = {
-  url?: string | null;
 };
 
 function parseJsonMetafield<T>(value?: string | null) {
@@ -485,12 +435,74 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
+  const materialStartingPrice = productOptions
+    .find((option) => option.name.toLowerCase() === 'quality')
+    ?.optionValues.map((value) => {
+      const variant = value.firstSelectableVariant as
+        | (NonNullable<typeof value.firstSelectableVariant> & {
+            printQuality?: {
+              reference?: {
+                priceWithoutDiscount?: {value?: string | null} | null;
+              } | null;
+            } | null;
+          })
+        | null
+        | undefined;
+      const amount = Number(variant?.price?.amount);
+
+      if (!variant || !Number.isFinite(amount) || amount <= 0) {
+        return null;
+      }
+
+      const priceWithoutDiscount = Number(
+        variant.printQuality?.reference?.priceWithoutDiscount?.value,
+      );
+
+      return {
+        amount,
+        currencyCode: String(variant.price.currencyCode),
+        priceWithoutDiscount:
+          Number.isFinite(priceWithoutDiscount) && priceWithoutDiscount > amount
+            ? priceWithoutDiscount
+            : null,
+      };
+    })
+    .filter(
+      (
+        price,
+      ): price is {
+        amount: number;
+        currencyCode: string;
+        priceWithoutDiscount: number | null;
+      } => price !== null,
+    )
+    .sort((firstPrice, secondPrice) => firstPrice.amount - secondPrice.amount)[0];
+
+  const formatMaterialPrice = (amount: number, currencyCode: string) =>
+    new Intl.NumberFormat('de-DE', {
+      style: 'currency',
+      currency: currencyCode,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+
+  const wallAreaM2 =
+    size.width > 0 && size.height > 0
+      ? (size.width * size.height) / 10_000
+      : 0;
+  const startingTotalPrice = materialStartingPrice
+    ? wallAreaM2 * materialStartingPrice.amount
+    : 0;
+  const formattedWallArea = new Intl.NumberFormat('de-DE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(wallAreaM2);
+
   const {
     title,
     descriptionHtml,
     productInfo,
     deliveryAndShipping,
-    installationVideo,
   } = product;
 
   const parsedProductInfo = parseJsonMetafield<ShopifyRichText>(
@@ -499,10 +511,6 @@ export default function Product() {
   const parsedDeliveryAndShipping = parseJsonMetafield<ShopifyRichText>(
     deliveryAndShipping?.value,
   );
-  const parsedInstallationVideo = parseJsonMetafield<InstallationVideoValue>(
-    installationVideo?.value,
-  );
-
   function getPropertiesForQuality(value: any) {
     if (value?.firstSelectableVariant?.printQuality?.reference?.properties?.value) {
       return value.firstSelectableVariant.printQuality.reference.properties.value.split(' - ');
@@ -670,7 +678,6 @@ export default function Product() {
     'Description',
     'Product Info',
     'Delivery & Shipping',
-    'Installation Video',
   ];
 
   const productInfoContent = parsedProductInfo
@@ -679,10 +686,6 @@ export default function Product() {
 
   const deliveryAndShippingContent = parsedDeliveryAndShipping
     ? renderShopifyRichText(parsedDeliveryAndShipping)
-    : null;
-
-  const installationVideoNode = parsedInstallationVideo?.url
-    ? renderVideoFromUrl(parsedInstallationVideo.url)
     : null;
 
   const tabContents = [
@@ -710,29 +713,6 @@ export default function Product() {
       <p key="noshipping">Teslimat &amp; kargo bilgisi yok.</p>
     ),
 
-    // Installation Video tab
-    parsedInstallationVideo?.url
-      ? (() => {
-        try {
-          const videoObj = parsedInstallationVideo;
-
-          if (videoObj?.url) {
-            const videoNode = renderVideoFromUrl(videoObj.url);
-            return (
-              videoNode ?? (
-                <p key="novideo">Kurulum videosu bulunamadı.</p>
-              )
-            );
-          }
-
-          return <p key="novideo">Kurulum videosu bulunamadı.</p>;
-        } catch {
-          return <p key="novideo">Kurulum videosu bulunamadı.</p>;
-        }
-      })()
-      : (
-        <p key="novideo">Kurulum videosu bulunamadı.</p>
-      ),
   ];
 
 
@@ -758,20 +738,75 @@ export default function Product() {
         </div>
 
         <div className="productDetailRight">
-          <div className="product-main">
-            <h1 className="productDetailTitle">{title}</h1>
-            {/* Height ve width inputları */}
-            <ProductSize onChange={setSize} />
+          <div className="product-main productPurchaseCard">
+            <section className="productPurchaseCardIntro">
+              <h1 className="productDetailTitle">{title}</h1>
+              <p className="productPurchaseNote">
+                Bitte planen Sie bei Ihrer Bestellung umlaufend 6 cm
+                Beschnittzugabe für eine passgenaue Montage ein.
+              </p>
 
-            <ProductForm
-              productOptions={productOptions}
-              selectedVariant={selectedVariant}
-              size={size}
-              crop={crop}
-              isConfiguring={isConfiguring}
-              onConfigure={() => setIsConfiguring(true)}
-              masterAssetId={product.masterAssetId?.value}
-            />
+              {materialStartingPrice && (
+                <div
+                  className="productStartingPrice"
+                  aria-label="Startpreis pro Quadratmeter"
+                >
+                  <span className="productStartingPriceLabel">Ab</span>
+                  <strong className="productStartingPriceAmount">
+                    {formatMaterialPrice(
+                      materialStartingPrice.amount,
+                      materialStartingPrice.currencyCode,
+                    )}
+                  </strong>
+                  <span className="productStartingPriceUnit">/ m²</span>
+                  {materialStartingPrice.priceWithoutDiscount && (
+                    <del className="productStartingPricePrevious">
+                      {formatMaterialPrice(
+                        materialStartingPrice.priceWithoutDiscount,
+                        materialStartingPrice.currencyCode,
+                      )}
+                    </del>
+                  )}
+                </div>
+              )}
+            </section>
+
+            <div className="productPurchaseCardDivider" aria-hidden="true" />
+
+            <section className="productPurchaseCardConfiguration">
+              <ProductSize onChange={setSize} />
+
+              <div className="productOrderSummary" aria-live="polite">
+                <div className="productOrderSummaryItem">
+                  <span className="productOrderSummaryLabel">Wandfläche</span>
+                  <strong className="productOrderSummaryValue">
+                    {wallAreaM2 > 0 ? `${formattedWallArea} m²` : '— m²'}
+                  </strong>
+                </div>
+                <div className="productOrderSummaryItem productOrderSummaryItemPrice">
+                  <span className="productOrderSummaryLabel">Preis ab</span>
+                  <strong className="productOrderSummaryValue">
+                    {wallAreaM2 > 0 && materialStartingPrice
+                      ? formatMaterialPrice(
+                          startingTotalPrice,
+                          materialStartingPrice.currencyCode,
+                        )
+                      : '—'}
+                  </strong>
+                </div>
+              </div>
+
+              <ProductForm
+                productOptions={productOptions}
+                selectedVariant={selectedVariant}
+                size={size}
+                crop={crop}
+                isConfiguring={isConfiguring}
+                onConfigure={() => setIsConfiguring(true)}
+                masterAssetId={product.masterAssetId?.value}
+                showQualityOptions={false}
+              />
+            </section>
           </div>
         </div>
       </div>
@@ -854,6 +889,9 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
           pricePerM2: field(key: "price_per_m2") {
             value
           }
+          priceWithoutDiscount: field(key: "price_wo_disc") {
+            value
+          }
           minWidthCm: field(key: "min_width_cm") {
             value
           }
@@ -932,10 +970,6 @@ const PRODUCT_FRAGMENT = `#graphql
       type
     }
     deliveryAndShipping: metafield(namespace: "custom", key: "delivery_and_shipping") {
-      value
-      type
-    }
-    installationVideo: metafield(namespace: "custom", key: "installation_video") {
       value
       type
     }

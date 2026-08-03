@@ -25,6 +25,7 @@ export function ProductForm({
   onConfigure,
   masterAssetId,
   showInlineAddToCart = false,
+  showQualityOptions = true,
 }: {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
@@ -34,6 +35,7 @@ export function ProductForm({
   onConfigure: () => void;
   masterAssetId?: string;
   showInlineAddToCart?: boolean;
+  showQualityOptions?: boolean;
 }) {
   const navigate = useNavigate();
   const { open } = useAside();
@@ -112,6 +114,8 @@ export function ProductForm({
 
         // -------- QUALITY / MATERIAL --------
         if (option.name.toLowerCase() === 'quality') {
+          if (!showQualityOptions) return null;
+
           return (
             <div className="product-options" key={option.name}>
               <h5>Select Material</h5>
@@ -231,8 +235,13 @@ export function ProductForm({
 
       {/* CONFIGURE */}
       {!isConfiguring && (
-        <button className='customAddToCartButton' type="button" disabled={!isSizeValid} onClick={onConfigure}>
-          Configure Now
+        <button
+          className="customAddToCartButton"
+          type="button"
+          disabled={!isSizeValid}
+          onClick={onConfigure}
+        >
+          Jetzt konfigurieren
         </button>
       )}
 

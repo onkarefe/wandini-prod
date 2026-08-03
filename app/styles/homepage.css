@@ -697,44 +697,61 @@
   /* uspbar */
 
   .uspbar {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .uspbar::-webkit-scrollbar {
-    display: none;
+    overflow: hidden;
   }
 
   .uspbar__list {
-    width: max-content;
-    padding: 16px 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    gap: 1px;
+    padding: 0;
+    background: #e7e7e7;
   }
 
   .uspbar__container {
-    width: max-content;
-    max-width: none;
-    padding-inline: 20px;
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 0;
   }
 
   .uspbar__item {
-    flex: 0 0 285px;
-    min-width: 285px;
+    width: 100%;
+    min-width: 0;
     justify-content: flex-start;
-    padding: 0 22px;
+    gap: 14px;
+    padding: 12px;
+    background: #ffffff;
+  }
+
+  .uspbar__item + .uspbar__item::before {
+    display: none;
   }
 
   .uspbar__icon {
-    flex-basis: 60px;
-    width: 60px;
-    height: 60px;
+    flex-basis: 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .uspbar__img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .uspbar__text {
+    flex: 1 1 auto;
   }
 
   .uspbar__title {
     font-size: 16px;
+    white-space: normal;
   }
 
   .uspbar__subtitle {
     font-size: 13px;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   /* all-products-list */
@@ -893,27 +910,66 @@
     margin-top: 32px;
   }
 
-  .uspbar .container {
+  .uspbar {
+    overflow: hidden;
+    border-block: 0;
+  }
+
+  .uspbar__container,
+  .uspbar__list {
+    width: 100%;
     max-width: 100%;
   }
 
+  .uspbar__container {
+    padding-inline: 24px;
+  }
+
+  .uspbar__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    padding: 0;
+    background: transparent;
+  }
+
   .uspbar__item {
-    gap: 13px;
-    padding-inline: 20px;
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 16px 20px;
+    background: #ffffff;
+  }
+
+  .uspbar__item + .uspbar__item::before {
+    display: none;
   }
 
   .uspbar__icon {
-    flex-basis: 60px;
-    width: 60px;
-    height: 60px;
+    flex-basis: 56px;
+    width: 56px;
+    height: 56px;
+  }
+
+  .uspbar__img {
+    width: 56px;
+    height: 56px;
+  }
+
+  .uspbar__text {
+    flex: 1 1 auto;
   }
 
   .uspbar__title {
     font-size: 16px;
+    white-space: normal;
   }
 
   .uspbar__subtitle {
     font-size: 13px;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   .all-product-link:nth-child(2) {

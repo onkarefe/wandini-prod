@@ -101,7 +101,7 @@ export function Header({ header, cart, isLoggedIn, publicStoreDomain }: HeaderPr
 
   return (
     <header className="h-header">
-      <div className="container mx-auto">
+      <div className="container mx-auto headerContainer">
         <div className="headerRow">
           <div className="h-headerLeft">
             <NavLink to="/" className="h-logoLink" aria-label="Go to homepage">

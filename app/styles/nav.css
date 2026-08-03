@@ -12,6 +12,11 @@
   background: #fff;
 }
 
+.headerContainer {
+  box-sizing: border-box;
+  padding-inline: 24px;
+}
+
 .headerRow {
   display: flex;
   flex-wrap: wrap;
@@ -441,6 +446,17 @@
 }
 
 /* ===== Responsive breakpoints ===== */
+@media (min-width: 768px) {
+  .headerRow {
+    min-height: 56px;
+  }
+
+  .h-headerLeft {
+    display: flex;
+    align-items: center;
+  }
+}
+
 @media (min-width: 1023.98px) {
   .h-navDesktop {
     display: inline-flex;
@@ -835,9 +851,13 @@ aside header .close {
 @media (max-width: 767.98px) {
   /* header */
 
+  .headerContainer {
+    padding-inline: 16px;
+  }
+
   .headerRow {
     justify-content: flex-start;
-    padding: 8px 16px;
+    padding: 8px 0;
     gap: 0 16px;
   }
 
@@ -952,7 +972,7 @@ aside header .close {
 
   .headerRow {
     justify-content: flex-start;
-    padding: 8px 16px;
+    padding: 4px 0;
     gap: 16px;
   }
 
