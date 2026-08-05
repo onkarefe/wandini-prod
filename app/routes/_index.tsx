@@ -312,8 +312,13 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const heroMap = Object.fromEntries(
     (heroNode?.fields ?? []).map((f: any) => [
       f.key,
-      // MediaImage.image || GenericFile.url || plain value
-      f.reference?.image ?? (f.reference?.url ? { url: f.reference.url } : f.value),
+      // MediaImage.image || Collection route || GenericFile.url || plain value
+      f.reference?.image ??
+        (f.reference?.handle
+          ? `/collections/${f.reference.handle}`
+          : f.reference?.url
+            ? {url: f.reference.url}
+            : f.value),
     ]),
   );
 
@@ -707,6 +712,9 @@ const HERO_QUERY = `#graphql
             }
             ... on GenericFile {
               url
+            }
+            ... on Collection {
+              handle
             }
           }
         }
