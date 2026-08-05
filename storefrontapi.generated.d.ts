@@ -432,6 +432,7 @@ export type HeroSectionsQuery = {
         fields: Array<
           Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'> & {
             reference?: StorefrontAPI.Maybe<
+              | Pick<StorefrontAPI.Collection, 'handle'>
               | Pick<StorefrontAPI.GenericFile, 'url'>
               | {
                   image?: StorefrontAPI.Maybe<
@@ -1861,7 +1862,7 @@ interface GeneratedQueryTypes {
     return: StoreRobotsQuery;
     variables: StoreRobotsQueryVariables;
   };
-  '#graphql\n  query HeroSections {\n    metaobjects(type: "hero_div", first: 10) {\n      nodes {\n        id\n        handle\n        fields {\n          key\n          value\n          reference {\n            ... on MediaImage {\n              image { url altText width height }\n            }\n            ... on GenericFile {\n              url\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query HeroSections {\n    metaobjects(type: "hero_div", first: 10) {\n      nodes {\n        id\n        handle\n        fields {\n          key\n          value\n          reference {\n            ... on MediaImage {\n              image { url altText width height }\n            }\n            ... on GenericFile {\n              url\n            }\n            ... on Collection {\n              handle\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: HeroSectionsQuery;
     variables: HeroSectionsQueryVariables;
   };

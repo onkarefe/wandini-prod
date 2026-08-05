@@ -463,6 +463,9 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     customGridFields.map((field) => [field.key, field]),
   );
   const customGridTitles = safeJsonArray(customGridFieldMap.titles?.value);
+  const customGridButtonTexts = safeJsonArray(
+    customGridFieldMap.button_text?.value,
+  );
   const customGridLinks =
     customGridFieldMap.links?.references?.nodes?.filter(Boolean) ?? [];
   const customGridImages =
@@ -489,6 +492,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
         title: customGridTitles[index] ?? '',
         image,
         link: collectionHandle ? `/collections/${collectionHandle}` : '',
+        buttonText: customGridButtonTexts[index] ?? '',
       };
     })
     .filter((item) => item.title || item.image || item.link);

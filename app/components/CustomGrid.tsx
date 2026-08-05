@@ -11,6 +11,7 @@ export type CustomGridItem = {
     height?: number;
   } | null;
   link: string;
+  buttonText: string;
 };
 
 interface CustomGridProps {
@@ -49,21 +50,21 @@ function CustomGridTile({
       style={getTileStyle(item.image?.url)}
     >
       <div className="cg-title">{item.title}</div>
-      {item.link ? (
+      {item.buttonText && item.link ? (
         <Link className="cg-button" to={item.link}>
-          Discover More
+          {item.buttonText}
         </Link>
-      ) : (
+      ) : item.buttonText ? (
         <button
           type="button"
           className="cg-button"
-          aria-label="Discover more coming soon"
+          aria-label={`${item.buttonText} coming soon`}
           aria-disabled="true"
           title="Coming soon"
         >
-          Discover More
+          {item.buttonText}
         </button>
-      )}
+      ) : null}
     </div>
   );
 }
