@@ -29,6 +29,7 @@ type HomepageHeroInput = {
   st1?: string | null;
   st2?: string | null;
   buttonText?: string | null;
+  buttonAction?: string | null;
   backgroundImage?: HomepageImageLike | string | null;
 };
 
@@ -321,6 +322,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     st1: heroMap.st1 ?? '',
     st2: heroMap.st2 ?? '',
     buttonText: heroMap.button_text ?? '',
+    buttonAction: heroMap.button_action ?? '',
     backgroundImage: heroMap.background ?? null,
   };
 
@@ -626,6 +628,7 @@ export default function Homepage() {
         st1={data.hero.st1}
         st2={data.hero.st2}
         buttonText={data.hero.buttonText}
+        buttonAction={data.hero.buttonAction}
         backgroundImage={data.hero.backgroundImage}
       />
       <UspBar items={data.uspItems} node={data.uspNode} />

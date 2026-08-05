@@ -1,4 +1,4 @@
-import { Image } from '@shopify/hydrogen';
+import {Link} from '~/lib/i18n-router';
 
 type HeroImage = { url: string; altText?: string | null; width?: number; height?: number } | null;
 
@@ -7,24 +7,17 @@ export default function HeroSection({
     st1,
     st2,
     buttonText,
+    buttonAction,
     backgroundImage,
 }: {
     title: string;
     st1: string;
     st2: string;
     buttonText: string;
+    buttonAction: string;
     backgroundImage: HeroImage;
 }) {
-    const scrollToProducts = () => {
-        const productsSection = document.getElementById('all-products-section');
-
-        if (!productsSection) return;
-
-        window.scrollTo({
-            top: productsSection.getBoundingClientRect().top + window.scrollY - 100,
-            behavior: 'smooth',
-        });
-    };
+    const buttonHref = buttonAction.trim();
 
     return (
         <section className="relative overflow-hidden !p-0">
@@ -41,15 +34,16 @@ export default function HeroSection({
                         <p className="hero-st1">{st1}</p>
                         <h1 className="hero-mainTitle">{title}</h1>
                         <p className="hero-st2">{st2}</p>
-                        <button
-                            type="button"
-                            className="defaultButton"
-                            aria-label={buttonText}
-                            title={buttonText}
-                            onClick={scrollToProducts}
-                        >
-                            {buttonText}
-                        </button>
+                        {buttonText && buttonHref ? (
+                            <Link
+                                className="defaultButton"
+                                to={buttonHref}
+                                aria-label={buttonText}
+                                title={buttonText}
+                            >
+                                {buttonText}
+                            </Link>
+                        ) : null}
                     </div>
                 </div>
             </div>
