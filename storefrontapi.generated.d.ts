@@ -567,14 +567,14 @@ export type CustomGridMetaobjectsQuery = {
   };
 };
 
-export type ShowcaseBannerMetaobjectQueryVariables = StorefrontAPI.Exact<{
+export type StepByStepMetaobjectQueryVariables = StorefrontAPI.Exact<{
   [key: string]: never;
 }>;
 
-export type ShowcaseBannerMetaobjectQuery = {
+export type StepByStepMetaobjectQuery = {
   metaobjects: {
     nodes: Array<
-      Pick<StorefrontAPI.Metaobject, 'id' | 'handle'> & {
+      Pick<StorefrontAPI.Metaobject, 'id' | 'handle' | 'type'> & {
         fields: Array<
           Pick<StorefrontAPI.MetaobjectField, 'key' | 'value' | 'type'> & {
             reference?: StorefrontAPI.Maybe<
@@ -589,6 +589,20 @@ export type ShowcaseBannerMetaobjectQuery = {
                   >;
                 })
             >;
+            references?: StorefrontAPI.Maybe<{
+              nodes: Array<
+                | Pick<StorefrontAPI.Collection, 'id' | 'handle' | 'title'>
+                | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+                | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                    image?: StorefrontAPI.Maybe<
+                      Pick<
+                        StorefrontAPI.Image,
+                        'url' | 'altText' | 'width' | 'height'
+                      >
+                    >;
+                  })
+              >;
+            }>;
           }
         >;
       }
@@ -1882,9 +1896,9 @@ interface GeneratedQueryTypes {
     return: CustomGridMetaobjectsQuery;
     variables: CustomGridMetaobjectsQueryVariables;
   };
-  '#graphql\n  query ShowcaseBannerMetaobject {\n    metaobjects(type: "showcase_banner", first: 1) {\n      nodes {\n        id\n        handle\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n            ... on Collection {\n              id\n              handle\n              title\n            }\n          }\n        }\n      }\n    }\n  }\n': {
-    return: ShowcaseBannerMetaobjectQuery;
-    variables: ShowcaseBannerMetaobjectQueryVariables;
+  '#graphql\n  query StepByStepMetaobject {\n    metaobjects(type: "step_by_step", first: 1) {\n      nodes {\n        id\n        handle\n        type\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n            ... on Collection {\n              id\n              handle\n              title\n            }\n          }\n          references(first: 10) {\n            nodes {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                id\n                url\n              }\n              ... on Collection {\n                id\n                handle\n                title\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+    return: StepByStepMetaobjectQuery;
+    variables: StepByStepMetaobjectQueryVariables;
   };
   '#graphql\n  query CustomerReviewsMetaobject {\n    metaobjects(type: "customer_reviews", first: 1) {\n      nodes {\n        id\n        handle\n        type\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n          }\n          references(first: 10) {\n            nodes {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                id\n                url\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: CustomerReviewsMetaobjectQuery;

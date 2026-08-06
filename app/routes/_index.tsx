@@ -291,7 +291,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     uspRes,
     allProductsRes,
     customGridRes,
-    showcaseBannerRes,
+    stepByStepRes,
     customerReviewsRes,
   ] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
@@ -299,7 +299,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     context.storefront.query(USPBAR_QUERY),
     context.storefront.query(GET_ALL_PRODUCTS_METAOBJECT_QUERY),
     context.storefront.query(CUSTOM_GRID_QUERY),
-    context.storefront.query(SHOWCASE_BANNER_QUERY),
+    context.storefront.query(STEP_BY_STEP_QUERY),
     context.storefront.query(CUSTOMER_REVIEWS_QUERY),
   ]);
 
@@ -497,36 +497,72 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     })
     .filter((item) => item.title || item.image || item.link);
 
-  const showcaseBannerNode = showcaseBannerRes?.metaobjects?.nodes?.[0];
-  const showcaseBannerFields = Array.isArray(showcaseBannerNode?.fields)
-    ? showcaseBannerNode.fields
+  const stepByStepNode = stepByStepRes?.metaobjects?.nodes?.[0];
+  const stepByStepFields = Array.isArray(stepByStepNode?.fields)
+    ? stepByStepNode.fields
     : [];
-  const showcaseBannerFieldMap = Object.fromEntries(
-    showcaseBannerFields.map((field) => [field.key, field]),
+  const stepByStepFieldMap = Object.fromEntries(
+    stepByStepFields.map((field) => [field.key, field]),
   );
-  const showcaseBannerTitle =
-    showcaseBannerFieldMap.banner_title?.value ?? '';
-  const showcaseBannerLinkReference =
-    showcaseBannerFieldMap.banner_button_link?.reference;
-  const showcaseBannerCollectionHandle =
-    showcaseBannerLinkReference &&
-    typeof showcaseBannerLinkReference === 'object' &&
-    'handle' in showcaseBannerLinkReference &&
-    typeof showcaseBannerLinkReference.handle === 'string'
-      ? showcaseBannerLinkReference.handle
-      : null;
-  const showcaseBanner = {
-    title: showcaseBannerTitle,
-    subtitle: showcaseBannerFieldMap.banner_subtitle?.value ?? '',
-    buttonText: showcaseBannerFieldMap.banner_button_text?.value ?? '',
-    buttonLink: showcaseBannerCollectionHandle
-      ? `/collections/${showcaseBannerCollectionHandle}`
-      : '',
+  const stepTitles = safeJsonArray(stepByStepFieldMap.box_title?.value);
+  const stepDescriptions = safeJsonArray(
+    stepByStepFieldMap.box_description?.value,
+  );
+  const stepImageReferences =
+    stepByStepFieldMap.image?.references?.nodes?.filter(Boolean) ?? [];
+  const stepCount = Math.min(
+    4,
+    Math.max(
+      stepTitles.length,
+      stepDescriptions.length,
+      stepImageReferences.length,
+    ),
+  );
+  const steps = Array.from({length: stepCount}).map((_, index) => ({
+    id: `step-by-step-${index + 1}`,
+    title: stepTitles[index] ?? '',
+    description: stepDescriptions[index] ?? '',
     image:
       normalizeReferenceImage(
-        showcaseBannerFieldMap.banner_background_image?.reference,
-        showcaseBannerTitle,
+        stepImageReferences[index],
+        stepTitles[index] ?? '',
       ) ?? null,
+  }));
+
+  const bulletTexts = safeJsonArray(stepByStepFieldMap.bullets?.value);
+  const bulletIconReferences =
+    stepByStepFieldMap.bullet_icons?.references?.nodes?.filter(Boolean) ?? [];
+  const bulletCount = Math.min(
+    4,
+    Math.max(bulletTexts.length, bulletIconReferences.length),
+  );
+  const bullets = Array.from({length: bulletCount}).map((_, index) => ({
+    id: `step-by-step-bullet-${index + 1}`,
+    text: bulletTexts[index] ?? '',
+    icon:
+      normalizeReferenceImage(
+        bulletIconReferences[index],
+        bulletTexts[index] ?? '',
+      ) ?? null,
+  }));
+
+  const ctaActionReference = stepByStepFieldMap.cta_action?.reference;
+  const ctaCollectionHandle =
+    ctaActionReference &&
+    typeof ctaActionReference === 'object' &&
+    'handle' in ctaActionReference &&
+    typeof ctaActionReference.handle === 'string'
+      ? ctaActionReference.handle
+      : null;
+  const stepByStep = {
+    mainTitle: stepByStepFieldMap.main_title?.value ?? '',
+    mainDescription: stepByStepFieldMap.main_description?.value ?? '',
+    ctaText: stepByStepFieldMap.cta_buton?.value ?? '',
+    ctaLink: ctaCollectionHandle
+      ? `/collections/${ctaCollectionHandle}`
+      : '',
+    steps,
+    bullets,
   };
 
   const customerReviewsNode = customerReviewsRes?.metaobjects?.nodes?.[0];
@@ -584,7 +620,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     allProducts,
     allProductsSectionTitle,
     customGridItems,
-    showcaseBanner,
+    stepByStep,
     customerReviews,
   };
 }
@@ -646,7 +682,7 @@ export default function Homepage() {
         sectionTitle={data.allProductsSectionTitle}
       />
       <CustomGrid items={data.customGridItems ?? []} />
-      <CustomOrder showcaseBanner={data.showcaseBanner} />
+      <CustomOrder content={data.stepByStep} />
       <CustomerRevs reviews={data.customerReviews ?? []} />
     </div>
   );
@@ -856,12 +892,13 @@ const CUSTOM_GRID_QUERY = `#graphql
   }
 ` as const;
 
-const SHOWCASE_BANNER_QUERY = `#graphql
-  query ShowcaseBannerMetaobject {
-    metaobjects(type: "showcase_banner", first: 1) {
+const STEP_BY_STEP_QUERY = `#graphql
+  query StepByStepMetaobject {
+    metaobjects(type: "step_by_step", first: 1) {
       nodes {
         id
         handle
+        type
         fields {
           key
           value
@@ -884,6 +921,28 @@ const SHOWCASE_BANNER_QUERY = `#graphql
               id
               handle
               title
+            }
+          }
+          references(first: 10) {
+            nodes {
+              ... on MediaImage {
+                id
+                image {
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+              ... on GenericFile {
+                id
+                url
+              }
+              ... on Collection {
+                id
+                handle
+                title
+              }
             }
           }
         }
