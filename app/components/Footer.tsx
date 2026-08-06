@@ -52,16 +52,17 @@ export function Footer({ footer: footerPromise, header, publicStoreDomain }: Foo
         {(footer) => (
           <footer className="custom-footer">
             <div className="footer-subsBox">
-              <div className="footerSubsTitle">Sign Up For Newsletter</div>
+              <div className="footerSubsTitle">Newsletter abonnieren</div>
 
               <div className="footerSubsSubtitle">
-                Subscribe to our newsletter and be the first to receive the latest updates,
-                promotional offers, and news about our products. Stay up-to-date with the latest trends in our world.
+                Abonnieren Sie unseren Newsletter und erhalten Sie als Erste aktuelle
+                Neuigkeiten, Angebote und Informationen zu unseren Produkten. Bleiben Sie
+                über die neuesten Trends auf dem Laufenden.
               </div>
 
               <div className="footerInputBox">
-                <input type="email" placeholder="Enter your email address" className="footerEmailInput" />
-                <button className="footerSubscribeButton">Subscribe</button>
+                <input type="email" placeholder="E-Mail-Adresse eingeben" className="footerEmailInput" />
+                <button className="footerSubscribeButton">Abonnieren</button>
               </div>
             </div>
 

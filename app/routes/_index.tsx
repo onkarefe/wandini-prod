@@ -572,6 +572,8 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const customerReviewsFieldMap = Object.fromEntries(
     customerReviewsFields.map((field: any) => [field.key, field]),
   );
+  const customerReviewsSectionTitle =
+    customerReviewsFieldMap.section_title?.value ?? '';
   const customerNames = safeJsonArray(
     customerReviewsFieldMap.customer_name?.value,
   );
@@ -622,6 +624,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     customGridItems,
     stepByStep,
     customerReviews,
+    customerReviewsSectionTitle,
   };
 }
 
@@ -683,7 +686,10 @@ export default function Homepage() {
       />
       <CustomGrid items={data.customGridItems ?? []} />
       <CustomOrder content={data.stepByStep} />
-      <CustomerRevs reviews={data.customerReviews ?? []} />
+      <CustomerRevs
+        reviews={data.customerReviews ?? []}
+        sectionTitle={data.customerReviewsSectionTitle}
+      />
     </div>
   );
 }

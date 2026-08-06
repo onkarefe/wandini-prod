@@ -16,6 +16,7 @@ type CustomerReview = {
 
 type CustomerRevsProps = {
   reviews?: CustomerReview[];
+  sectionTitle?: string | null;
 };
 
 type StarState = 'full' | 'half' | 'empty';
@@ -107,7 +108,10 @@ function CustomerReviewStars({rating}: {rating: number}) {
   );
 }
 
-export default function CustomerRevs({reviews = []}: CustomerRevsProps) {
+export default function CustomerRevs({
+  reviews = [],
+  sectionTitle,
+}: CustomerRevsProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     loop: reviews.length > 3,
@@ -142,9 +146,11 @@ export default function CustomerRevs({reviews = []}: CustomerRevsProps) {
 
   return (
     <section className="container CustomerRevs-section">
-      <div className="seperator">
-        <h3>Customer Reviews</h3>
-      </div>
+      {sectionTitle?.trim() ? (
+        <div className="seperator">
+          <h3>{sectionTitle.trim()}</h3>
+        </div>
+      ) : null}
 
       <div className="customerReviewsCarousel" ref={emblaRef}>
         <div className="customerReviewsCarousel__container">
