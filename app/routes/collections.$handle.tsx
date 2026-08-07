@@ -26,6 +26,7 @@ import {buildSimilarProductsPath} from '~/lib/similar-products';
 import {getCustomerWishlistProductIds} from '~/lib/wishlist.server';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {redirectToLocalePath} from '~/lib/locale';
+import {getRobotsDirective} from '~/lib/seo';
 import type {Route} from './+types/collections.$handle';
 import '../styles/collections.css';
 
@@ -259,7 +260,9 @@ export const meta: Route.MetaFunction = ({data, params}) => {
     ...(description ? [{name: 'description', content: description}] : []),
     {
       name: 'robots',
-      content: data?.isNoisyCollectionUrl ? 'noindex,follow' : 'index,follow',
+      content: getRobotsDirective(
+        data?.isNoisyCollectionUrl ? 'noindex,follow' : 'index,follow',
+      ),
     },
     {
       tagName: 'link',

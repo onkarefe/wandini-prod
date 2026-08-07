@@ -22,6 +22,7 @@ import {
 } from '~/components/ConfiguratorModal';
 import { redirectIfHandleIsLocalized } from '~/lib/redirect';
 import {usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {getRobotsDirective} from '~/lib/seo';
 import {
   calculateConfiguratorAreaM2,
   calculateConfiguratorBillingUnits,
@@ -263,7 +264,7 @@ export const meta: Route.MetaFunction = ({ data }) => {
   return [
     {title},
     ...(description ? [{name: 'description', content: description}] : []),
-    {name: 'robots', content: 'index,follow'},
+    {name: 'robots', content: getRobotsDirective()},
     {
       tagName: 'link',
       rel: 'canonical',

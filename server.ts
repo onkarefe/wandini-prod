@@ -2,6 +2,18 @@
 import {storefrontRedirect} from '@shopify/hydrogen';
 import {createRequestHandler} from '@shopify/hydrogen/oxygen';
 import {createHydrogenRouterContext} from '~/lib/context';
+import {
+  SEO_DISABLED_ROBOTS_DIRECTIVE,
+  SEO_ENABLED,
+} from '~/lib/seo';
+
+function applySearchEnginePolicy(response: Response) {
+  if (!SEO_ENABLED) {
+    response.headers.set('X-Robots-Tag', SEO_DISABLED_ROBOTS_DIRECTIVE);
+  }
+
+  return response;
+}
 
 /**
  * Export a fetch handler in module format.
@@ -45,17 +57,21 @@ export default {
          * If the redirect doesn't exist, then `storefrontRedirect`
          * will pass through the 404 response.
          */
-        return storefrontRedirect({
+        const redirectResponse = await storefrontRedirect({
           request,
           response,
           storefront: hydrogenContext.storefront,
         });
+
+        return applySearchEnginePolicy(redirectResponse);
       }
 
-      return response;
+      return applySearchEnginePolicy(response);
     } catch (error) {
       console.error(error);
-      return new Response('An unexpected error occurred', {status: 500});
+      return applySearchEnginePolicy(
+        new Response('An unexpected error occurred', {status: 500}),
+      );
     }
   },
 };

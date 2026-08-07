@@ -19,7 +19,10 @@ import tailwindCss from './styles/tailwind.css?url';
 import navStyles from '~/styles/nav.css?url';
 import {PageLayout} from './components/PageLayout';
 import {getLocaleFromI18n} from '~/lib/locale';
-import {useEffect, useState} from 'react';
+import {
+  SEO_DISABLED_ROBOTS_DIRECTIVE,
+  SEO_ENABLED,
+} from '~/lib/seo';
 
 export type RootLoader = typeof loader;
 
@@ -168,6 +171,9 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
         <Meta />
+        {!SEO_ENABLED ? (
+          <meta name="robots" content={SEO_DISABLED_ROBOTS_DIRECTIVE} />
+        ) : null}
         <Links />
       </head>
       <body>
@@ -181,27 +187,6 @@ export function Layout({children}: {children?: React.ReactNode}) {
 
 export default function App() {
   const data = useRouteLoaderData<RootLoader>('root');
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [isAuth, setIsAuth] = useState(false);
-  const [input, setInput] = useState('');
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    setIsHydrated(true);
-    setIsAuth(window.sessionStorage.getItem('isAuth') === 'true');
-  }, []);
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (input === 'admin123') {
-      setIsAuth(true);
-      window.sessionStorage.setItem('isAuth', 'true');
-      return;
-    }
-
-    setError('Wrong password!');
-  };
 
   if (!data) {
     return <Outlet />;
@@ -225,70 +210,7 @@ export default function App() {
     appContent
   );
 
-  const showAuthOverlay = import.meta.env.DEV && isHydrated && !isAuth;
-
-  return (
-    <>
-      {renderedApp}
-      {showAuthOverlay ? (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 9999,
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'rgba(245,245,245,0.96)',
-            padding: 24,
-          }}
-        >
-          <form
-            onSubmit={handleLogin}
-            style={{
-              background: '#fff',
-              padding: 32,
-              borderRadius: 8,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            }}
-          >
-            <h2 style={{marginBottom: 16}}>Enter Password</h2>
-            <input
-              type="password"
-              value={input}
-              onChange={(e) => {
-                setInput(e.target.value);
-                setError('');
-              }}
-              placeholder="Password"
-              style={{
-                padding: 8,
-                width: 200,
-                marginBottom: 12,
-                border: '1px solid #ccc',
-                borderRadius: 4,
-              }}
-            />
-            <br />
-            <button
-              type="submit"
-              style={{
-                padding: '8px 24px',
-                borderRadius: 4,
-                background: '#222',
-                color: '#fff',
-                border: 'none',
-              }}
-            >
-              Login
-            </button>
-            {error ? <div style={{color: 'red', marginTop: 8}}>{error}</div> : null}
-          </form>
-        </div>
-      ) : null}
-    </>
-  );
+  return renderedApp;
 }
 
 export function ErrorBoundary() {

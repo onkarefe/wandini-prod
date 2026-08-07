@@ -1,7 +1,22 @@
 import type {Route} from './+types/[robots.txt]';
 import {parseGid} from '@shopify/hydrogen';
+import {
+  SEO_DISABLED_ROBOTS_DIRECTIVE,
+  SEO_ENABLED,
+} from '~/lib/seo';
 
 export async function loader({request, context}: Route.LoaderArgs) {
+  if (!SEO_ENABLED) {
+    return new Response('User-agent: *\nDisallow: /\n', {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'X-Robots-Tag': SEO_DISABLED_ROBOTS_DIRECTIVE,
+      },
+    });
+  }
+
   const url = new URL(request.url);
 
   const {shop} = await context.storefront.query(ROBOTS_QUERY);

@@ -16,6 +16,7 @@ import CustomGrid, {type CustomGridItem} from '~/components/CustomGrid';
 import CustomOrder from '~/components/CustomOrder';
 import CustomerRevs from '~/components/CustomerRevs';
 import homepageStyles from '~/styles/homepage.css?url';
+import {getRobotsDirective} from '~/lib/seo';
 
 const HOMEPAGE_META_BRAND = 'Wandini';
 const HOMEPAGE_META_DESCRIPTION_MAX_LENGTH = 160;
@@ -155,7 +156,7 @@ export const meta: Route.MetaFunction = ({data}) => {
   return [
     {title},
     ...(description ? [{name: 'description', content: description}] : []),
-    {name: 'robots', content: 'index,follow'},
+    {name: 'robots', content: getRobotsDirective()},
     {
       tagName: 'link',
       rel: 'canonical',
@@ -289,7 +290,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     { collections },
     heroRes,
     uspRes,
-    allProductsRes,
+    collectionSwiperRes,
     customGridRes,
     stepByStepRes,
     customerReviewsRes,
@@ -297,7 +298,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(HERO_QUERY),
     context.storefront.query(USPBAR_QUERY),
-    context.storefront.query(GET_ALL_PRODUCTS_METAOBJECT_QUERY),
+    context.storefront.query(COLLECTION_SWIPER_QUERY),
     context.storefront.query(CUSTOM_GRID_QUERY),
     context.storefront.query(STEP_BY_STEP_QUERY),
     context.storefront.query(CUSTOMER_REVIEWS_QUERY),
@@ -378,82 +379,62 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       }))
       : [];
 
-  // --- all_products metaobject (map into typed array)
-  // GET_ALL_PRODUCTS_METAOBJECT_QUERY returns edges[].node.fields[]
-  type ProductGroup = {
-    id: string;
-    title?: string;
-    subtitle?: string;
-    image?: { url: string; altText?: string; width?: number; height?: number } | null;
-    link?: string;
-  };
-
-  let allProducts: Array<{
+  // --- collection_swiper metaobject (parallel field lists)
+  const collectionSwiperNode = collectionSwiperRes?.metaobjects?.nodes?.[0];
+  const collectionSwiperFields = Array.isArray(collectionSwiperNode?.fields)
+    ? collectionSwiperNode.fields
+    : [];
+  const collectionSwiperFieldMap = Object.fromEntries(
+    collectionSwiperFields.map((field: any) => [field.key, field]),
+  );
+  const collectionSwiperSectionTitle =
+    collectionSwiperFieldMap.section_title?.value ?? 'All Products';
+  const collectionTitles = safeJsonArray(
+    collectionSwiperFieldMap.collection_title?.value,
+  );
+  const collectionSubtitles = safeJsonArray(
+    collectionSwiperFieldMap.collection_subtitle?.value,
+  );
+  const collectionImages =
+    collectionSwiperFieldMap.collection_image?.references?.nodes?.filter(
+      Boolean,
+    ) ?? [];
+  const collectionLinks =
+    collectionSwiperFieldMap.collection_link?.references?.nodes?.filter(
+      Boolean,
+    ) ?? [];
+  const collectionItemCount = Math.max(
+    collectionTitles.length,
+    collectionSubtitles.length,
+    collectionImages.length,
+    collectionLinks.length,
+  );
+  const collectionSwiperItems: Array<{
     id: string;
     title: string;
     subtitle: string;
     image: { url: string; altText?: string; width?: number; height?: number } | null;
     link: string;
-  }> = [];
-  let allProductsSectionTitle = 'All Products';
+  }> = Array.from({length: collectionItemCount})
+    .map((_, index) => {
+      const collection = collectionLinks[index];
+      const title = collectionTitles[index] ?? collection?.title ?? '';
+      const image = normalizeReferenceImage(collectionImages[index], title);
 
-  const allProductsNode = allProductsRes?.metaobjects?.edges?.[0]?.node;
-  if (allProductsNode && Array.isArray(allProductsNode.fields)) {
-    const sectionTitleField = allProductsNode.fields.find(
-      (field) => field.key === 'section_title',
-    );
-    allProductsSectionTitle = sectionTitleField?.value || allProductsSectionTitle;
-
-    const groups: Record<string, ProductGroup> = {};
-    for (const f of allProductsNode.fields) {
-      const key = String(f.key || '');
-      const m = key.match(/^prod(\d+)_(img|title|subtitle|link)$/i);
-      if (!m) continue;
-      const idx = m[1];
-      const type = m[2].toLowerCase();
-      const id = `prod${idx}`;
-      groups[id] = groups[id] ?? { id };
-      if (type === 'img') {
-        const img = normalizeReferenceImage(f.reference, f.value ?? '');
-        if (img) {
-          groups[id].image = {
-            url: img.url,
-            altText: img.altText ?? '',
-            width: img.width ?? undefined,
-            height: img.height ?? undefined,
-          };
-        }
-      } else if (type === 'title') {
-        groups[id].title = f.value ?? '';
-      } else if (type === 'subtitle') {
-        groups[id].subtitle = f.value ?? '';
-      } else if (type === 'link') {
-        const collectionHandle =
-          f.reference &&
-            typeof f.reference === 'object' &&
-            'handle' in f.reference &&
-            typeof f.reference.handle === 'string'
-            ? f.reference.handle
-            : null;
-
-        groups[id].link = collectionHandle
-          ? `/collections/${collectionHandle}`
-          : (f.value ?? '');
-      }
-    }
-    allProducts = Object.keys(groups)
-      .sort((a, b) => parseInt(a.replace('prod', ''), 10) - parseInt(b.replace('prod', ''), 10))
-      .map((id) => {
-        const g = groups[id];
-        return {
-          id,
-          title: g.title ?? '',
-          subtitle: g.subtitle ?? '',
-          image: g.image ?? null,
-          link: g.link ?? '',
-        };
-      });
-  }
+      return {
+        id:
+          collection?.id ??
+          collectionImages[index]?.id ??
+          `collection-swiper-${index + 1}`,
+        title,
+        subtitle: collectionSubtitles[index] ?? '',
+        image,
+        link: collection?.handle
+          ? `/collections/${collection.handle}`
+          : '',
+      };
+    })
+    .filter((item) => item.title || item.subtitle || item.image || item.link);
 
   const customGridNode = customGridRes?.metaobjects?.nodes?.[0];
   const customGridFields = Array.isArray(customGridNode?.fields)
@@ -462,6 +443,8 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const customGridFieldMap = Object.fromEntries(
     customGridFields.map((field) => [field.key, field]),
   );
+  const customGridSectionTitle =
+    customGridFieldMap.section_title?.value ?? '';
   const customGridTitles = safeJsonArray(customGridFieldMap.titles?.value);
   const customGridButtonTexts = safeJsonArray(
     customGridFieldMap.button_text?.value,
@@ -619,9 +602,10 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     featuredCollection: collections.nodes[0],
     uspItems,
     uspNode,
-    allProducts,
-    allProductsSectionTitle,
+    collectionSwiperItems,
+    collectionSwiperSectionTitle,
     customGridItems,
+    customGridSectionTitle,
     stepByStep,
     customerReviews,
     customerReviewsSectionTitle,
@@ -681,10 +665,13 @@ export default function Homepage() {
       />
       <UspBar items={data.uspItems} node={data.uspNode} />
       <AllProduts
-        items={data.allProducts ?? []}
-        sectionTitle={data.allProductsSectionTitle}
+        items={data.collectionSwiperItems ?? []}
+        sectionTitle={data.collectionSwiperSectionTitle}
       />
-      <CustomGrid items={data.customGridItems ?? []} />
+      <CustomGrid
+        items={data.customGridItems ?? []}
+        sectionTitle={data.customGridSectionTitle}
+      />
       <CustomOrder content={data.stepByStep} />
       <CustomerRevs
         reviews={data.customerReviews ?? []}
@@ -804,21 +791,17 @@ const USPBAR_ICONS_QUERY = `#graphql
   }
 ` as const;
 
-//all products query
-
-export const GET_ALL_PRODUCTS_METAOBJECT_QUERY = `#graphql
-  query GetAllProductsMetaobject {
-    metaobjects(type: "all_products", first: 15) {
-      edges {
-        node {
-          id
-          handle
-          type
-          fields {
-            key
-            value
-            type
-            reference {
+const COLLECTION_SWIPER_QUERY = `#graphql
+  query CollectionSwiperHomepage {
+    metaobjects(type: "collection_swiper", first: 1) {
+      nodes {
+        id
+        handle
+        fields {
+          key
+          value
+          references(first: 20) {
+            nodes {
               ... on MediaImage {
                 id
                 image {
@@ -828,9 +811,14 @@ export const GET_ALL_PRODUCTS_METAOBJECT_QUERY = `#graphql
                   height
                 }
               }
+              ... on GenericFile {
+                id
+                url
+              }
               ... on Collection {
                 id
                 handle
+                title
               }
             }
           }

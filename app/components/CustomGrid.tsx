@@ -16,6 +16,7 @@ export type CustomGridItem = {
 
 interface CustomGridProps {
   items?: CustomGridItem[];
+  sectionTitle?: string | null;
 }
 
 const TILE_CLASS_NAMES = [
@@ -69,7 +70,10 @@ function CustomGridTile({
   );
 }
 
-export default function CustomGrid({items = []}: CustomGridProps) {
+export default function CustomGrid({
+  items = [],
+  sectionTitle,
+}: CustomGridProps) {
   const tiles = items.slice(0, TILE_CLASS_NAMES.length);
   const firstStackTiles = [
     {item: tiles[1], index: 1},
@@ -89,7 +93,13 @@ export default function CustomGrid({items = []}: CustomGridProps) {
   }
 
   return (
-    <div className="container mx-auto">
+    <section className="custom-6-grid container mx-auto">
+      {sectionTitle?.trim() ? (
+        <div className="seperator">
+          <h3>{sectionTitle.trim()}</h3>
+        </div>
+      ) : null}
+
       {tiles[0] || firstStackTiles.length > 0 ? (
         <div className="cg-line1">
           {tiles[0] ? <CustomGridTile item={tiles[0]} index={0} /> : null}
@@ -122,6 +132,6 @@ export default function CustomGrid({items = []}: CustomGridProps) {
           {tiles[5] ? <CustomGridTile item={tiles[5]} index={5} /> : null}
         </div>
       ) : null}
-    </div>
+    </section>
   );
 }

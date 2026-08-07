@@ -2,6 +2,7 @@ import {useLoaderData} from 'react-router';
 import type {Route} from './+types/pages.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import staticPagesStyles from '~/styles/staticPages.css?url';
+import {getRobotsDirective} from '~/lib/seo';
 
 const BLOCKED_HTML_TAGS = [
   'script',
@@ -132,7 +133,7 @@ export const meta: Route.MetaFunction = ({data, params}) => {
   return [
     {title},
     ...(description ? [{name: 'description', content: description}] : []),
-    {name: 'robots', content: 'index,follow'},
+    {name: 'robots', content: getRobotsDirective()},
     {
       tagName: 'link',
       rel: 'canonical',

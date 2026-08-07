@@ -1,5 +1,9 @@
 import type {Route} from './+types/sitemap.$type.$page[.xml]';
 import {getSitemap} from '@shopify/hydrogen';
+import {
+  SEO_DISABLED_ROBOTS_DIRECTIVE,
+  SEO_ENABLED,
+} from '~/lib/seo';
 
 const ARTICLE_SITEMAP_BLOG_LIMIT = 50;
 const ARTICLE_SITEMAP_ARTICLE_LIMIT = 100;
@@ -9,6 +13,17 @@ export async function loader({
   params,
   context: {storefront},
 }: Route.LoaderArgs) {
+  if (!SEO_ENABLED) {
+    return new Response('Sitemap is disabled while SEO is closed.', {
+      status: 404,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'X-Robots-Tag': SEO_DISABLED_ROBOTS_DIRECTIVE,
+      },
+    });
+  }
+
   if (params.type === 'metaObjects') {
     return new Response('Not found', {
       status: 404,

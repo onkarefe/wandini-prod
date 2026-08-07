@@ -5,6 +5,7 @@ import { PaginatedResourceSection } from '~/components/PaginatedResourceSection'
 import type { BlogsQuery } from 'storefrontapi.generated';
 import blogMainStyles from '~/styles/blogMain.css?url';
 import {Link} from '~/lib/i18n-router';
+import {getRobotsDirective} from '~/lib/seo';
 
 type BlogNode = BlogsQuery['blogs']['nodes'][0] & {
   blogCategoryDescription?: {
@@ -109,7 +110,7 @@ export const meta: Route.MetaFunction = ({data}) => {
   return [
     {title},
     ...(description ? [{name: 'description', content: description}] : []),
-    {name: 'robots', content: 'index,follow'},
+    {name: 'robots', content: getRobotsDirective()},
     {
       tagName: 'link',
       rel: 'canonical',

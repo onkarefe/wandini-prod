@@ -6,6 +6,7 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogHandleStyles from '~/styles/blogHandle.css?url';
 import {Link} from '~/lib/i18n-router';
+import {getRobotsDirective} from '~/lib/seo';
 
 export function links() {
   return [{rel: 'stylesheet', href: blogHandleStyles}];
@@ -67,7 +68,7 @@ export const meta: Route.MetaFunction = ({data, params}) => {
   return [
     {title},
     ...(description ? [{name: 'description', content: description}] : []),
-    {name: 'robots', content: 'index,follow'},
+    {name: 'robots', content: getRobotsDirective()},
     {
       tagName: 'link',
       rel: 'canonical',

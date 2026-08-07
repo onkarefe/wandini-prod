@@ -4,6 +4,7 @@ import {Image} from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogDetailStyles from '~/styles/blogDetail.css?url';
 import {Link} from '~/lib/i18n-router';
+import {getRobotsDirective} from '~/lib/seo';
 
 const BLOCKED_HTML_TAGS = [
   'script',
@@ -269,7 +270,7 @@ export const meta: Route.MetaFunction = ({data, params}) => {
   return [
     {title},
     ...(description ? [{name: 'description', content: description}] : []),
-    {name: 'robots', content: 'index,follow'},
+    {name: 'robots', content: getRobotsDirective()},
     {
       tagName: 'link',
       rel: 'canonical',
