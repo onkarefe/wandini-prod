@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import {useEffect, useMemo, useState} from 'react';
 
 type CropRect = {
   x: number;
@@ -15,7 +15,6 @@ type SelectedQualitySummary = {
 type ConfigratorScene2Props = {
   isOpen: boolean;
   onClose: () => void;
-  confirmButton?: React.ReactNode;
   inline?: boolean;
   showCloseButton?: boolean;
   imageUrl: string;
@@ -23,6 +22,7 @@ type ConfigratorScene2Props = {
   heightCm: number;
   crop: CropRect | null;
   selectedQualitySummary?: SelectedQualitySummary;
+  totalPrice?: string;
 };
 
 type SliceItem = {
@@ -31,45 +31,49 @@ type SliceItem = {
   dataUrl: string;
 };
 
-const MAX_PANEL_CM = 70;
+const MAX_PANEL_WIDTH_CM = 70;
+const PANEL_DISPLAY_SCALE = 1.18;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-function buildEqualCmSlices(totalWidthCm: number, maxSliceCm = MAX_PANEL_CM): number[] {
+function calculatePanelWidths(totalWidthCm: number): number[] {
   const safeWidth = Math.max(0, totalWidthCm);
-  if (safeWidth <= 0) return [];
+  if (!safeWidth) return [];
 
-  const panelCount = Math.max(1, Math.ceil(safeWidth / maxSliceCm));
+  const panelCount = Math.max(
+    1,
+    Math.ceil(safeWidth / MAX_PANEL_WIDTH_CM),
+  );
   const panelWidth = safeWidth / panelCount;
 
-  return Array.from({ length: panelCount }, () => panelWidth);
+  return Array.from({length: panelCount}, () => panelWidth);
 }
 
 function formatCm(value: number): string {
   return value.toFixed(1).replace(/\.0$/, '');
 }
 
-async function createCroppedSlices(
+async function createPanelImages(
   imageUrl: string,
   crop: CropRect,
   totalWidthCm: number,
 ): Promise<SliceItem[]> {
   return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
 
-    img.onload = () => {
+    image.onload = () => {
       try {
-        const naturalW = img.naturalWidth || 0;
-        const naturalH = img.naturalHeight || 0;
-        if (!naturalW || !naturalH || totalWidthCm <= 0) {
+        const naturalWidth = image.naturalWidth || 0;
+        const naturalHeight = image.naturalHeight || 0;
+        if (!naturalWidth || !naturalHeight || totalWidthCm <= 0) {
           resolve([]);
           return;
         }
 
-        const isRatioCrop =
+        const usesRelativeCrop =
           crop.x >= 0 &&
           crop.y >= 0 &&
           crop.w > 0 &&
@@ -79,12 +83,12 @@ async function createCroppedSlices(
           crop.w <= 1 &&
           crop.h <= 1;
 
-        const pxCrop = isRatioCrop
+        const pixelCrop = usesRelativeCrop
           ? {
-              x: Math.round(crop.x * naturalW),
-              y: Math.round(crop.y * naturalH),
-              w: Math.round(crop.w * naturalW),
-              h: Math.round(crop.h * naturalH),
+              x: Math.round(crop.x * naturalWidth),
+              y: Math.round(crop.y * naturalHeight),
+              w: Math.round(crop.w * naturalWidth),
+              h: Math.round(crop.h * naturalHeight),
             }
           : {
               x: Math.round(crop.x),
@@ -93,90 +97,104 @@ async function createCroppedSlices(
               h: Math.round(crop.h),
             };
 
-        const safeW = Math.max(1, pxCrop.w || 0);
-        const safeH = Math.max(1, pxCrop.h || 0);
-        const safeX = Math.max(0, Math.min(pxCrop.x || 0, Math.max(0, naturalW - safeW)));
-        const safeY = Math.max(0, Math.min(pxCrop.y || 0, Math.max(0, naturalH - safeH)));
+        const cropWidth = Math.max(1, pixelCrop.w || 0);
+        const cropHeight = Math.max(1, pixelCrop.h || 0);
+        const cropX = clamp(
+          pixelCrop.x || 0,
+          0,
+          Math.max(0, naturalWidth - cropWidth),
+        );
+        const cropY = clamp(
+          pixelCrop.y || 0,
+          0,
+          Math.max(0, naturalHeight - cropHeight),
+        );
+        const panelWidths = calculatePanelWidths(totalWidthCm);
 
-        const cmSlices = buildEqualCmSlices(totalWidthCm, MAX_PANEL_CM);
-        if (!cmSlices.length) {
+        if (!panelWidths.length) {
           resolve([]);
           return;
         }
 
-        const pxSlices: number[] = [];
-        let remainingPx = safeW;
-        for (let i = 0; i < cmSlices.length; i++) {
-          const last = i === cmSlices.length - 1;
-          if (last) {
-            pxSlices.push(Math.max(1, remainingPx));
-            break;
+        const panelPixelWidths: number[] = [];
+        let remainingPixels = cropWidth;
+
+        panelWidths.forEach((panelWidth, index) => {
+          const isLastPanel = index === panelWidths.length - 1;
+          if (isLastPanel) {
+            panelPixelWidths.push(Math.max(1, remainingPixels));
+            return;
           }
 
-          const remainingPieces = cmSlices.length - i;
-          const minReservedForRest = remainingPieces - 1;
-          const maxThis = Math.max(1, remainingPx - minReservedForRest);
-          const estimated = Math.round((safeW * cmSlices[i]) / totalWidthCm);
-          const currentPx = clamp(estimated, 1, maxThis);
-          pxSlices.push(currentPx);
-          remainingPx -= currentPx;
-        }
-
-        const items: SliceItem[] = [];
-        let offsetX = safeX;
-
-        for (let i = 0; i < cmSlices.length; i++) {
-          const panelW = Math.max(1, pxSlices[i] || 1);
-          const canvas = document.createElement('canvas');
-          canvas.width = panelW;
-          canvas.height = safeH;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) continue;
-
-          ctx.drawImage(
-            img,
-            offsetX,
-            safeY,
-            panelW,
-            safeH,
-            0,
-            0,
-            panelW,
-            safeH,
+          const remainingPanels = panelWidths.length - index;
+          const maximumCurrentWidth = Math.max(
+            1,
+            remainingPixels - (remainingPanels - 1),
+          );
+          const proportionalWidth = Math.round(
+            (cropWidth * panelWidth) / totalWidthCm,
+          );
+          const currentWidth = clamp(
+            proportionalWidth,
+            1,
+            maximumCurrentWidth,
           );
 
-          let dataUrl = '';
+          panelPixelWidths.push(currentWidth);
+          remainingPixels -= currentWidth;
+        });
+
+        const panels: SliceItem[] = [];
+        let panelX = cropX;
+
+        panelWidths.forEach((panelWidthCm, index) => {
+          const panelWidthPx = Math.max(1, panelPixelWidths[index] || 1);
+          const canvas = document.createElement('canvas');
+          canvas.width = panelWidthPx;
+          canvas.height = cropHeight;
+
+          const context = canvas.getContext('2d');
+          if (!context) return;
+
+          context.drawImage(
+            image,
+            panelX,
+            cropY,
+            panelWidthPx,
+            cropHeight,
+            0,
+            0,
+            panelWidthPx,
+            cropHeight,
+          );
+
           try {
-            dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            panels.push({
+              index: index + 1,
+              widthCm: panelWidthCm,
+              dataUrl: canvas.toDataURL('image/jpeg', 0.92),
+            });
           } catch {
-            dataUrl = '';
+            // A cross-origin image can prevent canvas export.
           }
-          if (!dataUrl) continue;
 
-          items.push({
-            index: i + 1,
-            widthCm: cmSlices[i],
-            dataUrl,
-          });
+          panelX += panelWidthPx;
+        });
 
-          offsetX += panelW;
-        }
-
-        resolve(items);
+        resolve(panels);
       } catch {
         resolve([]);
       }
     };
 
-    img.onerror = () => resolve([]);
-    img.src = imageUrl;
+    image.onerror = () => resolve([]);
+    image.src = imageUrl;
   });
 }
 
 export function ConfigratorScene2({
   isOpen,
   onClose,
-  confirmButton,
   inline = false,
   showCloseButton = true,
   imageUrl,
@@ -184,17 +202,16 @@ export function ConfigratorScene2({
   heightCm,
   crop,
   selectedQualitySummary,
+  totalPrice,
 }: ConfigratorScene2Props) {
   const shouldRender = isOpen || inline;
-
-  const [slices, setSlices] = useState<SliceItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const widthsPreview = useMemo(
-    () => buildEqualCmSlices(Math.max(0, widthCm), MAX_PANEL_CM),
+  const expectedPanelWidths = useMemo(
+    () => calculatePanelWidths(widthCm),
     [widthCm],
   );
+  const [panels, setPanels] = useState<SliceItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -206,49 +223,51 @@ export function ConfigratorScene2({
       };
     }
 
-    if (!crop || widthCm <= 0) {
-      setSlices([]);
+    if (!crop || widthCm <= 0 || heightCm <= 0) {
+      setPanels([]);
       setIsLoading(false);
-      setError('Kein gültiger Bildausschnitt oder keine gültige Breite gefunden.');
+      setError('Für diese Maße konnte keine Vorschau erstellt werden.');
       return;
     }
 
     setIsLoading(true);
     setError(null);
 
-    createCroppedSlices(imageUrl, crop, widthCm)
-      .then((items) => {
+    createPanelImages(imageUrl, crop, widthCm)
+      .then((nextPanels) => {
         if (cancelled) return;
-        setSlices(items);
-        if (!items.length) {
-          setError('Beim Aufteilen konnte kein Vorschaubild erstellt werden.');
-        }
+        setPanels(nextPanels);
+        setError(
+          nextPanels.length
+            ? null
+            : 'Die Tapetenbahnen konnten nicht erstellt werden.',
+        );
       })
       .catch(() => {
         if (cancelled) return;
-        setSlices([]);
-        setError('Beim Aufteilen ist ein Fehler aufgetreten.');
+        setPanels([]);
+        setError('Die Tapetenbahnen konnten nicht erstellt werden.');
       })
       .finally(() => {
-        if (cancelled) return;
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [crop, imageUrl, shouldRender, widthCm]);
+  }, [crop, heightCm, imageUrl, shouldRender, widthCm]);
 
   if (!shouldRender) return null;
 
+  const panelCount = panels.length || expectedPanelWidths.length;
+  const panelWidth = expectedPanelWidths[0] || 0;
+
   return (
-    <div
-      className={`configuratorSceneDialog cs2-dialog${inline ? ' configuratorSceneDialog--inline' : ''}`}
-    >
+    <div className="wallOrderReview">
       {showCloseButton && (
         <button
           type="button"
-          className="configuratorSceneCloseButton"
+          className="wallOrderReview__close"
           onClick={onClose}
           aria-label="Vorschau schließen"
         >
@@ -256,107 +275,104 @@ export function ConfigratorScene2({
         </button>
       )}
 
-      <div className="cs2-layout">
-        <div className="cs2-main">
-          {isLoading && (
-            <div className="cs2-feedback">Bahnen werden vorbereitet…</div>
-          )}
-          {!isLoading && error && <div className="cs2-feedback">{error}</div>}
+      <section
+        className="wallOrderReview__preview"
+        aria-label="Vorschau der Tapetenbahnen"
+      >
+        {isLoading && (
+          <div className="wallOrderReview__status">
+            Tapetenbahnen werden erstellt …
+          </div>
+        )}
 
-          {!isLoading && !error && slices.length > 0 && (
-            <div className="cs2-slices-grid">
-              {slices.map((slice) => (
-                <div key={slice.index} className="cs2-slice-item">
-                  <img
-                    src={slice.dataUrl}
-                    alt={`Bahn ${slice.index}`}
-                    className="cs2-slice-image"
-                  />
-                  <div className="cs2-slice-label">
-                    {slice.index} - {formatCm(slice.widthCm)} cm
-                  </div>
-                </div>
+        {!isLoading && error && (
+          <div className="wallOrderReview__status wallOrderReview__status--error">
+            {error}
+          </div>
+        )}
+
+        {!isLoading && !error && panels.length > 0 && (
+          <div className="wallOrderReview__scroller">
+            <div className="wallOrderReview__panels">
+              {panels.map((panel) => (
+                <figure
+                  key={panel.index}
+                  className="wallOrderReview__panel"
+                  style={{
+                    aspectRatio: `${panel.widthCm * PANEL_DISPLAY_SCALE} / ${Math.max(
+                      heightCm,
+                      1,
+                    )}`,
+                  }}
+                >
+                  <img src={panel.dataUrl} alt={`Bahn ${panel.index}`} />
+                  <figcaption>
+                    <span>Bahn {panel.index}</span>
+                    <strong>{formatCm(panel.widthCm)} cm</strong>
+                  </figcaption>
+                </figure>
               ))}
             </div>
-          )}
-        </div>
-
-        <div className="cs2-sidebar" aria-label="Vorschau-Zusammenfassung">
-          <div className="cs2-sidebar-card">
-            <div className="cs2-sidebar-title">Zusammenfassung</div>
-
-            <div className="cs2-sidebar-stats">
-              <div className="cs2-sidebar-section cs2-sidebar-section--compact">
-                <div className="cs2-sidebar-label">Maße</div>
-                <div className="cs2-sidebar-value">
-                  {widthCm} cm x {heightCm} cm
-                </div>
-              </div>
-
-              <div className="cs2-sidebar-section cs2-sidebar-section--compact">
-                <div className="cs2-sidebar-label">Anzahl der Bahnen</div>
-                <div className="cs2-sidebar-value">
-                  {error ? '-' : (slices.length || widthsPreview.length)}
-                </div>
-              </div>
-            </div>
-
-            <div className="cs2-sidebar-section">
-              <div className="cs2-sidebar-label">Druckmaterial / Qualität</div>
-              {selectedQualitySummary ? (
-                <div className="cs2-quality">
-                  <div className="cs2-sidebar-value">{selectedQualitySummary.title}</div>
-                  {selectedQualitySummary.properties.length > 0 && (
-                    <div className="cs2-quality-properties">
-                      {selectedQualitySummary.properties.map((property) => (
-                        <div
-                          key={`${selectedQualitySummary.title}-${property}`}
-                          className="cs2-quality-property"
-                        >
-                          {property}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="cs2-sidebar-value cs2-sidebar-value--muted">
-                  Keine Qualitätsinformationen verfügbar.
-                </div>
-              )}
-            </div>
           </div>
+        )}
+      </section>
 
-          <span className="cs2-warning" role="note">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="cs2-warning__icon"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-              />
-            </svg>
-            Bitte planen Sie bei Ihrer Bestellung umlaufend 6 cm Beschnittzugabe
-            für eine passgenaue Montage ein.
-          </span>
+      <section
+        className="wallOrderReview__summary"
+        aria-label="Bestellübersicht"
+      >
+        <header className="wallOrderReview__summaryHeader">
+          <span>Bestellübersicht</span>
+          <h3>Deine Fototapete</h3>
+        </header>
 
-          <div className="cs2-sidebar-action">
-            {confirmButton ?? (
-              <button type="button" className="configuratorPreviewButton">
-                In den Warenkorb
-              </button>
+        <div className="wallOrderReview__details">
+          <div>
+            <span>Wandmaß</span>
+            <strong>
+              {formatCm(widthCm)} × {formatCm(heightCm)} cm
+            </strong>
+          </div>
+          <div>
+            <span>Aufteilung</span>
+            <strong>{panelCount} Bahnen</strong>
+            {panelWidth > 0 && (
+              <small>je ca. {formatCm(panelWidth)} cm breit</small>
             )}
           </div>
+          <div>
+            <span>Material</span>
+            <strong>{selectedQualitySummary?.title || '–'}</strong>
+          </div>
         </div>
-      </div>
+
+        {totalPrice && (
+          <div className="wallOrderReview__total">
+            <span>Gesamtpreis</span>
+            <strong>{totalPrice}</strong>
+          </div>
+        )}
+
+        <div className="wallOrderReview__notice" role="note">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 8.25v4.5M12 16h.01" />
+          </svg>
+          <div>
+            <strong>Montagehinweis</strong>
+            <p>
+              Plane umlaufend 6 cm Beschnittzugabe für eine passgenaue Montage
+              ein.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
-

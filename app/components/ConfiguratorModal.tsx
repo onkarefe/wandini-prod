@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Configurator} from './Configurator';
 import {ConfigratorScene2} from './ConfigratorScene2';
 
@@ -17,8 +17,6 @@ type SelectedQualitySummary = {
 export type ConfiguratorMaterialOption = {
   id: string;
   title: string;
-  pricePerSquareMeter: string;
-  priceBeforeDiscount: string | null;
   calculatedPrice: string;
   properties: string[];
   isBestseller: boolean;
@@ -28,6 +26,97 @@ export type ConfiguratorMaterialOption = {
 };
 
 type ConfiguratorStep = 'crop' | 'materials' | 'preview';
+
+const CONFIGURATOR_STEPS: Array<{
+  key: ConfiguratorStep;
+  label: string;
+}> = [
+  {key: 'crop', label: 'Ausschnitt'},
+  {key: 'materials', label: 'Material'},
+  {key: 'preview', label: 'Vorschau'},
+];
+
+type ConfiguratorFlowHeaderProps = {
+  step: ConfiguratorStep;
+  title: string;
+  description: React.ReactNode;
+  titleRef: React.Ref<HTMLHeadingElement>;
+  showStepGuide?: boolean;
+};
+
+function ConfiguratorStepGuide({step}: {step: ConfiguratorStep}) {
+  const currentStepIndex = CONFIGURATOR_STEPS.findIndex(
+    (item) => item.key === step,
+  );
+  const currentStepNumber = currentStepIndex + 1;
+
+  return (
+    <nav
+      className="configuratorStepGuide"
+      aria-label="Fortschritt der Konfiguration"
+    >
+      <div className="configuratorStepGuideMeta">
+        <strong>
+          Schritt {currentStepNumber} von {CONFIGURATOR_STEPS.length}
+        </strong>
+      </div>
+
+      <div className="configuratorStepRail">
+        <ol className="configuratorStepList">
+          {CONFIGURATOR_STEPS.map((item, index) => {
+            const stepNumber = index + 1;
+            const isActive = index === currentStepIndex;
+            const isComplete = index < currentStepIndex;
+
+            return (
+              <li
+                key={item.key}
+                className={`${isActive ? 'is-active' : ''}${
+                  isComplete ? ' is-complete' : ''
+                }`}
+                aria-current={isActive ? 'step' : undefined}
+              >
+                <span className="configuratorStepNumber" aria-hidden="true">
+                  {isComplete ? '✓' : stepNumber}
+                </span>
+                <span>{item.label}</span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    </nav>
+  );
+}
+
+function ConfiguratorFlowHeader({
+  step,
+  title,
+  description,
+  titleRef,
+  showStepGuide = false,
+}: ConfiguratorFlowHeaderProps) {
+  return (
+    <header
+      className={`configuratorFlowHeader${
+        showStepGuide ? '' : ' configuratorFlowHeader--copyOnly'
+      }`}
+    >
+      <div className="configuratorFlowHeaderCopy">
+        <h2
+          id={`configurator-${step}-title`}
+          ref={titleRef}
+          tabIndex={-1}
+        >
+          {title}
+        </h2>
+        <p id={`configurator-${step}-description`}>{description}</p>
+      </div>
+
+      {showStepGuide && <ConfiguratorStepGuide step={step} />}
+    </header>
+  );
+}
 
 type ConfiguratorModalProps = {
   isOpen: boolean;
@@ -62,6 +151,13 @@ export function ConfiguratorModal({
   const [selectingMaterialId, setSelectingMaterialId] = useState<string | null>(
     null,
   );
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const stepTitleRef = useRef<HTMLHeadingElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -95,6 +191,65 @@ export function ConfiguratorModal({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setStep('crop');
+        setSelectingMaterialId(null);
+        onCloseRef.current();
+        return;
+      }
+
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+
+      const focusableElements = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+
+      if (focusableElements.length === 0) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (!dialogRef.current.contains(document.activeElement)) {
+        event.preventDefault();
+        firstElement.focus();
+        return;
+      }
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const focusFrame = window.requestAnimationFrame(() => {
+      stepTitleRef.current?.focus();
+    });
+
+    return () => window.cancelAnimationFrame(focusFrame);
+  }, [isOpen, step]);
+
   if (!isOpen) return null;
 
   const handleClose = () => {
@@ -123,6 +278,9 @@ export function ConfiguratorModal({
     }
   };
 
+  const selectedMaterial =
+    materialOptions.find((material) => material.selected) ?? null;
+
   return (
     <div className="configuratorModalOverlay" role="presentation">
       <div
@@ -130,10 +288,12 @@ export function ConfiguratorModal({
         aria-hidden="true"
       />
       <div
+        ref={dialogRef}
         className={`configuratorModal configuratorModal--${step}`}
         role="dialog"
         aria-modal="true"
-        aria-label="Produktkonfigurator"
+        aria-labelledby={`configurator-${step}-title`}
+        aria-describedby={`configurator-${step}-description`}
       >
         <button
           type="button"
@@ -155,6 +315,37 @@ export function ConfiguratorModal({
           </button>
         )}
 
+        <ConfiguratorFlowHeader
+          step={step}
+          title={
+            step === 'crop'
+              ? 'Bildausschnitt auswählen'
+              : step === 'materials'
+                ? 'Druckmaterial auswählen'
+                : 'Vorschau & Bestellübersicht'
+          }
+          description={
+            step === 'crop' ? (
+              <>
+                Der grün markierte Bereich entspricht deinen Wandmaßen.
+                Verschiebe den Ausschnitt, bis das gewünschte Motiv vollständig
+                darin liegt.
+              </>
+            ) : step === 'materials' ? (
+              <>
+                Wähle die passende Druckqualität für deine Wandfläche von{' '}
+                {widthCm} × {heightCm} cm.
+              </>
+            ) : (
+              <>
+                Prüfe die Aufteilung deines Motivs in einzelne Bahnen und
+                bestätige anschließend deine Bestellung.
+              </>
+            )
+          }
+          titleRef={stepTitleRef}
+        />
+
         {step === 'crop' && (
           <div className="configuratorModalBody configuratorModalBody--crop">
             <div className="configuratorModalLeft">
@@ -166,116 +357,130 @@ export function ConfiguratorModal({
               />
             </div>
 
-            <div className="configuratorCropActions">
+            <footer className="configuratorFlowFooter configuratorCropActions">
+              <ConfiguratorStepGuide step="crop" />
               <button
                 type="button"
                 className="configuratorPreviewButton"
                 disabled={!crop}
                 onClick={() => setStep('materials')}
               >
-                Weiter zur Materialauswahl
+                <span>Weiter zur Materialauswahl</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
               </button>
-            </div>
+            </footer>
           </div>
         )}
 
         {step === 'materials' && (
-          <div className="configuratorModalBody configuratorModalBody--materials">
-            <section
-              className="configuratorMaterials"
-              aria-labelledby="configurator-materials-title"
-            >
-              <header className="configuratorMaterialsHeader">
-                <span className="configuratorMaterialsEyebrow">
-                  Schritt 2 von 3
-                </span>
-                <h2 id="configurator-materials-title">
-                  Druckmaterial auswählen
-                </h2>
-                <p>
-                  Wählen Sie die passende Druckqualität für Ihre Wandfläche von{' '}
-                  {widthCm} × {heightCm} cm.
-                </p>
-              </header>
+          <>
+            <div className="configuratorModalBody configuratorModalBody--materials">
+              <section
+                className="configuratorMaterials"
+                aria-labelledby="configurator-materials-title"
+              >
+                <div className="configuratorMaterialsGrid">
+                  {materialOptions.map((material) => {
+                    const isSelecting = selectingMaterialId === material.id;
+                    const isSelectionPending = selectingMaterialId !== null;
 
-              <div className="configuratorMaterialsGrid">
-                {materialOptions.map((material) => {
-                  const isSelecting = selectingMaterialId === material.id;
-                  const isSelectionPending = selectingMaterialId !== null;
-
-                  return (
-                    <article
-                      key={material.id}
-                      className={`configuratorMaterialCard${
-                        material.selected
-                          ? ' configuratorMaterialCard--selected'
-                          : ''
-                      }`}
-                    >
-                      <div className="configuratorMaterialPrice">
-                        {material.priceBeforeDiscount && (
-                          <del>{material.priceBeforeDiscount}</del>
-                        )}
-                        <div className="configuratorMaterialCurrentPrice">
-                          <strong>{material.pricePerSquareMeter}</strong>
-                          <span>pro m²</span>
-                        </div>
-                      </div>
-
-                      <div className="configuratorMaterialTitleRow">
-                        <h3>{material.title}</h3>
+                    return (
+                      <article
+                        key={material.id}
+                        className={`configuratorMaterialCard${
+                          material.selected
+                            ? ' configuratorMaterialCard--selected'
+                            : ''
+                        }${
+                          material.isBestseller
+                            ? ' configuratorMaterialCard--bestseller'
+                            : ''
+                        }`}
+                      >
                         {material.isBestseller && (
                           <span className="configuratorMaterialBestseller">
-                            <span aria-hidden="true">★</span>
                             Bestseller
                           </span>
                         )}
-                      </div>
 
-                      <ul className="configuratorMaterialFeatures">
-                        {material.properties.map((property) => (
-                          <li key={`${material.id}-${property}`}>{property}</li>
-                        ))}
-                      </ul>
+                        <header className="configuratorMaterialCardHeader">
+                          <h3>{material.title}</h3>
+                        </header>
 
-                      <div className="configuratorMaterialTotal">
-                        <span>Preis für Ihre Maße</span>
-                        <strong>{material.calculatedPrice}</strong>
-                      </div>
+                        <ul className="configuratorMaterialFeatures">
+                          {material.properties.map((property) => (
+                            <li key={`${material.id}-${property}`}>
+                              {property}
+                            </li>
+                          ))}
+                        </ul>
 
-                      <button
-                        type="button"
-                        className="configuratorMaterialSelectButton"
-                        disabled={!material.exists || isSelectionPending}
-                        onClick={() => void handleMaterialSelect(material)}
-                      >
-                        {isSelecting
-                          ? 'Wird ausgewählt…'
-                          : 'Material auswählen'}
-                      </button>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-          </div>
+                        <div className="configuratorMaterialTotal">
+                          <div>
+                            <span>Gesamtpreis</span>
+                            <small>
+                              Für {widthCm} × {heightCm} cm
+                            </small>
+                          </div>
+                          <strong>{material.calculatedPrice}</strong>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="configuratorMaterialSelectButton"
+                          disabled={!material.exists || isSelectionPending}
+                          onClick={() => void handleMaterialSelect(material)}
+                        >
+                          {isSelecting
+                            ? 'Wird ausgewählt…'
+                            : material.selected
+                              ? 'Ausgewählt · Weiter'
+                              : 'Material auswählen'}
+                        </button>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            </div>
+            <footer className="configuratorFlowFooter configuratorMaterialsActions">
+              <ConfiguratorStepGuide step="materials" />
+              <p className="configuratorFlowFooterHint">
+                Wähle oben dein Material aus, um fortzufahren.
+              </p>
+            </footer>
+          </>
         )}
 
         {step === 'preview' && (
-          <div className="configuratorModalBody">
-            <ConfigratorScene2
-              isOpen
-              onClose={() => setStep('materials')}
-              confirmButton={confirmButton}
-              inline
-              showCloseButton={false}
-              imageUrl={imageUrl}
-              widthCm={widthCm}
-              heightCm={heightCm}
-              crop={crop}
-              selectedQualitySummary={selectedQualitySummary}
-            />
-          </div>
+          <>
+            <div className="configuratorModalBody configuratorModalBody--preview">
+              <ConfigratorScene2
+                isOpen
+                onClose={() => setStep('materials')}
+                inline
+                showCloseButton={false}
+                imageUrl={imageUrl}
+                widthCm={widthCm}
+                heightCm={heightCm}
+                crop={crop}
+                selectedQualitySummary={selectedQualitySummary}
+                totalPrice={selectedMaterial?.calculatedPrice}
+              />
+            </div>
+            <footer className="configuratorFlowFooter configuratorPreviewActions">
+              <ConfiguratorStepGuide step="preview" />
+              <div className="configuratorPreviewFooterAction">
+                {confirmButton ?? (
+                  <button type="button" className="configuratorPreviewButton">
+                    Bestätigen &amp; in den Warenkorb
+                  </button>
+                )}
+              </div>
+            </footer>
+          </>
         )}
       </div>
     </div>

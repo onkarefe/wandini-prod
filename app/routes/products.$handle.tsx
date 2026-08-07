@@ -596,34 +596,18 @@ export default function Product() {
         const printQuality = (variant as any)?.printQuality?.reference;
         const title = printQuality?.title?.value || name;
         const unitPrice = Number(variant?.price?.amount);
-        const priceBeforeDiscount = Number(
-          printQuality?.priceWithoutDiscount?.value,
-        );
         const currencyCode = variant?.price?.currencyCode;
         const hasPrice =
           Number.isFinite(unitPrice) && unitPrice >= 0 && Boolean(currencyCode);
-        const hasPriceBeforeDiscount =
-          hasPrice &&
-          Number.isFinite(priceBeforeDiscount) &&
-          priceBeforeDiscount > unitPrice;
 
         return {
           id: `${qualityOption.name}-${name}`,
           title,
-          pricePerSquareMeter: hasPrice
-            ? formatMaterialPrice(unitPrice, String(currencyCode))
-            : '—',
-          priceBeforeDiscount: hasPriceBeforeDiscount
-            ? formatMaterialPrice(
-                priceBeforeDiscount,
-                String(currencyCode),
-              )
-            : null,
           calculatedPrice: hasPrice && isSizeValid
             ? formatMaterialPrice(unitPrice * areaM2, String(currencyCode))
             : '—',
           properties: getPropertiesForQuality(value),
-          isBestseller: title.trim().toLowerCase() === 'premium',
+          isBestseller: title.trim().toLowerCase().includes('selbstklebend'),
           selected,
           exists,
           variantUriQuery,
