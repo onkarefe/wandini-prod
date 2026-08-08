@@ -97,7 +97,7 @@ function ConfiguratorFlowHeader({
   showStepGuide = false,
 }: ConfiguratorFlowHeaderProps) {
   return (
-    <header
+    <div
       className={`configuratorFlowHeader${
         showStepGuide ? '' : ' configuratorFlowHeader--copyOnly'
       }`}
@@ -114,7 +114,7 @@ function ConfiguratorFlowHeader({
       </div>
 
       {showStepGuide && <ConfiguratorStepGuide step={step} />}
-    </header>
+    </div>
   );
 }
 
@@ -357,7 +357,7 @@ export function ConfiguratorModal({
               />
             </div>
 
-            <footer className="configuratorFlowFooter configuratorCropActions">
+            <div className="configuratorFlowFooter configuratorCropActions">
               <ConfiguratorStepGuide step="crop" />
               <button
                 type="button"
@@ -370,7 +370,7 @@ export function ConfiguratorModal({
                   <path d="m9 18 6-6-6-6" />
                 </svg>
               </button>
-            </footer>
+            </div>
           </div>
         )}
 
@@ -405,9 +405,9 @@ export function ConfiguratorModal({
                           </span>
                         )}
 
-                        <header className="configuratorMaterialCardHeader">
+                        <div className="configuratorMaterialCardHeader">
                           <h3>{material.title}</h3>
-                        </header>
+                        </div>
 
                         <ul className="configuratorMaterialFeatures">
                           {material.properties.map((property) => (
@@ -445,12 +445,12 @@ export function ConfiguratorModal({
                 </div>
               </section>
             </div>
-            <footer className="configuratorFlowFooter configuratorMaterialsActions">
+            <div className="configuratorFlowFooter configuratorMaterialsActions">
               <ConfiguratorStepGuide step="materials" />
               <p className="configuratorFlowFooterHint">
                 Wähle oben dein Material aus, um fortzufahren.
               </p>
-            </footer>
+            </div>
           </>
         )}
 
@@ -470,7 +470,7 @@ export function ConfiguratorModal({
                 totalPrice={selectedMaterial?.calculatedPrice}
               />
             </div>
-            <footer className="configuratorFlowFooter configuratorPreviewActions">
+            <div className="configuratorFlowFooter configuratorPreviewActions">
               <ConfiguratorStepGuide step="preview" />
               <div className="configuratorPreviewFooterAction">
                 {confirmButton ?? (
@@ -479,7 +479,7 @@ export function ConfiguratorModal({
                   </button>
                 )}
               </div>
-            </footer>
+            </div>
           </>
         )}
       </div>

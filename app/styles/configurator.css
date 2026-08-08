@@ -1208,7 +1208,7 @@
 
 .configuratorPreviewFooterAction {
   width: min(340px, 100%);
-  flex: 0 0 340px;
+  flex: 0 0 auto;
 }
 
 .configuratorPreviewFooterAction > *,
@@ -2335,7 +2335,7 @@
   }
 }
 
-/* Final order review: intentionally isolated from the legacy scene styles. */
+/* Final order review */
 .wallOrderReview {
   width: 100%;
   height: 100%;
@@ -2351,8 +2351,7 @@
   min-height: 0;
   padding: 5px;
   border: 1px solid #202421;
-  background:
-    radial-gradient(circle at 50% 45%, #252a27 0%, #151816 72%);
+  background: #171a18;
   display: flex;
   overflow: hidden;
   box-sizing: border-box;
@@ -2365,15 +2364,15 @@
   min-height: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  overscroll-behavior-inline: contain;
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
   scroll-snap-type: x proximity;
-  scrollbar-color: #19a77c #292e2b;
+  scrollbar-width: thin;
+  scrollbar-color: #18a77b #292e2b;
 }
 
 .wallOrderReview__scroller::-webkit-scrollbar {
-  height: 10px;
+  height: 9px;
 }
 
 .wallOrderReview__scroller::-webkit-scrollbar-track {
@@ -2383,7 +2382,7 @@
 .wallOrderReview__scroller::-webkit-scrollbar-thumb {
   border: 2px solid #292e2b;
   border-radius: 999px;
-  background: #19a77c;
+  background: #18a77b;
 }
 
 .wallOrderReview__panels {
@@ -2391,7 +2390,7 @@
   min-width: 100%;
   height: 100%;
   min-height: 0;
-  padding-bottom: 9px;
+  padding: 0 0 9px;
   display: flex;
   align-items: stretch;
   gap: 8px;
@@ -2400,28 +2399,29 @@
 
 .wallOrderReview__panel {
   position: relative;
-  flex: 0 0 auto;
   width: auto;
   min-width: 0;
   max-width: none;
   height: 100%;
-  min-height: 100%;
+  min-height: 0;
+  flex: 0 0 auto;
+  aspect-ratio: var(--panel-aspect-ratio);
   margin: 0;
   border: 0;
   border-radius: 0;
-  background: #111311;
+  background: #111;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   scroll-snap-align: start;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.2),
-    0 10px 24px rgba(0, 0, 0, 0.28);
 }
 
 .wallOrderReview__panel img {
-  position: absolute;
-  inset: 0;
+  position: static;
   width: 100%;
-  height: 100%;
+  height: auto;
+  min-height: 0;
+  flex: 1 1 auto;
   max-width: none;
   max-height: none;
   border: 0;
@@ -2431,16 +2431,15 @@
 }
 
 .wallOrderReview__panel figcaption {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  position: static;
+  width: 100%;
+  flex: 0 0 46px;
   min-height: 46px;
   padding: 7px 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 0;
-  background: rgba(12, 15, 13, 0.92);
-  color: #bfc7c3;
+  background: rgba(10, 12, 11, 0.93);
+  color: #c7ceca;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2462,7 +2461,7 @@
 .wallOrderReview__status {
   width: 100%;
   min-height: 100%;
-  color: #515754;
+  color: #d5dad7;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2472,7 +2471,7 @@
 }
 
 .wallOrderReview__status--error {
-  color: #b42318;
+  color: #ffb4ac;
 }
 
 .wallOrderReview__summary {
@@ -2566,16 +2565,16 @@
   gap: 12px;
 }
 
+.wallOrderReview__total span {
+  color: #b6bdb9;
+}
+
 .wallOrderReview__total strong {
   color: #fff;
   font-size: 22px;
   font-weight: 850;
   line-height: 1;
   white-space: nowrap;
-}
-
-.wallOrderReview__total span {
-  color: #b6bdb9;
 }
 
 .wallOrderReview__notice {
@@ -2616,28 +2615,116 @@
 }
 
 @media (max-width: 767.98px) {
+  .configuratorModal.configuratorModal--preview {
+    position: relative;
+    inset: auto;
+    width: 100vw;
+    min-width: 100vw;
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .configuratorModal--preview .configuratorFlowHeader {
+    flex: 0 0 auto;
+  }
+
+  .configuratorModal.configuratorModal--preview
+    .configuratorModalBody--preview {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    padding: 8px;
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+  }
+
+  .configuratorModal--preview .configuratorPreviewActions {
+    position: static;
+    inset: auto;
+    width: 100%;
+    margin: 0;
+    flex: 0 0 auto;
+    z-index: auto;
+  }
+
   .wallOrderReview {
+    width: 100%;
     height: auto;
     min-height: 100%;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(330px, 52dvh) auto;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
   }
 
   .wallOrderReview__preview {
-    min-height: 330px;
+    width: 100%;
+    height: clamp(430px, calc(100dvh - 235px), 660px);
+    min-height: clamp(430px, calc(100dvh - 235px), 660px);
+    flex: 0 0 clamp(430px, calc(100dvh - 235px), 660px);
     padding: 4px;
   }
 
+  .wallOrderReview__scroller {
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+  }
+
   .wallOrderReview__panels {
+    width: max-content;
+    min-width: max-content;
+    height: 100%;
+    padding-bottom: 7px;
     gap: 7px;
-    padding-bottom: 8px;
+  }
+
+  .wallOrderReview__panel {
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    height: 100%;
+    min-height: 0;
+    flex: 0 0 auto;
+    aspect-ratio: var(--panel-mobile-aspect-ratio);
+    scroll-snap-align: start;
+  }
+
+  .wallOrderReview__panel figcaption {
+    flex-basis: 50px;
+    min-height: 50px;
+    font-size: 12px;
+  }
+
+  .wallOrderReview__panel figcaption strong {
+    font-size: 14px;
   }
 
   .wallOrderReview__summary {
     width: 100%;
     height: auto;
     min-height: 0;
+    flex: 0 0 auto;
+    padding: 15px 14px 14px;
+    overflow: visible;
+  }
+
+  .wallOrderReview__details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+  }
+
+  .wallOrderReview__details > div:last-child {
+    grid-column: 1 / -1;
   }
 
   .wallOrderReview__notice {

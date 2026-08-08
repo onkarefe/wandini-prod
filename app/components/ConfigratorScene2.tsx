@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useState, type CSSProperties} from 'react';
 
 type CropRect = {
   x: number;
@@ -33,6 +33,7 @@ type SliceItem = {
 
 const MAX_PANEL_WIDTH_CM = 70;
 const PANEL_DISPLAY_SCALE = 1.18;
+const MOBILE_PANEL_DISPLAY_SCALE = 1.34;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -299,11 +300,13 @@ export function ConfigratorScene2({
                   key={panel.index}
                   className="wallOrderReview__panel"
                   style={{
-                    aspectRatio: `${panel.widthCm * PANEL_DISPLAY_SCALE} / ${Math.max(
-                      heightCm,
-                      1,
-                    )}`,
-                  }}
+                    '--panel-aspect-ratio': `${
+                      panel.widthCm * PANEL_DISPLAY_SCALE
+                    } / ${Math.max(heightCm, 1)}`,
+                    '--panel-mobile-aspect-ratio': `${
+                      panel.widthCm * MOBILE_PANEL_DISPLAY_SCALE
+                    } / ${Math.max(heightCm, 1)}`,
+                  } as CSSProperties}
                 >
                   <img src={panel.dataUrl} alt={`Bahn ${panel.index}`} />
                   <figcaption>
@@ -321,10 +324,10 @@ export function ConfigratorScene2({
         className="wallOrderReview__summary"
         aria-label="Bestellübersicht"
       >
-        <header className="wallOrderReview__summaryHeader">
+        <div className="wallOrderReview__summaryHeader">
           <span>Bestellübersicht</span>
           <h3>Deine Fototapete</h3>
-        </header>
+        </div>
 
         <div className="wallOrderReview__details">
           <div>
