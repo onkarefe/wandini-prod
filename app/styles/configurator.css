@@ -424,17 +424,42 @@
 .configuratorModal--crop,
 .configuratorModal--materials,
 .configuratorModal--preview {
-  width: calc(100vw - 48px);
-  max-width: 1240px;
-  height: min(700px, calc(100dvh - 48px));
-  max-height: calc(100dvh - 48px);
-  padding: 0;
-  border-radius: 14px;
+  width: calc(100vw - 20px);
+  max-width: 1268px;
+  height: min(728px, calc(100dvh - 20px));
+  max-height: calc(100dvh - 20px);
+  padding: 12px;
+  border: 2px solid #3c4741;
+  border-radius: 18px;
+  background: #eef1ef;
   overflow: hidden;
+  box-sizing: border-box;
+  box-shadow:
+    0 28px 72px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.72);
 }
 
 .configuratorModal--crop {
   --configurator-crop-image-max-height: min(500px, calc(100dvh - 238px));
+}
+
+@media (min-width: 768px) {
+  :is(
+      .configuratorModal--crop,
+      .configuratorModal--materials,
+      .configuratorModal--preview
+    )
+    > .configuratorFlowHeader {
+    width: calc(100% + 24px);
+    margin: -12px -12px 0;
+  }
+
+  :is(.configuratorModal--materials, .configuratorModal--preview)
+      > .configuratorFlowFooter,
+  .configuratorModal--crop .configuratorFlowFooter {
+    width: calc(100% + 24px);
+    margin: 0 -12px -12px;
+  }
 }
 
 :is(
@@ -443,7 +468,7 @@
     .configuratorModal--preview
   )
   .configuratorModalIconButton {
-  top: 14px;
+  top: 26px;
   width: 40px;
   height: 40px;
   border-color: rgba(17, 17, 17, 0.12);
@@ -459,12 +484,12 @@
     .configuratorModal--preview
   )
   .configuratorModalCloseButton {
-  right: 14px;
+  right: 26px;
 }
 
 :is(.configuratorModal--materials, .configuratorModal--preview)
   .configuratorModalBackButton {
-  right: 68px;
+  right: 78px;
   left: auto;
   font-size: 0;
 }
@@ -547,7 +572,7 @@
 .configuratorFlowHeader {
   flex: 0 0 auto;
   min-width: 0;
-  padding: 14px 64px 13px 20px;
+  padding: 28px 92px 28px 42px;
   border-bottom: 1px solid #e8e8e8;
   background: #fff;
   display: grid;
@@ -563,8 +588,8 @@
 
 :is(.configuratorModal--materials, .configuratorModal--preview)
   .configuratorFlowHeader {
-  padding-right: 122px;
-  padding-left: 20px;
+  padding-right: 154px;
+  padding-left: 42px;
 }
 
 .configuratorFlowHeaderCopy {
@@ -725,15 +750,16 @@
 
 .configuratorModalBody--crop .configuratorImage {
   max-width: 100%;
-  max-height: var(--configurator-crop-image-max-height);
+  max-height: 100%;
+  min-height: 0;
   width: auto;
   height: auto;
 }
 
 .configuratorFlowFooter {
   width: 100%;
-  min-height: 88px;
-  padding: 12px 18px;
+  min-height: 120px;
+  padding: 26px 38px;
   border-top: 1px solid #e8e8e8;
   background: #fff;
   display: flex;
@@ -2079,8 +2105,10 @@
     height: 100dvh;
     max-height: 100dvh;
     padding: 0;
+    border: 0;
     border-radius: 0;
     overflow: hidden;
+    box-shadow: none;
   }
 
   .configuratorModal.configuratorModal--crop {
@@ -2296,12 +2324,12 @@
   }
 }
 @media (min-width: 1280px) and (max-width: 1379.98px) {
-  .configuratorModal{
-    max-width: 1200px;
-    max-height: 650px;
+  .configuratorModal {
+    max-width: 1228px;
+    max-height: 678px;
   }
 
-  .configuratorModalLeft{
+  .configuratorModalLeft {
     max-height: 77%;
   }
 

@@ -1,5 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {flushSync} from 'react-dom';
+import {useCallback, useEffect, useId, useMemo, useRef, useState} from 'react';
 import {useLocation, useNavigate} from 'react-router';
 import type {CustomCollectionQuery} from 'storefrontapi.generated';
 import {
@@ -14,12 +13,16 @@ type CollectionFilters = NonNullable<
 >;
 type CollectionFilter = CollectionFilters[number];
 type FilterValue = CollectionFilter['values'][number];
-
 type SelectedFilters = Record<string, string[]>;
 
 interface FilterBarProps {
   filters: CollectionFilters;
   isUpdating?: boolean;
+}
+
+interface FilterIndex {
+  filterIdByInput: Map<string, string>;
+  valuesByFilterId: Map<string, Map<string, FilterValue>>;
 }
 
 function getFilterValueInput(value: Pick<FilterValue, 'input'>): string | null {
@@ -30,29 +33,65 @@ function flattenSelectedFilters(selectedFilters: SelectedFilters): string[] {
   return Object.values(selectedFilters).flatMap((values) => values);
 }
 
+function getActiveFilterLabel(count: number): string {
+  return count === 1 ? '1 Filter aktiv' : `${count} Filter aktiv`;
+}
+
+function getOptionCountLabel(count: number): string {
+  return count === 1 ? '1 Option' : `${count} Optionen`;
+}
+
 export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const drawerId = useId();
+  const drawerTitleId = useId();
+  const filterGroupIdPrefix = useId();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({});
-  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [expandedFilterIds, setExpandedFilterIds] = useState<Set<string>>(
+    () => new Set(filters[0] ? [filters[0].id] : []),
+  );
 
-  const validInputsByFilterId = useMemo(() => {
-    const map = new Map<string, Set<string>>();
+  const filterIndex = useMemo<FilterIndex>(() => {
+    const filterIdByInput = new Map<string, string>();
+    const valuesByFilterId = new Map<string, Map<string, FilterValue>>();
 
     for (const filter of filters) {
-      map.set(
-        filter.id,
-        new Set(
-          filter.values
-            .map((value) => getFilterValueInput(value))
-            .filter((value): value is string => value !== null),
-        ),
-      );
+      const valuesByInput = new Map<string, FilterValue>();
+
+      for (const value of filter.values) {
+        const input = getFilterValueInput(value);
+
+        if (!input) {
+          continue;
+        }
+
+        valuesByInput.set(input, value);
+
+        if (!filterIdByInput.has(input)) {
+          filterIdByInput.set(input, filter.id);
+        }
+      }
+
+      valuesByFilterId.set(filter.id, valuesByInput);
+    }
+
+    return {filterIdByInput, valuesByFilterId};
+  }, [filters]);
+
+  const selectedInputsByFilterId = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+
+    for (const [filterId, inputs] of Object.entries(selectedFilters)) {
+      map.set(filterId, new Set(inputs));
     }
 
     return map;
-  }, [filters]);
+  }, [selectedFilters]);
 
   const navigateWithParams = useCallback(
     (params: URLSearchParams) => {
@@ -75,66 +114,118 @@ export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const activeInputs = params.getAll('f');
-
-    if (!activeInputs.length) {
-      setSelectedFilters({});
-      return;
-    }
-
     const nextSelectedFilters: SelectedFilters = {};
 
-    for (const input of activeInputs) {
-      for (const filter of filters) {
-        if (!validInputsByFilterId.get(filter.id)?.has(input)) {
-          continue;
-        }
+    for (const input of params.getAll('f')) {
+      const filterId = filterIndex.filterIdByInput.get(input);
 
-        const currentValues = nextSelectedFilters[filter.id] ?? [];
+      if (!filterId) {
+        continue;
+      }
 
-        if (!currentValues.includes(input)) {
-          nextSelectedFilters[filter.id] = [...currentValues, input];
-        }
+      const currentInputs = nextSelectedFilters[filterId] ?? [];
 
-        break;
+      if (!currentInputs.includes(input)) {
+        nextSelectedFilters[filterId] = [...currentInputs, input];
       }
     }
 
     setSelectedFilters(nextSelectedFilters);
-  }, [filters, location.search, validInputsByFilterId]);
+  }, [filterIndex, location.search]);
 
-  const handleFilterClick = useCallback(
+  useEffect(() => {
+    const activeFilterIds = Object.keys(selectedFilters);
+
+    if (activeFilterIds.length === 0) {
+      return;
+    }
+
+    setExpandedFilterIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+      let hasChanged = false;
+
+      for (const filterId of activeFilterIds) {
+        if (!nextIds.has(filterId)) {
+          nextIds.add(filterId);
+          hasChanged = true;
+        }
+      }
+
+      return hasChanged ? nextIds : currentIds;
+    });
+  }, [selectedFilters]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+
+    if (!dialog) {
+      return;
+    }
+
+    if (!isDrawerOpen) {
+      if (dialog.open) {
+        dialog.close();
+      }
+
+      return;
+    }
+
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+
+    const handleBackdropPointerDown = (event: PointerEvent) => {
+      if (event.target !== dialog) {
+        return;
+      }
+
+      const bounds = dialog.getBoundingClientRect();
+      const isInsideDrawer =
+        event.clientX >= bounds.left &&
+        event.clientX <= bounds.right &&
+        event.clientY >= bounds.top &&
+        event.clientY <= bounds.bottom;
+
+      if (!isInsideDrawer) {
+        setIsDrawerOpen(false);
+      }
+    };
+
+    const previousOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    dialog.addEventListener('pointerdown', handleBackdropPointerDown);
+
+    return () => {
+      dialog.removeEventListener('pointerdown', handleBackdropPointerDown);
+      document.documentElement.style.overflow = previousOverflow;
+    };
+  }, [isDrawerOpen]);
+
+  const handleFilterChange = useCallback(
     (filterId: string, input: string) => {
       if (isUpdating) {
         return;
       }
 
-      const currentValues = selectedFilters[filterId] ?? [];
-      const nextValues = currentValues.includes(input)
-        ? currentValues.filter((value) => value !== input)
-        : [...currentValues, input];
-      const nextSelectedFilters =
-        nextValues.length === 0
-          ? {...selectedFilters}
-          : {
-              ...selectedFilters,
-              [filterId]: nextValues,
-            };
+      const currentInputs = selectedFilters[filterId] ?? [];
+      const nextInputs = currentInputs.includes(input)
+        ? currentInputs.filter((value) => value !== input)
+        : [...currentInputs, input];
+      const nextSelectedFilters: SelectedFilters = {...selectedFilters};
 
-      if (nextValues.length === 0) {
+      if (nextInputs.length > 0) {
+        nextSelectedFilters[filterId] = nextInputs;
+      } else {
         delete nextSelectedFilters[filterId];
       }
 
       const params = getBaseParams();
-
       replaceCollectionFilterParams(
         params,
         flattenSelectedFilters(nextSelectedFilters),
       );
 
-      flushSync(() => {
-        setSelectedFilters(nextSelectedFilters);
-      });
+      setSelectedFilters(nextSelectedFilters);
       navigateWithParams(params);
     },
     [getBaseParams, isUpdating, navigateWithParams, selectedFilters],
@@ -146,231 +237,274 @@ export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
     }
 
     const params = getBaseParams();
-
     params.delete('f');
 
-    flushSync(() => {
-      setSelectedFilters({});
-    });
+    setSelectedFilters({});
     navigateWithParams(params);
   }, [getBaseParams, isUpdating, navigateWithParams]);
 
-  const isActive = useCallback(
+  const handleRemoveFilter = useCallback(
     (filterId: string, input: string) => {
-      return (selectedFilters[filterId] ?? []).includes(input);
+      handleFilterChange(filterId, input);
     },
-    [selectedFilters],
+    [handleFilterChange],
   );
 
-  const getSelectedCount = useCallback(
-    (filterId: string) => {
-      return (selectedFilters[filterId] ?? []).length;
-    },
-    [selectedFilters],
-  );
+  const toggleFilterGroup = useCallback((filterId: string) => {
+    setExpandedFilterIds((currentIds) => {
+      const nextIds = new Set(currentIds);
 
-  const handleRemoveFilterValue = useCallback(
-    (filterId: string, valueInput: string) => {
-      if (isUpdating) {
-        return;
-      }
-
-      const currentValues = selectedFilters[filterId] ?? [];
-      const nextValues = currentValues.filter((value) => value !== valueInput);
-      const nextSelectedFilters: SelectedFilters = {...selectedFilters};
-
-      if (nextValues.length > 0) {
-        nextSelectedFilters[filterId] = nextValues;
+      if (nextIds.has(filterId)) {
+        nextIds.delete(filterId);
       } else {
-        delete nextSelectedFilters[filterId];
+        nextIds.add(filterId);
       }
 
-      const params = getBaseParams();
+      return nextIds;
+    });
+  }, []);
 
-      replaceCollectionFilterParams(
-        params,
-        flattenSelectedFilters(nextSelectedFilters),
-      );
+  const closeDrawer = useCallback(() => {
+    setIsDrawerOpen(false);
+  }, []);
 
-      flushSync(() => {
-        setSelectedFilters(nextSelectedFilters);
-      });
-      navigateWithParams(params);
-    },
-    [getBaseParams, isUpdating, navigateWithParams, selectedFilters],
-  );
-
-  const activeChips = useMemo(() => {
-    const chips: Array<{
+  const activeFilters = useMemo(() => {
+    const items: Array<{
       filterId: string;
-      valueInput: string;
-      valueLabel: string;
+      input: string;
+      label: string;
     }> = [];
 
-    for (const filter of filters) {
-      const activeInputs = selectedFilters[filter.id] ?? [];
+    for (const [filterId, inputs] of Object.entries(selectedFilters)) {
+      const valuesByInput = filterIndex.valuesByFilterId.get(filterId);
 
-      for (const input of activeInputs) {
-        const matchedValue = filter.values.find(
-          (value) => getFilterValueInput(value) === input,
-        );
+      for (const input of inputs) {
+        const value = valuesByInput?.get(input);
 
-        if (matchedValue) {
-          chips.push({
-            filterId: filter.id,
-            valueInput: input,
-            valueLabel: matchedValue.label,
-          });
+        if (value) {
+          items.push({filterId, input, label: value.label});
         }
       }
     }
 
-    return chips;
-  }, [filters, selectedFilters]);
+    return items;
+  }, [filterIndex, selectedFilters]);
 
   if (filters.length === 0) {
     return null;
   }
 
-  const activeFilterCount = activeChips.length;
+  const activeFilterCount = activeFilters.length;
 
-    return (
-    <div
-      className={`collection-filters ${isUpdating ? 'is-updating' : ''}`}
-      aria-busy={isUpdating}
-    >
-      {isUpdating ? (
-        <div className="collection-filters__overlay" aria-live="polite">
-          <span className="collection-filters__overlay-spinner" aria-hidden="true" />
-          <span className="collection-filters__overlay-text">Updating filters</span>
-        </div>
-      ) : null}
-
-      <div className="filters-bar">
-        <button
-          type="button"
-          className={`filters-bar__trigger ${isMegaMenuOpen ? 'is-open' : ''} ${
-            isUpdating ? 'is-updating' : ''
-          }`}
-          onClick={() => setIsMegaMenuOpen((value) => !value)}
-          aria-expanded={isMegaMenuOpen}
-        >
-          <span className="filters-bar__trigger-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-              <path d="M96 160C96 142.3 110.3 128 128 128L512 128C529.7 128 544 142.3 544 160C544 177.7 529.7 192 512 192L128 192C110.3 192 96 177.7 96 160zM96 320C96 302.3 110.3 288 128 288L512 288C529.7 288 544 302.3 544 320C544 337.7 529.7 352 512 352L128 352C110.3 352 96 337.7 96 320zM544 480C544 497.7 529.7 512 512 512L128 512C110.3 512 96 497.7 96 480C96 462.3 110.3 448 128 448L512 448C529.7 448 544 462.3 544 480z" />
-            </svg>
-          </span>
-          <span className="filters-bar__trigger-label">Filters</span>
-        </button>
-
+  return (
+    <div className="collection-filters" aria-busy={isUpdating}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className="filters-trigger"
+        onClick={() => setIsDrawerOpen(true)}
+        aria-haspopup="dialog"
+        aria-expanded={isDrawerOpen}
+        aria-controls={drawerId}
+        aria-label={
+          activeFilterCount > 0
+            ? `${getActiveFilterLabel(activeFilterCount)}; Filter öffnen`
+            : 'Filter öffnen'
+        }
+      >
+        <span className="filters-trigger__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 7h10M18 7h2M10 17h10M4 17h2M14 4v6M10 14v6" />
+          </svg>
+        </span>
+        <span className="filters-trigger__label">Filter</span>
         {activeFilterCount > 0 ? (
-          <button
-            type="button"
-            className="filters-bar__reset"
-            onClick={handleClearFilters}
-            disabled={isUpdating}
-          >
-            Reset
-          </button>
+          <span className="filters-trigger__count" aria-hidden="true">
+            {activeFilterCount}
+          </span>
         ) : null}
-      </div>
+      </button>
 
-      {isMegaMenuOpen ? (
-          <div className="filters-mega" aria-label="Product filters">
-            <div className="filters-mega__head">
-              <div className="filters-mega__status">
-                {isUpdating
-                  ? 'Updating products'
-                  : activeFilterCount > 0
-                    ? `${activeFilterCount} selected`
-                    : 'All filters'}
+      <dialog
+        id={drawerId}
+        ref={dialogRef}
+        className={`filters-drawer ${isUpdating ? 'is-updating' : ''}`}
+        aria-labelledby={drawerTitleId}
+        onCancel={closeDrawer}
+        onClose={() => {
+          setIsDrawerOpen(false);
+          triggerRef.current?.focus();
+        }}
+      >
+        {isDrawerOpen ? (
+          <div className="filters-drawer__surface">
+            {isUpdating ? (
+              <div className="filters-drawer__progress" aria-hidden="true">
+                <span />
               </div>
-            <button
-              type="button"
-              className="filters-mega__close"
-              onClick={() => setIsMegaMenuOpen(false)}
-            >
-              Close
-            </button>
-          </div>
+            ) : null}
 
-          <div className="filters-mega__grid">
-            {filters.map((filter) => {
-              const selectedCount = getSelectedCount(filter.id);
+            <header className="filters-drawer__header">
+              <div className="filters-drawer__heading">
+                <h2 id={drawerTitleId} className="filters-drawer__title">
+                  Filter
+                </h2>
+                <p className="filters-drawer__status" aria-live="polite">
+                  {isUpdating
+                    ? 'Produkte werden aktualisiert'
+                    : activeFilterCount > 0
+                      ? getActiveFilterLabel(activeFilterCount)
+                      : 'Auswahl verfeinern'}
+                </p>
+              </div>
 
-              return (
-                <section key={filter.id} className="filter-group">
-                  <div className="filter-group__head">
-                    <h3 className="filter-group__title">{filter.label}</h3>
-                    <span className="filter-group__meta">
-                      {selectedCount > 0
-                        ? `${selectedCount} selected`
-                        : `${filter.values.length} options`}
-                    </span>
+              <button
+                type="button"
+                className="filters-drawer__close"
+                onClick={closeDrawer}
+                aria-label="Filter schließen"
+              >
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="m5 5 10 10M15 5 5 15" />
+                </svg>
+              </button>
+            </header>
+
+            <div className="filters-drawer__body">
+              {activeFilters.length > 0 ? (
+                <section className="filters-active" aria-label="Aktive Filter">
+                  <div className="filters-active__header">
+                    <h3 className="filters-active__title">Aktive Filter</h3>
+                    <button
+                      type="button"
+                      className="filters-active__clear"
+                      onClick={handleClearFilters}
+                      disabled={isUpdating}
+                    >
+                      Alle löschen
+                    </button>
                   </div>
 
-                  <ul className="filter-group__options">
-                    {filter.values.map((value: FilterValue) => {
-                      const input = getFilterValueInput(value);
-
-                      if (!input) {
-                        return null;
-                      }
-
-                      return (
-                        <li key={value.id} className="filter-group__option">
-                          <label className="filter-group__option-label">
-                            <input
-                              type="checkbox"
-                              className="filter-group__checkbox"
-                              checked={isActive(filter.id, input)}
-                              onChange={() => handleFilterClick(filter.id, input)}
-                              disabled={isUpdating}
-                            />
-                            <span
-                              className="filter-group__checkbox-ui"
-                              aria-hidden="true"
-                            />
-                            <span className="filter-group__option-text">
-                              {value.label}
-                            </span>
-                            {typeof value.count === 'number' ? (
-                              <span className="filter-group__option-count">
-                                {value.count}
-                              </span>
-                            ) : null}
-                          </label>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                  <div className="filters-active__list">
+                    {activeFilters.map((filter) => (
+                      <button
+                        key={`${filter.filterId}-${filter.input}`}
+                        type="button"
+                        className="filters-active__chip"
+                        onClick={() =>
+                          handleRemoveFilter(filter.filterId, filter.input)
+                        }
+                        disabled={isUpdating}
+                        aria-label={`Filter ${filter.label} entfernen`}
+                      >
+                        <span>{filter.label}</span>
+                        <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                          <path d="m3 3 6 6M9 3 3 9" />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
                 </section>
-              );
-            })}
-          </div>
+              ) : null}
 
-          {activeChips.length > 0 ? (
-            <div className="filters-selected">
-              {activeChips.map((chip) => (
-                <button
-                  key={`${chip.filterId}-${chip.valueInput}`}
-                  type="button"
-                  className="filters-selected__chip"
-                  onClick={() =>
-                    handleRemoveFilterValue(chip.filterId, chip.valueInput)
-                  }
-                  disabled={isUpdating}
-                >
-                  <span className="filters-selected__chip-text">{chip.valueLabel}</span>
-                  <span className="filters-selected__chip-icon" aria-hidden="true">
-                    x
-                  </span>
-                </button>
-              ))}
+              <div className="filters-groups">
+                {filters.map((filter, index) => {
+                  const selectedInputs =
+                    selectedInputsByFilterId.get(filter.id) ??
+                    new Set<string>();
+                  const selectedCount = selectedInputs.size;
+                  const isExpanded = expandedFilterIds.has(filter.id);
+                  const optionsId = `${filterGroupIdPrefix}-${index}`;
+
+                  return (
+                    <section key={filter.id} className="filter-group">
+                      <button
+                        type="button"
+                        className="filter-group__toggle"
+                        onClick={() => toggleFilterGroup(filter.id)}
+                        aria-expanded={isExpanded}
+                        aria-controls={optionsId}
+                      >
+                        <span className="filter-group__heading">
+                          <span className="filter-group__title">
+                            {filter.label}
+                          </span>
+                          <span className="filter-group__meta">
+                            {selectedCount > 0
+                              ? `${selectedCount} ausgewählt`
+                              : getOptionCountLabel(filter.values.length)}
+                          </span>
+                        </span>
+                        <span
+                          className="filter-group__chevron"
+                          aria-hidden="true"
+                        >
+                          <svg viewBox="0 0 16 16" fill="none">
+                            <path d="m4 6 4 4 4-4" />
+                          </svg>
+                        </span>
+                      </button>
+
+                      {isExpanded ? (
+                        <ul id={optionsId} className="filter-group__options">
+                          {filter.values.map((value) => {
+                            const input = getFilterValueInput(value);
+
+                            if (!input) {
+                              return null;
+                            }
+
+                            const isSelected = selectedInputs.has(input);
+
+                            return (
+                              <li
+                                key={value.id}
+                                className="filter-group__option"
+                              >
+                                <label
+                                  className={`filter-option ${
+                                    isSelected ? 'is-selected' : ''
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    className="filter-option__input"
+                                    checked={isSelected}
+                                    onChange={() =>
+                                      handleFilterChange(filter.id, input)
+                                    }
+                                    disabled={isUpdating}
+                                  />
+                                  <span
+                                    className="filter-option__control"
+                                    aria-hidden="true"
+                                  >
+                                    <svg viewBox="0 0 12 12" fill="none">
+                                      <path d="m2.5 6 2.2 2.2L9.5 3.5" />
+                                    </svg>
+                                  </span>
+                                  <span className="filter-option__label">
+                                    {value.label}
+                                  </span>
+                                  {typeof value.count === 'number' ? (
+                                    <span className="filter-option__count">
+                                      {value.count}
+                                    </span>
+                                  ) : null}
+                                </label>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      ) : null}
+                    </section>
+                  );
+                })}
+              </div>
             </div>
-          ) : null}
-        </div>
-      ) : null}
+          </div>
+        ) : null}
+      </dialog>
     </div>
   );
 }
