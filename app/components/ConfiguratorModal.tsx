@@ -36,6 +36,66 @@ const CONFIGURATOR_STEPS: Array<{
   {key: 'preview', label: 'Vorschau'},
 ];
 
+type ConfiguratorMaterialVisual = {
+  imageUrl: string;
+  badge?: string;
+  featured?: boolean;
+  objectPosition?: string;
+};
+
+const MATERIAL_VISUALS = {
+  standard: {
+    imageUrl:
+      'https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_Material_01_Standard.jpg?v=1786026504',
+  },
+  premium: {
+    imageUrl:
+      'https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_Material_02_Premium.jpg?v=1786026504',
+    badge: 'Am beliebtesten',
+    featured: true,
+  },
+  premiumVinyl: {
+    imageUrl:
+      'https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_Material_03_PremiumVinyl.jpg?v=1786026505',
+    badge: 'Empfohlen',
+  },
+  selfAdhesive: {
+    imageUrl:
+      'https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_Material_04_Selbstklebend.jpg?v=1786026504',
+    badge: 'Kein Klebstoff nötig',
+    objectPosition: 'center bottom',
+  },
+  airtex: {
+    imageUrl:
+      'https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_Material_05_AirtexBahnenlos.jpg?v=1786026505',
+    badge: 'Bahnenlos',
+  },
+} satisfies Record<string, ConfiguratorMaterialVisual>;
+
+function resolveMaterialVisual(
+  title: string,
+): ConfiguratorMaterialVisual | null {
+  const normalizedTitle = title.trim().toLocaleLowerCase('de-DE');
+
+  if (normalizedTitle.includes('premium vinyl')) {
+    return MATERIAL_VISUALS.premiumVinyl;
+  }
+  if (normalizedTitle.includes('selbstkleb')) {
+    return MATERIAL_VISUALS.selfAdhesive;
+  }
+  if (normalizedTitle.includes('airtex')) {
+    return MATERIAL_VISUALS.airtex;
+  }
+  if (normalizedTitle.includes('premium')) {
+    return MATERIAL_VISUALS.premium;
+  }
+  if (normalizedTitle.includes('standard')) {
+    return MATERIAL_VISUALS.standard;
+  }
+
+  return null;
+}
+
 type ConfiguratorFlowHeaderProps = {
   step: ConfiguratorStep;
   title: string;
@@ -103,11 +163,7 @@ function ConfiguratorFlowHeader({
       }`}
     >
       <div className="configuratorFlowHeaderCopy">
-        <h2
-          id={`configurator-${step}-title`}
-          ref={titleRef}
-          tabIndex={-1}
-        >
+        <h2 id={`configurator-${step}-title`} ref={titleRef} tabIndex={-1}>
           {title}
         </h2>
         <p id={`configurator-${step}-description`}>{description}</p>
@@ -264,9 +320,7 @@ export function ConfiguratorModal({
     );
   };
 
-  const handleMaterialSelect = async (
-    material: ConfiguratorMaterialOption,
-  ) => {
+  const handleMaterialSelect = async (material: ConfiguratorMaterialOption) => {
     if (!material.exists || selectingMaterialId) return;
 
     setSelectingMaterialId(material.id);
@@ -283,10 +337,7 @@ export function ConfiguratorModal({
 
   return (
     <div className="configuratorModalOverlay" role="presentation">
-      <div
-        className="configuratorModalBackdrop"
-        aria-hidden="true"
-      />
+      <div className="configuratorModalBackdrop" aria-hidden="true" />
       <div
         ref={dialogRef}
         className={`configuratorModal configuratorModal--${step}`}
@@ -385,6 +436,9 @@ export function ConfiguratorModal({
                   {materialOptions.map((material) => {
                     const isSelecting = selectingMaterialId === material.id;
                     const isSelectionPending = selectingMaterialId !== null;
+                    const materialVisual = resolveMaterialVisual(
+                      material.title,
+                    );
 
                     return (
                       <article
@@ -394,51 +448,93 @@ export function ConfiguratorModal({
                             ? ' configuratorMaterialCard--selected'
                             : ''
                         }${
-                          material.isBestseller
-                            ? ' configuratorMaterialCard--bestseller'
+                          materialVisual?.featured
+                            ? ' configuratorMaterialCard--featured'
                             : ''
                         }`}
                       >
-                        {material.isBestseller && (
-                          <span className="configuratorMaterialBestseller">
-                            Bestseller
-                          </span>
+                        {materialVisual && (
+                          <div className="configuratorMaterialMedia">
+                            <img
+                              src={materialVisual.imageUrl}
+                              alt={`Materialoberfläche ${material.title}`}
+                              decoding="async"
+                              draggable={false}
+                              style={{
+                                objectPosition: materialVisual.objectPosition,
+                              }}
+                            />
+
+                            {materialVisual.badge && (
+                              <span
+                                className={`configuratorMaterialBadge${
+                                  materialVisual.featured
+                                    ? ' configuratorMaterialBadge--featured'
+                                    : ''
+                                }`}
+                              >
+                                {materialVisual.badge}
+                              </span>
+                            )}
+
+                            {material.selected && (
+                              <span
+                                className="configuratorMaterialSelectedMark"
+                                aria-hidden="true"
+                              >
+                                <svg viewBox="0 0 24 24">
+                                  <path d="m7 12.5 3.2 3.2L17.5 8.5" />
+                                </svg>
+                              </span>
+                            )}
+                          </div>
                         )}
 
-                        <div className="configuratorMaterialCardHeader">
-                          <h3>{material.title}</h3>
-                        </div>
-
-                        <ul className="configuratorMaterialFeatures">
-                          {material.properties.map((property) => (
-                            <li key={`${material.id}-${property}`}>
-                              {property}
-                            </li>
-                          ))}
-                        </ul>
-
-                        <div className="configuratorMaterialTotal">
-                          <div>
-                            <span>Gesamtpreis</span>
-                            <small>
-                              Für {widthCm} × {heightCm} cm
-                            </small>
+                        <div className="configuratorMaterialCardBody">
+                          <div className="configuratorMaterialCardHeader">
+                            <h3>{material.title}</h3>
                           </div>
-                          <strong>{material.calculatedPrice}</strong>
-                        </div>
 
-                        <button
-                          type="button"
-                          className="configuratorMaterialSelectButton"
-                          disabled={!material.exists || isSelectionPending}
-                          onClick={() => void handleMaterialSelect(material)}
-                        >
-                          {isSelecting
-                            ? 'Wird ausgewählt…'
-                            : material.selected
-                              ? 'Ausgewählt · Weiter'
-                              : 'Material auswählen'}
-                        </button>
+                          <ul className="configuratorMaterialFeatures">
+                            {material.properties.map((property) => (
+                              <li key={`${material.id}-${property}`}>
+                                {property}
+                              </li>
+                            ))}
+                          </ul>
+
+                          <div className="configuratorMaterialTotal">
+                            <div>
+                              <span>Gesamtpreis</span>
+                              <small>
+                                Für {widthCm} × {heightCm} cm
+                              </small>
+                            </div>
+                            <strong>{material.calculatedPrice}</strong>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="configuratorMaterialSelectButton"
+                            disabled={!material.exists || isSelectionPending}
+                            aria-pressed={material.selected}
+                            aria-busy={isSelecting}
+                            onClick={() => void handleMaterialSelect(material)}
+                          >
+                            <span>
+                              {isSelecting
+                                ? 'Wird ausgewählt…'
+                                : material.selected
+                                  ? 'Ausgewählt · Weiter'
+                                  : 'Material auswählen'}
+                            </span>
+                            {!isSelecting && (
+                              <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m9 18 6-6-6-6" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
                       </article>
                     );
                   })}
