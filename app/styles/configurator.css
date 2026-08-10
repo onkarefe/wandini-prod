@@ -2648,8 +2648,10 @@
   }
 }
 
-/* lg only: 1024–1279px */
-@media (min-width: 1024px) and (max-width: 1279.98px) {
+/* Compact desktop: narrow widths or short browser viewports (for example Safari
+   after the macOS menu bar and browser chrome consume part of a 720px display). */
+@media (min-width: 1024px) and (max-width: 1279.98px),
+  (min-width: 1280px) and (max-height: 760px) {
   :is(
       .configuratorModal--crop,
       .configuratorModal--materials,
@@ -2766,6 +2768,7 @@
   .configuratorMaterialsGrid {
     gap: 10px;
     padding: 0 2px;
+    grid-auto-rows: 100%;
   }
 
   .configuratorMaterialMedia {
@@ -2808,9 +2811,17 @@
     overflow-y: auto;
   }
 
+  .configuratorMaterials {
+    margin-block: auto;
+  }
+
   .configuratorMaterials,
   .configuratorMaterialsGrid {
     height: auto;
+  }
+
+  .configuratorMaterialsGrid {
+    grid-auto-rows: auto;
   }
 }
 @media (min-width: 1280px) and (max-width: 1379.98px) {
@@ -2872,6 +2883,12 @@
   .cs2-warning__icon {
     height: 18px;
     width: 18px;
+  }
+}
+
+@media (min-width: 1280px) and (max-height: 760px) {
+  .configuratorMaterialMedia {
+    aspect-ratio: 16 / 9;
   }
 }
 
