@@ -1,4 +1,4 @@
-import type {ChangeEvent} from 'react';
+import {lazy, Suspense, type ChangeEvent} from 'react';
 import {
   redirect,
   useLoaderData,
@@ -71,6 +71,11 @@ type CollectionItemListElement = {
 
 const COLLECTION_META_BRAND = 'Wandini';
 const COLLECTION_META_DESCRIPTION_MAX_LENGTH = 160;
+const ZUBEHOR_COLLECTION_PAGE_TYPE = 'zubehor';
+
+const ZubehorCollectionLayout = lazy(
+  () => import('~/components/ZubehorCollectionLayout'),
+);
 
 const NOISY_COLLECTION_PARAMS = ['sort', 'f', 'cursor', 'direction'] as const;
 
@@ -78,12 +83,22 @@ function hasNoisyCollectionParams(searchParams: URLSearchParams) {
   return NOISY_COLLECTION_PARAMS.some((param) => searchParams.has(param));
 }
 
+function isZubehorCollection(collection: CollectionData) {
+  return (
+    collection.pageType?.value?.trim().toLowerCase() ===
+    ZUBEHOR_COLLECTION_PAGE_TYPE
+  );
+}
+
 function normalizeMetaText(value?: string | null) {
   if (!value) {
     return '';
   }
 
-  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function truncateMetaDescription(value: string) {
@@ -114,7 +129,9 @@ function getCollectionMetaTitle(collection?: CollectionMetaInput | null) {
     return COLLECTION_META_BRAND;
   }
 
-  return collectionTitle.toLowerCase().includes(COLLECTION_META_BRAND.toLowerCase())
+  return collectionTitle
+    .toLowerCase()
+    .includes(COLLECTION_META_BRAND.toLowerCase())
     ? collectionTitle
     : `${collectionTitle} | ${COLLECTION_META_BRAND}`;
 }
@@ -135,7 +152,8 @@ function buildCollectionPageJsonLd(
   collection: CollectionMetaInput,
   canonicalUrl: string,
 ) {
-  const name = normalizeMetaText(collection.title) || getCollectionMetaTitle(collection);
+  const name =
+    normalizeMetaText(collection.title) || getCollectionMetaTitle(collection);
   const description = getCollectionMetaDescription(collection);
 
   return {
@@ -160,7 +178,8 @@ function buildCollectionBreadcrumbJsonLd(
   collection: CollectionMetaInput,
   canonicalUrl: string,
 ) {
-  const name = normalizeMetaText(collection.title) || getCollectionMetaTitle(collection);
+  const name =
+    normalizeMetaText(collection.title) || getCollectionMetaTitle(collection);
 
   return {
     '@context': 'https://schema.org',
@@ -271,7 +290,9 @@ export const meta: Route.MetaFunction = ({data, params}) => {
     },
     {property: 'og:type', content: 'website'},
     {property: 'og:title', content: title},
-    ...(description ? [{property: 'og:description', content: description}] : []),
+    ...(description
+      ? [{property: 'og:description', content: description}]
+      : []),
     {property: 'og:url', content: canonicalUrl},
     ...(imageUrl ? [{property: 'og:image', content: imageUrl}] : []),
     {
@@ -279,7 +300,9 @@ export const meta: Route.MetaFunction = ({data, params}) => {
       content: imageUrl ? 'summary_large_image' : 'summary',
     },
     {name: 'twitter:title', content: title},
-    ...(description ? [{name: 'twitter:description', content: description}] : []),
+    ...(description
+      ? [{name: 'twitter:description', content: description}]
+      : []),
     ...(imageUrl ? [{name: 'twitter:image', content: imageUrl}] : []),
   ];
 };
@@ -291,11 +314,7 @@ export async function loader(args: Route.LoaderArgs) {
   return {...deferredData, ...criticalData};
 }
 
-async function loadCriticalData({
-  context,
-  params,
-  request,
-}: Route.LoaderArgs) {
+async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const {handle} = params;
   const {storefront, customerAccount} = context;
 
@@ -347,8 +366,90 @@ function loadDeferredData() {
 }
 
 export default function Collection() {
-  const {collection, canonicalUrl, isNoisyCollectionUrl, isLoggedIn, wishlistProductIds} =
-    useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
+  const {
+    collection,
+    canonicalUrl,
+    isNoisyCollectionUrl,
+    isLoggedIn,
+    wishlistProductIds,
+  } = data;
+  const collectionPageJsonLd = isNoisyCollectionUrl
+    ? null
+    : buildCollectionPageJsonLd(collection, canonicalUrl);
+  const breadcrumbJsonLd = isNoisyCollectionUrl
+    ? null
+    : buildCollectionBreadcrumbJsonLd(collection, canonicalUrl);
+  const itemListJsonLd = isNoisyCollectionUrl
+    ? null
+    : buildCollectionItemListJsonLd(collection.products.nodes, canonicalUrl);
+
+  return (
+    <div className="collection">
+      {collectionPageJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: stringifyJsonLd(collectionPageJsonLd),
+          }}
+        />
+      ) : null}
+      {breadcrumbJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
+        />
+      ) : null}
+      {itemListJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: stringifyJsonLd(itemListJsonLd)}}
+        />
+      ) : null}
+
+      {isZubehorCollection(collection) ? (
+        <Suspense
+          fallback={
+            <div className="collectionMainHeroDiv" aria-busy="true">
+              <h1>{collection.title}</h1>
+            </div>
+          }
+        >
+          <ZubehorCollectionLayout
+            collection={collection}
+            isLoggedIn={isLoggedIn}
+            wishlistProductIds={wishlistProductIds}
+          />
+        </Suspense>
+      ) : (
+        <DefaultCollectionLayout
+          collection={collection}
+          isLoggedIn={isLoggedIn}
+          wishlistProductIds={wishlistProductIds}
+        />
+      )}
+
+      <Analytics.CollectionView
+        data={{
+          collection: {
+            id: collection.id,
+            handle: collection.handle,
+          },
+        }}
+      />
+    </div>
+  );
+}
+
+function DefaultCollectionLayout({
+  collection,
+  isLoggedIn,
+  wishlistProductIds,
+}: {
+  collection: CollectionData;
+  isLoggedIn: boolean;
+  wishlistProductIds: string[];
+}) {
   const navigate = useNavigate();
   const navigation = useNavigation();
   const location = useLocation();
@@ -392,36 +493,8 @@ export default function Collection() {
       search: params.toString(),
     });
   };
-  const collectionPageJsonLd = isNoisyCollectionUrl
-    ? null
-    : buildCollectionPageJsonLd(collection, canonicalUrl);
-  const breadcrumbJsonLd = isNoisyCollectionUrl
-    ? null
-    : buildCollectionBreadcrumbJsonLd(collection, canonicalUrl);
-  const itemListJsonLd = isNoisyCollectionUrl
-    ? null
-    : buildCollectionItemListJsonLd(collection.products.nodes, canonicalUrl);
-
   return (
-    <div className="collection">
-      {collectionPageJsonLd ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{__html: stringifyJsonLd(collectionPageJsonLd)}}
-        />
-      ) : null}
-      {breadcrumbJsonLd ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
-        />
-      ) : null}
-      {itemListJsonLd ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{__html: stringifyJsonLd(itemListJsonLd)}}
-        />
-      ) : null}
+    <>
       <div
         className="collectionMainHeroDiv"
         style={
@@ -485,8 +558,10 @@ export default function Collection() {
               const similarProductsUrl =
                 hasMainMotif && hasMainTheme
                   ? buildSimilarProductsPath({
-                      mainMotif: productWithSimilarFields.mainMotif?.value ?? '',
-                      mainTheme: productWithSimilarFields.mainTheme?.value ?? '',
+                      mainMotif:
+                        productWithSimilarFields.mainMotif?.value ?? '',
+                      mainTheme:
+                        productWithSimilarFields.mainTheme?.value ?? '',
                       productCategory: collection.handle,
                     })
                   : null;
@@ -524,7 +599,11 @@ export default function Collection() {
           </PaginatedResourceSection>
 
           {isCollectionUpdating ? (
-            <div className="collection-loader" aria-live="polite" aria-busy="true">
+            <div
+              className="collection-loader"
+              aria-live="polite"
+              aria-busy="true"
+            >
               <img
                 src={wandiniLogo}
                 alt="Wandini loading"
@@ -534,16 +613,7 @@ export default function Collection() {
           ) : null}
         </div>
       ) : null}
-
-      <Analytics.CollectionView
-        data={{
-          collection: {
-            id: collection.id,
-            handle: collection.handle,
-          },
-        }}
-      />
-    </div>
+    </>
   );
 }
 
@@ -571,7 +641,12 @@ function parseCollectionFilters(
   const legacyFilters: Array<Record<string, unknown>> = [];
 
   searchParams.forEach((value, key) => {
-    if (key === 'f' || key === 'sort' || key === 'cursor' || key === 'direction') {
+    if (
+      key === 'f' ||
+      key === 'sort' ||
+      key === 'cursor' ||
+      key === 'direction'
+    ) {
       return;
     }
 
@@ -659,6 +734,9 @@ const CUSTOM_COLLECTION_QUERY = `#graphql
       handle
       title
       description
+      pageType: metafield(namespace: "custom", key: "page_type") {
+        value
+      }
       seo {
         description
         title
