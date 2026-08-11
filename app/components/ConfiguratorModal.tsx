@@ -506,9 +506,6 @@ export function ConfiguratorModal({
                           <div className="configuratorMaterialTotal">
                             <div>
                               <span>Gesamtpreis</span>
-                              <small>
-                                Für {widthCm} × {heightCm} cm
-                              </small>
                             </div>
                             <strong>{material.calculatedPrice}</strong>
                           </div>

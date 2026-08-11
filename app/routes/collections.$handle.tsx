@@ -512,7 +512,7 @@ function DefaultCollectionLayout({
         <p>{collection.description}</p>
       </div>
 
-      <div className="container mx-auto">
+      <div className="collection-controls container mx-auto">
         {hasFilters ? (
           <FilterBar
             filters={collection.products.filters}

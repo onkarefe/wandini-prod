@@ -3,9 +3,11 @@ import {useEffect, useState} from 'react';
 import type {Route} from './+types/similar-products.$slug';
 import {CustomProductCard} from '~/components/CustomProductCard';
 import {
+  buildSimilarProductsPath,
   getSimilarProductsPageData,
   type SimilarProductsBaseProduct,
 } from '~/lib/similar-products';
+import {getCustomerWishlistProductIds} from '~/lib/wishlist.server';
 import '../styles/collections.css';
 
 const PAGE_SIZE = 9;
@@ -36,8 +38,8 @@ function buildSeoIdentity(target: {
     target.categoryHandle,
   );
   const heading = `${target.mainTheme} ${target.mainMotif} ${categoryLabel}`;
-  const description = `Explore ${target.mainTheme} ${target.mainMotif} ${categoryLabel.toLowerCase()} and related designs selected by motif, theme, and category.`;
-  const subtitle = `Explore ${target.mainTheme} ${target.mainMotif}-inspired ${categoryLabel.toLowerCase()} selected by motif, theme, and visual style.`;
+  const description = `Entdecken Sie ${categoryLabel} zum Thema „${target.mainTheme}“ und mit dem Motiv „${target.mainMotif}“ sowie verwandte Designs.`;
+  const subtitle = `Entdecken Sie ${categoryLabel.toLowerCase()} mit ähnlichen Motiven, Themen und Bildstilen.`;
 
   return {
     categoryLabel,
@@ -46,17 +48,6 @@ function buildSeoIdentity(target: {
     description,
     subtitle,
   };
-}
-
-function getLocalePrefixFromPathname(pathname: string) {
-  const segments = pathname.split('/').filter(Boolean);
-  const firstSegment = segments[0]?.toLowerCase();
-
-  if (firstSegment === 'de-de') {
-    return '/de-de';
-  }
-
-  return '';
 }
 
 type LoadMoreResponse = {
@@ -71,10 +62,12 @@ type LoadMoreResponse = {
 export const meta: Route.MetaFunction = ({data, params}) => {
   const canonicalUrl = data?.canonicalUrl ?? `/similar-products/${params.slug ?? ''}`;
   const seoIdentity = data ? buildSeoIdentity(data.target) : null;
-  const title = seoIdentity?.title ?? `Similar Products | ${params.slug ?? ''} | Wandini`;
+  const title =
+    seoIdentity?.title ??
+    `Ähnliche Produkte | ${params.slug ?? ''} | Wandini`;
   const description =
     seoIdentity?.description ??
-    'Explore related designs selected by motif, theme, and category.';
+    'Entdecken Sie verwandte Designs, ausgewählt nach Motiv, Thema und Kategorie.';
 
   return [
     {title},
@@ -92,21 +85,29 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
   const slug = params.slug;
 
   if (!slug) {
-    throw new Response('Similar products slug not found.', {status: 404});
+    throw new Response('Slug für ähnliche Produkte wurde nicht gefunden.', {
+      status: 404,
+    });
   }
 
-  const pageData = await getSimilarProductsPageData({
-    storefront: context.storefront,
-    slug,
-    offset: 0,
-    pageSize: PAGE_SIZE,
-  });
+  const [pageData, isLoggedIn, wishlistProductIds] = await Promise.all([
+    getSimilarProductsPageData({
+      storefront: context.storefront,
+      slug,
+      offset: 0,
+      pageSize: PAGE_SIZE,
+    }),
+    context.customerAccount.isLoggedIn(),
+    getCustomerWishlistProductIds({}),
+  ]);
 
   const url = new URL(request.url);
 
   return {
     ...pageData,
     canonicalUrl: `${url.origin}${url.pathname}`,
+    isLoggedIn,
+    wishlistProductIds,
   };
 }
 
@@ -115,7 +116,10 @@ export async function action({context, params, request}: Route.ActionArgs) {
 
   if (!slug) {
     return Response.json(
-      {ok: false, message: 'Similar products slug not found.'},
+      {
+        ok: false,
+        message: 'Slug für ähnliche Produkte wurde nicht gefunden.',
+      },
       {status: 404},
     );
   }
@@ -127,7 +131,7 @@ export async function action({context, params, request}: Route.ActionArgs) {
 
   if (!Number.isFinite(offset) || offset < 0) {
     return Response.json(
-      {ok: false, message: 'Invalid offset value.'},
+      {ok: false, message: 'Ungültiger Offset-Wert.'},
       {status: 400},
     );
   }
@@ -152,6 +156,7 @@ export default function SimilarProductsSlugPage() {
   const [items, setItems] = useState(initialData.items);
   const [nextOffset, setNextOffset] = useState(initialData.nextOffset);
   const [hasMore, setHasMore] = useState(initialData.hasMore);
+  const wishlistProductIdSet = new Set(initialData.wishlistProductIds);
   const heroState = location.state as
     | {
         sourceProductTitle?: string;
@@ -159,19 +164,17 @@ export default function SimilarProductsSlugPage() {
       }
     | undefined;
   const seoIdentity = buildSeoIdentity(initialData.target);
-  const relatedCollectionHref = `${getLocalePrefixFromPathname(
-    new URL(initialData.canonicalUrl).pathname,
-  )}/collections/${initialData.target.categoryHandle}`;
-  const relatedCollectionLabel = buildSimilarCategoryLabel(
-    initialData.target.collectionTitle,
-    initialData.target.categoryHandle,
-  );
 
   useEffect(() => {
     setItems(initialData.items);
     setNextOffset(initialData.nextOffset);
     setHasMore(initialData.hasMore);
-  }, [initialData.target.slug]);
+  }, [
+    initialData.hasMore,
+    initialData.items,
+    initialData.nextOffset,
+    initialData.target.slug,
+  ]);
 
   useEffect(() => {
     const response = fetcher.data;
@@ -220,38 +223,52 @@ export default function SimilarProductsSlugPage() {
         </div>
       ) : null}
 
-      <div className="container mx-auto">
-        <section aria-labelledby="related-links-heading">
-          <h2 id="related-links-heading">Explore more designs</h2>
-          <a href={relatedCollectionHref}>{relatedCollectionLabel}</a>
-        </section>
-      </div>
-
       <div className="collection-products-shell">
         <div className="custom-products-grid container mx-auto">
-          {items.map((product) => (
-            <CustomProductCard
-              key={product.id}
-              productId={product.id}
-              title={product.title}
-              images={
-                product.images?.nodes?.map((image) => ({
-                  url: image.url,
-                  altText: image.altText ?? undefined,
-                })) ?? []
-              }
-              productUrl={`/products/${product.handle}`}
-              minPrice={
-                product.priceRange?.minVariantPrice
-                  ? {
-                      amount: product.priceRange.minVariantPrice.amount,
-                      currencyCode:
-                        product.priceRange.minVariantPrice.currencyCode,
-                    }
-                  : undefined
-              }
-            />
-          ))}
+          {items.map((product) => {
+            const mainMotif = product.mainMotif?.value?.trim() ?? '';
+            const mainTheme = product.mainTheme?.value?.trim() ?? '';
+            const hasSimilarProductsTarget = Boolean(mainMotif && mainTheme);
+            const similarProductsUrl = hasSimilarProductsTarget
+              ? buildSimilarProductsPath({
+                  mainMotif,
+                  mainTheme,
+                  productCategory: initialData.target.categoryHandle,
+                })
+              : null;
+
+            return (
+              <CustomProductCard
+                key={product.id}
+                productId={product.id}
+                title={product.title}
+                images={
+                  product.images?.nodes?.map((image) => ({
+                    url: image.url,
+                    altText: image.altText ?? undefined,
+                  })) ?? []
+                }
+                productUrl={`/products/${product.handle}`}
+                showSimilarMotifsButton={hasSimilarProductsTarget}
+                similarProductsUrl={similarProductsUrl ?? undefined}
+                similarProductsSourceTitle={product.title}
+                similarProductsSourceImageUrl={
+                  product.images?.nodes?.[0]?.url ?? undefined
+                }
+                minPrice={
+                  product.priceRange?.minVariantPrice
+                    ? {
+                        amount: product.priceRange.minVariantPrice.amount,
+                        currencyCode:
+                          product.priceRange.minVariantPrice.currencyCode,
+                      }
+                    : undefined
+                }
+                isLoggedIn={initialData.isLoggedIn}
+                isWishlisted={wishlistProductIdSet.has(product.id)}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -263,7 +280,7 @@ export default function SimilarProductsSlugPage() {
             className="collectionReloadButton"
             disabled={fetcher.state !== 'idle'}
           >
-            {fetcher.state !== 'idle' ? 'Loading...' : 'Load more'}
+            {fetcher.state !== 'idle' ? 'Wird geladen...' : 'Mehr anzeigen'}
           </button>
         </fetcher.Form>
       ) : null}

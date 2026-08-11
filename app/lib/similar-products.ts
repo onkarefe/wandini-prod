@@ -121,7 +121,7 @@ export async function fetchSimilarProductsBaseData({
     const collection = data.collection;
 
     if (!collection) {
-      throw new Response(`Collection ${categoryHandle} not found.`, {
+      throw new Response(`Kollektion ${categoryHandle} wurde nicht gefunden.`, {
         status: 404,
       });
     }
@@ -542,7 +542,7 @@ function resolveSimilarProductsTarget({
   });
 
   if (matchingProducts.length === 0) {
-    throw new Response(`Similar products target ${slug} not found.`, {
+    throw new Response(`Ziel für ähnliche Produkte ${slug} wurde nicht gefunden.`, {
       status: 404,
     });
   }
@@ -552,7 +552,7 @@ function resolveSimilarProductsTarget({
   const mainTheme = getMetafieldTextValue(primaryProduct.mainTheme);
 
   if (!mainMotif || !mainTheme) {
-    throw new Response(`Similar products target ${slug} is invalid.`, {
+    throw new Response(`Ziel für ähnliche Produkte ${slug} ist ungültig.`, {
       status: 404,
     });
   }
@@ -717,7 +717,7 @@ export async function getSimilarProductsPageData({
   const categoryHandle = resolveCategoryHandleFromSlug(slug, collectionHandles);
 
   if (!categoryHandle) {
-    throw new Response(`Category could not be resolved for ${slug}.`, {
+    throw new Response(`Kategorie für ${slug} konnte nicht ermittelt werden.`, {
       status: 404,
     });
   }

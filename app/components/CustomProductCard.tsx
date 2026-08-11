@@ -221,7 +221,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
           <button
             key={`dot-${img.url}`}
             type="button"
-            aria-label={`Go to slide ${i + 1}`}
+            aria-label={`Zu Bild ${i + 1} wechseln`}
             className={
               'custom-product-card__dot' +
               (i === selectedIndex ? ' custom-product-card__dot--active' : '')

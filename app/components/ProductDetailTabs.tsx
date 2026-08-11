@@ -9,11 +9,13 @@ import '~/styles/ProductDetailTabs.css';
 export interface ProductDetailTabsProps {
   tabTitles?: string[];
   tabContents?: ReactNode[];
+  headerNotice?: ReactNode;
 }
 
 export function ProductDetailTabs({
   tabTitles = [],
   tabContents = [],
+  headerNotice,
 }: ProductDetailTabsProps) {
   const [activeTab, setActiveTab] = useState(0);
   const tabsId = useId().replace(/:/g, '');
@@ -50,27 +52,33 @@ export function ProductDetailTabs({
 
   return (
     <div className="custom-tabs">
-      <div
-        className="custom-tabs-header"
-        role="tablist"
-        aria-label="Product information"
-      >
-        {tabTitles.slice(0, tabCount).map((title, index) => (
-          <button
-            key={title}
-            className={activeTab === index ? 'active' : ''}
-            onClick={() => setActiveTab(index)}
-            onKeyDown={(event) => handleTabKeyDown(event, index)}
-            type="button"
-            role="tab"
-            id={`${tabsId}-tab-${index}`}
-            aria-controls={`${tabsId}-panel-${index}`}
-            aria-selected={activeTab === index}
-            tabIndex={activeTab === index ? 0 : -1}
-          >
-            {title}
-          </button>
-        ))}
+      <div className="custom-tabs-header">
+        <div
+          className="custom-tabs-list"
+          role="tablist"
+          aria-label="Produktinformationen"
+        >
+          {tabTitles.slice(0, tabCount).map((title, index) => (
+            <button
+              key={title}
+              className={activeTab === index ? 'active' : ''}
+              onClick={() => setActiveTab(index)}
+              onKeyDown={(event) => handleTabKeyDown(event, index)}
+              type="button"
+              role="tab"
+              id={`${tabsId}-tab-${index}`}
+              aria-controls={`${tabsId}-panel-${index}`}
+              aria-selected={activeTab === index}
+              tabIndex={activeTab === index ? 0 : -1}
+            >
+              {title}
+            </button>
+          ))}
+        </div>
+
+        {headerNotice ? (
+          <p className="custom-tabs-header-notice">{headerNotice}</p>
+        ) : null}
       </div>
 
       <div className="custom-tabs-content">

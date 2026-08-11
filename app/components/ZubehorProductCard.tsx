@@ -54,9 +54,9 @@ function formatPriceLabel(price: ProductPrice | null) {
       maximumFractionDigits: 2,
     }).format(numericAmount);
 
-    return `${formattedAmount} / m²`;
+    return formattedAmount;
   } catch {
-    return `${price.amount} ${price.currencyCode} / m²`;
+    return `${price.amount} ${price.currencyCode}`;
   }
 }
 
