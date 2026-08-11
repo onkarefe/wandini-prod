@@ -2919,17 +2919,21 @@
   height: 100%;
   min-width: 0;
   min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
-  touch-action: pan-x pan-y;
   scroll-snap-type: x proximity;
   scrollbar-width: thin;
   scrollbar-color: #18a77b #292e2b;
+  touch-action: pan-x pan-y;
+  box-sizing: border-box;
 }
 
 .wallOrderReview__scroller::-webkit-scrollbar {
-  height: 9px;
+  height: 7px;
 }
 
 .wallOrderReview__scroller::-webkit-scrollbar-track {
@@ -2942,79 +2946,95 @@
   background: #18a77b;
 }
 
-.wallOrderReview__panels {
-  width: max-content;
-  min-width: 100%;
+.wallOrderReview__artwork {
+  position: relative;
+  width: auto;
   height: 100%;
-  min-height: 0;
-  padding: 0 0 9px;
-  display: flex;
-  align-items: stretch;
-  gap: 8px;
+  max-width: none;
+  max-height: 100%;
+  flex: 0 0 auto;
+  aspect-ratio: var(--artwork-aspect-ratio);
+  margin: 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: #111;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
   box-sizing: border-box;
 }
 
-.wallOrderReview__panel {
-  position: relative;
-  width: auto;
-  min-width: 0;
-  max-width: none;
+.wallOrderReview__artwork > img {
+  width: 100%;
   height: 100%;
-  min-height: 0;
-  flex: 0 0 auto;
-  aspect-ratio: var(--panel-aspect-ratio);
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-  background: #111;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  scroll-snap-align: start;
-}
-
-.wallOrderReview__panel img {
-  position: static;
-  width: 100%;
-  height: auto;
-  min-height: 0;
-  flex: 1 1 auto;
-  max-width: none;
-  max-height: none;
-  border: 0;
-  border-radius: 0;
   display: block;
-  object-fit: fill;
+  object-fit: contain;
 }
 
-.wallOrderReview__panel figcaption {
-  position: static;
-  width: 100%;
-  flex: 0 0 46px;
-  min-height: 46px;
-  padding: 7px 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 0;
-  background: rgba(10, 12, 11, 0.93);
-  color: #c7ceca;
+.wallOrderReview__panelGuides {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.wallOrderReview__panelGuide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.82);
+  box-shadow: 1px 0 rgba(0, 0, 0, 0.34);
+}
+
+.wallOrderReview__panelGuide:last-child {
+  border-right: 0;
+  box-shadow: none;
+}
+
+.wallOrderReview__panelGuide > span {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  min-width: max-content;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background: rgba(12, 15, 13, 0.82);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  color: rgba(255, 255, 255, 0.76);
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  font-size: 11px;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 10px;
   font-weight: 750;
   line-height: 1;
   white-space: nowrap;
-  box-sizing: border-box;
+  transform: translateX(-50%);
+  backdrop-filter: blur(5px);
 }
 
-.wallOrderReview__panel figcaption strong {
+.wallOrderReview__panelGuide > span strong {
   color: #fff;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
 }
 
+@supports not (backdrop-filter: blur(1px)) {
+  .wallOrderReview__panelGuide > span {
+    background: rgba(12, 15, 13, 0.92);
+  }
+}
+
+@media (max-width: 1100px) {
+  .wallOrderReview__panelGuide > span {
+    bottom: 7px;
+    padding: 5px 6px;
+    font-size: 9px;
+  }
+
+  .wallOrderReview__panelGuide > span strong {
+    font-size: 10px;
+  }
+}
+
+/* Keep the status layer independent from the artwork's intrinsic ratio. */
 .wallOrderReview__status {
   width: 100%;
   min-height: 100%;
@@ -3232,37 +3252,19 @@
   }
 
   .wallOrderReview__scroller {
+    padding: 0;
     scroll-snap-type: x mandatory;
-    scrollbar-width: thin;
   }
 
-  .wallOrderReview__panels {
-    width: max-content;
-    min-width: max-content;
-    height: 100%;
-    padding-bottom: 7px;
-    gap: 7px;
+  .wallOrderReview__panelGuide > span {
+    bottom: 7px;
+    padding: 5px;
+    font-size: 8px;
+    gap: 3px;
   }
 
-  .wallOrderReview__panel {
-    width: auto;
-    min-width: 0;
-    max-width: none;
-    height: 100%;
-    min-height: 0;
-    flex: 0 0 auto;
-    aspect-ratio: var(--panel-mobile-aspect-ratio);
-    scroll-snap-align: start;
-  }
-
-  .wallOrderReview__panel figcaption {
-    flex-basis: 50px;
-    min-height: 50px;
-    font-size: 12px;
-  }
-
-  .wallOrderReview__panel figcaption strong {
-    font-size: 14px;
+  .wallOrderReview__panelGuide > span strong {
+    font-size: 9px;
   }
 
   .wallOrderReview__summary {

@@ -25,15 +25,13 @@ type ConfigratorScene2Props = {
   totalPrice?: string;
 };
 
-type SliceItem = {
-  index: number;
-  widthCm: number;
+type CroppedPreview = {
   dataUrl: string;
+  width: number;
+  height: number;
 };
 
 const MAX_PANEL_WIDTH_CM = 70;
-const PANEL_DISPLAY_SCALE = 1.18;
-const MOBILE_PANEL_DISPLAY_SCALE = 1.34;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -43,10 +41,7 @@ function calculatePanelWidths(totalWidthCm: number): number[] {
   const safeWidth = Math.max(0, totalWidthCm);
   if (!safeWidth) return [];
 
-  const panelCount = Math.max(
-    1,
-    Math.ceil(safeWidth / MAX_PANEL_WIDTH_CM),
-  );
+  const panelCount = Math.max(1, Math.ceil(safeWidth / MAX_PANEL_WIDTH_CM));
   const panelWidth = safeWidth / panelCount;
 
   return Array.from({length: panelCount}, () => panelWidth);
@@ -56,11 +51,10 @@ function formatCm(value: number): string {
   return value.toFixed(1).replace(/\.0$/, '');
 }
 
-async function createPanelImages(
+async function createCroppedPreview(
   imageUrl: string,
   crop: CropRect,
-  totalWidthCm: number,
-): Promise<SliceItem[]> {
+): Promise<CroppedPreview | null> {
   return new Promise((resolve) => {
     const image = new Image();
     image.crossOrigin = 'anonymous';
@@ -69,8 +63,8 @@ async function createPanelImages(
       try {
         const naturalWidth = image.naturalWidth || 0;
         const naturalHeight = image.naturalHeight || 0;
-        if (!naturalWidth || !naturalHeight || totalWidthCm <= 0) {
-          resolve([]);
+        if (!naturalWidth || !naturalHeight) {
+          resolve(null);
           return;
         }
 
@@ -98,8 +92,8 @@ async function createPanelImages(
               h: Math.round(crop.h),
             };
 
-        const cropWidth = Math.max(1, pixelCrop.w || 0);
-        const cropHeight = Math.max(1, pixelCrop.h || 0);
+        const cropWidth = clamp(pixelCrop.w || 0, 1, naturalWidth);
+        const cropHeight = clamp(pixelCrop.h || 0, 1, naturalHeight);
         const cropX = clamp(
           pixelCrop.x || 0,
           0,
@@ -110,85 +104,44 @@ async function createPanelImages(
           0,
           Math.max(0, naturalHeight - cropHeight),
         );
-        const panelWidths = calculatePanelWidths(totalWidthCm);
+        const canvas = document.createElement('canvas');
+        canvas.width = cropWidth;
+        canvas.height = cropHeight;
 
-        if (!panelWidths.length) {
-          resolve([]);
+        const context = canvas.getContext('2d');
+        if (!context) {
+          resolve(null);
           return;
         }
 
-        const panelPixelWidths: number[] = [];
-        let remainingPixels = cropWidth;
+        context.drawImage(
+          image,
+          cropX,
+          cropY,
+          cropWidth,
+          cropHeight,
+          0,
+          0,
+          cropWidth,
+          cropHeight,
+        );
 
-        panelWidths.forEach((panelWidth, index) => {
-          const isLastPanel = index === panelWidths.length - 1;
-          if (isLastPanel) {
-            panelPixelWidths.push(Math.max(1, remainingPixels));
-            return;
-          }
-
-          const remainingPanels = panelWidths.length - index;
-          const maximumCurrentWidth = Math.max(
-            1,
-            remainingPixels - (remainingPanels - 1),
-          );
-          const proportionalWidth = Math.round(
-            (cropWidth * panelWidth) / totalWidthCm,
-          );
-          const currentWidth = clamp(
-            proportionalWidth,
-            1,
-            maximumCurrentWidth,
-          );
-
-          panelPixelWidths.push(currentWidth);
-          remainingPixels -= currentWidth;
-        });
-
-        const panels: SliceItem[] = [];
-        let panelX = cropX;
-
-        panelWidths.forEach((panelWidthCm, index) => {
-          const panelWidthPx = Math.max(1, panelPixelWidths[index] || 1);
-          const canvas = document.createElement('canvas');
-          canvas.width = panelWidthPx;
-          canvas.height = cropHeight;
-
-          const context = canvas.getContext('2d');
-          if (!context) return;
-
-          context.drawImage(
-            image,
-            panelX,
-            cropY,
-            panelWidthPx,
-            cropHeight,
-            0,
-            0,
-            panelWidthPx,
-            cropHeight,
-          );
-
-          try {
-            panels.push({
-              index: index + 1,
-              widthCm: panelWidthCm,
-              dataUrl: canvas.toDataURL('image/jpeg', 0.92),
-            });
-          } catch {
-            // A cross-origin image can prevent canvas export.
-          }
-
-          panelX += panelWidthPx;
-        });
-
-        resolve(panels);
+        try {
+          resolve({
+            dataUrl: canvas.toDataURL('image/jpeg', 0.92),
+            width: cropWidth,
+            height: cropHeight,
+          });
+        } catch {
+          // A cross-origin image can prevent canvas export.
+          resolve(null);
+        }
       } catch {
-        resolve([]);
+        resolve(null);
       }
     };
 
-    image.onerror = () => resolve([]);
+    image.onerror = () => resolve(null);
     image.src = imageUrl;
   });
 }
@@ -210,7 +163,7 @@ export function ConfigratorScene2({
     () => calculatePanelWidths(widthCm),
     [widthCm],
   );
-  const [panels, setPanels] = useState<SliceItem[]>([]);
+  const [preview, setPreview] = useState<CroppedPreview | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -225,7 +178,7 @@ export function ConfigratorScene2({
     }
 
     if (!crop || widthCm <= 0 || heightCm <= 0) {
-      setPanels([]);
+      setPreview(null);
       setIsLoading(false);
       setError('Für diese Maße konnte keine Vorschau erstellt werden.');
       return;
@@ -234,19 +187,19 @@ export function ConfigratorScene2({
     setIsLoading(true);
     setError(null);
 
-    createPanelImages(imageUrl, crop, widthCm)
-      .then((nextPanels) => {
+    createCroppedPreview(imageUrl, crop)
+      .then((nextPreview) => {
         if (cancelled) return;
-        setPanels(nextPanels);
+        setPreview(nextPreview);
         setError(
-          nextPanels.length
+          nextPreview
             ? null
             : 'Die Tapetenbahnen konnten nicht erstellt werden.',
         );
       })
       .catch(() => {
         if (cancelled) return;
-        setPanels([]);
+        setPreview(null);
         setError('Die Tapetenbahnen konnten nicht erstellt werden.');
       })
       .finally(() => {
@@ -260,8 +213,12 @@ export function ConfigratorScene2({
 
   if (!shouldRender) return null;
 
-  const panelCount = panels.length || expectedPanelWidths.length;
+  const panelCount = expectedPanelWidths.length;
   const panelWidth = expectedPanelWidths[0] || 0;
+  const totalPanelWidth = expectedPanelWidths.reduce(
+    (sum, currentWidth) => sum + currentWidth,
+    0,
+  );
 
   return (
     <div className="wallOrderReview">
@@ -292,30 +249,46 @@ export function ConfigratorScene2({
           </div>
         )}
 
-        {!isLoading && !error && panels.length > 0 && (
+        {!isLoading && !error && preview && panelCount > 0 && (
           <div className="wallOrderReview__scroller">
-            <div className="wallOrderReview__panels">
-              {panels.map((panel) => (
-                <figure
-                  key={panel.index}
-                  className="wallOrderReview__panel"
-                  style={{
-                    '--panel-aspect-ratio': `${
-                      panel.widthCm * PANEL_DISPLAY_SCALE
-                    } / ${Math.max(heightCm, 1)}`,
-                    '--panel-mobile-aspect-ratio': `${
-                      panel.widthCm * MOBILE_PANEL_DISPLAY_SCALE
-                    } / ${Math.max(heightCm, 1)}`,
-                  } as CSSProperties}
-                >
-                  <img src={panel.dataUrl} alt={`Bahn ${panel.index}`} />
-                  <figcaption>
-                    <span>Bahn {panel.index}</span>
-                    <strong>{formatCm(panel.widthCm)} cm</strong>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
+            <figure
+              className="wallOrderReview__artwork"
+              style={
+                {
+                  '--artwork-aspect-ratio': `${preview.width} / ${preview.height}`,
+                } as CSSProperties
+              }
+            >
+              <img
+                src={preview.dataUrl}
+                alt="Vorschau der zugeschnittenen Fototapete"
+              />
+              <div className="wallOrderReview__panelGuides" aria-hidden="true">
+                {expectedPanelWidths.map((currentWidth, index) => {
+                  const widthBefore = expectedPanelWidths
+                    .slice(0, index)
+                    .reduce((sum, itemWidth) => sum + itemWidth, 0);
+                  const left = (widthBefore / totalPanelWidth) * 100;
+                  const segmentWidth = (currentWidth / totalPanelWidth) * 100;
+
+                  return (
+                    <div
+                      key={index}
+                      className="wallOrderReview__panelGuide"
+                      style={{
+                        left: `${left}%`,
+                        width: `${segmentWidth}%`,
+                      }}
+                    >
+                      <span>
+                        Bahn {index + 1}
+                        <strong>{formatCm(currentWidth)} cm</strong>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </figure>
           </div>
         )}
       </section>
