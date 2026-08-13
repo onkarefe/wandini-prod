@@ -1,65 +1,48 @@
-import { useOptimisticCart } from '@shopify/hydrogen';
+import {useOptimisticCart} from '@shopify/hydrogen';
+import type {CartApiQueryFragment} from 'storefrontapi.generated';
+import {useAside} from '~/components/Aside';
+import {CartLineItem} from '~/components/CartLineItem';
 import {Link} from '~/lib/i18n-router';
-import type { CartApiQueryFragment } from 'storefrontapi.generated';
-import { useAside } from '~/components/Aside';
-import { CartLineItem } from '~/components/CartLineItem';
 
 export type CartLayout = 'page' | 'aside';
 
 export type CustomCartProps = {
-    cart: CartApiQueryFragment | null;
-    layout: CartLayout;
+  cart: CartApiQueryFragment | null;
+  layout: CartLayout;
 };
 
-/**
- * Cart component used by the /cart page route.
- */
-export function CustomCart({ layout, cart: originalCart }: CustomCartProps) {
-    // The useOptimisticCart hook applies pending actions to the cart
-    // so the user immediately sees feedback when they modify the cart.
-    const cart = useOptimisticCart(originalCart);
+export function CustomCart({layout, cart: originalCart}: CustomCartProps) {
+  const cart = useOptimisticCart(originalCart);
+  const hasLines = Boolean(cart?.lines?.nodes?.length);
+  const withDiscount = Boolean(
+    cart?.discountCodes?.some((code) => code.applicable),
+  );
+  const className = `custom-cart-main custom-cart-main--${layout}${withDiscount ? ' with-discount' : ''}`;
 
-    const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
-    const withDiscount =
-        cart &&
-        Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
-    // bu satır eski aside dönem için bunu aç
-    // const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
-    const className = `custom-cart-main ${withDiscount ? 'with-discount' : ''}`;
-    return (
-        <div className={className}>
-            <CartEmpty hidden={linesCount} layout={layout} />
-            <div className="cart-details">
-                <div aria-labelledby="cart-lines">
-                    <ul>
-                        {(cart?.lines?.nodes ?? []).map((line) => (
-                            <CartLineItem key={line.id} line={line} layout={layout} />
-                        ))}
-                    </ul>
-                </div>
-            </div>
-        </div>
-    );
+  return (
+    <div className={className}>
+      <CartEmpty hidden={hasLines} />
+      <div className="cart-details" aria-label="Warenkorbartikel">
+        <ul>
+          {(cart?.lines?.nodes ?? []).map((line) => (
+            <CartLineItem key={line.id} line={line} layout={layout} />
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
 }
 
-function CartEmpty({
-    hidden = false,
-}: {
-    hidden: boolean;
-    layout?: CustomCartProps['layout'];
-}) {
-    const { close } = useAside();
-    return (
-        <div hidden={hidden}>
-            <br />
-            <p>
-                efe Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-                started!
-            </p>
-            <br />
-            <Link to="/collections" onClick={close} prefetch="viewport">
-                Continue shopping →
-            </Link>
-        </div>
-    );
+function CartEmpty({hidden = false}: {hidden: boolean}) {
+  const {close} = useAside();
+
+  return (
+    <div className="custom-cart-empty" hidden={hidden}>
+      <h2>Ihr Warenkorb ist leer</h2>
+      <p>Entdecken Sie unsere Fototapeten und finden Sie Ihr Lieblingsmotiv.</p>
+      <Link to="/collections" onClick={close} prefetch="viewport">
+        Produkte entdecken
+      </Link>
+    </div>
+  );
 }

@@ -372,7 +372,7 @@ export function ConfiguratorModal({
             step === 'crop'
               ? 'Bildausschnitt auswählen'
               : step === 'materials'
-                ? 'Druckmaterial auswählen'
+                ? 'Tapete auswählen'
                 : 'Vorschau & Bestellübersicht'
           }
           description={

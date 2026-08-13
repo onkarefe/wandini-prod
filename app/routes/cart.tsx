@@ -1,10 +1,14 @@
-import { useLoaderData, data, type HeadersFunction } from 'react-router';
-import type { Route } from './+types/cart';
-import type { CartQueryDataReturn } from '@shopify/hydrogen';
-import { CartForm, useOptimisticCart } from '@shopify/hydrogen';
-import { CustomCart } from '~/components/customCart';
-import { CartUpsellCard } from '~/components/CartUpsellCard';
-import { CartSummary as CustomCartSummary } from '~/components/CustomCartSummary';
+import {Suspense} from 'react';
+import {Await, useLoaderData, data, type HeadersFunction} from 'react-router';
+import type {Route} from './+types/cart';
+import type {CartQueryDataReturn} from '@shopify/hydrogen';
+import {CartForm, useOptimisticCart} from '@shopify/hydrogen';
+import {CustomCart} from '~/components/customCart';
+import {
+  CartUpsellCard,
+  type CartUpsellProduct,
+} from '~/components/CartUpsellCard';
+import {CartSummary as CustomCartSummary} from '~/components/CustomCartSummary';
 import {getLocaleFromRequest, prefixPathWithLocale} from '~/lib/locale';
 import '~/styles/cart.css';
 
@@ -41,19 +45,19 @@ function getSafeRedirectPath(redirectParam: FormDataEntryValue | null) {
 
 export const meta: Route.MetaFunction = () => {
   return [
-    { title: `Hydrogen | Cart` },
+    {title: 'Warenkorb | Wandini'},
     {name: 'robots', content: 'noindex,follow'},
   ];
 };
 
-export const headers: HeadersFunction = ({ actionHeaders }) => actionHeaders;
+export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
 
-export async function action({ request, context }: Route.ActionArgs) {
-  const { cart } = context;
+export async function action({request, context}: Route.ActionArgs) {
+  const {cart} = context;
 
   const formData = await request.formData();
 
-  const { action, inputs } = CartForm.getFormInput(formData);
+  const {action, inputs} = CartForm.getFormInput(formData);
 
   if (!action) {
     return data(
@@ -137,7 +141,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 
   const cartId = result?.cart?.id;
   const headers = cartId ? cart.setCartId(result.cart.id) : new Headers();
-  const { cart: cartResult, errors, warnings } = result;
+  const {cart: cartResult, errors, warnings} = result;
 
   const redirectTo = getSafeRedirectPath(formData.get('redirectTo'));
   if (redirectTo) {
@@ -157,17 +161,57 @@ export async function action({ request, context }: Route.ActionArgs) {
         cartId,
       },
     },
-    { status, headers },
+    {status, headers},
   );
 }
 
-export async function loader({ context }: Route.LoaderArgs) {
-  const { cart } = context;
-  return await cart.get();
+export async function loader({context}: Route.LoaderArgs) {
+  const {cart, storefront} = context;
+  const cartUpsellProducts = storefront
+    .query(CART_UPSELL_PRODUCTS_QUERY, {
+      cache: storefront.CacheLong(),
+      displayName: 'CartUpsellProducts',
+      variables: {collectionHandle: 'zubehor'},
+    })
+    .then(({collection}) => {
+      const references =
+        collection?.cartUpsellProducts?.references?.nodes ?? [];
+
+      return references.flatMap((reference) =>
+        reference.__typename === 'Product'
+          ? [
+              {
+                id: reference.id,
+                handle: reference.handle,
+                title: reference.title,
+                image: reference.featuredImage ?? null,
+                variant: reference.selectedOrFirstAvailableVariant
+                  ? {
+                      id: reference.selectedOrFirstAvailableVariant.id,
+                      availableForSale:
+                        reference.selectedOrFirstAvailableVariant
+                          .availableForSale,
+                      price: reference.selectedOrFirstAvailableVariant.price,
+                    }
+                  : null,
+              } satisfies CartUpsellProduct,
+            ]
+          : [],
+      );
+    })
+    .catch((error: unknown) => {
+      console.error('Cart upsell products could not be loaded.', error);
+      return [] as CartUpsellProduct[];
+    });
+
+  return {
+    cart: await cart.get(),
+    cartUpsellProducts,
+  };
 }
 
 export default function Cart() {
-  const cart = useLoaderData<typeof loader>();
+  const {cart, cartUpsellProducts} = useLoaderData<typeof loader>();
   const optimisticCart = useOptimisticCart(cart);
   const cartHasItems = optimisticCart?.totalQuantity
     ? optimisticCart.totalQuantity > 0
@@ -175,18 +219,70 @@ export default function Cart() {
 
   return (
     <div className="cartMainContainer">
-      <h1 className='carth1Title'>Cart </h1>
+      <header className="cart-page-header">
+        <h1>Warenkorb</h1>
+        <p>Überprüfen Sie Ihre Auswahl und schließen Sie Ihre Bestellung ab.</p>
+      </header>
       <div className="cartMainRow">
-        <div className="cart cartLeft">
+        <div className="cartLeft">
           <CustomCart layout="page" cart={cart} />
-          <CartUpsellCard />
         </div>
         <div className="cartRight">
           {cartHasItems && (
             <CustomCartSummary cart={optimisticCart} layout="page" />
           )}
         </div>
+        <div className="cartExtras">
+          <Suspense fallback={null}>
+            <Await resolve={cartUpsellProducts} errorElement={null}>
+              {(products) => <CartUpsellCard products={products} />}
+            </Await>
+          </Suspense>
+        </div>
       </div>
     </div>
   );
 }
+
+const CART_UPSELL_PRODUCTS_QUERY = `#graphql
+  query CartUpsellProducts(
+    $country: CountryCode
+    $language: LanguageCode
+    $collectionHandle: String!
+  ) @inContext(country: $country, language: $language) {
+    collection(handle: $collectionHandle) {
+      cartUpsellProducts: metafield(
+        namespace: "custom"
+        key: "cart_upsell_products"
+      ) {
+        references(first: 3) {
+          nodes {
+            __typename
+            ... on Product {
+              id
+              handle
+              title
+              featuredImage {
+                url
+                altText
+                width
+                height
+              }
+              selectedOrFirstAvailableVariant(
+                ignoreUnknownOptions: true
+                caseInsensitiveMatch: true
+              ) {
+                id
+                availableForSale
+                price {
+                  amount
+                  currencyCode
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+` as const;

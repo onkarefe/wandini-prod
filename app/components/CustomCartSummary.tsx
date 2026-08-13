@@ -1,9 +1,8 @@
-import type { CartApiQueryFragment } from 'storefrontapi.generated';
-import type { CartLayout } from '~/components/CartMain';
-import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
-import { useEffect, useRef, useState } from 'react';
-import { useFetcher } from 'react-router';
-import type { FetcherWithComponents } from 'react-router';
+import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
+import {useEffect, useRef, useState, type ReactNode} from 'react';
+import {useFetcher, type FetcherWithComponents} from 'react-router';
+import type {CartApiQueryFragment} from 'storefrontapi.generated';
+import type {CartLayout} from '~/components/CartMain';
 import {
   getGiftCardStorageKey,
   getPersistedGiftCardCodes,
@@ -15,222 +14,267 @@ type CartSummaryProps = {
   layout: CartLayout;
 };
 
-export function CartSummary({ cart, layout }: CartSummaryProps) {
-  const className =
-    layout === 'page'
-      ? 'cart-summary-page custom-cart-summary custom-cart-summary-page'
-      : 'cart-summary-aside custom-cart-summary custom-cart-summary-aside';
+type CartFetcher = FetcherWithComponents<unknown>;
+
+function hasErrors(data: unknown) {
+  if (!data || typeof data !== 'object' || !('errors' in data)) return false;
+  const errors = (data as {errors?: unknown}).errors;
+  return Array.isArray(errors) ? errors.length > 0 : Boolean(errors);
+}
+
+export function CartSummary({cart, layout}: CartSummaryProps) {
+  const quantity = cart?.totalQuantity ?? 0;
 
   return (
-    <div aria-labelledby="cart-summary" className={className}>
-      <dl className="custom-cart-subtotal">
-        <dt className="custom-cart-subtotal-label">Subtotal</dt>
-        <dd className="custom-cart-subtotal-value">
-          {cart?.cost?.subtotalAmount?.amount ? (
-            <Money data={cart?.cost?.subtotalAmount} />
-          ) : (
-            '-'
-          )}
-        </dd>
+    <section
+      className={`order-summary order-summary--${layout}`}
+      aria-labelledby="order-summary-title"
+    >
+      <header className="order-summary__header">
+        <h2 id="order-summary-title">Bestellübersicht</h2>
+        <span>{quantity} Artikel</span>
+      </header>
+
+      <dl className="order-summary__prices">
+        <div>
+          <dt>Zwischensumme</dt>
+          <dd>
+            {cart?.cost?.subtotalAmount?.amount ? (
+              <Money data={cart.cost.subtotalAmount} />
+            ) : (
+              '–'
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt>Versand</dt>
+          <dd className="order-summary__shipping">An der Kasse</dd>
+        </div>
+        <div className="order-summary__total">
+          <dt>Gesamtsumme</dt>
+          <dd>
+            {cart?.cost?.totalAmount?.amount ? (
+              <Money data={cart.cost.totalAmount} />
+            ) : (
+              '–'
+            )}
+          </dd>
+        </div>
       </dl>
-      <CartDiscounts discountCodes={cart?.discountCodes} />
-      <CartGiftCard
-        cartId={cart?.id}
-        giftCardCodes={cart?.appliedGiftCards}
-      />
-      <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
-    </div>
+
+      <div className="order-summary__codes">
+        <DiscountCode discountCodes={cart?.discountCodes} />
+        <GiftCard cartId={cart?.id} giftCardCodes={cart?.appliedGiftCards} />
+      </div>
+
+      {cart?.checkoutUrl ? (
+        <a className="order-summary__checkout" href={cart.checkoutUrl}>
+          Zur Kasse
+        </a>
+      ) : null}
+    </section>
   );
 }
 
-function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
-  if (!checkoutUrl) return null;
-
-  return (
-    <div className="custom-cart-checkout-wrap">
-      <a href={checkoutUrl} target="_self" className="custom-cart-checkout-btn">
-        Continue to Checkout <span aria-hidden="true">&rarr;</span>
-      </a>
-    </div>
-  );
-}
-
-function CartDiscounts({
+function DiscountCode({
   discountCodes,
 }: {
   discountCodes?: CartApiQueryFragment['discountCodes'];
 }) {
-  const codes: string[] =
-    discountCodes
-      ?.filter((discount) => discount.applicable)
-      ?.map(({ code }) => code) || [];
+  const appliedCodes =
+    discountCodes?.filter(({applicable}) => applicable).map(({code}) => code) ??
+    [];
+  const hasInvalidCode = Boolean(
+    discountCodes?.some(({applicable}) => !applicable),
+  );
 
   return (
-    <div className="custom-cart-section">
-      {/* Have existing discount, display it with a remove option */}
-      <dl hidden={!codes.length} className="custom-cart-applied-list">
-        <div className="custom-cart-applied-row">
-          <dt className="custom-cart-applied-title">Discount(s)</dt>
-          <UpdateDiscountForm>
-            <div className="custom-cart-chip-row">
-              <code className="custom-cart-chip">{codes?.join(', ')}</code>
-              <button className="custom-cart-chip-remove">Remove</button>
-            </div>
-          </UpdateDiscountForm>
-        </div>
-      </dl>
+    <div className="order-summary__code-group">
+      <label htmlFor="discount-code">Rabattcode</label>
 
-      {/* Show an input to apply a discount */}
-      <UpdateDiscountForm discountCodes={codes}>
-        <div className="custom-cart-input-row">
-          <div className="custom-cart-input-wrap">
-            <input
-              className="custom-cart-input"
-              type="text"
-              name="discountCode"
-              placeholder="Discount code"
+      {appliedCodes.map((code) => (
+        <DiscountForm
+          key={code}
+          discountCodes={appliedCodes.filter((item) => item !== code)}
+        >
+          {(fetcher) => (
+            <AppliedCode
+              label={code}
+              pending={fetcher.state !== 'idle'}
+              removeLabel={`Rabattcode ${code} entfernen`}
             />
-            <button className="custom-cart-apply-btn" type="submit">
-              Apply
-            </button>
-          </div>
-        </div>
-      </UpdateDiscountForm>
+          )}
+        </DiscountForm>
+      ))}
+
+      <DiscountForm discountCodes={appliedCodes}>
+        {(fetcher) => {
+          const pending = fetcher.state !== 'idle';
+          const error = hasInvalidCode || hasErrors(fetcher.data);
+
+          return (
+            <>
+              <div className="order-summary__code-input">
+                <input
+                  id="discount-code"
+                  name="discountCode"
+                  type="text"
+                  placeholder="Code eingeben"
+                  autoComplete="off"
+                  spellCheck={false}
+                  required
+                  aria-invalid={error || undefined}
+                  aria-describedby={error ? 'discount-code-error' : undefined}
+                />
+                <button type="submit" disabled={pending}>
+                  {pending ? 'Bitte warten' : 'Einlösen'}
+                </button>
+              </div>
+              {error ? (
+                <p id="discount-code-error" className="order-summary__error">
+                  Dieser Rabattcode ist nicht gültig.
+                </p>
+              ) : null}
+            </>
+          );
+        }}
+      </DiscountForm>
     </div>
   );
 }
 
-function UpdateDiscountForm({
+function DiscountForm({
   discountCodes,
   children,
 }: {
-  discountCodes?: string[];
-  children: React.ReactNode;
+  discountCodes: string[];
+  children: (fetcher: CartFetcher) => ReactNode;
 }) {
   return (
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.DiscountCodesUpdate}
-      inputs={{
-        discountCodes: discountCodes || [],
-      }}
+      inputs={{discountCodes}}
     >
       {children}
     </CartForm>
   );
 }
 
-function CartGiftCard({
+function GiftCard({
   cartId,
   giftCardCodes,
 }: {
   cartId?: string | null;
   giftCardCodes: CartApiQueryFragment['appliedGiftCards'] | undefined;
 }) {
-  const giftCardCodeInput = useRef<HTMLInputElement>(null);
-  const giftCardAddFetcher = useFetcher({ key: 'gift-card-add' });
+  const inputRef = useRef<HTMLInputElement>(null);
+  const submittedCode = useRef<string | null>(null);
+  const fetcher = useFetcher({key: 'gift-card-add'});
   const storageKey = getGiftCardStorageKey(cartId);
-  const [persistedGiftCardCodes, setPersistedGiftCardCodes] = useState<
-    string[]
-  >([]);
+  const [storedCodes, setStoredCodes] = useState<string[]>([]);
 
   useEffect(() => {
-    setPersistedGiftCardCodes(
-      getPersistedGiftCardCodes(storageKey, giftCardCodes),
-    );
+    setStoredCodes(getPersistedGiftCardCodes(storageKey, giftCardCodes));
   }, [giftCardCodes, storageKey]);
 
-  // Clear the gift card code input after the gift card is added
   useEffect(() => {
-    if (giftCardAddFetcher.data) {
-      giftCardCodeInput.current!.value = '';
+    const code = fetcher.formData?.get('giftCardCode');
+    if (fetcher.state !== 'idle' && typeof code === 'string' && code.trim()) {
+      submittedCode.current = code.replace(/\s/g, '');
     }
-  }, [giftCardAddFetcher.data]);
+  }, [fetcher.formData, fetcher.state]);
 
-  function saveAppliedCode(code: string) {
-    setPersistedGiftCardCodes(rememberGiftCardCode(storageKey, code));
-  }
+  useEffect(() => {
+    if (
+      fetcher.state !== 'idle' ||
+      !fetcher.data ||
+      !submittedCode.current ||
+      hasErrors(fetcher.data)
+    ) {
+      return;
+    }
+
+    const code = submittedCode.current;
+    const applied = giftCardCodes?.some((giftCard) =>
+      code.endsWith(giftCard.lastCharacters),
+    );
+    if (!applied) return;
+
+    setStoredCodes(rememberGiftCardCode(storageKey, code));
+    submittedCode.current = null;
+    if (inputRef.current) inputRef.current.value = '';
+  }, [fetcher.data, fetcher.state, giftCardCodes, storageKey]);
 
   return (
-    <div className="custom-cart-section">
-      {/* Display applied gift cards with individual remove buttons */}
-      {giftCardCodes && giftCardCodes.length > 0 && (
-        <dl className="custom-cart-applied-list">
-          <dt className="custom-cart-applied-title">Applied Gift Card(s)</dt>
-          {giftCardCodes.map((giftCard) => (
-            <RemoveGiftCardForm key={giftCard.id} giftCardId={giftCard.id}>
-              <div className="custom-cart-chip-row">
-                <code className="custom-cart-chip">
-                  ***{giftCard.lastCharacters}
-                </code>
-                <span className="custom-cart-chip-amount">
-                  <Money data={giftCard.amountUsed} />
-                </span>
-                <button className="custom-cart-chip-remove" type="submit">
-                  Remove
+    <div className="order-summary__code-group">
+      <label htmlFor="gift-card-code">Geschenkkarte</label>
+
+      {giftCardCodes?.map((giftCard) => (
+        <RemoveGiftCardForm key={giftCard.id} giftCardId={giftCard.id}>
+          {(removeFetcher) => (
+            <AppliedCode
+              label={`•••• ${giftCard.lastCharacters}`}
+              amount={<Money data={giftCard.amountUsed} />}
+              pending={removeFetcher.state !== 'idle'}
+              removeLabel={`Geschenkkarte mit der Endung ${giftCard.lastCharacters} entfernen`}
+            />
+          )}
+        </RemoveGiftCardForm>
+      ))}
+
+      <GiftCardForm giftCardCodes={storedCodes}>
+        {(formFetcher) => {
+          const pending = formFetcher.state !== 'idle';
+          const error = hasErrors(formFetcher.data);
+
+          return (
+            <>
+              <div className="order-summary__code-input">
+                <input
+                  id="gift-card-code"
+                  name="giftCardCode"
+                  type="text"
+                  placeholder="Code eingeben"
+                  autoComplete="off"
+                  spellCheck={false}
+                  required
+                  ref={inputRef}
+                  aria-invalid={error || undefined}
+                  aria-describedby={error ? 'gift-card-error' : undefined}
+                />
+                <button type="submit" disabled={pending}>
+                  {pending ? 'Bitte warten' : 'Einlösen'}
                 </button>
               </div>
-            </RemoveGiftCardForm>
-          ))}
-        </dl>
-      )}
-
-      {/* Show an input to apply a gift card */}
-      <UpdateGiftCardForm
-        giftCardCodes={persistedGiftCardCodes}
-        saveAppliedCode={saveAppliedCode}
-        fetcherKey="gift-card-add"
-      >
-        <div className="custom-cart-input-row">
-          <div className="custom-cart-input-wrap">
-            <input
-              className="custom-cart-input"
-              type="text"
-              name="giftCardCode"
-              placeholder="Gift card code"
-              ref={giftCardCodeInput}
-            />
-            <button
-              className="custom-cart-apply-btn"
-              type="submit"
-              disabled={giftCardAddFetcher.state !== 'idle'}
-            >
-              Apply
-            </button>
-          </div>
-        </div>
-      </UpdateGiftCardForm>
+              {error ? (
+                <p id="gift-card-error" className="order-summary__error">
+                  Die Geschenkkarte konnte nicht eingelöst werden.
+                </p>
+              ) : null}
+            </>
+          );
+        }}
+      </GiftCardForm>
     </div>
   );
 }
 
-function UpdateGiftCardForm({
+function GiftCardForm({
   giftCardCodes,
-  saveAppliedCode,
-  fetcherKey,
   children,
 }: {
-  giftCardCodes?: string[];
-  saveAppliedCode?: (code: string) => void;
-  fetcherKey?: string;
-  children: React.ReactNode;
+  giftCardCodes: string[];
+  children: (fetcher: CartFetcher) => ReactNode;
 }) {
   return (
     <CartForm
-      fetcherKey={fetcherKey}
+      fetcherKey="gift-card-add"
       route="/cart"
       action={CartForm.ACTIONS.GiftCardCodesUpdate}
-      inputs={{
-        giftCardCodes: giftCardCodes || [],
-      }}
+      inputs={{giftCardCodes}}
     >
-      {(fetcher: FetcherWithComponents<any>) => {
-        const code = fetcher.formData?.get('giftCardCode');
-        if (code && saveAppliedCode) {
-          saveAppliedCode(code as string);
-        }
-        return children;
-      }}
+      {children}
     </CartForm>
   );
 }
@@ -240,17 +284,39 @@ function RemoveGiftCardForm({
   children,
 }: {
   giftCardId: string;
-  children: React.ReactNode;
+  children: (fetcher: CartFetcher) => ReactNode;
 }) {
   return (
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.GiftCardCodesRemove}
-      inputs={{
-        giftCardCodes: [giftCardId],
-      }}
+      inputs={{giftCardCodes: [giftCardId]}}
     >
       {children}
     </CartForm>
+  );
+}
+
+function AppliedCode({
+  label,
+  amount,
+  pending,
+  removeLabel,
+}: {
+  label: string;
+  amount?: ReactNode;
+  pending: boolean;
+  removeLabel: string;
+}) {
+  return (
+    <div className="order-summary__applied-code">
+      <span>
+        <strong>{label}</strong>
+        {amount}
+      </span>
+      <button type="submit" disabled={pending} aria-label={removeLabel}>
+        {pending ? 'Wird entfernt' : 'Entfernen'}
+      </button>
+    </div>
   );
 }

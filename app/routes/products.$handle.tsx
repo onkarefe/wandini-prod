@@ -1,9 +1,10 @@
 import {lazy, Suspense} from 'react';
-import {useLoaderData} from 'react-router';
+import {Await, useLoaderData} from 'react-router';
 import {Analytics, getSelectedProductOptions} from '@shopify/hydrogen';
 import type {Route} from './+types/products.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {getRobotsDirective} from '~/lib/seo';
+import {getSimilarMotifsPreview} from '~/lib/similar-products-preview';
 
 const ZUBEHOR_PRODUCT_LAYOUT = 'zubehor';
 
@@ -12,6 +13,9 @@ const WallpaperProductLayout = lazy(
 );
 const ZubehorProductLayout = lazy(
   () => import('~/components/ZubehorProductLayout'),
+);
+const SimilarMotifsCarousel = lazy(
+  () => import('~/components/SimilarMotifsCarousel'),
 );
 
 const BLOCKED_HTML_TAGS = [
@@ -267,8 +271,8 @@ export const meta: Route.MetaFunction = ({data}) => {
 };
 
 export async function loader(args: Route.LoaderArgs) {
-  const deferredData = loadDeferredData();
   const criticalData = await loadCriticalData(args);
+  const deferredData = loadDeferredData(args, criticalData.product);
   return {...deferredData, ...criticalData};
 }
 
@@ -297,8 +301,34 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   };
 }
 
-function loadDeferredData() {
-  return {};
+function loadDeferredData(
+  {context}: Route.LoaderArgs,
+  product: Awaited<ReturnType<typeof loadCriticalData>>['product'],
+) {
+  if (isZubehorProduct(product)) {
+    return {similarMotifsPreview: null};
+  }
+
+  const mainMotif = product.mainMotif?.value?.trim();
+  const mainTheme = product.mainTheme?.value?.trim();
+
+  if (!mainMotif || !mainTheme) {
+    return {similarMotifsPreview: null};
+  }
+
+  const similarMotifsPreview = getSimilarMotifsPreview({
+    storefront: context.storefront,
+    sourceProductId: product.id,
+    sourceProductTitle: product.title,
+    sourceProductImageUrl: product.images.edges[0]?.node.url ?? null,
+    mainMotif,
+    mainTheme,
+  }).catch((error: unknown) => {
+    console.error('Similar motifs preview could not be loaded.', error);
+    return null;
+  });
+
+  return {similarMotifsPreview};
 }
 
 function isZubehorProduct(
@@ -311,11 +341,13 @@ function isZubehorProduct(
 }
 
 export default function Product() {
-  const {product, canonicalUrl} = useLoaderData<typeof loader>();
+  const {product, canonicalUrl, similarMotifsPreview} =
+    useLoaderData<typeof loader>();
   const productJsonLd = buildProductJsonLd(product, canonicalUrl);
   const breadcrumbJsonLd = buildProductBreadcrumbJsonLd(product, canonicalUrl);
   const selectedVariant = product.selectedOrFirstAvailableVariant;
-  const ProductLayout = isZubehorProduct(product)
+  const isZubehor = isZubehorProduct(product);
+  const ProductLayout = isZubehor
     ? ZubehorProductLayout
     : WallpaperProductLayout;
 
@@ -342,6 +374,16 @@ export default function Product() {
       >
         <ProductLayout product={product} />
       </Suspense>
+
+      {!isZubehor ? (
+        <Suspense fallback={null}>
+          <Await resolve={similarMotifsPreview} errorElement={null}>
+            {(preview) =>
+              preview ? <SimilarMotifsCarousel data={preview} /> : null
+            }
+          </Await>
+        </Suspense>
+      ) : null}
 
       <Analytics.ProductView
         data={{
@@ -496,6 +538,12 @@ const PRODUCT_FRAGMENT = `#graphql
       type
     }
     productLayout: metafield(namespace: "custom", key: "product_layout") {
+      value
+    }
+    mainMotif: metafield(namespace: "custom", key: "main_motif") {
+      value
+    }
+    mainTheme: metafield(namespace: "custom", key: "main_theme") {
       value
     }
   }

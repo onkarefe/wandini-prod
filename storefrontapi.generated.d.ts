@@ -348,6 +348,85 @@ export type FooterQuery = {
   >;
 };
 
+export type SimilarMotifsPreviewProductFragment = Pick<
+  StorefrontAPI.Product,
+  'id' | 'handle' | 'title'
+> & {
+  priceRange: {
+    minVariantPrice: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+  };
+  images: {
+    nodes: Array<
+      Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
+    >;
+  };
+};
+
+export type SimilarMotifsPreviewQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+  categoryHandle: StorefrontAPI.Scalars['String']['input'];
+  mainMotif: StorefrontAPI.Scalars['String']['input'];
+  mainTheme: StorefrontAPI.Scalars['String']['input'];
+  candidateLimit: StorefrontAPI.Scalars['Int']['input'];
+}>;
+
+export type SimilarMotifsPreviewQuery = {
+  collection?: StorefrontAPI.Maybe<{
+    sameMotif: {
+      nodes: Array<
+        Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
+          priceRange: {
+            minVariantPrice: Pick<
+              StorefrontAPI.MoneyV2,
+              'amount' | 'currencyCode'
+            >;
+          };
+          images: {
+            nodes: Array<
+              Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
+            >;
+          };
+        }
+      >;
+    };
+    sameTheme: {
+      nodes: Array<
+        Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
+          priceRange: {
+            minVariantPrice: Pick<
+              StorefrontAPI.MoneyV2,
+              'amount' | 'currencyCode'
+            >;
+          };
+          images: {
+            nodes: Array<
+              Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
+            >;
+          };
+        }
+      >;
+    };
+    fallback: {
+      nodes: Array<
+        Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
+          priceRange: {
+            minVariantPrice: Pick<
+              StorefrontAPI.MoneyV2,
+              'amount' | 'currencyCode'
+            >;
+          };
+          images: {
+            nodes: Array<
+              Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
+            >;
+          };
+        }
+      >;
+    };
+  }>;
+};
+
 export type SimilarProductsBaseQueryVariables = StorefrontAPI.Exact<{
   handle: StorefrontAPI.Scalars['String']['input'];
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
@@ -875,6 +954,56 @@ export type BlogsQuery = {
   };
 };
 
+export type CartUpsellProductsQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+  collectionHandle: StorefrontAPI.Scalars['String']['input'];
+}>;
+
+export type CartUpsellProductsQuery = {
+  collection?: StorefrontAPI.Maybe<{
+    cartUpsellProducts?: StorefrontAPI.Maybe<{
+      references?: StorefrontAPI.Maybe<{
+        nodes: Array<
+          | {
+              __typename:
+                | 'Collection'
+                | 'GenericFile'
+                | 'MediaImage'
+                | 'Metaobject'
+                | 'Model3d'
+                | 'Page'
+                | 'ProductVariant'
+                | 'Video';
+            }
+          | ({__typename: 'Product'} & Pick<
+              StorefrontAPI.Product,
+              'id' | 'handle' | 'title'
+            > & {
+                featuredImage?: StorefrontAPI.Maybe<
+                  Pick<
+                    StorefrontAPI.Image,
+                    'url' | 'altText' | 'width' | 'height'
+                  >
+                >;
+                selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<
+                  Pick<
+                    StorefrontAPI.ProductVariant,
+                    'id' | 'availableForSale'
+                  > & {
+                    price: Pick<
+                      StorefrontAPI.MoneyV2,
+                      'amount' | 'currencyCode'
+                    >;
+                  }
+                >;
+              })
+        >;
+      }>;
+    }>;
+  }>;
+};
+
 export type CustomProductCardFieldsFragment = Pick<
   StorefrontAPI.Product,
   'id' | 'handle' | 'title'
@@ -1398,6 +1527,8 @@ export type ProductFragment = Pick<
     Pick<StorefrontAPI.Metafield, 'value' | 'type'>
   >;
   productLayout?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
+  mainMotif?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
+  mainTheme?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
 };
 
 export type ProductQueryVariables = StorefrontAPI.Exact<{
@@ -1622,6 +1753,8 @@ export type ProductQuery = {
       productLayout?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.Metafield, 'value'>
       >;
+      mainMotif?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
+      mainTheme?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
     }
   >;
 };
@@ -1872,6 +2005,10 @@ interface GeneratedQueryTypes {
     return: FooterQuery;
     variables: FooterQueryVariables;
   };
+  '#graphql\n  #graphql\n  fragment SimilarMotifsPreviewProduct on Product {\n    id\n    handle\n    title\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    images(first: 1) {\n      nodes {\n        url\n        altText\n        width\n        height\n      }\n    }\n  }\n\n  query SimilarMotifsPreview(\n    $country: CountryCode\n    $language: LanguageCode\n    $categoryHandle: String!\n    $mainMotif: String!\n    $mainTheme: String!\n    $candidateLimit: Int!\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $categoryHandle) {\n      sameMotif: products(\n        first: $candidateLimit\n        filters: [\n          {\n            productMetafield: {\n              namespace: "custom"\n              key: "main_motif"\n              value: $mainMotif\n            }\n          }\n        ]\n      ) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n      sameTheme: products(\n        first: $candidateLimit\n        filters: [\n          {\n            productMetafield: {\n              namespace: "custom"\n              key: "main_theme"\n              value: $mainTheme\n            }\n          }\n        ]\n      ) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n      fallback: products(first: $candidateLimit) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n    }\n  }\n': {
+    return: SimilarMotifsPreviewQuery;
+    variables: SimilarMotifsPreviewQueryVariables;
+  };
   '#graphql\n  query SimilarProductsBase(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int!\n    $after: String\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      products(first: $first, after: $after) {\n        nodes {\n          id\n          handle\n          title\n          mainMotif: metafield(namespace: "custom", key: "main_motif") {\n            value\n          }\n          mainTheme: metafield(namespace: "custom", key: "main_theme") {\n            value\n          }\n          priceRange {\n            minVariantPrice {\n              amount\n              currencyCode\n            }\n          }\n          images(first: 3) {\n            nodes {\n              url\n              altText\n            }\n          }\n          collections(first: 20) {\n            nodes {\n              handle\n              title\n            }\n          }\n          options {\n            name\n            optionValues {\n              name\n              swatch {\n                color\n              }\n            }\n          }\n        }\n        pageInfo {\n          hasNextPage\n          endCursor\n        }\n      }\n    }\n  }\n': {
     return: SimilarProductsBaseQuery;
     variables: SimilarProductsBaseQueryVariables;
@@ -1932,6 +2069,10 @@ interface GeneratedQueryTypes {
     return: BlogsQuery;
     variables: BlogsQueryVariables;
   };
+  '#graphql\n  query CartUpsellProducts(\n    $country: CountryCode\n    $language: LanguageCode\n    $collectionHandle: String!\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $collectionHandle) {\n      cartUpsellProducts: metafield(\n        namespace: "custom"\n        key: "cart_upsell_products"\n      ) {\n        references(first: 3) {\n          nodes {\n            __typename\n            ... on Product {\n              id\n              handle\n              title\n              featuredImage {\n                url\n                altText\n                width\n                height\n              }\n              selectedOrFirstAvailableVariant(\n                ignoreUnknownOptions: true\n                caseInsensitiveMatch: true\n              ) {\n                id\n                availableForSale\n                price {\n                  amount\n                  currencyCode\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+    return: CartUpsellProductsQuery;
+    variables: CartUpsellProductsQueryVariables;
+  };
   '#graphql\n  #graphql\n  fragment CustomProductCardFields on Product {\n    id\n    handle\n    title\n    mainMotif: metafield(namespace: "custom", key: "main_motif") {\n      value\n    }\n    mainTheme: metafield(namespace: "custom", key: "main_theme") {\n      value\n    }\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    images(first: 3) {\n      nodes {\n        url\n        altText\n      }\n    }\n  }\n\n  query CustomCollection(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n    $filters: [ProductFilter!]\n    $sortKey: ProductCollectionSortKeys\n    $reverse: Boolean\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      description\n      pageType: metafield(namespace: "custom", key: "page_type") {\n        value\n      }\n      seo {\n        description\n        title\n      }\n      image {\n        url\n        altText\n        width\n        height\n      }\n      products(\n        first: $first,\n        last: $last,\n        before: $startCursor,\n        after: $endCursor,\n        filters: $filters,\n        sortKey: $sortKey,\n        reverse: $reverse\n      ) {\n        filters {\n          id\n          label\n          type\n          values {\n            id\n            label\n            count\n            input\n          }\n        }\n        nodes {\n          ...CustomProductCardFields\n        }\n        pageInfo {\n          hasPreviousPage\n          hasNextPage\n          endCursor\n          startCursor\n        }\n      }\n    }\n  }\n': {
     return: CustomCollectionQuery;
     variables: CustomCollectionQueryVariables;
@@ -1956,7 +2097,7 @@ interface GeneratedQueryTypes {
     return: PoliciesQuery;
     variables: PoliciesQueryVariables;
   };
-  '#graphql\n  query Product(\n    $country: CountryCode\n    $handle: String!\n    $language: LanguageCode\n    $selectedOptions: [SelectedOptionInput!]!\n  ) @inContext(country: $country, language: $language) {\n    product(handle: $handle) {\n      ...Product\n    }\n  }\n  #graphql\n  fragment Product on Product {\n    id\n    title\n    vendor\n    handle\n    descriptionHtml\n    description\n    encodedVariantExistence\n    encodedVariantAvailability\n    images(first: 20) {\n      edges {\n        node {\n          id\n          url\n          altText\n          width\n          height\n        }\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n        firstSelectableVariant {\n          ...ProductVariant\n        }\n        swatch {\n          color\n          image {\n            previewImage {\n              url\n            }\n          }\n        }\n      }\n    }\n    selectedOrFirstAvailableVariant(\n      selectedOptions: $selectedOptions\n      ignoreUnknownOptions: true\n      caseInsensitiveMatch: true\n    ) {\n      ...ProductVariant\n    }\n    adjacentVariants(selectedOptions: $selectedOptions) {\n      ...ProductVariant\n    }\n    seo {\n      description\n      title\n    }\n    productInfo: metafield(namespace: "custom", key: "product_info") {\n      value\n      type\n    }\n    deliveryAndShipping: metafield(namespace: "custom", key: "delivery_and_shipping") {\n      value\n      type\n    }\n    masterAssetId: metafield(namespace: "custom", key: "master_asset_id") {\n      value\n      type\n    }\n    productLayout: metafield(namespace: "custom", key: "product_layout") {\n      value\n    }\n  }\n  #graphql\n  fragment ProductVariant on ProductVariant {\n    availableForSale\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    id\n    image {\n      __typename\n      id\n      url\n      altText\n      width\n      height\n    }\n    price {\n      amount\n      currencyCode\n    }\n    product {\n      title\n      handle\n    }\n    selectedOptions {\n      name\n      value\n    }\n    sku\n    title\n    unitPrice {\n      amount\n      currencyCode\n    }\n    printQuality: metafield(namespace: "custom", key: "print_quality") {\n      reference {\n        ... on Metaobject {\n          id\n          handle\n          title: field(key: "title") {\n            value\n          }\n          pricePerM2: field(key: "price_per_m2") {\n            value\n          }\n          priceWithoutDiscount: field(key: "price_wo_disc") {\n            value\n          }\n          minWidthCm: field(key: "min_width_cm") {\n            value\n          }\n          maxWidthCm: field(key: "max_width_cm") {\n            value\n          }\n          minHeightCm: field(key: "min_height_cm") {\n            value\n          }\n          maxHeightCm: field(key: "max_height_cm") {\n            value\n          }\n          properties: field(key: "properties") {\n            value\n          }\n        }\n      }\n    }\n  }\n\n\n': {
+  '#graphql\n  query Product(\n    $country: CountryCode\n    $handle: String!\n    $language: LanguageCode\n    $selectedOptions: [SelectedOptionInput!]!\n  ) @inContext(country: $country, language: $language) {\n    product(handle: $handle) {\n      ...Product\n    }\n  }\n  #graphql\n  fragment Product on Product {\n    id\n    title\n    vendor\n    handle\n    descriptionHtml\n    description\n    encodedVariantExistence\n    encodedVariantAvailability\n    images(first: 20) {\n      edges {\n        node {\n          id\n          url\n          altText\n          width\n          height\n        }\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n        firstSelectableVariant {\n          ...ProductVariant\n        }\n        swatch {\n          color\n          image {\n            previewImage {\n              url\n            }\n          }\n        }\n      }\n    }\n    selectedOrFirstAvailableVariant(\n      selectedOptions: $selectedOptions\n      ignoreUnknownOptions: true\n      caseInsensitiveMatch: true\n    ) {\n      ...ProductVariant\n    }\n    adjacentVariants(selectedOptions: $selectedOptions) {\n      ...ProductVariant\n    }\n    seo {\n      description\n      title\n    }\n    productInfo: metafield(namespace: "custom", key: "product_info") {\n      value\n      type\n    }\n    deliveryAndShipping: metafield(namespace: "custom", key: "delivery_and_shipping") {\n      value\n      type\n    }\n    masterAssetId: metafield(namespace: "custom", key: "master_asset_id") {\n      value\n      type\n    }\n    productLayout: metafield(namespace: "custom", key: "product_layout") {\n      value\n    }\n    mainMotif: metafield(namespace: "custom", key: "main_motif") {\n      value\n    }\n    mainTheme: metafield(namespace: "custom", key: "main_theme") {\n      value\n    }\n  }\n  #graphql\n  fragment ProductVariant on ProductVariant {\n    availableForSale\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    id\n    image {\n      __typename\n      id\n      url\n      altText\n      width\n      height\n    }\n    price {\n      amount\n      currencyCode\n    }\n    product {\n      title\n      handle\n    }\n    selectedOptions {\n      name\n      value\n    }\n    sku\n    title\n    unitPrice {\n      amount\n      currencyCode\n    }\n    printQuality: metafield(namespace: "custom", key: "print_quality") {\n      reference {\n        ... on Metaobject {\n          id\n          handle\n          title: field(key: "title") {\n            value\n          }\n          pricePerM2: field(key: "price_per_m2") {\n            value\n          }\n          priceWithoutDiscount: field(key: "price_wo_disc") {\n            value\n          }\n          minWidthCm: field(key: "min_width_cm") {\n            value\n          }\n          maxWidthCm: field(key: "max_width_cm") {\n            value\n          }\n          minHeightCm: field(key: "min_height_cm") {\n            value\n          }\n          maxHeightCm: field(key: "max_height_cm") {\n            value\n          }\n          properties: field(key: "properties") {\n            value\n          }\n        }\n      }\n    }\n  }\n\n\n': {
     return: ProductQuery;
     variables: ProductQueryVariables;
   };

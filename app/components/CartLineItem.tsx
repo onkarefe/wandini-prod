@@ -1,11 +1,11 @@
-import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
-import type { CartLayout } from '~/components/CartMain';
-import { CartForm, Image, type OptimisticCartLine } from '@shopify/hydrogen';
-import { useVariantUrl } from '~/lib/variants';
+import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
+import type {CartLayout} from '~/components/CartMain';
+import {CartForm, Image, type OptimisticCartLine} from '@shopify/hydrogen';
+import {useVariantUrl} from '~/lib/variants';
 import {Link} from '~/lib/i18n-router';
-import { ProductPrice } from './ProductPrice';
-import { useAside } from './Aside';
-import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import {ProductPrice} from './ProductPrice';
+import {useAside} from './Aside';
+import type {CartApiQueryFragment} from 'storefrontapi.generated';
 
 type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 
@@ -20,25 +20,25 @@ export function CartLineItem({
   layout: CartLayout;
   line: CartLine;
 }) {
-  const { id, merchandise } = line;
-  const { product, title, image, selectedOptions } = merchandise;
+  const {id, merchandise} = line;
+  const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
-  const { close } = useAside();
+  const {close} = useAside();
 
   return (
-    <li key={id} className="custom-cart-line">
+    <li key={id} className={`custom-cart-line custom-cart-line--${layout}`}>
       <div className="customCartLineImgBox">
         {image && (
           <Image
             alt={title}
-            className='custom-cartLineImg'
+            className="custom-cartLineImg"
             data={image}
             loading="lazy"
           />
         )}
       </div>
 
-      <div className='customCartDataBox'>
+      <div className="customCartDataBox">
         <Link
           prefetch="intent"
           to={lineItemUrl}
@@ -53,7 +53,7 @@ export function CartLineItem({
           </p>
         </Link>
         <ProductPrice price={line?.cost?.totalAmount} />
-        <ul>
+        <ul className="custom-cart-line__options">
           {selectedOptions.map((option) => (
             <li key={option.name}>
               <small>
@@ -111,9 +111,9 @@ export function CartLineItem({
 //   );
 // }
 
-function CartLineRemove({ line }: { line: CartLine }) {
+function CartLineRemove({line}: {line: CartLine}) {
   if (!line || typeof line?.quantity === 'undefined') return null;
-  const { id: lineId, quantity, isOptimistic } = line;
+  const {id: lineId, quantity, isOptimistic} = line;
 
   return (
     <div className="custom-cart-line-remove">
@@ -139,10 +139,17 @@ function CartLineRemoveButton({
       fetcherKey={getUpdateKey(lineIds)}
       route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
-      inputs={{ lineIds }}
+      inputs={{lineIds}}
     >
-      <button className='aside-itemRemove' disabled={disabled} type="submit">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208zM216 272C202.7 272 192 282.7 192 296L192 488C192 501.3 202.7 512 216 512C229.3 512 240 501.3 240 488L240 296C240 282.7 229.3 272 216 272zM320 272C306.7 272 296 282.7 296 296L296 488C296 501.3 306.7 512 320 512C333.3 512 344 501.3 344 488L344 296C344 282.7 333.3 272 320 272zM424 272C410.7 272 400 282.7 400 296L400 488C400 501.3 410.7 512 424 512C437.3 512 448 501.3 448 488L448 296C448 282.7 437.3 272 424 272z" /></svg>
+      <button
+        className="aside-itemRemove"
+        disabled={disabled}
+        type="submit"
+        aria-label="Artikel entfernen"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+          <path d="M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208zM216 272C202.7 272 192 282.7 192 296L192 488C192 501.3 202.7 512 216 512C229.3 512 240 501.3 240 488L240 296C240 282.7 229.3 272 216 272zM320 272C306.7 272 296 282.7 296 296L296 488C296 501.3 306.7 512 320 512C333.3 512 344 501.3 344 488L344 296C344 282.7 333.3 272 320 272zM424 272C410.7 272 400 282.7 400 296L400 488C400 501.3 410.7 512 424 512C437.3 512 448 501.3 448 488L448 296C448 282.7 437.3 272 424 272z" />
+        </svg>
       </button>
     </CartForm>
   );
@@ -162,7 +169,7 @@ function CartLineUpdateButton({
       fetcherKey={getUpdateKey(lineIds)}
       route="/cart"
       action={CartForm.ACTIONS.LinesUpdate}
-      inputs={{ lines }}
+      inputs={{lines}}
     >
       {children}
     </CartForm>

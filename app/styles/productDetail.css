@@ -5,10 +5,12 @@
 }
 
 .productDetailLeft {
+  min-width: 0;
   flex-basis: calc(70% - 8px);
   margin-right: 8px;
 }
 .productDetailRight {
+  min-width: 0;
   flex-basis: calc(30% - 8px);
   margin-left: 8px;
 }
@@ -105,6 +107,10 @@
 }
 
 @media (min-width: 1024px) {
+  .productDetailRow1 {
+    flex-wrap: nowrap;
+  }
+
   .embla--main,
   .embla__container,
   .embla__slide {
