@@ -162,9 +162,9 @@
   height: 32px;
   padding: 0;
   place-items: center;
-  border: 1px solid transparent;
+  border: 1px solid #ffd5d2;
   border-radius: 50%;
-  background: transparent;
+  background: #fff4f3;
   box-shadow: none;
   cursor: pointer;
   transition:
@@ -173,18 +173,18 @@
 }
 
 .custom-cart-line--page .aside-itemRemove svg {
-  width: 15px;
-  height: 15px;
-  fill: #86868b;
+  width: 16px;
+  height: 16px;
+  fill: #d92d20;
 }
 
 .custom-cart-line--page .aside-itemRemove:hover:not(:disabled) {
-  border-color: #e5e5e7;
-  background: #f5f5f7;
+  border-color: #d92d20;
+  background: #d92d20;
 }
 
 .custom-cart-line--page .aside-itemRemove:hover:not(:disabled) svg {
-  fill: #1d1d1f;
+  fill: #ffffff;
 }
 
 .custom-cart-line--page .aside-itemRemove:disabled {

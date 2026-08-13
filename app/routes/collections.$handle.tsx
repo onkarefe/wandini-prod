@@ -71,7 +71,12 @@ type CollectionItemListElement = {
 
 const COLLECTION_META_BRAND = 'Wandini';
 const COLLECTION_META_DESCRIPTION_MAX_LENGTH = 160;
+const BESTSELLER_COLLECTION_PAGE_TYPE = 'bestseller';
 const ZUBEHOR_COLLECTION_PAGE_TYPE = 'zubehor';
+
+const BestsellerCollectionLayout = lazy(
+  () => import('~/components/BestsellerCollectionLayout'),
+);
 
 const ZubehorCollectionLayout = lazy(
   () => import('~/components/ZubehorCollectionLayout'),
@@ -81,6 +86,13 @@ const NOISY_COLLECTION_PARAMS = ['sort', 'f', 'cursor', 'direction'] as const;
 
 function hasNoisyCollectionParams(searchParams: URLSearchParams) {
   return NOISY_COLLECTION_PARAMS.some((param) => searchParams.has(param));
+}
+
+function isBestsellerCollection(collection: CollectionData) {
+  return (
+    collection.pageType?.value?.trim().toLowerCase() ===
+    BESTSELLER_COLLECTION_PAGE_TYPE
+  );
 }
 
 function isZubehorCollection(collection: CollectionData) {
@@ -344,10 +356,26 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     getCustomerWishlistProductIds({}),
   ]);
 
-  const collection = data.collection as CollectionWithSeo | null | undefined;
+  let collection = data.collection as CollectionWithSeo | null | undefined;
 
   if (!collection) {
     throw new Response(`Collection ${handle} not found`, {status: 404});
+  }
+
+  if (isBestsellerCollection(collection)) {
+    const bestsellerData = (await storefront.query(CUSTOM_COLLECTION_QUERY, {
+      variables: {
+        handle,
+        first: 14,
+        filters: [],
+        sortKey: 'BEST_SELLING',
+        reverse: false,
+      },
+    })) as CustomCollectionQuery;
+
+    collection =
+      (bestsellerData.collection as CollectionWithSeo | null | undefined) ??
+      collection;
   }
 
   redirectIfHandleIsLocalized(request, {handle, data: collection});
@@ -407,7 +435,21 @@ export default function Collection() {
         />
       ) : null}
 
-      {isZubehorCollection(collection) ? (
+      {isBestsellerCollection(collection) ? (
+        <Suspense
+          fallback={
+            <div className="collectionMainHeroDiv" aria-busy="true">
+              <h1>{collection.title}</h1>
+            </div>
+          }
+        >
+          <BestsellerCollectionLayout
+            collection={collection}
+            isLoggedIn={isLoggedIn}
+            wishlistProductIds={wishlistProductIds}
+          />
+        </Suspense>
+      ) : isZubehorCollection(collection) ? (
         <Suspense
           fallback={
             <div className="collectionMainHeroDiv" aria-busy="true">
