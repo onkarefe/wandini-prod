@@ -1190,6 +1190,37 @@ export type CatalogQuery = {
   };
 };
 
+export type CustomerReviewsPageMetaobjectFragment = Pick<
+  StorefrontAPI.Metaobject,
+  'id' | 'handle' | 'type'
+> & {
+  fields: Array<
+    Pick<StorefrontAPI.MetaobjectField, 'key' | 'value' | 'type'> & {
+      reference?: StorefrontAPI.Maybe<
+        | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+        | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+            image?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
+            >;
+          })
+      >;
+      references?: StorefrontAPI.Maybe<{
+        nodes: Array<
+          | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+          | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+              image?: StorefrontAPI.Maybe<
+                Pick<
+                  StorefrontAPI.Image,
+                  'url' | 'altText' | 'width' | 'height'
+                >
+              >;
+            })
+        >;
+      }>;
+    }
+  >;
+};
+
 export type PageQueryVariables = StorefrontAPI.Exact<{
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
@@ -1199,6 +1230,161 @@ export type PageQueryVariables = StorefrontAPI.Exact<{
 export type PageQuery = {
   page?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Page, 'handle' | 'id' | 'title' | 'body'> & {
+      pageType?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
+      erfahrungenHero?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type'> & {
+          reference?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.Metaobject, 'id' | 'handle' | 'type'> & {
+              fields: Array<
+                Pick<
+                  StorefrontAPI.MetaobjectField,
+                  'key' | 'value' | 'type'
+                > & {
+                  reference?: StorefrontAPI.Maybe<
+                    | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+                    | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                        image?: StorefrontAPI.Maybe<
+                          Pick<
+                            StorefrontAPI.Image,
+                            'url' | 'altText' | 'width' | 'height'
+                          >
+                        >;
+                      })
+                  >;
+                  references?: StorefrontAPI.Maybe<{
+                    nodes: Array<
+                      | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+                      | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                          image?: StorefrontAPI.Maybe<
+                            Pick<
+                              StorefrontAPI.Image,
+                              'url' | 'altText' | 'width' | 'height'
+                            >
+                          >;
+                        })
+                    >;
+                  }>;
+                }
+              >;
+            }
+          >;
+        }
+      >;
+      customerReviews?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type'> & {
+          reference?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.Metaobject, 'id' | 'handle' | 'type'> & {
+              fields: Array<
+                Pick<
+                  StorefrontAPI.MetaobjectField,
+                  'key' | 'value' | 'type'
+                > & {
+                  reference?: StorefrontAPI.Maybe<
+                    | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+                    | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                        image?: StorefrontAPI.Maybe<
+                          Pick<
+                            StorefrontAPI.Image,
+                            'url' | 'altText' | 'width' | 'height'
+                          >
+                        >;
+                      })
+                  >;
+                  references?: StorefrontAPI.Maybe<{
+                    nodes: Array<
+                      | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+                      | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                          image?: StorefrontAPI.Maybe<
+                            Pick<
+                              StorefrontAPI.Image,
+                              'url' | 'altText' | 'width' | 'height'
+                            >
+                          >;
+                        })
+                    >;
+                  }>;
+                }
+              >;
+            }
+          >;
+          references?: StorefrontAPI.Maybe<{
+            nodes: Array<
+              Pick<StorefrontAPI.Metaobject, 'id' | 'handle' | 'type'> & {
+                fields: Array<
+                  Pick<
+                    StorefrontAPI.MetaobjectField,
+                    'key' | 'value' | 'type'
+                  > & {
+                    reference?: StorefrontAPI.Maybe<
+                      | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+                      | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                          image?: StorefrontAPI.Maybe<
+                            Pick<
+                              StorefrontAPI.Image,
+                              'url' | 'altText' | 'width' | 'height'
+                            >
+                          >;
+                        })
+                    >;
+                    references?: StorefrontAPI.Maybe<{
+                      nodes: Array<
+                        | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+                        | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                            image?: StorefrontAPI.Maybe<
+                              Pick<
+                                StorefrontAPI.Image,
+                                'url' | 'altText' | 'width' | 'height'
+                              >
+                            >;
+                          })
+                      >;
+                    }>;
+                  }
+                >;
+              }
+            >;
+          }>;
+        }
+      >;
+      erfahrungenSteps?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type'> & {
+          reference?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.Metaobject, 'id' | 'handle' | 'type'> & {
+              fields: Array<
+                Pick<
+                  StorefrontAPI.MetaobjectField,
+                  'key' | 'value' | 'type'
+                > & {
+                  reference?: StorefrontAPI.Maybe<
+                    | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+                    | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                        image?: StorefrontAPI.Maybe<
+                          Pick<
+                            StorefrontAPI.Image,
+                            'url' | 'altText' | 'width' | 'height'
+                          >
+                        >;
+                      })
+                  >;
+                  references?: StorefrontAPI.Maybe<{
+                    nodes: Array<
+                      | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+                      | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                          image?: StorefrontAPI.Maybe<
+                            Pick<
+                              StorefrontAPI.Image,
+                              'url' | 'altText' | 'width' | 'height'
+                            >
+                          >;
+                        })
+                    >;
+                  }>;
+                }
+              >;
+            }
+          >;
+        }
+      >;
       seo?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.Seo, 'description' | 'title'>
       >;
@@ -2085,7 +2271,7 @@ interface GeneratedQueryTypes {
     return: CatalogQuery;
     variables: CatalogQueryVariables;
   };
-  '#graphql\n  query Page(\n    $language: LanguageCode,\n    $country: CountryCode,\n    $handle: String!\n  )\n  @inContext(language: $language, country: $country) {\n    page(handle: $handle) {\n      handle\n      id\n      title\n      body\n      seo {\n        description\n        title\n      }\n    }\n  }\n': {
+  '#graphql\n  fragment CustomerReviewsPageMetaobject on Metaobject {\n    id\n    handle\n    type\n      fields {\n        key\n        value\n        type\n        reference {\n          ... on MediaImage {\n            id\n            image {\n              url\n              altText\n              width\n              height\n            }\n          }\n          ... on GenericFile {\n            id\n            url\n          }\n        }\n        references(first: 50) {\n        nodes {\n          ... on MediaImage {\n            id\n            image {\n              url\n              altText\n              width\n              height\n            }\n          }\n          ... on GenericFile {\n            id\n            url\n          }\n        }\n      }\n    }\n  }\n\n  query Page(\n    $language: LanguageCode,\n    $country: CountryCode,\n    $handle: String!\n  )\n  @inContext(language: $language, country: $country) {\n    page(handle: $handle) {\n      handle\n      id\n      title\n      body\n      pageType: metafield(namespace: "custom", key: "page_type") {\n        value\n      }\n      erfahrungenHero: metafield(\n        namespace: "custom"\n        key: "erfahrungen_hero"\n      ) {\n        type\n        reference {\n          ...CustomerReviewsPageMetaobject\n        }\n      }\n      customerReviews: metafield(\n        namespace: "custom"\n        key: "reviews_page_comments"\n      ) {\n        type\n        reference {\n          ...CustomerReviewsPageMetaobject\n        }\n        references(first: 5) {\n          nodes {\n            ...CustomerReviewsPageMetaobject\n          }\n        }\n      }\n      erfahrungenSteps: metafield(\n        namespace: "custom"\n        key: "erfahrungen_steps"\n      ) {\n        type\n        reference {\n          ...CustomerReviewsPageMetaobject\n        }\n      }\n      seo {\n        description\n        title\n      }\n    }\n  }\n': {
     return: PageQuery;
     variables: PageQueryVariables;
   };

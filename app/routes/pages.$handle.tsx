@@ -1,8 +1,15 @@
 import {useLoaderData} from 'react-router';
+import {lazy, Suspense} from 'react';
 import type {Route} from './+types/pages.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import staticPagesStyles from '~/styles/staticPages.css?url';
 import {getRobotsDirective} from '~/lib/seo';
+import {
+  parseCustomerReviewsHeroMetaobject,
+  parseCustomerReviewsMetaobject,
+  parseCustomerReviewsSectionTitle,
+  parseCustomerReviewsStepsMetaobject,
+} from '~/lib/customer-reviews';
 
 const BLOCKED_HTML_TAGS = [
   'script',
@@ -21,6 +28,11 @@ const BLOCKED_HTML_TAGS = [
 ] as const;
 const PAGE_META_BRAND = 'Wandini';
 const PAGE_META_DESCRIPTION_MAX_LENGTH = 160;
+const ERFAHRUNGEN_PAGE_TYPE = 'erfahrungen';
+
+const CustomerReviewsPage = lazy(
+  () => import('~/components/customer-reviews-page'),
+);
 
 type PageMetaInput = {
   title?: string | null;
@@ -31,12 +43,23 @@ type PageMetaInput = {
   } | null;
 };
 
+type PageWithType = {
+  pageType?: {value?: string | null} | null;
+};
+
+function isErfahrungenPage(page?: PageWithType | null) {
+  return page?.pageType?.value?.trim().toLowerCase() === ERFAHRUNGEN_PAGE_TYPE;
+}
+
 function normalizeMetaText(value?: string | null) {
   if (!value) {
     return '';
   }
 
-  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function truncateMetaDescription(value: string) {
@@ -80,15 +103,18 @@ function getPageMetaDescription(page?: PageMetaInput | null) {
 }
 
 function sanitizeInlineStyles(html: string) {
-  return html.replace(/\sstyle\s*=\s*(["'])(.*?)\1/gi, (_match, quote, rawStyle) => {
-    const sanitizedStyle = String(rawStyle)
-      .replace(/expression\s*\([^)]*\)/gi, '')
-      .replace(/url\s*\(\s*(['"]?)\s*javascript:[^)]+\1\s*\)/gi, '')
-      .replace(/-moz-binding\s*:[^;]+;?/gi, '')
-      .trim();
+  return html.replace(
+    /\sstyle\s*=\s*(["'])(.*?)\1/gi,
+    (_match, quote, rawStyle) => {
+      const sanitizedStyle = String(rawStyle)
+        .replace(/expression\s*\([^)]*\)/gi, '')
+        .replace(/url\s*\(\s*(['"]?)\s*javascript:[^)]+\1\s*\)/gi, '')
+        .replace(/-moz-binding\s*:[^;]+;?/gi, '')
+        .trim();
 
-    return sanitizedStyle ? ` style=${quote}${sanitizedStyle}${quote}` : '';
-  });
+      return sanitizedStyle ? ` style=${quote}${sanitizedStyle}${quote}` : '';
+    },
+  );
 }
 
 function sanitizeShopifyPageHtml(html: string | null | undefined) {
@@ -141,11 +167,15 @@ export const meta: Route.MetaFunction = ({data, params}) => {
     },
     {property: 'og:type', content: 'website'},
     {property: 'og:title', content: title},
-    ...(description ? [{property: 'og:description', content: description}] : []),
+    ...(description
+      ? [{property: 'og:description', content: description}]
+      : []),
     {property: 'og:url', content: canonicalUrl},
     {name: 'twitter:card', content: 'summary'},
     {name: 'twitter:title', content: title},
-    ...(description ? [{name: 'twitter:description', content: description}] : []),
+    ...(description
+      ? [{name: 'twitter:description', content: description}]
+      : []),
   ];
 };
 
@@ -183,9 +213,26 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
 
   redirectIfHandleIsLocalized(request, {handle: params.handle, data: page});
   const url = new URL(request.url);
+  const customerReviewsMetaobject =
+    page.customerReviews?.reference ??
+    page.customerReviews?.references?.nodes?.[0] ??
+    null;
+  const customerReviewsHeroMetaobject = page.erfahrungenHero?.reference ?? null;
+  const customerReviewsStepsMetaobject =
+    page.erfahrungenSteps?.reference ?? null;
 
   return {
     canonicalUrl: `${url.origin}${url.pathname}`,
+    customerReviewsHero: parseCustomerReviewsHeroMetaobject(
+      customerReviewsHeroMetaobject,
+    ),
+    customerReviews: parseCustomerReviewsMetaobject(customerReviewsMetaobject),
+    customerReviewsSectionTitle: parseCustomerReviewsSectionTitle(
+      customerReviewsMetaobject,
+    ),
+    customerReviewsSteps: parseCustomerReviewsStepsMetaobject(
+      customerReviewsStepsMetaobject,
+    ),
     page: {
       ...page,
       body: sanitizeShopifyPageHtml(page.body),
@@ -203,7 +250,32 @@ function loadDeferredData(_: Route.LoaderArgs) {
 }
 
 export default function Page() {
-  const {page} = useLoaderData<typeof loader>();
+  const {
+    customerReviews,
+    customerReviewsHero,
+    customerReviewsSectionTitle,
+    customerReviewsSteps,
+    page,
+  } = useLoaderData<typeof loader>();
+
+  if (isErfahrungenPage(page)) {
+    return (
+      <Suspense
+        fallback={
+          <main className="static-page" aria-busy="true">
+            <div className="static-page__article container mx-auto" />
+          </main>
+        }
+      >
+        <CustomerReviewsPage
+          hero={customerReviewsHero}
+          reviews={customerReviews}
+          reviewsSectionTitle={customerReviewsSectionTitle}
+          steps={customerReviewsSteps}
+        />
+      </Suspense>
+    );
+  }
 
   return (
     <main className="static-page">
@@ -221,6 +293,49 @@ export default function Page() {
 }
 
 const PAGE_QUERY = `#graphql
+  fragment CustomerReviewsPageMetaobject on Metaobject {
+    id
+    handle
+    type
+      fields {
+        key
+        value
+        type
+        reference {
+          ... on MediaImage {
+            id
+            image {
+              url
+              altText
+              width
+              height
+            }
+          }
+          ... on GenericFile {
+            id
+            url
+          }
+        }
+        references(first: 50) {
+        nodes {
+          ... on MediaImage {
+            id
+            image {
+              url
+              altText
+              width
+              height
+            }
+          }
+          ... on GenericFile {
+            id
+            url
+          }
+        }
+      }
+    }
+  }
+
   query Page(
     $language: LanguageCode,
     $country: CountryCode,
@@ -232,6 +347,41 @@ const PAGE_QUERY = `#graphql
       id
       title
       body
+      pageType: metafield(namespace: "custom", key: "page_type") {
+        value
+      }
+      erfahrungenHero: metafield(
+        namespace: "custom"
+        key: "erfahrungen_hero"
+      ) {
+        type
+        reference {
+          ...CustomerReviewsPageMetaobject
+        }
+      }
+      customerReviews: metafield(
+        namespace: "custom"
+        key: "reviews_page_comments"
+      ) {
+        type
+        reference {
+          ...CustomerReviewsPageMetaobject
+        }
+        references(first: 5) {
+          nodes {
+            ...CustomerReviewsPageMetaobject
+          }
+        }
+      }
+      erfahrungenSteps: metafield(
+        namespace: "custom"
+        key: "erfahrungen_steps"
+      ) {
+        type
+        reference {
+          ...CustomerReviewsPageMetaobject
+        }
+      }
       seo {
         description
         title
