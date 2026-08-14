@@ -111,12 +111,13 @@ export function ZubehorProductCard({
 
     if (!isLoggedIn) {
       const returnTo = `${location.pathname}${location.search}${location.hash}`;
-      window.location.href = `${loginPath}?returnTo=${encodeURIComponent(returnTo)}`;
+      window.location.href = `${loginPath}?return_to=${encodeURIComponent(returnTo)}`;
       return;
     }
 
     const formData = new FormData();
     formData.set('productId', productId);
+    formData.set('desiredWishlisted', String(!wishlisted));
     void fetcher.submit(formData, {
       method: 'post',
       action: '/api/wishlist',

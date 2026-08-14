@@ -44,18 +44,24 @@ function CustomGridTile({
   index: number;
 }) {
   const tileClassName = TILE_CLASS_NAMES[index] ?? TILE_CLASS_NAMES[0];
+  const className = `${tileClassName} cgBoxMain`;
+  const style = getTileStyle(item.image?.url);
+
+  if (item.link) {
+    return (
+      <Link className={className} style={style} to={item.link}>
+        <div className="cg-title">{item.title}</div>
+        {item.buttonText ? (
+          <span className="cg-button">{item.buttonText}</span>
+        ) : null}
+      </Link>
+    );
+  }
 
   return (
-    <div
-      className={`${tileClassName} cgBoxMain`}
-      style={getTileStyle(item.image?.url)}
-    >
+    <div className={className} style={style}>
       <div className="cg-title">{item.title}</div>
-      {item.buttonText && item.link ? (
-        <Link className="cg-button" to={item.link}>
-          {item.buttonText}
-        </Link>
-      ) : item.buttonText ? (
+      {item.buttonText ? (
         <button
           type="button"
           className="cg-button"

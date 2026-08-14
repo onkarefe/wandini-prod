@@ -20,16 +20,6 @@
   margin-bottom: 20px;
 }
 
-.similar-motifs-section__eyebrow {
-  margin: 0 0 7px;
-  color: #77736c;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.11em;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
 .similar-motifs-section h2 {
   margin: 0;
   font-size: clamp(1.65rem, 2.5vw, 2.25rem);
@@ -93,7 +83,15 @@
 
 .similar-motifs-carousel {
   width: 100%;
+  min-width: 0;
   overflow: hidden;
+}
+
+.similar-motifs-section__content {
+  display: grid;
+  grid-template-columns: calc((100% - 54px) / 4) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 18px;
 }
 
 .similar-motifs-carousel__track {
@@ -104,7 +102,7 @@
 }
 
 .similar-motifs-carousel__slide {
-  flex: 0 0 calc((100% - 54px) / 4);
+  flex: 0 0 calc((100% - 36px) / 3);
   min-width: 0;
 }
 
@@ -278,6 +276,10 @@
 }
 
 @media (max-width: 1023.98px) {
+  .similar-motifs-section__content {
+    grid-template-columns: calc((100% - 36px) / 3) minmax(0, 1fr);
+  }
+
   .similar-motifs-carousel__slide {
     flex-basis: calc((100% - 18px) / 2);
   }
@@ -298,6 +300,14 @@
   .similar-motifs-section__controls button {
     width: 38px;
     height: 38px;
+  }
+
+  .similar-motifs-section__content {
+    display: block;
+  }
+
+  .similar-motifs-explore-card {
+    margin-bottom: 18px;
   }
 
   .similar-motifs-carousel__slide {

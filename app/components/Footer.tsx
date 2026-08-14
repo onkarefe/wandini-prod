@@ -81,8 +81,10 @@ export function Footer({ footer: footerPromise, header, publicStoreDomain }: Foo
                   ) : null}
 
                   <div className="footerLogoSubtext">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas volutpat lacinia sem,
-                    non posuere nulla consequat sit amet.
+                    Fragen oder besondere Wünsche?
+                    <br />
+                    Unser Team hilft dir persönlich weiter und findet die
+                    passende Lösung für dein Projekt.
                   </div>
 
                   <div className="footerCallCenterBox">
@@ -93,14 +95,12 @@ export function Footer({ footer: footerPromise, header, publicStoreDomain }: Foo
                       />
                     </div>
                     <div className="callCenterTextBox">
-                      <div className="callCenterTitle">Hotline Free:</div>
+                      <div className="callCenterTitle">Support Hotline</div>
                       <a className="footerTel" href="tel:+4902433939920">
                         +49 (0)2433 93992-0
                       </a>
                     </div>
                   </div>
-
-                  <div className="footerAdress">Rheinstraße 20 41836 Hückelhoven</div>
                 </div>
 
                 {/* ----- FOOTER MENÜ BÖLÜMLERİ ----- */}
@@ -139,7 +139,7 @@ export function Footer({ footer: footerPromise, header, publicStoreDomain }: Foo
 
             <div className="footerSubBanner">
               <div className="container mx-auto">
-                <span>Copyright © 2026 - Wandini. All Rights Reserved</span>
+                <span>Copyright © 2026 – Wandini. Alle Rechte vorbehalten.</span>
               </div>
             </div>
           </footer>

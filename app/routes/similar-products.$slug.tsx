@@ -7,7 +7,7 @@ import {
   getSimilarProductsPageData,
   type SimilarProductsBaseProduct,
 } from '~/lib/similar-products';
-import {getCustomerWishlistProductIds} from '~/lib/wishlist.server';
+import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import '../styles/collections.css';
 
 const PAGE_SIZE = 9;
@@ -90,15 +90,17 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
     });
   }
 
-  const [pageData, isLoggedIn, wishlistProductIds] = await Promise.all([
+  const [pageData, wishlistState] = await Promise.all([
     getSimilarProductsPageData({
       storefront: context.storefront,
       slug,
       offset: 0,
       pageSize: PAGE_SIZE,
     }),
-    context.customerAccount.isLoggedIn(),
-    getCustomerWishlistProductIds({}),
+    loadCustomerWishlistState({
+      customerAccount: context.customerAccount,
+      env: context.env,
+    }),
   ]);
 
   const url = new URL(request.url);
@@ -106,8 +108,8 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
   return {
     ...pageData,
     canonicalUrl: `${url.origin}${url.pathname}`,
-    isLoggedIn,
-    wishlistProductIds,
+    isLoggedIn: wishlistState.isLoggedIn,
+    wishlistProductIds: wishlistState.wishlistProductIds,
   };
 }
 

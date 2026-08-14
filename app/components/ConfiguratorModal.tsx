@@ -166,7 +166,9 @@ function ConfiguratorFlowHeader({
         <h2 id={`configurator-${step}-title`} ref={titleRef} tabIndex={-1}>
           {title}
         </h2>
-        <p id={`configurator-${step}-description`}>{description}</p>
+        {description ? (
+          <p id={`configurator-${step}-description`}>{description}</p>
+        ) : null}
       </div>
 
       {showStepGuide && <ConfiguratorStepGuide step={step} />}
@@ -344,7 +346,9 @@ export function ConfiguratorModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={`configurator-${step}-title`}
-        aria-describedby={`configurator-${step}-description`}
+        aria-describedby={
+          step === 'crop' ? undefined : `configurator-${step}-description`
+        }
       >
         <button
           type="button"
@@ -376,13 +380,7 @@ export function ConfiguratorModal({
                 : 'Vorschau & Bestellübersicht'
           }
           description={
-            step === 'crop' ? (
-              <>
-                Der grün markierte Bereich entspricht deinen Wandmaßen.
-                Verschiebe den Ausschnitt, bis das gewünschte Motiv vollständig
-                darin liegt.
-              </>
-            ) : step === 'materials' ? (
+            step === 'crop' ? null : step === 'materials' ? (
               <>
                 Wähle die passende Druckqualität für deine Wandfläche von{' '}
                 {widthCm} × {heightCm} cm.
@@ -540,9 +538,6 @@ export function ConfiguratorModal({
             </div>
             <div className="configuratorFlowFooter configuratorMaterialsActions">
               <ConfiguratorStepGuide step="materials" />
-              <p className="configuratorFlowFooterHint">
-                Wähle oben dein Material aus, um fortzufahren.
-              </p>
             </div>
           </>
         )}

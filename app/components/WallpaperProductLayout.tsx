@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {Fragment, useState, type ReactNode} from 'react';
 import {useNavigate} from 'react-router';
 import {
   getAdjacentAndFirstAvailableVariants,
@@ -33,6 +33,8 @@ type SelectedQualitySummary = {
 
 type ShopifyRichTextChild = {
   value?: string | null;
+  bold?: boolean | null;
+  italic?: boolean | null;
 };
 
 type ShopifyRichTextBlock = {
@@ -43,6 +45,23 @@ type ShopifyRichTextBlock = {
 type ShopifyRichText = {
   children?: ShopifyRichTextBlock[] | null;
 };
+
+function renderShopifyRichTextChild(
+  child: ShopifyRichTextChild,
+  index: number,
+) {
+  let content: ReactNode = child.value ?? '';
+
+  if (child.bold) {
+    content = <strong>{content}</strong>;
+  }
+
+  if (child.italic) {
+    content = <em>{content}</em>;
+  }
+
+  return <Fragment key={`text-${index}`}>{content}</Fragment>;
+}
 
 function renderShopifyRichText(richText: ShopifyRichText | null) {
   if (!richText?.children) return null;
@@ -58,7 +77,7 @@ function renderShopifyRichText(richText: ShopifyRichText | null) {
 
     return (
       <p key={paragraphText || `paragraph-${index}`}>
-        {block.children?.map((child) => child.value)}
+        {block.children?.map(renderShopifyRichTextChild)}
       </p>
     );
   });

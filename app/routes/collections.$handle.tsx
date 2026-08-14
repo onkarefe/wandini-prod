@@ -23,7 +23,7 @@ import {
   normalizeCollectionSortParam,
 } from '~/lib/collectionParams';
 import {buildSimilarProductsPath} from '~/lib/similar-products';
-import {getCustomerWishlistProductIds} from '~/lib/wishlist.server';
+import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {redirectToLocalePath} from '~/lib/locale';
 import {getRobotsDirective} from '~/lib/seo';
@@ -343,7 +343,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const filters = parseCollectionFilters(url.searchParams);
   const isLoggedIn = await customerAccount.isLoggedIn();
 
-  const [data, wishlistProductIds] = await Promise.all([
+  const [data, wishlistState] = await Promise.all([
     storefront.query(CUSTOM_COLLECTION_QUERY, {
       variables: {
         handle,
@@ -353,8 +353,13 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
         reverse,
       },
     }) as Promise<CustomCollectionQuery>,
-    getCustomerWishlistProductIds({}),
+    loadCustomerWishlistState({
+      customerAccount,
+      env: context.env,
+      isLoggedIn,
+    }),
   ]);
+  const {wishlistProductIds} = wishlistState;
 
   let collection = data.collection as CollectionWithSeo | null | undefined;
 

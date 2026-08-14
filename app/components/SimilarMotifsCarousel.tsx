@@ -1,6 +1,6 @@
 import {Image} from '@shopify/hydrogen';
 import useEmblaCarousel from 'embla-carousel-react';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {Link} from '~/lib/i18n-router';
 import type {
   SimilarMotifsPreviewData,
@@ -116,17 +116,6 @@ export default function SimilarMotifsCarousel({
 }: {
   data: SimilarMotifsPreviewData;
 }) {
-  const slides = useMemo(
-    () => [
-      ...data.products.map((product) => ({
-        id: product.id,
-        product,
-        type: 'product' as const,
-      })),
-      {id: 'explore-all', type: 'explore' as const},
-    ],
-    [data.products],
-  );
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     containScroll: 'trimSnaps',
@@ -162,10 +151,7 @@ export default function SimilarMotifsCarousel({
       aria-labelledby="similar-motifs-heading"
     >
       <div className="similar-motifs-section__header">
-        <div>
-          <p className="similar-motifs-section__eyebrow">Passende Designs</p>
-          <h2 id="similar-motifs-heading">Ähnliche Motive</h2>
-        </div>
+        <h2 id="similar-motifs-heading">Ähnliche Motive</h2>
 
         <div className="similar-motifs-section__controls">
           <button
@@ -187,29 +173,29 @@ export default function SimilarMotifsCarousel({
         </div>
       </div>
 
-      <div
-        className="similar-motifs-carousel"
-        ref={emblaRef}
-        role="region"
-        aria-roledescription="Karussell"
-        aria-label="Ähnliche Motive"
-      >
-        <div className="similar-motifs-carousel__track">
-          {slides.map((slide, index) => (
-            <div
-              className="similar-motifs-carousel__slide"
-              key={slide.id}
-              role="group"
-              aria-roledescription="Folie"
-              aria-label={`${index + 1} von ${slides.length}`}
-            >
-              {slide.type === 'product' ? (
-                <SimilarProductCard product={slide.product} />
-              ) : (
-                <ExploreAllCard data={data} />
-              )}
-            </div>
-          ))}
+      <div className="similar-motifs-section__content">
+        <ExploreAllCard data={data} />
+
+        <div
+          className="similar-motifs-carousel"
+          ref={emblaRef}
+          role="region"
+          aria-roledescription="Karussell"
+          aria-label="Ähnliche Motive"
+        >
+          <div className="similar-motifs-carousel__track">
+            {data.products.map((product, index) => (
+              <div
+                className="similar-motifs-carousel__slide"
+                key={product.id}
+                role="group"
+                aria-roledescription="Folie"
+                aria-label={`${index + 1} von ${data.products.length}`}
+              >
+                <SimilarProductCard product={product} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import {useMemo} from 'react';
 import type {CustomCollectionQuery} from 'storefrontapi.generated';
 import BestsellerProductCard from '~/components/BestsellerProductCard';
+import {Link} from '~/lib/i18n-router';
 import {buildSimilarProductsPath} from '~/lib/similar-products';
 import '../styles/bestseller-collection.css';
 
@@ -151,6 +152,18 @@ export default function BestsellerCollectionLayout({
           {renderSlot(12, 'bestseller-collection__slot--stack-top')}
           {renderSlot(13, 'bestseller-collection__slot--stack-bottom')}
         </section>
+      </div>
+
+      <div className="bestseller-collection__cta container mx-auto">
+        <Link
+          className="bestseller-collection__cta-button"
+          to="/collections/fototapeten"
+        >
+          <span>Alle Fototapeten entdecken</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 12h14m-5-5 5 5-5 5" />
+          </svg>
+        </Link>
       </div>
     </div>
   );

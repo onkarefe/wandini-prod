@@ -139,6 +139,11 @@
   margin-bottom: 6px;
 }
 
+.customTabContent strong,
+.customTabContent b {
+  font-weight: 700;
+}
+
 .customTabContent h1,
 .customTabContent h2,
 .customTabContent h3,

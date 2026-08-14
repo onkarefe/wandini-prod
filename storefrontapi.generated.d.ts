@@ -3,6 +3,33 @@
 /* eslint-disable */
 import type * as StorefrontAPI from '@shopify/hydrogen/storefront-api-types';
 
+export type AccountFavoritesProductsQueryVariables = StorefrontAPI.Exact<{
+  ids:
+    | Array<StorefrontAPI.Scalars['ID']['input']>
+    | StorefrontAPI.Scalars['ID']['input'];
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type AccountFavoritesProductsQuery = {
+  nodes: Array<
+    StorefrontAPI.Maybe<
+      {__typename: 'Product'} & Pick<
+        StorefrontAPI.Product,
+        'id' | 'handle' | 'title'
+      > & {
+          priceRange: {
+            minVariantPrice: Pick<
+              StorefrontAPI.MoneyV2,
+              'amount' | 'currencyCode'
+            >;
+          };
+          images: {nodes: Array<Pick<StorefrontAPI.Image, 'url' | 'altText'>>};
+        }
+    >
+  >;
+};
+
 export type MoneyFragment = Pick<
   StorefrontAPI.MoneyV2,
   'currencyCode' | 'amount'
@@ -2183,6 +2210,10 @@ export type ArticleSitemapQuery = {
 };
 
 interface GeneratedQueryTypes {
+  '#graphql\n  query AccountFavoritesProducts(\n    $ids: [ID!]!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    nodes(ids: $ids) {\n      ... on Product {\n        __typename\n        id\n        handle\n        title\n        priceRange {\n          minVariantPrice {\n            amount\n            currencyCode\n          }\n        }\n        images(first: 3) {\n          nodes {\n            url\n            altText\n          }\n        }\n      }\n    }\n  }\n': {
+    return: AccountFavoritesProductsQuery;
+    variables: AccountFavoritesProductsQueryVariables;
+  };
   '#graphql\n  fragment Shop on Shop {\n    id\n    name\n    description\n    primaryDomain { url }\n    brand {\n      logo {\n        image { url altText width height }\n      }\n    }\n  }\n\n  query Header(\n    $country: CountryCode\n    $headerMenuHandle: String!\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    shop { ...Shop }\n\n    menu(handle: $headerMenuHandle) {\n      ...Menu\n    }\n\n    megaMenus: metaobjects(type: "mega_menu", first: 50) {\n      nodes {\n        id\n        type\n        handle\n\n        # ROOT fields:\n        # - trigger_handle (value)\n        # - base_collection (reference)\n        # - columns (references)\n        fields {\n          key\n          value\n\n          reference {\n            ... on Collection {\n              id\n              handle\n              title\n            }\n          }\n\n          references(first: 50) {\n            nodes {\n              ... on Metaobject {\n                id\n                type\n                handle\n\n                # COLUMN fields:\n                # - title (value)\n                # - items (references)\n                fields {\n                  key\n                  value\n\n                  references(first: 50) {\n                    nodes {\n                      ... on Metaobject {\n                        id\n                        type\n                        handle\n\n                        # ITEM fields:\n                        # - label (value)\n                        # - action_type (value)\n                        # - collection (reference)\n                        # - filter_preset (reference -> metaobject)\n                        # - sort_preset (reference -> metaobject)\n                        fields {\n                          key\n                          value\n\n                          # collection OR filter_preset OR sort_preset resolve via reference\n                          reference {\n                            ... on Collection {\n                              id\n                              handle\n                              title\n                            }\n\n                            # Filter Preset metaobject (label + taxonomy_value_gid)\n                            ... on Metaobject {\n                              id\n                              type\n                              handle\n                              fields {\n                                key\n                                value\n                              }\n                            }\n                          }\n                        }\n                      }\n                    }\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n\n  #graphql\n  fragment MenuItem on MenuItem {\n    id\n    resourceId\n    tags\n    title\n    type\n    url\n  }\n  fragment ChildMenuItem on MenuItem {\n    ...MenuItem\n  }\n  fragment ParentMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...ChildMenuItem\n    }\n  }\n  fragment Menu on Menu {\n    id\n    items {\n      ...ParentMenuItem\n    }\n  }\n\n': {
     return: HeaderQuery;
     variables: HeaderQueryVariables;
