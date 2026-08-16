@@ -41,7 +41,7 @@ function SearchResultsArticles({
 
   return (
     <div className="search-result">
-      <h2>Articles</h2>
+      <h2>Magazin</h2>
       <div>
         {articles.nodes.map((article) => {
           const blogHandle = article.blog?.handle;
@@ -81,7 +81,7 @@ function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
 
   return (
     <div className="search-result">
-      <h2>Pages</h2>
+      <h2>Seiten</h2>
       <div>
         {pages.nodes.map((page) => {
           const pageUrl = urlWithTrackingParams({
@@ -114,7 +114,7 @@ function SearchResultsProducts({
 
   return (
     <div className="search-result">
-      <h2>Products</h2>
+      <h2>Produkte</h2>
       <Pagination connection={products}>
         {({nodes, isLoading, NextLink, PreviousLink}) => {
           const itemsMarkup = nodes.map((product) => {
@@ -146,7 +146,7 @@ function SearchResultsProducts({
             <div>
               <div>
                 <PreviousLink>
-                  {isLoading ? 'Loading...' : <span>Load previous</span>}
+                  {isLoading ? 'Wird geladen …' : <span>Zurück</span>}
                 </PreviousLink>
               </div>
               <div>
@@ -155,7 +155,7 @@ function SearchResultsProducts({
               </div>
               <div>
                 <NextLink>
-                  {isLoading ? 'Loading...' : <span>Load more</span>}
+                  {isLoading ? 'Wird geladen …' : <span>Mehr anzeigen</span>}
                 </NextLink>
               </div>
             </div>
@@ -170,25 +170,18 @@ function SearchResultsProducts({
 function SearchResultsEmpty() {
   return (
     <div className="noSR-mainbox">
-      <img
-        src={nosrIcon}
-        alt=""
-        aria-hidden="true"
-        className="noSR-icon"
-      />
+      <img src={nosrIcon} alt="" aria-hidden="true" className="noSR-icon" />
 
-      <h2 className="noSR-title">
-        Sorry, we couldn{"'"}t find what you are looking for
-      </h2>
+      <h2 className="noSR-title">Keine Ergebnisse gefunden</h2>
 
       <p className="noSR-desc">
-        Try using simpler search terms and then filtering the results.
+        Verwenden Sie einen allgemeineren Suchbegriff.
         <br />
-        Still can{"'"}t find it? Contact Customer Services.
+        Benötigen Sie Hilfe? Unser Kundenservice unterstützt Sie gerne.
       </p>
 
       <Link to="/" className="noSR-button">
-        Go To Homepage
+        Zur Startseite
       </Link>
     </div>
   );

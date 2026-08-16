@@ -1,5 +1,4 @@
-import {useRef, useEffect} from 'react';
-import '../styles/searchPage.css';
+import {useEffect, useRef} from 'react';
 import {Form, type FormProps} from 'react-router';
 
 type SearchFormProps = Omit<FormProps, 'children'> & {
@@ -8,64 +7,41 @@ type SearchFormProps = Omit<FormProps, 'children'> & {
   }) => React.ReactNode;
 };
 
-/**
- * Search form component that sends search requests to the `/search` route.
- * @example
- * ```tsx
- * <SearchForm>
- *  {({inputRef}) => (
- *    <>
- *      <input
- *        ref={inputRef}
- *        type="search"
- *        defaultValue={term}
- *        name="q"
- *        placeholder="Search…"
- *      />
- *      <button type="submit">Search</button>
- *   </>
- *  )}
- *  </SearchForm>
- */
-export function SearchForm({children, ...props}: SearchFormProps) {
+export function SearchForm({children, className, ...props}: SearchFormProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  useFocusOnCmdK(inputRef);
+  useSearchKeyboardShortcut(inputRef);
 
-  if (typeof children !== 'function') {
-    return null;
-  }
-
-
-  // burası arama sonuçları sayfası
   return (
-    <Form className='searchPageMainForm' method="get" {...props}>
+    <Form
+      {...props}
+      className={['search-page__form', className].filter(Boolean).join(' ')}
+      method="get"
+    >
       {children({inputRef})}
     </Form>
   );
 }
 
-/**
- * Focuses the input when cmd+k is pressed
- */
-function useFocusOnCmdK(inputRef: React.RefObject<HTMLInputElement>) {
-  // focus the input when cmd+k is pressed
+function useSearchKeyboardShortcut(
+  inputRef: React.RefObject<HTMLInputElement>,
+) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'k' && event.metaKey) {
+      if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
         inputRef.current?.focus();
       }
 
-      if (event.key === 'Escape') {
+      if (
+        event.key === 'Escape' &&
+        document.activeElement === inputRef.current
+      ) {
         inputRef.current?.blur();
       }
     }
 
     document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [inputRef]);
 }

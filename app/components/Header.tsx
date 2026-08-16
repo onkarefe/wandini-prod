@@ -574,7 +574,7 @@ function SearchToggle() {
       type="button"
       className="h-searchbox"
       onClick={() => open('search')}
-      aria-label="Search"
+      aria-label="Suchen"
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true">
         <path d="M416 208c0 45.9-14.9 88.3-40.1 122.7l108.7 108.7c9.4 9.4 9.4 24.6 0 33.9l-11.3 11.3c-9.4 9.4-24.6 9.4-33.9 0L330.7 375.9C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0s208 93.1 208 208zm-208 144c79.5 0 144-64.5 144-144S287.5 64 208 64 64 128.5 64 208s64.5 144 144 144z" />

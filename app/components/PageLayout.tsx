@@ -57,8 +57,8 @@ export function PageLayout({
 
 function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
   return (
-    <Aside type="cart" heading="CART">
-      <Suspense fallback={<p>Loading cart ...</p>}>
+    <Aside type="cart" heading="WARENKORB">
+      <Suspense fallback={<p>Warenkorb wird geladen …</p>}>
         <Await resolve={cart}>
           {(resolvedCart) => {
             return <CartMain cart={resolvedCart} layout="aside" />;
@@ -73,7 +73,7 @@ function SearchAside() {
   const queriesDatalistId = useId();
 
   return (
-    <Aside type="search" heading="SEARCH">
+    <Aside type="search" heading="SUCHE">
       <div className="predictive-search">
         <br />
         <SearchFormPredictive>
@@ -84,13 +84,13 @@ function SearchAside() {
                 name="q"
                 onChange={fetchResults}
                 onFocus={fetchResults}
-                placeholder="Search"
+                placeholder="Suchen"
                 ref={inputRef}
                 type="search"
                 list={queriesDatalistId}
               />
               &nbsp;
-              <button type="submit">Search</button>
+              <button type="submit">Suchen</button>
             </>
           )}
         </SearchFormPredictive>
@@ -105,7 +105,7 @@ function SearchAside() {
               : SEARCH_ENDPOINT;
 
             if (state === 'loading' && term.current) {
-              return <div>Loading...</div>;
+              return <div>Wird geladen …</div>;
             }
 
             if (!total) {
@@ -141,7 +141,7 @@ function SearchAside() {
                 {term.current && total ? (
                   <Link onClick={closeSearch} to={searchUrl}>
                     <p>
-                      View all results for <q>{term.current}</q>
+                      Alle Ergebnisse für <q>{term.current}</q> anzeigen
                       {' '}
                       {'->'}
                     </p>
