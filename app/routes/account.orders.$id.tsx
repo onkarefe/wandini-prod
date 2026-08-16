@@ -13,17 +13,17 @@ import {
   formatGermanFulfillmentStatus,
   formatGermanOrderDate,
 } from '~/lib/order-display';
+import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
     {title: `Bestellung ${data?.order?.name ?? ''}`.trim()},
-    {name: 'robots', content: 'noindex,follow'},
+    {name: 'robots', content: PRIVATE_ROBOTS_DIRECTIVE},
   ];
 };
 
 export async function loader({params, context, request}: Route.LoaderArgs) {
   const {customerAccount} = context;
-  customerAccount.handleAuthStatus();
 
   if (!params.id) {
     return redirectToLocalePath(request, '/account/orders');

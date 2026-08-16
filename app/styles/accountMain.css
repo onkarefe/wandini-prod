@@ -21,7 +21,7 @@
 }
 
 .account-shell__container {
-  width: min(100%, 1180px);
+  width: 100%;
   margin-inline: auto;
 }
 
@@ -71,17 +71,6 @@
   top: calc(var(--header-height, 58px) + 24px);
   min-width: 0;
   align-self: start;
-}
-
-.account-navigation__label {
-  margin: 0;
-  padding: 0 12px 12px;
-  color: var(--account-muted);
-  font-size: 0.68rem;
-  font-weight: 650;
-  letter-spacing: 0.1em;
-  line-height: 1.3;
-  text-transform: uppercase;
 }
 
 .account-tabs {
@@ -147,8 +136,17 @@
   color: var(--account-danger);
 }
 
+.account-tabs__link--button:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
 .account-shell__content {
   min-width: 0;
+}
+
+.account-shell__content[data-loading='true'] {
+  cursor: progress;
 }
 
 .account-page {
@@ -901,7 +899,7 @@ select.account-addresses__input {
   min-width: 0;
 }
 
-.account-addresses__form:has(.account-addresses__grid) {
+.account-addresses__form.is-editing {
   grid-column: 1 / -1;
 }
 
@@ -921,7 +919,7 @@ select.account-addresses__input {
   background: var(--account-surface);
 }
 
-.account-addresses__block:has(.account-addresses__grid) {
+.account-addresses__form.is-editing .account-addresses__block {
   min-height: 0;
 }
 
@@ -1085,10 +1083,6 @@ select.account-addresses__input {
     position: static;
     width: 100%;
     margin-bottom: 34px;
-  }
-
-  .account-navigation__label {
-    padding-left: 0;
   }
 
   .account-tabs {

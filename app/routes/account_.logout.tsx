@@ -1,8 +1,9 @@
 import type {Route} from './+types/account_.logout';
 import {redirectToLocalePath} from '~/lib/locale';
+import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
 
 export const meta: Route.MetaFunction = () => {
-  return [{name: 'robots', content: 'noindex,follow'}];
+  return [{name: 'robots', content: PRIVATE_ROBOTS_DIRECTIVE}];
 };
 
 // if we don't implement this, /account/logout will get caught by account.$.tsx to do login

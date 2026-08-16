@@ -1,25 +1,42 @@
-import {data as remixData, Form, Outlet, useLoaderData} from 'react-router';
+import {
+  data as remixData,
+  Form,
+  Outlet,
+  useLoaderData,
+  useNavigation,
+  type ShouldRevalidateFunction,
+} from 'react-router';
 import type {Route} from './+types/account';
-import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
+import {CUSTOMER_SUMMARY_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
 import accountMainStyles from '~/styles/accountMain.css?url';
 import {NavLink} from '~/lib/i18n-router';
+import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
 
 export function links() {
   return [{rel: 'stylesheet', href: accountMainStyles}];
 }
 
 export const meta: Route.MetaFunction = () => {
-  return [{name: 'robots', content: 'noindex,follow'}];
+  return [{name: 'robots', content: PRIVATE_ROBOTS_DIRECTIVE}];
 };
 
-export function shouldRevalidate() {
-  return true;
-}
+export const shouldRevalidate: ShouldRevalidateFunction = ({
+  formMethod,
+  formAction,
+  currentUrl,
+  nextUrl,
+}) => {
+  if (formMethod && formMethod !== 'GET') {
+    return formAction?.endsWith('/account/profile') ?? true;
+  }
+  if (currentUrl.toString() === nextUrl.toString()) return true;
+
+  return false;
+};
 
 export async function loader({context}: Route.LoaderArgs) {
   const {customerAccount} = context;
-  customerAccount.handleAuthStatus();
-  const {data, errors} = await customerAccount.query(CUSTOMER_DETAILS_QUERY, {
+  const {data, errors} = await customerAccount.query(CUSTOMER_SUMMARY_QUERY, {
     variables: {
       language: customerAccount.i18n.language,
     },
@@ -34,6 +51,7 @@ export async function loader({context}: Route.LoaderArgs) {
     {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'X-Robots-Tag': PRIVATE_ROBOTS_DIRECTIVE,
       },
     },
   );
@@ -41,6 +59,8 @@ export async function loader({context}: Route.LoaderArgs) {
 
 export default function AccountLayout() {
   const {customer} = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
+  const isNavigating = navigation.state !== 'idle';
 
   const heading = customer?.firstName
     ? `Guten Tag, ${customer.firstName}`
@@ -48,7 +68,7 @@ export default function AccountLayout() {
 
   return (
     <div className="account-shell">
-      <div className="account-shell__container">
+      <div className="container mx-auto account-shell__container">
         <header className="account-shell__header">
           <p className="account-shell__eyebrow">Mein Konto</p>
           <h1 className="account-shell__title">{heading}</h1>
@@ -59,7 +79,11 @@ export default function AccountLayout() {
         </header>
         <div className="account-shell__layout">
           <AccountMenu />
-          <main className="account-shell__content">
+          <main
+            className="account-shell__content"
+            aria-busy={isNavigating || undefined}
+            data-loading={isNavigating || undefined}
+          >
             <Outlet context={{customer}} />
           </main>
         </div>
@@ -87,7 +111,6 @@ function AccountMenu() {
 
   return (
     <div className="account-navigation">
-      <p className="account-navigation__label">Kontonavigation</p>
       <nav className="account-tabs" aria-label="Kontobereiche">
         <NavLink to="/account/orders" className={getTabClassName}>
           Bestellungen
@@ -108,13 +131,19 @@ function AccountMenu() {
 }
 
 function Logout() {
+  const navigation = useNavigation();
+  const isLoggingOut =
+    navigation.state !== 'idle' &&
+    navigation.formAction?.endsWith('/account/logout');
+
   return (
     <Form className="account-logout" method="POST" action="/account/logout">
       <button
         className="account-tabs__link account-tabs__link--button"
         type="submit"
+        disabled={isLoggingOut}
       >
-        Abmelden
+        {isLoggingOut ? 'Wird abgemeldet...' : 'Abmelden'}
       </button>
     </Form>
   );

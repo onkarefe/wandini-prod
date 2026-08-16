@@ -9,6 +9,7 @@ import {
   useOutletContext,
 } from 'react-router';
 import type {Route} from './+types/account.profile';
+import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
 
 export type ActionResponse = {
   error: string | null;
@@ -16,7 +17,10 @@ export type ActionResponse = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Profil'}, {name: 'robots', content: 'noindex,follow'}];
+  return [
+    {title: 'Profil'},
+    {name: 'robots', content: PRIVATE_ROBOTS_DIRECTIVE},
+  ];
 };
 
 const PROFILE_ERROR_MESSAGES = {
@@ -123,8 +127,15 @@ export default function AccountProfile() {
       </header>
 
       <section className="account-profile__section">
-        <Form method="PUT" className="account-profile__form">
-          <fieldset className="account-profile__fieldset">
+        <Form
+          method="PUT"
+          className="account-profile__form"
+          aria-busy={isSubmitting}
+        >
+          <fieldset
+            className="account-profile__fieldset"
+            disabled={isSubmitting}
+          >
             <legend className="account-sr-only">Persönliche Angaben</legend>
             <div className="account-profile__field">
               <label className="account-profile__label" htmlFor="firstName">

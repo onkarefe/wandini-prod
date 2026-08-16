@@ -1,5 +1,10 @@
 import {useRef} from 'react';
-import {useLoaderData, useNavigation, useSearchParams} from 'react-router';
+import {
+  useLoaderData,
+  useLocation,
+  useNavigation,
+  useSearchParams,
+} from 'react-router';
 import {
   Money,
   flattenConnection,
@@ -24,6 +29,7 @@ import {
   formatGermanFulfillmentStatus,
   formatGermanOrderDate,
 } from '~/lib/order-display';
+import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
 
 type OrdersLoaderData = {
   customer: CustomerOrdersFragment;
@@ -31,12 +37,14 @@ type OrdersLoaderData = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Bestellungen'}, {name: 'robots', content: 'noindex,follow'}];
+  return [
+    {title: 'Bestellungen'},
+    {name: 'robots', content: PRIVATE_ROBOTS_DIRECTIVE},
+  ];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {
   const {customerAccount} = context;
-  customerAccount.handleAuthStatus();
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 20,
   });
@@ -162,10 +170,22 @@ function OrderSearchForm({
   currentFilters: OrderFilterParams;
 }) {
   const [, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const navigation = useNavigation();
+  const currentSearchParams = new URLSearchParams(location.search);
+  const nextSearchParams = new URLSearchParams(
+    navigation.location?.search ?? location.search,
+  );
+  const filtersAreChanging = [
+    ORDER_FILTER_FIELDS.NAME,
+    ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER,
+  ].some(
+    (field) => currentSearchParams.get(field) !== nextSearchParams.get(field),
+  );
   const isSearching =
-    navigation.state !== 'idle' &&
-    navigation.location?.pathname?.includes('orders');
+    navigation.state === 'loading' &&
+    navigation.location?.pathname === location.pathname &&
+    filtersAreChanging;
   const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -184,7 +204,7 @@ function OrderSearchForm({
       params.set(ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER, confirmationNumber);
     }
 
-    setSearchParams(params);
+    setSearchParams(params, {preventScrollReset: true, replace: true});
   };
 
   const hasFilters = currentFilters.name || currentFilters.confirmationNumber;
@@ -205,6 +225,7 @@ function OrderSearchForm({
         onSubmit={handleSubmit}
         className="account-orders__filters"
         aria-label="Bestellungen durchsuchen"
+        aria-busy={isSearching}
       >
         <div className="account-orders__filter-grid">
           <label className="account-orders__field">
@@ -249,7 +270,10 @@ function OrderSearchForm({
               type="button"
               disabled={isSearching}
               onClick={() => {
-                setSearchParams(new URLSearchParams());
+                setSearchParams(new URLSearchParams(), {
+                  preventScrollReset: true,
+                  replace: true,
+                });
                 formRef.current?.reset();
               }}
             >

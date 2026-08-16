@@ -6,11 +6,11 @@
  */
 export const SEO_ENABLED = false;
 
-export const SEO_DISABLED_ROBOTS_DIRECTIVE =
+export const PRIVATE_ROBOTS_DIRECTIVE =
   'noindex,nofollow,noarchive,nosnippet,noimageindex';
 
-export function getRobotsDirective(
-  enabledDirective = 'index,follow',
-) {
+export const SEO_DISABLED_ROBOTS_DIRECTIVE = PRIVATE_ROBOTS_DIRECTIVE;
+
+export function getRobotsDirective(enabledDirective = 'index,follow') {
   return SEO_ENABLED ? enabledDirective : SEO_DISABLED_ROBOTS_DIRECTIVE;
 }

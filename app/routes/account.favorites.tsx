@@ -12,15 +12,18 @@ import {
 } from '~/lib/wishlist-errors.server';
 import {WISHLIST_LOAD_UNAVAILABLE_MESSAGE} from '~/lib/wishlist';
 import {getCustomerWishlistProductIds} from '~/lib/wishlist.server';
+import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
 import '../styles/wishlistFeedback.css';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Favoriten'}, {name: 'robots', content: 'noindex,follow'}];
+  return [
+    {title: 'Favoriten'},
+    {name: 'robots', content: PRIVATE_ROBOTS_DIRECTIVE},
+  ];
 };
 
 export async function loader({context, request}: Route.LoaderArgs) {
   const {customerAccount, storefront} = context;
-  await customerAccount.handleAuthStatus();
   const requestId = getWishlistRequestId(request);
   let customerId: string;
 
@@ -119,7 +122,10 @@ export default function AccountFavorites() {
         ) : null}
       </header>
 
-      <section className="account-favorites__content">
+      <section
+        className="account-favorites__content"
+        aria-busy={revalidator.state !== 'idle'}
+      >
         {wishlistStatus === 'unavailable' ? (
           <div className="account-favorites__unavailable" role="status">
             <p className="account-message account-message--error">

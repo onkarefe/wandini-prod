@@ -38,3 +38,13 @@ export const CUSTOMER_DETAILS_QUERY = `#graphql
   }
   ${CUSTOMER_FRAGMENT}
 ` as const;
+
+export const CUSTOMER_SUMMARY_QUERY = `#graphql
+  query CustomerSummary($language: LanguageCode) @inContext(language: $language) {
+    customer {
+      id
+      firstName
+      lastName
+    }
+  }
+` as const;

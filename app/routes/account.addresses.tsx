@@ -7,8 +7,8 @@ import {
   data,
   Form,
   useActionData,
+  useLoaderData,
   useNavigation,
-  useOutletContext,
   type Fetcher,
 } from 'react-router';
 import {useEffect, useRef, useState} from 'react';
@@ -18,6 +18,8 @@ import {
   DELETE_ADDRESS_MUTATION,
   CREATE_ADDRESS_MUTATION,
 } from '~/graphql/customer-account/CustomerAddressMutations';
+import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
+import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -29,7 +31,10 @@ export type ActionResponse = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Adressen'}, {name: 'robots', content: 'noindex,follow'}];
+  return [
+    {title: 'Adressen'},
+    {name: 'robots', content: PRIVATE_ROBOTS_DIRECTIVE},
+  ];
 };
 
 const NEW_ADDRESS_ID = 'NEW_ADDRESS_ID';
@@ -86,12 +91,10 @@ const EUROPEAN_COUNTRIES = [
   ['CY', 'Zypern'],
 ] as const;
 
+const EUROPEAN_COUNTRY_NAMES = new Map<string, string>(EUROPEAN_COUNTRIES);
+
 function getCountryName(countryCode?: string | null) {
-  return (
-    EUROPEAN_COUNTRIES.find(([code]) => code === countryCode)?.[1] ??
-    countryCode ??
-    ''
-  );
+  return EUROPEAN_COUNTRY_NAMES.get(countryCode ?? '') ?? countryCode ?? '';
 }
 
 const ADDRESS_ERROR_MESSAGES = {
@@ -133,9 +136,21 @@ function addressErrorResponse(
 }
 
 export async function loader({context}: Route.LoaderArgs) {
-  context.customerAccount.handleAuthStatus();
+  const {customerAccount} = context;
+  const {data: queryData, errors} = await customerAccount.query(
+    CUSTOMER_DETAILS_QUERY,
+    {
+      variables: {
+        language: customerAccount.i18n.language,
+      },
+    },
+  );
 
-  return {};
+  if (errors?.length || !queryData?.customer) {
+    throw new Response('Kundenadressen nicht gefunden', {status: 404});
+  }
+
+  return {customer: queryData.customer};
 }
 
 export async function action({request, context}: Route.ActionArgs) {
@@ -343,7 +358,7 @@ export async function action({request, context}: Route.ActionArgs) {
 }
 
 export default function Addresses() {
-  const {customer} = useOutletContext<{customer: CustomerFragment}>();
+  const {customer} = useLoaderData<typeof loader>();
   const {defaultAddress, addresses} = customer;
   const action = useActionData<ActionResponse>();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -367,6 +382,7 @@ export default function Addresses() {
         <button
           className="account-button account-button--primary"
           type="button"
+          aria-controls={NEW_ADDRESS_ID}
           aria-expanded={isCreateOpen}
           onClick={() => setIsCreateOpen((current) => !current)}
         >
@@ -527,13 +543,18 @@ export function AddressForm({
   const idPrefix = String(addressId).replace(/[^a-zA-Z0-9_-]/g, '_');
   const autoSubmitRef = useRef<HTMLButtonElement>(null);
   const selectedCountryCode = String(address?.territoryCode ?? 'DE');
-  const hasEuropeanCountry = EUROPEAN_COUNTRIES.some(
-    ([code]) => code === selectedCountryCode,
-  );
+  const hasEuropeanCountry = EUROPEAN_COUNTRY_NAMES.has(selectedCountryCode);
   const fullName = [address?.firstName, address?.lastName]
     .filter(Boolean)
     .join(' ');
   const isCurrentSubmission = formData?.get('addressId') === addressId;
+  const isPending = isCurrentSubmission && state !== 'idle';
+  const formClassName = [
+    'account-addresses__form',
+    isEditing ? 'is-editing' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
   const cardClassName = [
     'account-addresses__block',
     'account-addresses__block--card',
@@ -558,8 +579,8 @@ export function AddressForm({
     isCurrentSubmission && formMethod === method ? state : 'idle';
 
   return (
-    <Form id={addressId} className="account-addresses__form">
-      <fieldset className="account-addresses__fieldset">
+    <Form id={addressId} className={formClassName} aria-busy={isPending}>
+      <fieldset className="account-addresses__fieldset" disabled={isPending}>
         <legend className="account-sr-only">
           {isNewAddress ? 'Neue Adresse' : 'Gespeicherte Adresse'}
         </legend>
