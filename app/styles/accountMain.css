@@ -1,18 +1,18 @@
-:root {
-  --account-bg: #f7f7f5;
+.account-shell {
+  --account-bg: #ffffff;
   --account-surface: #ffffff;
-  --account-surface-soft: #f5f5f3;
-  --account-text: #1d1d1f;
-  --account-text-muted: #6e6e73;
-  --account-border: #e3e3e1;
-  --account-border-strong: #b9b9b6;
-  --account-accent: #171717;
-  --account-danger: #a33a32;
-  --account-success: #25633c;
-  --account-radius-lg: 12px;
-  --account-radius-md: 8px;
-  --account-radius-sm: 6px;
-  --account-container: 1280px;
+  --account-surface-muted: #f6f6f4;
+  --account-text: #181817;
+  --account-muted: #6d6d68;
+  --account-border: #deded9;
+  --account-border-strong: #aaa9a3;
+  --account-danger: #9c2f28;
+  --account-success: #28603c;
+  width: 100%;
+  min-height: 64vh;
+  padding: 54px 24px 88px;
+  background: var(--account-bg);
+  color: var(--account-text);
 }
 
 .account-shell,
@@ -20,105 +20,111 @@
   box-sizing: border-box;
 }
 
-.account-shell {
-  min-height: 70vh;
-  padding: 44px 24px 72px;
-  background: var(--account-bg);
-  color: var(--account-text);
-}
-
 .account-shell__container {
-  width: min(100%, var(--account-container));
-  margin: 0 auto;
+  width: min(100%, 1180px);
+  margin-inline: auto;
 }
 
 .account-shell__header {
-  padding: 0 0 28px;
+  padding-bottom: 32px;
   border-bottom: 1px solid var(--account-border);
 }
 
 .account-shell__eyebrow,
 .account-page__eyebrow {
   margin: 0 0 8px;
-  color: var(--account-text-muted);
-  font-size: 0.75rem;
+  color: var(--account-muted);
+  font-size: 0.72rem;
   font-weight: 650;
-  letter-spacing: 0.12em;
-  line-height: 1.3;
+  letter-spacing: 0.11em;
+  line-height: 1.35;
   text-transform: uppercase;
 }
 
 .account-shell__title {
   margin: 0;
   color: var(--account-text);
-  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-size: clamp(1.9rem, 3vw, 2.45rem);
   font-weight: 650;
-  letter-spacing: -0.035em;
-  line-height: 1.15;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
 }
 
 .account-shell__intro {
-  max-width: 620px;
-  margin: 9px 0 0;
-  color: var(--account-text-muted);
-  font-size: 0.9rem;
-  line-height: 1.55;
+  max-width: 600px;
+  margin: 10px 0 0;
+  color: var(--account-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
 .account-shell__layout {
   display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
+  grid-template-columns: 224px minmax(0, 1fr);
   align-items: start;
-  gap: 36px;
-  padding-top: 32px;
+  column-gap: 52px;
+  padding-top: 40px;
 }
 
 .account-navigation {
   position: sticky;
-  top: 88px;
-  padding: 8px;
-  border: 1px solid var(--account-border);
-  border-radius: var(--account-radius-md);
-  background: var(--account-surface);
+  top: calc(var(--header-height, 58px) + 24px);
+  min-width: 0;
+  align-self: start;
+}
+
+.account-navigation__label {
+  margin: 0;
+  padding: 0 12px 12px;
+  color: var(--account-muted);
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  line-height: 1.3;
+  text-transform: uppercase;
 }
 
 .account-tabs {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  border-top: 1px solid var(--account-border);
 }
 
 .account-tabs__link {
   display: flex;
-  min-height: 42px;
+  width: 100%;
+  min-height: 46px;
   align-items: center;
   padding: 0 12px;
   border: 0;
+  border-bottom: 1px solid var(--account-border);
   border-left: 2px solid transparent;
-  border-radius: var(--account-radius-sm);
+  border-radius: 0;
   background: transparent;
-  color: var(--account-text-muted);
+  color: var(--account-muted);
   font: inherit;
   font-size: 0.875rem;
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.2;
+  text-align: left;
   text-decoration: none;
   white-space: nowrap;
+  cursor: pointer;
   transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease;
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
 }
 
 .account-tabs__link:hover {
-  background: var(--account-surface-soft);
+  background: var(--account-surface-muted);
   color: var(--account-text);
   text-decoration: none;
 }
 
 .account-tabs__link.is-active {
-  border-left-color: var(--account-accent);
-  background: var(--account-surface-soft);
+  border-left-color: var(--account-text);
+  background: var(--account-surface-muted);
   color: var(--account-text);
   font-weight: 650;
 }
@@ -128,26 +134,21 @@
 }
 
 .account-logout {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--account-border);
+  margin: 18px 0 0;
 }
 
 .account-tabs__link--button {
-  width: 100%;
-  cursor: pointer;
+  min-height: 40px;
+  border-bottom: 0;
 }
 
 .account-tabs__link--button:hover {
+  background: transparent;
   color: var(--account-danger);
 }
 
 .account-shell__content {
   min-width: 0;
-  padding: 32px;
-  border: 1px solid var(--account-border);
-  border-radius: var(--account-radius-lg);
-  background: var(--account-surface);
 }
 
 .account-page {
@@ -159,8 +160,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 28px;
+  gap: 28px;
+  margin-bottom: 30px;
   padding-bottom: 24px;
   border-bottom: 1px solid var(--account-border);
 }
@@ -168,30 +169,30 @@
 .account-page__title {
   margin: 0;
   color: var(--account-text);
-  font-size: clamp(1.5rem, 2.5vw, 1.85rem);
+  font-size: clamp(1.55rem, 2.5vw, 1.9rem);
   font-weight: 650;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
+  letter-spacing: -0.035em;
+  line-height: 1.18;
 }
 
 .account-page__description {
-  max-width: 650px;
+  max-width: 640px;
   margin: 8px 0 0;
-  color: var(--account-text-muted);
+  color: var(--account-muted);
   font-size: 0.875rem;
-  line-height: 1.55;
+  line-height: 1.58;
 }
 
 .account-page__count {
   display: inline-flex;
-  min-height: 34px;
+  min-height: 32px;
   flex: 0 0 auto;
   align-items: center;
-  padding: 0 11px;
+  padding: 0 10px;
   border: 1px solid var(--account-border);
-  border-radius: 999px;
-  color: var(--account-text-muted);
-  font-size: 0.8rem;
+  border-radius: 2px;
+  color: var(--account-muted);
+  font-size: 0.76rem;
   white-space: nowrap;
 }
 
@@ -214,39 +215,48 @@
   justify-content: center;
   padding: 0 16px;
   border: 1px solid transparent;
-  border-radius: var(--account-radius-sm);
+  border-radius: 3px;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 0.84rem;
   font-weight: 650;
   line-height: 1;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
   transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease,
-    opacity 150ms ease;
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    opacity 140ms ease;
 }
 
 .account-button:hover {
   text-decoration: none;
 }
 
+.account-button:focus-visible,
+.account-tabs__link:focus-visible,
+.account-profile__input:focus-visible,
+.account-addresses__input:focus-visible,
+.account-orders__input:focus-visible {
+  outline: 2px solid var(--account-text);
+  outline-offset: 2px;
+}
+
 .account-button:disabled {
   cursor: wait;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .account-button--primary {
-  border-color: var(--account-accent);
-  background: var(--account-accent);
+  border-color: var(--account-text);
+  background: var(--account-text);
   color: #ffffff;
 }
 
 .account-button--primary:hover:not(:disabled) {
-  border-color: #333333;
-  background: #333333;
+  border-color: #3b3b39;
+  background: #3b3b39;
   color: #ffffff;
 }
 
@@ -258,22 +268,22 @@
 
 .account-button--secondary:hover:not(:disabled) {
   border-color: var(--account-text);
-  background: var(--account-surface-soft);
+  background: var(--account-surface-muted);
 }
 
 .account-button--danger {
-  border-color: #e6c9c5;
-  background: #fffafa;
+  border-color: #d9bdb9;
+  background: var(--account-surface);
   color: var(--account-danger);
 }
 
 .account-button--danger:hover:not(:disabled) {
   border-color: var(--account-danger);
-  background: #fff4f2;
+  background: #fff7f6;
 }
 
 .account-button--text-danger {
-  min-height: 36px;
+  min-height: 38px;
   padding: 0 8px;
   background: transparent;
   color: var(--account-danger);
@@ -281,61 +291,59 @@
 }
 
 .account-button--text-danger:hover:not(:disabled) {
-  background: #fff4f2;
+  background: #fff7f6;
 }
 
 .account-message {
   margin: 0;
   padding: 11px 13px;
   border: 1px solid var(--account-border);
-  border-radius: var(--account-radius-sm);
-  font-size: 0.825rem;
+  border-radius: 2px;
+  font-size: 0.82rem;
   line-height: 1.5;
 }
 
 .account-message--error {
-  border-color: #ebceca;
-  background: #fff7f6;
-  color: #8b342d;
+  border-color: #e4c8c4;
+  background: #fff8f7;
+  color: #842d27;
 }
 
 .account-message--success {
-  border-color: #c9dfd0;
-  background: #f4faf6;
+  border-color: #c9d9ce;
+  background: #f5f9f6;
   color: var(--account-success);
 }
 
 .account-empty-state {
   display: flex;
-  min-height: 220px;
+  min-height: 210px;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  padding: 36px;
-  border: 1px dashed var(--account-border-strong);
-  border-radius: var(--account-radius-md);
-  background: #fdfdfc;
+  padding: 32px;
+  border: 1px solid var(--account-border);
+  background: var(--account-surface);
 }
 
 .account-empty-state h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 650;
 }
 
 .account-empty-state p {
   max-width: 520px;
   margin: 8px 0 20px;
-  color: var(--account-text-muted);
+  color: var(--account-muted);
   font-size: 0.875rem;
-  line-height: 1.55;
+  line-height: 1.58;
 }
 
 /* Profile */
 
 .account-profile__section {
-  max-width: 760px;
-  padding: 0;
+  max-width: 720px;
 }
 
 .account-profile__form {
@@ -366,13 +374,13 @@
 .account-addresses__label,
 .account-orders__field-label {
   color: var(--account-text);
-  font-size: 0.825rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .account-addresses__label span {
-  color: var(--account-text-muted);
+  color: var(--account-muted);
   font-weight: 450;
 }
 
@@ -384,15 +392,15 @@
   margin: 0;
   padding: 0 13px;
   border: 1px solid var(--account-border-strong);
-  border-radius: var(--account-radius-sm);
-  outline: none;
+  border-radius: 2px;
+  outline: 0;
   background: var(--account-surface);
   color: var(--account-text);
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   transition:
-    border-color 150ms ease,
-    box-shadow 150ms ease;
+    border-color 140ms ease,
+    box-shadow 140ms ease;
 }
 
 select.account-addresses__input {
@@ -402,14 +410,13 @@ select.account-addresses__input {
 .account-profile__input::placeholder,
 .account-addresses__input::placeholder,
 .account-orders__input::placeholder {
-  color: #929296;
+  color: #92928d;
 }
 
 .account-profile__input:focus,
 .account-addresses__input:focus,
 .account-orders__input:focus {
   border-color: var(--account-text);
-  box-shadow: 0 0 0 3px rgba(29, 29, 31, 0.08);
 }
 
 .account-profile__actions {
@@ -422,18 +429,17 @@ select.account-addresses__input {
 .account-orders__container {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 36px;
 }
 
 .account-orders__section {
-  padding: 0;
+  min-width: 0;
 }
 
 .account-orders__section--filters {
-  padding: 20px;
+  padding: 22px;
   border: 1px solid var(--account-border);
-  border-radius: var(--account-radius-md);
-  background: var(--account-surface-soft);
+  background: var(--account-surface-muted);
 }
 
 .account-orders__section-head {
@@ -450,20 +456,20 @@ select.account-addresses__input {
   font-size: 1rem;
   font-weight: 650;
   letter-spacing: -0.01em;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .account-orders__section-copy {
   margin: 5px 0 0;
-  color: var(--account-text-muted);
+  color: var(--account-muted);
   font-size: 0.8rem;
   line-height: 1.5;
 }
 
 .account-orders__count {
-  margin: 0;
-  color: var(--account-text-muted);
-  font-size: 0.78rem;
+  margin: 1px 0 0;
+  color: var(--account-muted);
+  font-size: 0.76rem;
   line-height: 1.4;
   white-space: nowrap;
 }
@@ -497,19 +503,19 @@ select.account-addresses__input {
   justify-content: center;
   padding: 0 15px;
   border: 1px solid var(--account-border-strong);
-  border-radius: var(--account-radius-sm);
+  border-radius: 3px;
   background: var(--account-surface);
   color: var(--account-text);
   font: inherit;
-  font-size: 0.825rem;
+  font-size: 0.82rem;
   font-weight: 650;
   text-decoration: none;
   cursor: pointer;
 }
 
 .account-orders__button--primary {
-  border-color: var(--account-accent);
-  background: var(--account-accent);
+  border-color: var(--account-text);
+  background: var(--account-text);
   color: #ffffff;
 }
 
@@ -521,13 +527,20 @@ select.account-addresses__input {
 }
 
 .account-orders__button--primary:hover:not(:disabled) {
-  background: #333333;
+  background: #3b3b39;
   color: #ffffff;
+}
+
+.account-orders__button:focus-visible,
+.account-orders__view-link:focus-visible,
+.account-orders__empty-link:focus-visible {
+  outline: 2px solid var(--account-text);
+  outline-offset: 2px;
 }
 
 .account-orders__button:disabled {
   cursor: wait;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .account-orders__list {
@@ -539,7 +552,6 @@ select.account-addresses__input {
 .account-orders__card {
   padding: 20px;
   border: 1px solid var(--account-border);
-  border-radius: var(--account-radius-md);
   background: var(--account-surface);
 }
 
@@ -560,9 +572,9 @@ select.account-addresses__input {
 
 .account-orders__order-link {
   color: var(--account-text);
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-weight: 650;
-  line-height: 1.35;
+  line-height: 1.4;
   text-decoration: none;
 }
 
@@ -573,14 +585,14 @@ select.account-addresses__input {
 
 .account-orders__date {
   margin: 0;
-  color: var(--account-text-muted);
-  font-size: 0.8rem;
+  color: var(--account-muted);
+  font-size: 0.78rem;
   line-height: 1.45;
 }
 
 .account-orders__amount {
   color: var(--account-text);
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-variant-numeric: tabular-nums;
   font-weight: 650;
   white-space: nowrap;
@@ -603,38 +615,38 @@ select.account-addresses__input {
 
 .account-orders__meta-label,
 .account-order__status-label {
-  color: var(--account-text-muted);
-  font-size: 0.7rem;
+  color: var(--account-muted);
+  font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.06em;
-  line-height: 1.35;
+  line-height: 1.4;
   text-transform: uppercase;
 }
 
 .account-orders__meta-value {
   min-width: 0;
   color: var(--account-text);
-  font-size: 0.825rem;
+  font-size: 0.82rem;
   overflow-wrap: anywhere;
 }
 
 .account-orders__badge {
   display: inline-flex;
-  min-height: 27px;
+  min-height: 26px;
   align-items: center;
-  padding: 0 9px;
+  padding: 0 8px;
   border: 1px solid var(--account-border);
-  border-radius: 999px;
-  background: var(--account-surface-soft);
-  color: #4c4c50;
-  font-size: 0.72rem;
+  border-radius: 2px;
+  background: var(--account-surface-muted);
+  color: #4c4c48;
+  font-size: 0.7rem;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .account-orders__badge--success {
-  border-color: #c9dfd0;
-  background: #f4faf6;
+  border-color: #c8d9ce;
+  background: #f5f9f6;
   color: var(--account-success);
 }
 
@@ -646,25 +658,26 @@ select.account-addresses__input {
 
 .account-orders__empty {
   display: flex;
+  min-height: 180px;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   padding: 28px;
-  border: 1px dashed var(--account-border-strong);
-  border-radius: var(--account-radius-md);
+  border: 1px solid var(--account-border);
 }
 
 .account-orders__empty-title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-weight: 650;
 }
 
 .account-orders__empty-copy {
   max-width: 540px;
   margin: 7px 0 18px;
-  color: var(--account-text-muted);
-  font-size: 0.85rem;
-  line-height: 1.55;
+  color: var(--account-muted);
+  font-size: 0.84rem;
+  line-height: 1.58;
 }
 
 .account-orders a .collectionReloadButton {
@@ -675,7 +688,7 @@ select.account-addresses__input {
   margin: 14px 0;
   padding: 0 14px;
   border: 1px solid var(--account-border-strong);
-  border-radius: var(--account-radius-sm);
+  border-radius: 3px;
   background: var(--account-surface);
   color: var(--account-text);
   font-size: 0.8rem;
@@ -684,7 +697,7 @@ select.account-addresses__input {
 
 .account-orders a:hover .collectionReloadButton {
   border-color: var(--account-text);
-  background: var(--account-surface-soft);
+  background: var(--account-surface-muted);
 }
 
 /* Order detail */
@@ -694,7 +707,7 @@ select.account-addresses__input {
   align-items: center;
   gap: 7px;
   margin-bottom: 22px;
-  color: var(--account-text-muted);
+  color: var(--account-muted);
   font-size: 0.8rem;
   font-weight: 550;
   text-decoration: none;
@@ -712,16 +725,14 @@ select.account-addresses__input {
 .account-order__status-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
-  margin-bottom: 28px;
+  margin-bottom: 30px;
   border: 1px solid var(--account-border);
-  border-radius: var(--account-radius-md);
-  background: var(--account-surface-soft);
+  background: var(--account-surface-muted);
 }
 
 .account-order__status-item {
   display: flex;
-  min-height: 82px;
+  min-height: 80px;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
@@ -738,18 +749,14 @@ select.account-addresses__input {
 }
 
 .account-order__status-total {
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
 }
 
-.account-order__section {
-  padding: 0;
-}
-
 .account-order__section + .account-order__section {
-  margin-top: 30px;
-  padding-top: 26px;
+  margin-top: 32px;
+  padding-top: 28px;
   border-top: 1px solid var(--account-border);
 }
 
@@ -768,21 +775,20 @@ select.account-addresses__input {
 }
 
 .account-order__section-head > span {
-  color: var(--account-text-muted);
-  font-size: 0.78rem;
+  color: var(--account-muted);
+  font-size: 0.76rem;
 }
 
 .account-order__table-wrap {
   overflow: hidden;
   border: 1px solid var(--account-border);
-  border-radius: var(--account-radius-md);
 }
 
 .account-order__table {
   width: 100%;
   border-collapse: collapse;
   color: var(--account-text);
-  font-size: 0.825rem;
+  font-size: 0.82rem;
 }
 
 .account-order__table th,
@@ -799,9 +805,9 @@ select.account-addresses__input {
 }
 
 .account-order__table thead th {
-  background: var(--account-surface-soft);
-  color: var(--account-text-muted);
-  font-size: 0.7rem;
+  background: var(--account-surface-muted);
+  color: var(--account-muted);
+  font-size: 0.68rem;
   font-weight: 650;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -828,24 +834,23 @@ select.account-addresses__input {
 .account-order__table .account-order__grand-total td {
   padding-top: 14px;
   padding-bottom: 16px;
-  font-size: 0.95rem;
+  font-size: 0.94rem;
   font-weight: 700;
 }
 
 .account-order__product {
   display: flex;
-  min-width: 240px;
+  min-width: 230px;
   align-items: center;
   gap: 14px;
 }
 
 .account-order__product-image {
-  width: 72px;
-  height: 72px;
-  flex: 0 0 72px;
+  width: 68px;
+  height: 68px;
+  flex: 0 0 68px;
   overflow: hidden;
-  border-radius: 4px;
-  background: var(--account-surface-soft);
+  background: var(--account-surface-muted);
 }
 
 .account-order__product-image img {
@@ -857,7 +862,7 @@ select.account-addresses__input {
 
 .account-order__product-copy p {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: 0.86rem;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -865,8 +870,8 @@ select.account-addresses__input {
 .account-order__product-copy small {
   display: block;
   margin-top: 4px;
-  color: var(--account-text-muted);
-  font-size: 0.75rem;
+  color: var(--account-muted);
+  font-size: 0.74rem;
   line-height: 1.4;
 }
 
@@ -874,17 +879,13 @@ select.account-addresses__input {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  color: #4c4c50;
-  font-size: 0.875rem;
+  color: #4c4c48;
+  font-size: 0.86rem;
   font-style: normal;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 /* Addresses */
-
-.account-addresses__section {
-  padding: 0;
-}
 
 .account-addresses__stack,
 .account-addresses__list {
@@ -905,21 +906,27 @@ select.account-addresses__input {
 }
 
 .account-addresses__fieldset {
+  min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
 }
 
 .account-addresses__block {
-  height: 100%;
+  display: flex;
+  min-height: 244px;
+  flex-direction: column;
   padding: 22px;
   border: 1px solid var(--account-border);
-  border-radius: var(--account-radius-md);
   background: var(--account-surface);
 }
 
+.account-addresses__block:has(.account-addresses__grid) {
+  min-height: 0;
+}
+
 .account-addresses__block.is-default {
-  border-color: #b9d1c1;
+  border-color: var(--account-border-strong);
 }
 
 .account-addresses__card-head {
@@ -936,9 +943,9 @@ select.account-addresses__input {
 .account-addresses__legend {
   margin: 0;
   color: var(--account-text);
-  font-size: 0.95rem;
+  font-size: 0.94rem;
   font-weight: 650;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .account-addresses__status {
@@ -947,9 +954,9 @@ select.account-addresses__input {
   flex: 0 0 auto;
   align-items: center;
   padding: 0 8px;
-  border: 1px solid #c9dfd0;
-  border-radius: 999px;
-  background: #f4faf6;
+  border: 1px solid var(--account-border);
+  border-radius: 2px;
+  background: var(--account-surface-muted);
   color: var(--account-success);
   font-size: 0.68rem;
   font-weight: 650;
@@ -958,13 +965,13 @@ select.account-addresses__input {
 
 .account-addresses__summary {
   display: flex;
-  min-height: 134px;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 3px;
-  color: #4c4c50;
-  font-size: 0.85rem;
+  color: #4c4c48;
+  font-size: 0.84rem;
   font-style: normal;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .account-addresses__grid {
@@ -978,9 +985,9 @@ select.account-addresses__input {
 }
 
 .account-addresses__help {
-  color: var(--account-text-muted);
+  color: var(--account-muted);
   font-size: 0.72rem;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .account-addresses__checkbox-row {
@@ -994,7 +1001,7 @@ select.account-addresses__input {
   width: 17px;
   height: 17px;
   margin: 0;
-  accent-color: var(--account-accent);
+  accent-color: var(--account-text);
 }
 
 .account-addresses__checkbox:disabled {
@@ -1025,10 +1032,6 @@ select.account-addresses__input {
 
 /* Favorites */
 
-.account-favorites__content {
-  padding: 0;
-}
-
 .account-favorites__unavailable {
   display: grid;
   justify-items: start;
@@ -1049,66 +1052,84 @@ select.account-addresses__input {
 }
 
 .account-favorites .custom-product-card__image {
-  height: 230px;
+  height: auto;
+  aspect-ratio: 4 / 3;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1080px) {
+  .account-shell__layout {
+    grid-template-columns: 200px minmax(0, 1fr);
+    column-gap: 36px;
+  }
+
   .account-favorites .custom-products-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 960px) {
+@media (max-width: 860px) {
   .account-shell {
-    padding: 36px 20px 60px;
+    padding: 40px 20px 68px;
+  }
+
+  .account-shell__header {
+    padding-bottom: 26px;
   }
 
   .account-shell__layout {
     display: block;
-    padding-top: 24px;
+    padding-top: 26px;
   }
 
   .account-navigation {
     position: static;
-    display: flex;
     width: 100%;
-    align-items: stretch;
-    margin-bottom: 20px;
-    padding: 5px;
-    overflow-x: auto;
+    margin-bottom: 34px;
+  }
+
+  .account-navigation__label {
+    padding-left: 0;
   }
 
   .account-tabs {
-    flex: 1 0 auto;
     flex-direction: row;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--account-border);
+    scrollbar-width: thin;
   }
 
   .account-tabs__link {
-    border-left: 0;
+    width: auto;
+    min-width: max-content;
+    flex: 1 0 auto;
+    justify-content: center;
     border-bottom: 2px solid transparent;
+    border-left: 0;
   }
 
   .account-tabs__link.is-active {
-    border-bottom-color: var(--account-accent);
+    border-bottom-color: var(--account-text);
     border-left-color: transparent;
   }
 
   .account-logout {
-    flex: 0 0 auto;
-    margin: 0 0 0 5px;
-    padding: 0 0 0 5px;
-    border-top: 0;
-    border-left: 1px solid var(--account-border);
+    margin-top: 8px;
+  }
+
+  .account-tabs__link--button {
+    width: auto;
+    justify-content: flex-start;
+    padding-left: 0;
   }
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 640px) {
   .account-shell {
-    padding: 28px 16px 48px;
+    padding: 30px 16px 52px;
   }
 
-  .account-shell__header {
-    padding-bottom: 22px;
+  .account-shell__title {
+    font-size: 1.8rem;
   }
 
   .account-shell__intro {
@@ -1116,33 +1137,40 @@ select.account-addresses__input {
   }
 
   .account-navigation {
-    margin-right: -16px;
-    margin-left: -16px;
-    padding-right: 16px;
-    padding-left: 16px;
-    border-right: 0;
-    border-left: 0;
-    border-radius: 0;
+    margin-bottom: 28px;
+  }
+
+  .account-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-inline: 0;
+    overflow: visible;
+    padding-inline: 0;
+    border-right: 1px solid var(--account-border);
   }
 
   .account-tabs__link {
-    min-height: 40px;
-    padding: 0 11px;
+    width: 100%;
+    min-width: 0;
+    min-height: 43px;
+    padding: 0 12px;
+    border-left: 1px solid var(--account-border);
     font-size: 0.8rem;
   }
 
-  .account-logout .account-tabs__link {
-    padding-right: 6px;
+  .account-tabs__link.is-active {
+    border-left-color: var(--account-border);
   }
 
-  .account-shell__content {
-    padding: 22px 18px;
+  .account-logout .account-tabs__link {
+    padding-left: 0;
+    border-left: 0;
   }
 
   .account-page__header {
     flex-direction: column;
     gap: 18px;
-    margin-bottom: 22px;
+    margin-bottom: 24px;
     padding-bottom: 20px;
   }
 
@@ -1174,7 +1202,12 @@ select.account-addresses__input {
   .account-orders__section--filters,
   .account-orders__card,
   .account-addresses__block {
-    padding: 17px;
+    padding: 18px;
+  }
+
+  .account-orders__section-head {
+    flex-direction: column;
+    gap: 6px;
   }
 
   .account-orders__card-top {
@@ -1197,7 +1230,7 @@ select.account-addresses__input {
 
   .account-orders__empty,
   .account-empty-state {
-    min-height: 190px;
+    min-height: 180px;
     padding: 24px 20px;
   }
 
@@ -1206,7 +1239,7 @@ select.account-addresses__input {
   }
 
   .account-order__status-item {
-    min-height: 68px;
+    min-height: 66px;
     padding: 13px 16px;
   }
 
@@ -1247,7 +1280,6 @@ select.account-addresses__input {
     margin-bottom: 12px;
     padding: 15px;
     border: 1px solid var(--account-border);
-    border-radius: var(--account-radius-md);
   }
 
   .account-order__table tbody td {
@@ -1261,9 +1293,9 @@ select.account-addresses__input {
   }
 
   .account-order__table tbody td::before {
-    color: var(--account-text-muted);
+    color: var(--account-muted);
     content: attr(data-label);
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -1300,7 +1332,7 @@ select.account-addresses__input {
     text-align: left;
   }
 
-  .account-addresses__summary {
+  .account-addresses__block {
     min-height: 0;
   }
 
@@ -1308,25 +1340,17 @@ select.account-addresses__input {
   .account-addresses__actions .account-button--secondary {
     flex: 1 1 auto;
   }
-
-  .account-favorites .custom-product-card__image {
-    height: 220px;
-  }
 }
 
 @media (max-width: 420px) {
-  .account-shell__content {
-    padding: 20px 15px;
-  }
-
   .account-orders__card-top {
     flex-direction: column;
   }
 
   .account-order__product-image {
-    width: 62px;
-    height: 62px;
-    flex-basis: 62px;
+    width: 60px;
+    height: 60px;
+    flex-basis: 60px;
   }
 }
 

@@ -86,7 +86,8 @@ function AccountMenu() {
   }
 
   return (
-    <aside className="account-navigation">
+    <div className="account-navigation">
+      <p className="account-navigation__label">Kontonavigation</p>
       <nav className="account-tabs" aria-label="Kontobereiche">
         <NavLink to="/account/orders" className={getTabClassName}>
           Bestellungen
@@ -102,7 +103,7 @@ function AccountMenu() {
         </NavLink>
       </nav>
       <Logout />
-    </aside>
+    </div>
   );
 }
 
