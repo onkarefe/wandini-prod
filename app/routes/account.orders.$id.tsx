@@ -7,10 +7,14 @@ import type {
 } from 'customer-accountapi.generated';
 import {CUSTOMER_ORDER_QUERY} from '~/graphql/customer-account/CustomerOrderQuery';
 import {redirectToLocalePath} from '~/lib/locale';
+import {
+  formatGermanFulfillmentStatus,
+  formatGermanOrderDate,
+} from '~/lib/order-display';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
-    {title: `Order ${data?.order?.name}`},
+    {title: `Bestellung ${data?.order?.name ?? ''}`.trim()},
     {name: 'robots', content: 'noindex,follow'},
   ];
 };
@@ -28,7 +32,7 @@ export async function loader({params, context, request}: Route.LoaderArgs) {
   try {
     orderId = atob(params.id);
   } catch {
-    throw new Response('Order not found', {status: 404});
+    throw new Response('Bestellung nicht gefunden', {status: 404});
   }
 
   const {data, errors}: {data: OrderQuery; errors?: Array<{message: string}>} =
@@ -40,7 +44,7 @@ export async function loader({params, context, request}: Route.LoaderArgs) {
     });
 
   if (errors?.length || !data?.order) {
-    throw new Response('Order not found', {status: 404});
+    throw new Response('Bestellung nicht gefunden', {status: 404});
   }
 
   const {order} = data;
@@ -52,7 +56,7 @@ export async function loader({params, context, request}: Route.LoaderArgs) {
   const discountApplications = order.discountApplications.nodes;
 
   // Get fulfillment status from first fulfillment node
-  const fulfillmentStatus = order.fulfillments.nodes[0]?.status ?? 'N/A';
+  const fulfillmentStatus = order.fulfillments.nodes[0]?.status ?? null;
 
   // Get first discount value with proper type checking
   const firstDiscount = discountApplications[0]?.value;
@@ -96,19 +100,19 @@ export default function OrderRoute() {
   } = useLoaderData<typeof loader>();
   return (
     <div className="account-order">
-      <h2>Order {order.name}</h2>
-      <p>Placed on {new Date(order.processedAt!).toDateString()}</p>
+      <h2>Bestellung {order.name}</h2>
+      <p>Bestellt am {formatGermanOrderDate(order.processedAt)}</p>
       {order.confirmationNumber && (
-        <p>Confirmation: {order.confirmationNumber}</p>
+        <p>Bestätigung: {order.confirmationNumber}</p>
       )}
       <br />
       <div>
         <table>
           <thead>
             <tr>
-              <th scope="col">Product</th>
-              <th scope="col">Price</th>
-              <th scope="col">Total</th>
+              <th scope="col">Produkt</th>
+              <th scope="col">Preis</th>
+              <th scope="col">Gesamt</th>
             </tr>
           </thead>
           <tbody>
@@ -121,11 +125,11 @@ export default function OrderRoute() {
               discountPercentage) && (
               <tr>
                 <th scope="row" colSpan={2}>
-                  <p>Discounts</p>
+                  <p>Rabatte</p>
                 </th>
                 <td>
                   {discountPercentage ? (
-                    <span>-{discountPercentage}% OFF</span>
+                    <span>-{discountPercentage}% Rabatt</span>
                   ) : (
                     discountValue && <Money data={discountValue!} />
                   )}
@@ -134,7 +138,7 @@ export default function OrderRoute() {
             )}
             <tr>
               <th scope="row" colSpan={2}>
-                <p>Subtotal</p>
+                <p>Zwischensumme</p>
               </th>
               <td>
                 <Money data={order.subtotal!} />
@@ -142,7 +146,7 @@ export default function OrderRoute() {
             </tr>
             <tr>
               <th scope="row" colSpan={2}>
-                Tax
+                Steuer
               </th>
               <td>
                 <Money data={order.totalTax!} />
@@ -150,7 +154,7 @@ export default function OrderRoute() {
             </tr>
             <tr>
               <th scope="row" colSpan={2}>
-                <p>Total</p>
+                <p>Gesamtsumme</p>
               </th>
               <td>
                 <Money data={order.totalPrice!} />
@@ -159,7 +163,7 @@ export default function OrderRoute() {
           </tfoot>
         </table>
         <div>
-          <h3>Shipping Address</h3>
+          <h3>Lieferadresse</h3>
           {order?.shippingAddress ? (
             <address>
               <p>{order.shippingAddress.name}</p>
@@ -175,18 +179,21 @@ export default function OrderRoute() {
               )}
             </address>
           ) : (
-            <p>No shipping address defined</p>
+            <p>Keine Lieferadresse hinterlegt</p>
           )}
-          <h3>Status</h3>
+          <h3>Versandstatus</h3>
           <div>
-            <p>{fulfillmentStatus}</p>
+            <p>
+              {formatGermanFulfillmentStatus(fulfillmentStatus) ??
+                'Nicht verfügbar'}
+            </p>
           </div>
         </div>
       </div>
       <br />
       <p>
         <a target="_blank" href={order.statusPageUrl} rel="noreferrer">
-          View Order Status →
+          Bestellstatus anzeigen &rarr;
         </a>
       </p>
     </div>

@@ -8,10 +8,14 @@ export function PaginatedResourceSection<NodesType>({
   connection,
   children,
   resourcesClassName,
+  previousLabel = 'Load previous',
+  nextLabel = 'Load more +',
 }: {
   connection: React.ComponentProps<typeof Pagination<NodesType>>['connection'];
   children: React.FunctionComponent<{ node: NodesType; index: number }>;
   resourcesClassName?: string;
+  previousLabel?: string;
+  nextLabel?: string;
 }) {
   return (
     <Pagination connection={connection}>
@@ -23,7 +27,7 @@ export function PaginatedResourceSection<NodesType>({
         return (
             <div>
               <PreviousLink>
-                <span className="collectionReloadButton">Load previous</span>
+                <span className="collectionReloadButton">{previousLabel}</span>
               </PreviousLink>
               {resourcesClassName ? (
                 <div className={resourcesClassName}>{resourcesMarkup}</div>
@@ -31,7 +35,7 @@ export function PaginatedResourceSection<NodesType>({
                 resourcesMarkup
               )}
               <NextLink>
-                <span className="collectionReloadButton">Load more +</span>
+                <span className="collectionReloadButton">{nextLabel}</span>
               </NextLink>
             </div>
           );

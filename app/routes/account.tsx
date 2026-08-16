@@ -31,7 +31,7 @@ export async function loader({context}: Route.LoaderArgs) {
   });
 
   if (errors?.length || !data?.customer) {
-    throw new Response('Customer not found', {status: 404});
+    throw new Response('Kundenkonto nicht gefunden', {status: 404});
   }
 
   return remixData(
@@ -49,15 +49,15 @@ export default function AccountLayout() {
 
   const heading = customer
     ? customer.firstName
-      ? `Welcome, ${customer.firstName}`
-      : `Welcome to your account.`
-    : 'Account Details';
+      ? `Willkommen, ${customer.firstName}`
+      : 'Willkommen in Ihrem Kundenkonto.'
+    : 'Kontodetails';
 
   return (
     <div className="account-shell">
       <div className="account-shell__container">
         <header className="account-shell__header">
-          <p className="account-shell__eyebrow">My account</p>
+          <p className="account-shell__eyebrow">Mein Konto</p>
           <h1 className="account-shell__title">{heading}</h1>
         </header>
         <AccountMenu />
@@ -87,18 +87,18 @@ function AccountMenu() {
   }
 
   return (
-    <nav className="account-tabs" role="navigation" aria-label="Account sections">
+    <nav className="account-tabs" role="navigation" aria-label="Kontobereiche">
       <NavLink to="/account/orders" className={getTabClassName}>
-        Orders
+        Bestellungen
       </NavLink>
       <NavLink to="/account/profile" className={getTabClassName}>
-        Profile
+        Profil
       </NavLink>
       <NavLink to="/account/favorites" className={getTabClassName}>
-        Favorites
+        Favoriten
       </NavLink>
       <NavLink to="/account/addresses" className={getTabClassName}>
-        Addresses
+        Adressen
       </NavLink>
       <Logout />
     </nav>
@@ -109,7 +109,7 @@ function Logout() {
   return (
     <Form className="account-logout" method="POST" action="/account/logout">
       <button className="account-tabs__link account-tabs__link--button" type="submit">
-        Sign out
+        Abmelden
       </button>
     </Form>
   );

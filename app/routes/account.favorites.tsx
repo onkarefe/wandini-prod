@@ -15,7 +15,7 @@ import '../styles/wishlistFeedback.css';
 
 export const meta: Route.MetaFunction = () => {
   return [
-    {title: 'Favorites'},
+    {title: 'Favoriten'},
     {name: 'robots', content: 'noindex,follow'},
   ];
 };
@@ -106,7 +106,7 @@ export default function AccountFavorites() {
   return (
     <div className="account-favorites">
       <section className="account-profile__section">
-        <h2 className="account-profile__title">My favorites</h2>
+        <h2 className="account-profile__title">Meine Favoriten</h2>
 
         {wishlistStatus === 'unavailable' ? (
           <div className="account-favorites__unavailable" role="status">
@@ -130,7 +130,7 @@ export default function AccountFavorites() {
           </div>
         ) : favoriteProducts.length === 0 ? (
           <p className="account-addresses__empty">
-            You have not added any favorite products yet.
+            Sie haben noch keine Produkte zu Ihren Favoriten hinzugefügt.
           </p>
         ) : (
           <div className="custom-products-grid">

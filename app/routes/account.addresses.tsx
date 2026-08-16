@@ -30,7 +30,7 @@ export type ActionResponse = {
 
 export const meta: Route.MetaFunction = () => {
   return [
-    {title: 'Addresses'},
+    {title: 'Adressen'},
     {name: 'robots', content: 'noindex,follow'},
   ];
 };
@@ -38,20 +38,22 @@ export const meta: Route.MetaFunction = () => {
 const NEW_ADDRESS_ID = 'NEW_ADDRESS_ID';
 
 const ADDRESS_ERROR_MESSAGES = {
-  generic: 'We could not process this address request right now. Please try again.',
-  create: 'We could not create this address right now. Please try again.',
-  update: 'We could not update this address right now. Please try again.',
-  delete: 'We could not delete this address right now. Please try again.',
-  unauthorized: 'Please sign in again to manage your addresses.',
-  invalidRequest: 'We could not process this address request. Please refresh and try again.',
-  methodNotAllowed: 'This address request method is not allowed.',
+  generic:
+    'Die Adressanfrage konnte derzeit nicht verarbeitet werden. Bitte versuchen Sie es erneut.',
+  create:
+    'Die Adresse konnte derzeit nicht angelegt werden. Bitte versuchen Sie es erneut.',
+  update:
+    'Die Adresse konnte derzeit nicht aktualisiert werden. Bitte versuchen Sie es erneut.',
+  delete:
+    'Die Adresse konnte derzeit nicht gelöscht werden. Bitte versuchen Sie es erneut.',
+  unauthorized:
+    'Bitte melden Sie sich erneut an, um Ihre Adressen zu verwalten.',
+  invalidRequest:
+    'Die Adressanfrage konnte nicht verarbeitet werden. Bitte laden Sie die Seite neu und versuchen Sie es erneut.',
+  methodNotAllowed: 'Diese Adressanfrage ist nicht zulässig.',
 } as const;
 
-function getAddressErrorMessage(error: unknown, fallback: string) {
-  if (import.meta.env.DEV && error instanceof Error && error.message) {
-    return error.message;
-  }
-
+function getAddressErrorMessage(_error: unknown, fallback: string) {
   return fallback;
 }
 
@@ -155,7 +157,7 @@ export async function action({request, context}: Route.ActionArgs) {
           }
 
           if (!data?.customerAddressCreate?.customerAddress) {
-            throw new Error('Customer address create failed.');
+            throw new Error('Die Kundenadresse konnte nicht angelegt werden.');
           }
 
           return {
@@ -196,7 +198,7 @@ export async function action({request, context}: Route.ActionArgs) {
           }
 
           if (!data?.customerAddressUpdate?.customerAddress) {
-            throw new Error('Customer address update failed.');
+            throw new Error('Die Kundenadresse konnte nicht aktualisiert werden.');
           }
 
           return {
@@ -235,7 +237,7 @@ export async function action({request, context}: Route.ActionArgs) {
           }
 
           if (!data?.customerAddressDelete?.deletedAddressId) {
-            throw new Error('Customer address delete failed.');
+            throw new Error('Die Kundenadresse konnte nicht gelöscht werden.');
           }
 
           return {error: null, deletedAddress: addressId};
@@ -274,7 +276,7 @@ export default function Addresses() {
   return (
     <div className="account-addresses">
       <section className="account-addresses__section">
-        <h2 className="account-addresses__title">Addresses</h2>
+        <h2 className="account-addresses__title">Adressen</h2>
         {!addresses.nodes.length ? (
           <div className="account-addresses__stack">
             <div className="account-addresses__toolbar">
@@ -283,16 +285,22 @@ export default function Addresses() {
                 type="button"
                 onClick={() => setIsCreateOpen((current) => !current)}
               >
-                {isCreateOpen ? 'Close new address' : 'Add new address'}
+                {isCreateOpen
+                  ? 'Formular schließen'
+                  : 'Neue Adresse hinzufügen'}
               </button>
             </div>
             {isCreateOpen ? (
               <div className="account-addresses__block account-addresses__block--create">
-                <legend className="account-addresses__legend">Create address</legend>
+                <legend className="account-addresses__legend">
+                  Neue Adresse anlegen
+                </legend>
                 <NewAddressForm />
               </div>
             ) : null}
-            <p className="account-addresses__empty">You have no addresses saved.</p>
+            <p className="account-addresses__empty">
+              Sie haben noch keine Adressen gespeichert.
+            </p>
           </div>
         ) : (
           <div className="account-addresses__stack">
@@ -302,12 +310,16 @@ export default function Addresses() {
                 type="button"
                 onClick={() => setIsCreateOpen((current) => !current)}
               >
-                {isCreateOpen ? 'Close new address' : 'Add new address'}
+                {isCreateOpen
+                  ? 'Formular schließen'
+                  : 'Neue Adresse hinzufügen'}
               </button>
             </div>
             {isCreateOpen ? (
               <div className="account-addresses__block account-addresses__block--create">
-                <legend className="account-addresses__legend">Create address</legend>
+                <legend className="account-addresses__legend">
+                  Neue Adresse anlegen
+                </legend>
                 <NewAddressForm />
               </div>
             ) : null}
@@ -352,7 +364,9 @@ function NewAddressForm() {
             formMethod="POST"
             type="submit"
           >
-            {stateForMethod('POST') !== 'idle' ? 'Creating' : 'Create'}
+            {stateForMethod('POST') !== 'idle'
+              ? 'Wird angelegt...'
+              : 'Adresse anlegen'}
           </button>
         </div>
       )}
@@ -383,7 +397,9 @@ function ExistingAddresses({
                 formMethod="PUT"
                 type="submit"
               >
-                {stateForMethod('PUT') !== 'idle' ? 'Saving' : 'Save'}
+                {stateForMethod('PUT') !== 'idle'
+                  ? 'Wird gespeichert...'
+                  : 'Speichern'}
               </button>
               <button
                 className="account-addresses__button account-addresses__button--secondary"
@@ -391,7 +407,9 @@ function ExistingAddresses({
                 formMethod="DELETE"
                 type="submit"
               >
-                {stateForMethod('DELETE') !== 'idle' ? 'Deleting' : 'Delete'}
+                {stateForMethod('DELETE') !== 'idle'
+                  ? 'Wird gelöscht...'
+                  : 'Löschen'}
               </button>
             </div>
           )}
@@ -438,13 +456,15 @@ export function AddressForm({
         <div className={cardClassName}>
           <div className="account-addresses__card-head">
             <div className="account-addresses__card-intro">
-              <legend className="account-addresses__legend">Saved address</legend>
+              <legend className="account-addresses__legend">
+                Gespeicherte Adresse
+              </legend>
               {isDefaultAddress ? (
                 <span className="account-addresses__status">
                   <span className="account-addresses__status-icon" aria-hidden="true">
                     ✓
                   </span>
-                  Default address
+                  Standardadresse
                 </span>
               ) : null}
             </div>
@@ -453,142 +473,142 @@ export function AddressForm({
           <div className="account-addresses__grid">
             <div className="account-addresses__field">
               <label className="account-addresses__label" htmlFor={`${idPrefix}-firstName`}>
-                First name*
+                Vorname*
               </label>
               <input
                 className="account-addresses__input"
-                aria-label="First name"
+                aria-label="Vorname"
                 autoComplete="given-name"
                 defaultValue={address?.firstName ?? ''}
                 id={`${idPrefix}-firstName`}
                 name="firstName"
-                placeholder="First name"
+                placeholder="Vorname"
                 required
                 type="text"
               />
             </div>
             <div className="account-addresses__field">
               <label className="account-addresses__label" htmlFor={`${idPrefix}-lastName`}>
-                Last name*
+                Nachname*
               </label>
               <input
                 className="account-addresses__input"
-                aria-label="Last name"
+                aria-label="Nachname"
                 autoComplete="family-name"
                 defaultValue={address?.lastName ?? ''}
                 id={`${idPrefix}-lastName`}
                 name="lastName"
-                placeholder="Last name"
+                placeholder="Nachname"
                 required
                 type="text"
               />
             </div>
             <div className="account-addresses__field">
               <label className="account-addresses__label" htmlFor={`${idPrefix}-company`}>
-                Company
+                Unternehmen
               </label>
               <input
                 className="account-addresses__input"
-                aria-label="Company"
+                aria-label="Unternehmen"
                 autoComplete="organization"
                 defaultValue={address?.company ?? ''}
                 id={`${idPrefix}-company`}
                 name="company"
-                placeholder="Company"
+                placeholder="Unternehmen"
                 type="text"
               />
             </div>
             <div className="account-addresses__field">
               <label className="account-addresses__label" htmlFor={`${idPrefix}-address1`}>
-                Address line*
+                Straße und Hausnummer*
               </label>
               <input
                 className="account-addresses__input"
-                aria-label="Address line 1"
+                aria-label="Straße und Hausnummer"
                 autoComplete="address-line1"
                 defaultValue={address?.address1 ?? ''}
                 id={`${idPrefix}-address1`}
                 name="address1"
-                placeholder="Address line 1*"
+                placeholder="Straße und Hausnummer*"
                 required
                 type="text"
               />
             </div>
             <div className="account-addresses__field">
               <label className="account-addresses__label" htmlFor={`${idPrefix}-address2`}>
-                Address line 2
+                Adresszusatz
               </label>
               <input
                 className="account-addresses__input"
-                aria-label="Address line 2"
+                aria-label="Adresszusatz"
                 autoComplete="address-line2"
                 defaultValue={address?.address2 ?? ''}
                 id={`${idPrefix}-address2`}
                 name="address2"
-                placeholder="Address line 2"
+                placeholder="Adresszusatz"
                 type="text"
               />
             </div>
             <div className="account-addresses__field">
               <label className="account-addresses__label" htmlFor={`${idPrefix}-city`}>
-                City*
+                Ort*
               </label>
               <input
                 className="account-addresses__input"
-                aria-label="City"
+                aria-label="Ort"
                 autoComplete="address-level2"
                 defaultValue={address?.city ?? ''}
                 id={`${idPrefix}-city`}
                 name="city"
-                placeholder="City"
+                placeholder="Ort"
                 required
                 type="text"
               />
             </div>
             <div className="account-addresses__field">
               <label className="account-addresses__label" htmlFor={`${idPrefix}-zoneCode`}>
-                State / Province*
+                Bundesland / Region*
               </label>
               <input
                 className="account-addresses__input"
-                aria-label="State/Province"
+                aria-label="Bundesland oder Region"
                 autoComplete="address-level1"
                 defaultValue={address?.zoneCode ?? ''}
                 id={`${idPrefix}-zoneCode`}
                 name="zoneCode"
-                placeholder="State / Province"
+                placeholder="Bundesland / Region"
                 required
                 type="text"
               />
             </div>
             <div className="account-addresses__field">
               <label className="account-addresses__label" htmlFor={`${idPrefix}-zip`}>
-                Zip / Postal Code*
+                Postleitzahl*
               </label>
               <input
                 className="account-addresses__input"
-                aria-label="Zip"
+                aria-label="Postleitzahl"
                 autoComplete="postal-code"
                 defaultValue={address?.zip ?? ''}
                 id={`${idPrefix}-zip`}
                 name="zip"
-                placeholder="Zip / Postal Code"
+                placeholder="Postleitzahl"
                 required
                 type="text"
               />
             </div>
             <div className="account-addresses__field">
               <label className="account-addresses__label" htmlFor={`${idPrefix}-territoryCode`}>
-                Country Code*
+                Ländercode*
               </label>
               <input
                 className="account-addresses__input"
-                aria-label="territoryCode"
+                aria-label="Ländercode"
                 autoComplete="country"
                 defaultValue={address?.territoryCode ?? ''}
                 id={`${idPrefix}-territoryCode`}
                 name="territoryCode"
-                placeholder="Country"
+                placeholder="Ländercode"
                 required
                 type="text"
                 maxLength={2}
@@ -596,11 +616,11 @@ export function AddressForm({
             </div>
             <div className="account-addresses__field">
               <label className="account-addresses__label" htmlFor={`${idPrefix}-phoneNumber`}>
-                Phone
+                Telefon
               </label>
               <input
                 className="account-addresses__input"
-                aria-label="Phone Number"
+                aria-label="Telefonnummer"
                 autoComplete="tel"
                 defaultValue={address?.phoneNumber ?? ''}
                 id={`${idPrefix}-phoneNumber`}
@@ -628,7 +648,7 @@ export function AddressForm({
               className="account-addresses__checkbox-label"
               htmlFor={`${idPrefix}-defaultAddress`}
             >
-              Set as default address
+              Als Standardadresse festlegen
             </label>
           </div>
           {error ? (
@@ -648,7 +668,7 @@ export function AddressForm({
             tabIndex={-1}
             type="submit"
           >
-            Auto submit
+            Automatisch speichern
           </button>
         </div>
       </fieldset>

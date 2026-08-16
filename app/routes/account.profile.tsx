@@ -17,21 +17,18 @@ export type ActionResponse = {
 
 export const meta: Route.MetaFunction = () => {
   return [
-    {title: 'Profile'},
+    {title: 'Profil'},
     {name: 'robots', content: 'noindex,follow'},
   ];
 };
 
 const PROFILE_ERROR_MESSAGES = {
-  update: 'We could not update your profile right now. Please try again.',
-  methodNotAllowed: 'This profile request method is not allowed.',
+  update:
+    'Ihr Profil konnte derzeit nicht aktualisiert werden. Bitte versuchen Sie es erneut.',
+  methodNotAllowed: 'Diese Anfrage für das Profil ist nicht zulässig.',
 } as const;
 
-function getProfileErrorMessage(error: unknown, fallback: string) {
-  if (import.meta.env.DEV && error instanceof Error && error.message) {
-    return error.message;
-  }
-
+function getProfileErrorMessage(_error: unknown, fallback: string) {
   return fallback;
 }
 
@@ -88,7 +85,7 @@ export async function action({request, context}: Route.ActionArgs) {
     }
 
     if (!data?.customerUpdate?.customer) {
-      throw new Error('Customer profile update failed.');
+      throw new Error('Die Aktualisierung des Kundenprofils ist fehlgeschlagen.');
     }
 
     return {
@@ -115,13 +112,15 @@ export default function AccountProfile() {
   return (
     <div className="account-profile">
       <section className="account-profile__section">
-        <h2 className="account-profile__title">My profile</h2>
+        <h2 className="account-profile__title">Mein Profil</h2>
         <Form method="PUT" className="account-profile__form">
-          <legend className="account-profile__legend">Personal information</legend>
+          <legend className="account-profile__legend">
+            Persönliche Angaben
+          </legend>
           <fieldset className="account-profile__fieldset">
             <div className="account-profile__field">
               <label className="account-profile__label" htmlFor="firstName">
-                First name
+                Vorname
               </label>
               <input
                 className="account-profile__input"
@@ -129,15 +128,15 @@ export default function AccountProfile() {
                 name="firstName"
                 type="text"
                 autoComplete="given-name"
-                placeholder="First name"
-                aria-label="First name"
+                placeholder="Vorname"
+                aria-label="Vorname"
                 defaultValue={customer.firstName ?? ''}
                 minLength={2}
               />
             </div>
             <div className="account-profile__field">
               <label className="account-profile__label" htmlFor="lastName">
-                Last name
+                Nachname
               </label>
               <input
                 className="account-profile__input"
@@ -145,8 +144,8 @@ export default function AccountProfile() {
                 name="lastName"
                 type="text"
                 autoComplete="family-name"
-                placeholder="Last name"
-                aria-label="Last name"
+                placeholder="Nachname"
+                aria-label="Nachname"
                 defaultValue={customer.lastName ?? ''}
                 minLength={2}
               />
@@ -164,7 +163,7 @@ export default function AccountProfile() {
             type="submit"
             disabled={state !== 'idle'}
           >
-            {state !== 'idle' ? 'Updating' : 'Update'}
+            {state !== 'idle' ? 'Wird aktualisiert...' : 'Aktualisieren'}
           </button>
         </Form>
       </section>

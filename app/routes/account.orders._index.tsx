@@ -15,6 +15,11 @@ import type {
 } from 'customer-accountapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {Link} from '~/lib/i18n-router';
+import {
+  formatGermanFinancialStatus,
+  formatGermanFulfillmentStatus,
+  formatGermanOrderDate,
+} from '~/lib/order-display';
 
 type OrdersLoaderData = {
   customer: CustomerOrdersFragment;
@@ -23,7 +28,7 @@ type OrdersLoaderData = {
 
 export const meta: Route.MetaFunction = () => {
   return [
-    {title: 'Orders'},
+    {title: 'Bestellungen'},
     {name: 'robots', content: 'noindex,follow'},
   ];
 };
@@ -48,7 +53,7 @@ export async function loader({request, context}: Route.LoaderArgs) {
   });
 
   if (errors?.length || !data?.customer) {
-    throw new Response('Customer orders not found', {status: 404});
+    throw new Response('Bestellungen nicht gefunden', {status: 404});
   }
 
   return {customer: data.customer, filters};
@@ -82,17 +87,21 @@ function OrdersTable({
     <section className="account-orders__section" aria-live="polite">
       <div className="account-orders__section-head">
         <div>
-          <p className="account-orders__eyebrow">Order history</p>
-          <h2 className="account-orders__title">Your orders</h2>
+          <p className="account-orders__eyebrow">Bestellverlauf</p>
+          <h2 className="account-orders__title">Ihre Bestellungen</h2>
         </div>
         <p className="account-orders__count">
-          {orderCount} {orderCount === 1 ? 'order' : 'orders'}
+          {orderCount} {orderCount === 1 ? 'Bestellung' : 'Bestellungen'}
         </p>
       </div>
 
       {orders?.nodes.length ? (
         <div className="account-orders__list">
-          <PaginatedResourceSection connection={orders}>
+          <PaginatedResourceSection
+            connection={orders}
+            previousLabel="Vorherige Bestellungen"
+            nextLabel="Weitere Bestellungen"
+          >
             {({node: order}) => <OrderItem key={order.id} order={order} />}
           </PaginatedResourceSection>
         </div>
@@ -109,25 +118,27 @@ function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
       {hasFilters ? (
         <>
           <p className="account-orders__empty-title">
-            No orders match your current filters.
+            Keine Bestellung entspricht Ihren aktuellen Filtern.
           </p>
           <p className="account-orders__empty-copy">
-            Try a different order number or clear the current search.
+            Versuchen Sie eine andere Bestellnummer oder setzen Sie die Filter
+            zurück.
           </p>
           <Link className="account-orders__empty-link" to="/account/orders">
-            Clear filters
+            Filter zurücksetzen
           </Link>
         </>
       ) : (
         <>
           <p className="account-orders__empty-title">
-            You haven&apos;t placed any orders yet.
+            Sie haben noch keine Bestellung aufgegeben.
           </p>
           <p className="account-orders__empty-copy">
-            Once you place an order, it will appear here for quick tracking.
+            Sobald Sie eine Bestellung aufgeben, erscheint sie hier zur
+            schnellen Nachverfolgung.
           </p>
           <Link className="account-orders__empty-link" to="/collections">
-            Start shopping
+            Jetzt einkaufen
           </Link>
         </>
       )}
@@ -172,8 +183,8 @@ function OrderSearchForm({
     <section className="account-orders__section account-orders__section--filters">
       <div className="account-orders__section-head">
         <div>
-          <p className="account-orders__eyebrow">Find an order</p>
-          <h2 className="account-orders__title">Search & filter</h2>
+          <p className="account-orders__eyebrow">Bestellung finden</p>
+          <h2 className="account-orders__title">Suchen und filtern</h2>
         </div>
       </div>
 
@@ -181,28 +192,30 @@ function OrderSearchForm({
         ref={formRef}
         onSubmit={handleSubmit}
         className="account-orders__filters"
-        aria-label="Search orders"
+        aria-label="Bestellungen durchsuchen"
       >
         <div className="account-orders__filter-grid">
           <label className="account-orders__field">
-            <span className="account-orders__field-label">Order number</span>
+            <span className="account-orders__field-label">Bestellnummer</span>
             <input
               type="search"
               name={ORDER_FILTER_FIELDS.NAME}
-              placeholder="Order #"
-              aria-label="Order number"
+              placeholder="Bestellnummer"
+              aria-label="Bestellnummer"
               defaultValue={currentFilters.name || ''}
               className="account-orders__input"
             />
           </label>
 
           <label className="account-orders__field">
-            <span className="account-orders__field-label">Confirmation number</span>
+            <span className="account-orders__field-label">
+              Bestätigungsnummer
+            </span>
             <input
               type="search"
               name={ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER}
-              placeholder="Confirmation #"
-              aria-label="Confirmation number"
+              placeholder="Bestätigungsnummer"
+              aria-label="Bestätigungsnummer"
               defaultValue={currentFilters.confirmationNumber || ''}
               className="account-orders__input"
             />
@@ -215,7 +228,7 @@ function OrderSearchForm({
             type="submit"
             disabled={isSearching}
           >
-            {isSearching ? 'Searching...' : 'Search orders'}
+            {isSearching ? 'Suche läuft...' : 'Bestellungen suchen'}
           </button>
 
           {hasFilters && (
@@ -228,23 +241,13 @@ function OrderSearchForm({
                 formRef.current?.reset();
               }}
             >
-              Clear filters
+              Filter zurücksetzen
             </button>
           )}
         </div>
       </form>
     </section>
   );
-}
-
-function formatStatusLabel(status?: string | null) {
-  if (!status) return null;
-
-  return status
-    .toLowerCase()
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
 }
 
 function OrderValue({order}: {order: OrderItemFragment}) {
@@ -286,18 +289,21 @@ function DetailItem({
 
 function OrderItem({order}: {order: OrderItemFragment}) {
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
-  const formattedFinancialStatus = formatStatusLabel(order.financialStatus);
-  const formattedFulfillmentStatus = formatStatusLabel(fulfillmentStatus);
+  const formattedFinancialStatus = formatGermanFinancialStatus(
+    order.financialStatus,
+  );
+  const formattedFulfillmentStatus =
+    formatGermanFulfillmentStatus(fulfillmentStatus);
 
   return (
     <article className="account-orders__card">
       <div className="account-orders__card-top">
         <div className="account-orders__summary">
           <Link className="account-orders__order-link" to={`/account/orders/${btoa(order.id)}`}>
-            Order #{order.number}
+            Bestellung #{order.number}
           </Link>
           <p className="account-orders__date">
-            Placed on {new Date(order.processedAt).toDateString()}
+            Bestellt am {formatGermanOrderDate(order.processedAt)}
           </p>
         </div>
 
@@ -306,12 +312,15 @@ function OrderItem({order}: {order: OrderItemFragment}) {
 
       <div className="account-orders__meta">
         {order.confirmationNumber && (
-          <DetailItem label="Confirmation" value={order.confirmationNumber} />
+          <DetailItem
+            label="Bestätigung"
+            value={order.confirmationNumber}
+          />
         )}
 
         {formattedFinancialStatus && (
           <DetailItem
-            label="Payment"
+            label="Zahlung"
             value={
               <StatusBadge
                 label={formattedFinancialStatus}
@@ -323,7 +332,7 @@ function OrderItem({order}: {order: OrderItemFragment}) {
 
         {formattedFulfillmentStatus && (
           <DetailItem
-            label="Fulfillment"
+            label="Versandstatus"
             value={<StatusBadge label={formattedFulfillmentStatus} />}
           />
         )}
@@ -331,7 +340,7 @@ function OrderItem({order}: {order: OrderItemFragment}) {
 
       <div className="account-orders__card-actions">
         <Link className="account-orders__view-link" to={`/account/orders/${btoa(order.id)}`}>
-          View order
+          Bestellung ansehen
         </Link>
       </div>
     </article>
