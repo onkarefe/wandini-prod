@@ -1,6 +1,10 @@
 import {useRef} from 'react';
 import {useLoaderData, useNavigation, useSearchParams} from 'react-router';
-import {Money, flattenConnection, getPaginationVariables} from '@shopify/hydrogen';
+import {
+  Money,
+  flattenConnection,
+  getPaginationVariables,
+} from '@shopify/hydrogen';
 import type {Route} from './+types/account.orders._index';
 import {
   ORDER_FILTER_FIELDS,
@@ -27,10 +31,7 @@ type OrdersLoaderData = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [
-    {title: 'Bestellungen'},
-    {name: 'robots', content: 'noindex,follow'},
-  ];
+  return [{title: 'Bestellungen'}, {name: 'robots', content: 'noindex,follow'}];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {
@@ -64,7 +65,17 @@ export default function Orders() {
   const {orders} = customer;
 
   return (
-    <div className="account-orders">
+    <div className="account-page account-orders">
+      <header className="account-page__header">
+        <div>
+          <p className="account-page__eyebrow">Bestellübersicht</p>
+          <h2 className="account-page__title">Bestellungen</h2>
+          <p className="account-page__description">
+            Prüfen Sie den Status Ihrer Bestellungen und öffnen Sie alle
+            Bestelldetails.
+          </p>
+        </div>
+      </header>
       <div className="account-orders__container">
         <OrderSearchForm currentFilters={filters} />
         <OrdersTable orders={orders} filters={filters} />
@@ -87,11 +98,10 @@ function OrdersTable({
     <section className="account-orders__section" aria-live="polite">
       <div className="account-orders__section-head">
         <div>
-          <p className="account-orders__eyebrow">Bestellverlauf</p>
-          <h2 className="account-orders__title">Ihre Bestellungen</h2>
+          <h3 className="account-orders__title">Bestellverlauf</h3>
         </div>
         <p className="account-orders__count">
-          {orderCount} {orderCount === 1 ? 'Bestellung' : 'Bestellungen'}
+          {orderCount} {orderCount === 1 ? 'Eintrag' : 'Einträge'} angezeigt
         </p>
       </div>
 
@@ -183,8 +193,10 @@ function OrderSearchForm({
     <section className="account-orders__section account-orders__section--filters">
       <div className="account-orders__section-head">
         <div>
-          <p className="account-orders__eyebrow">Bestellung finden</p>
-          <h2 className="account-orders__title">Suchen und filtern</h2>
+          <h3 className="account-orders__title">Bestellung finden</h3>
+          <p className="account-orders__section-copy">
+            Suchen Sie nach Bestell- oder Bestätigungsnummer.
+          </p>
         </div>
       </div>
 
@@ -272,13 +284,7 @@ function StatusBadge({
   );
 }
 
-function DetailItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
+function DetailItem({label, value}: {label: string; value: React.ReactNode}) {
   return (
     <div className="account-orders__meta-item">
       <span className="account-orders__meta-label">{label}</span>
@@ -299,7 +305,10 @@ function OrderItem({order}: {order: OrderItemFragment}) {
     <article className="account-orders__card">
       <div className="account-orders__card-top">
         <div className="account-orders__summary">
-          <Link className="account-orders__order-link" to={`/account/orders/${btoa(order.id)}`}>
+          <Link
+            className="account-orders__order-link"
+            to={`/account/orders/${btoa(order.id)}`}
+          >
             Bestellung #{order.number}
           </Link>
           <p className="account-orders__date">
@@ -312,10 +321,7 @@ function OrderItem({order}: {order: OrderItemFragment}) {
 
       <div className="account-orders__meta">
         {order.confirmationNumber && (
-          <DetailItem
-            label="Bestätigung"
-            value={order.confirmationNumber}
-          />
+          <DetailItem label="Bestätigung" value={order.confirmationNumber} />
         )}
 
         {formattedFinancialStatus && (
@@ -339,7 +345,10 @@ function OrderItem({order}: {order: OrderItemFragment}) {
       </div>
 
       <div className="account-orders__card-actions">
-        <Link className="account-orders__view-link" to={`/account/orders/${btoa(order.id)}`}>
+        <Link
+          className="account-orders__view-link"
+          to={`/account/orders/${btoa(order.id)}`}
+        >
           Bestellung ansehen
         </Link>
       </div>

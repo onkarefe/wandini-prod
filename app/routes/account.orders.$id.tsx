@@ -7,7 +7,9 @@ import type {
 } from 'customer-accountapi.generated';
 import {CUSTOMER_ORDER_QUERY} from '~/graphql/customer-account/CustomerOrderQuery';
 import {redirectToLocalePath} from '~/lib/locale';
+import {Link} from '~/lib/i18n-router';
 import {
+  formatGermanFinancialStatus,
   formatGermanFulfillmentStatus,
   formatGermanOrderDate,
 } from '~/lib/order-display';
@@ -98,104 +100,147 @@ export default function OrderRoute() {
     discountPercentage,
     fulfillmentStatus,
   } = useLoaderData<typeof loader>();
+  const financialStatusLabel = formatGermanFinancialStatus(
+    order.financialStatus,
+  );
+  const fulfillmentStatusLabel =
+    formatGermanFulfillmentStatus(fulfillmentStatus) ?? 'Nicht verfügbar';
+
   return (
-    <div className="account-order">
-      <h2>Bestellung {order.name}</h2>
-      <p>Bestellt am {formatGermanOrderDate(order.processedAt)}</p>
-      {order.confirmationNumber && (
-        <p>Bestätigung: {order.confirmationNumber}</p>
-      )}
-      <br />
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Produkt</th>
-              <th scope="col">Preis</th>
-              <th scope="col">Gesamt</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lineItems.map((lineItem) => (
-              <OrderLineRow key={lineItem.id} lineItem={lineItem} />
-            ))}
-          </tbody>
-          <tfoot>
-            {((discountValue && discountValue.amount) ||
-              discountPercentage) && (
+    <div className="account-page account-order">
+      <Link className="account-order__back" to="/account/orders">
+        <span aria-hidden="true">←</span> Zurück zu den Bestellungen
+      </Link>
+
+      <header className="account-page__header account-order__header">
+        <div>
+          <p className="account-page__eyebrow">Bestelldetails</p>
+          <h2 className="account-page__title">Bestellung {order.name}</h2>
+          <p className="account-page__description">
+            Bestellt am {formatGermanOrderDate(order.processedAt)}
+            {order.confirmationNumber
+              ? ` · Bestätigung ${order.confirmationNumber}`
+              : ''}
+          </p>
+        </div>
+        <a
+          className="account-button account-button--secondary"
+          target="_blank"
+          href={order.statusPageUrl}
+          rel="noreferrer"
+        >
+          Bestellstatus öffnen
+        </a>
+      </header>
+
+      <div className="account-order__status-row">
+        <div className="account-order__status-item">
+          <span className="account-order__status-label">Zahlung</span>
+          <span className="account-orders__badge">
+            {financialStatusLabel ?? 'Nicht verfügbar'}
+          </span>
+        </div>
+        <div className="account-order__status-item">
+          <span className="account-order__status-label">Versand</span>
+          <span className="account-orders__badge">
+            {fulfillmentStatusLabel}
+          </span>
+        </div>
+        <div className="account-order__status-item account-order__status-item--total">
+          <span className="account-order__status-label">Gesamtsumme</span>
+          <strong className="account-order__status-total">
+            <Money data={order.totalPrice} />
+          </strong>
+        </div>
+      </div>
+
+      <section className="account-order__section">
+        <div className="account-order__section-head">
+          <h3>Artikel</h3>
+          <span>
+            {lineItems.length} {lineItems.length === 1 ? 'Artikel' : 'Artikel'}
+          </span>
+        </div>
+        <div className="account-order__table-wrap">
+          <table className="account-order__table">
+            <thead>
               <tr>
-                <th scope="row" colSpan={2}>
-                  <p>Rabatte</p>
+                <th scope="col">Produkt</th>
+                <th scope="col">Menge</th>
+                <th scope="col">Einzelpreis</th>
+                <th scope="col">Summe</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lineItems.map((lineItem) => (
+                <OrderLineRow key={lineItem.id} lineItem={lineItem} />
+              ))}
+            </tbody>
+            <tfoot>
+              {((discountValue && discountValue.amount) ||
+                discountPercentage) && (
+                <tr>
+                  <th scope="row" colSpan={3}>
+                    Rabatt
+                  </th>
+                  <td>
+                    {discountPercentage ? (
+                      <span>-{discountPercentage}% Rabatt</span>
+                    ) : (
+                      discountValue && (
+                        <span>
+                          −<Money data={discountValue} />
+                        </span>
+                      )
+                    )}
+                  </td>
+                </tr>
+              )}
+              <tr>
+                <th scope="row" colSpan={3}>
+                  Zwischensumme
                 </th>
                 <td>
-                  {discountPercentage ? (
-                    <span>-{discountPercentage}% Rabatt</span>
-                  ) : (
-                    discountValue && <Money data={discountValue!} />
-                  )}
+                  <Money data={order.subtotal!} />
                 </td>
               </tr>
-            )}
-            <tr>
-              <th scope="row" colSpan={2}>
-                <p>Zwischensumme</p>
-              </th>
-              <td>
-                <Money data={order.subtotal!} />
-              </td>
-            </tr>
-            <tr>
-              <th scope="row" colSpan={2}>
-                Steuer
-              </th>
-              <td>
-                <Money data={order.totalTax!} />
-              </td>
-            </tr>
-            <tr>
-              <th scope="row" colSpan={2}>
-                <p>Gesamtsumme</p>
-              </th>
-              <td>
-                <Money data={order.totalPrice!} />
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-        <div>
+              <tr>
+                <th scope="row" colSpan={3}>
+                  Steuer
+                </th>
+                <td>
+                  <Money data={order.totalTax!} />
+                </td>
+              </tr>
+              <tr className="account-order__grand-total">
+                <th scope="row" colSpan={3}>
+                  Gesamtsumme
+                </th>
+                <td>
+                  <Money data={order.totalPrice!} />
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      <section className="account-order__section account-order__section--address">
+        <div className="account-order__section-head">
           <h3>Lieferadresse</h3>
+        </div>
+        <div className="account-order__address-content">
           {order?.shippingAddress ? (
             <address>
-              <p>{order.shippingAddress.name}</p>
-              {order.shippingAddress.formatted ? (
-                <p>{order.shippingAddress.formatted}</p>
-              ) : (
-                ''
-              )}
-              {order.shippingAddress.formattedArea ? (
-                <p>{order.shippingAddress.formattedArea}</p>
-              ) : (
-                ''
-              )}
+              {order.shippingAddress.formatted.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
             </address>
           ) : (
             <p>Keine Lieferadresse hinterlegt</p>
           )}
-          <h3>Versandstatus</h3>
-          <div>
-            <p>
-              {formatGermanFulfillmentStatus(fulfillmentStatus) ??
-                'Nicht verfügbar'}
-            </p>
-          </div>
         </div>
-      </div>
-      <br />
-      <p>
-        <a target="_blank" href={order.statusPageUrl} rel="noreferrer">
-          Bestellstatus anzeigen &rarr;
-        </a>
-      </p>
+      </section>
     </div>
   );
 }
@@ -220,13 +265,18 @@ function getLineItemDisplayTotal(lineItem: OrderLineItemFullFragment) {
   const unitPriceAmount = Number(lineItem.price.amount);
   const totalDiscountAmount = Number(lineItem.totalDiscount?.amount ?? 0);
 
-  if (!Number.isFinite(unitPriceAmount) || !Number.isFinite(totalDiscountAmount)) {
+  if (
+    !Number.isFinite(unitPriceAmount) ||
+    !Number.isFinite(totalDiscountAmount)
+  ) {
     return lineItem.price;
   }
 
   return {
-    amount: Math.max(0, unitPriceAmount * lineItem.quantity - totalDiscountAmount)
-      .toFixed(2),
+    amount: Math.max(
+      0,
+      unitPriceAmount * lineItem.quantity - totalDiscountAmount,
+    ).toFixed(2),
     currencyCode: lineItem.price.currencyCode,
   };
 }
@@ -235,24 +285,27 @@ function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
   const lineTotal = getLineItemDisplayTotal(lineItem);
 
   return (
-    <tr key={lineItem.id}>
-      <td>
-        <div>
+    <tr>
+      <td data-label="Produkt">
+        <div className="account-order__product">
           {lineItem?.image && (
-            <div>
-              <Image data={lineItem.image} width={96} height={96} />
+            <div className="account-order__product-image">
+              <Image data={lineItem.image} width={88} height={88} />
             </div>
           )}
-          <div>
+          <div className="account-order__product-copy">
             <p>{lineItem.title}</p>
-            <small>{lineItem.variantTitle}</small>
+            {lineItem.variantTitle ? (
+              <small>{lineItem.variantTitle}</small>
+            ) : null}
           </div>
         </div>
       </td>
-      <td>
+      <td data-label="Menge">{lineItem.quantity}</td>
+      <td data-label="Einzelpreis">
         <Money data={lineItem.price!} />
       </td>
-      <td>
+      <td data-label="Summe">
         {lineTotal ? <Money data={lineTotal} /> : <span>-</span>}
       </td>
     </tr>

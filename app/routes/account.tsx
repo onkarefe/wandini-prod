@@ -1,9 +1,4 @@
-import {
-  data as remixData,
-  Form,
-  Outlet,
-  useLoaderData,
-} from 'react-router';
+import {data as remixData, Form, Outlet, useLoaderData} from 'react-router';
 import type {Route} from './+types/account';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
 import accountMainStyles from '~/styles/accountMain.css?url';
@@ -47,11 +42,9 @@ export async function loader({context}: Route.LoaderArgs) {
 export default function AccountLayout() {
   const {customer} = useLoaderData<typeof loader>();
 
-  const heading = customer
-    ? customer.firstName
-      ? `Willkommen, ${customer.firstName}`
-      : 'Willkommen in Ihrem Kundenkonto.'
-    : 'Kontodetails';
+  const heading = customer?.firstName
+    ? `Guten Tag, ${customer.firstName}`
+    : 'Guten Tag';
 
   return (
     <div className="account-shell">
@@ -59,10 +52,16 @@ export default function AccountLayout() {
         <header className="account-shell__header">
           <p className="account-shell__eyebrow">Mein Konto</p>
           <h1 className="account-shell__title">{heading}</h1>
+          <p className="account-shell__intro">
+            Verwalten Sie Ihre Bestellungen und persönlichen Angaben an einem
+            Ort.
+          </p>
         </header>
-        <AccountMenu />
-        <div className="account-shell__content">
-          <Outlet context={{customer}} />
+        <div className="account-shell__layout">
+          <AccountMenu />
+          <main className="account-shell__content">
+            <Outlet context={{customer}} />
+          </main>
         </div>
       </div>
     </div>
@@ -87,28 +86,33 @@ function AccountMenu() {
   }
 
   return (
-    <nav className="account-tabs" role="navigation" aria-label="Kontobereiche">
-      <NavLink to="/account/orders" className={getTabClassName}>
-        Bestellungen
-      </NavLink>
-      <NavLink to="/account/profile" className={getTabClassName}>
-        Profil
-      </NavLink>
-      <NavLink to="/account/favorites" className={getTabClassName}>
-        Favoriten
-      </NavLink>
-      <NavLink to="/account/addresses" className={getTabClassName}>
-        Adressen
-      </NavLink>
+    <aside className="account-navigation">
+      <nav className="account-tabs" aria-label="Kontobereiche">
+        <NavLink to="/account/orders" className={getTabClassName}>
+          Bestellungen
+        </NavLink>
+        <NavLink to="/account/profile" className={getTabClassName}>
+          Profil
+        </NavLink>
+        <NavLink to="/account/favorites" className={getTabClassName}>
+          Favoriten
+        </NavLink>
+        <NavLink to="/account/addresses" className={getTabClassName}>
+          Adressen
+        </NavLink>
+      </nav>
       <Logout />
-    </nav>
+    </aside>
   );
 }
 
 function Logout() {
   return (
     <Form className="account-logout" method="POST" action="/account/logout">
-      <button className="account-tabs__link account-tabs__link--button" type="submit">
+      <button
+        className="account-tabs__link account-tabs__link--button"
+        type="submit"
+      >
         Abmelden
       </button>
     </Form>

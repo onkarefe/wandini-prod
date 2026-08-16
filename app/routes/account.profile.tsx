@@ -16,10 +16,7 @@ export type ActionResponse = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [
-    {title: 'Profil'},
-    {name: 'robots', content: 'noindex,follow'},
-  ];
+  return [{title: 'Profil'}, {name: 'robots', content: 'noindex,follow'}];
 };
 
 const PROFILE_ERROR_MESSAGES = {
@@ -85,7 +82,9 @@ export async function action({request, context}: Route.ActionArgs) {
     }
 
     if (!data?.customerUpdate?.customer) {
-      throw new Error('Die Aktualisierung des Kundenprofils ist fehlgeschlagen.');
+      throw new Error(
+        'Die Aktualisierung des Kundenprofils ist fehlgeschlagen.',
+      );
     }
 
     return {
@@ -105,19 +104,28 @@ export async function action({request, context}: Route.ActionArgs) {
 
 export default function AccountProfile() {
   const account = useOutletContext<{customer: CustomerFragment}>();
-  const {state} = useNavigation();
+  const {state, formMethod} = useNavigation();
   const action = useActionData<ActionResponse>();
   const customer = action?.customer ?? account?.customer;
+  const isSubmitting = state !== 'idle' && formMethod === 'PUT';
 
   return (
-    <div className="account-profile">
+    <div className="account-page account-profile">
+      <header className="account-page__header">
+        <div>
+          <p className="account-page__eyebrow">Persönliche Angaben</p>
+          <h2 className="account-page__title">Profil</h2>
+          <p className="account-page__description">
+            Halten Sie Ihren Namen für Bestellungen und die persönliche
+            Ansprache aktuell.
+          </p>
+        </div>
+      </header>
+
       <section className="account-profile__section">
-        <h2 className="account-profile__title">Mein Profil</h2>
         <Form method="PUT" className="account-profile__form">
-          <legend className="account-profile__legend">
-            Persönliche Angaben
-          </legend>
           <fieldset className="account-profile__fieldset">
+            <legend className="account-sr-only">Persönliche Angaben</legend>
             <div className="account-profile__field">
               <label className="account-profile__label" htmlFor="firstName">
                 Vorname
@@ -151,20 +159,26 @@ export default function AccountProfile() {
               />
             </div>
           </fieldset>
-          {action?.error ? (
-            <p className="account-profile__error">
-              <mark className="account-profile__error-mark">
-                <small>{action.error}</small>
-              </mark>
-            </p>
-          ) : null}
-          <button
-            className="account-profile__button"
-            type="submit"
-            disabled={state !== 'idle'}
-          >
-            {state !== 'idle' ? 'Wird aktualisiert...' : 'Aktualisieren'}
-          </button>
+          <div aria-live="polite">
+            {action?.error ? (
+              <p className="account-message account-message--error">
+                {action.error}
+              </p>
+            ) : action?.customer ? (
+              <p className="account-message account-message--success">
+                Ihre Angaben wurden gespeichert.
+              </p>
+            ) : null}
+          </div>
+          <div className="account-profile__actions">
+            <button
+              className="account-button account-button--primary"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Wird gespeichert...' : 'Änderungen speichern'}
+            </button>
+          </div>
         </Form>
       </section>
     </div>

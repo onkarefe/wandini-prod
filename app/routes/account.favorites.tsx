@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {useLoaderData, useRevalidator} from 'react-router';
 import type {Route} from './+types/account.favorites';
 import {CustomProductCard} from '~/components/CustomProductCard';
+import {Link} from '~/lib/i18n-router';
 import {CUSTOMER_WISHLIST_OWNER_QUERY} from '~/graphql/customer-account/WishlistCustomerOwnerQuery';
 import {ACCOUNT_FAVORITES_PRODUCTS_QUERY} from '~/graphql/storefront/AccountFavoritesProductsQuery';
 import {
@@ -14,10 +15,7 @@ import {getCustomerWishlistProductIds} from '~/lib/wishlist.server';
 import '../styles/wishlistFeedback.css';
 
 export const meta: Route.MetaFunction = () => {
-  return [
-    {title: 'Favoriten'},
-    {name: 'robots', content: 'noindex,follow'},
-  ];
+  return [{title: 'Favoriten'}, {name: 'robots', content: 'noindex,follow'}];
 };
 
 export async function loader({context, request}: Route.LoaderArgs) {
@@ -104,20 +102,32 @@ export default function AccountFavorites() {
   }, [favorites]);
 
   return (
-    <div className="account-favorites">
-      <section className="account-profile__section">
-        <h2 className="account-profile__title">Meine Favoriten</h2>
+    <div className="account-page account-favorites">
+      <header className="account-page__header">
+        <div>
+          <p className="account-page__eyebrow">Ihre Auswahl</p>
+          <h2 className="account-page__title">Favoriten</h2>
+          <p className="account-page__description">
+            Hier finden Sie alle Produkte, die Sie für später gespeichert haben.
+          </p>
+        </div>
+        {wishlistStatus === 'ready' && favoriteProducts.length > 0 ? (
+          <span className="account-page__count">
+            {favoriteProducts.length}{' '}
+            {favoriteProducts.length === 1 ? 'Produkt' : 'Produkte'}
+          </span>
+        ) : null}
+      </header>
 
+      <section className="account-favorites__content">
         {wishlistStatus === 'unavailable' ? (
           <div className="account-favorites__unavailable" role="status">
-            <p className="account-profile__error">
-              <mark className="account-profile__error-mark">
-                {WISHLIST_LOAD_UNAVAILABLE_MESSAGE}
-              </mark>
+            <p className="account-message account-message--error">
+              {WISHLIST_LOAD_UNAVAILABLE_MESSAGE}
             </p>
             <button
               type="button"
-              className="account-profile__button"
+              className="account-button account-button--primary"
               disabled={revalidator.state !== 'idle'}
               onClick={() => {
                 void revalidator.revalidate();
@@ -129,9 +139,19 @@ export default function AccountFavorites() {
             </button>
           </div>
         ) : favoriteProducts.length === 0 ? (
-          <p className="account-addresses__empty">
-            Sie haben noch keine Produkte zu Ihren Favoriten hinzugefügt.
-          </p>
+          <div className="account-empty-state">
+            <h3>Noch keine Favoriten</h3>
+            <p>
+              Speichern Sie Produkte über das Herzsymbol, um sie hier schnell
+              wiederzufinden.
+            </p>
+            <Link
+              className="account-button account-button--primary"
+              to="/collections"
+            >
+              Produkte entdecken
+            </Link>
+          </div>
         ) : (
           <div className="custom-products-grid">
             {favoriteProducts.map((product) => (
