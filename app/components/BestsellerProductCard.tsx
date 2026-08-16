@@ -1,6 +1,11 @@
 import {useCallback, useEffect, useState, type MouseEvent} from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import {Link, useFetcher, useLocation, useNavigate} from 'react-router';
+import {
+  WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
+  type WishlistActionData,
+} from '~/lib/wishlist';
+import '../styles/wishlistFeedback.css';
 
 type ProductPrice = {
   amount: string;
@@ -99,11 +104,7 @@ export default function BestsellerProductCard({
   similarProductsSourceImageUrl,
 }: BestsellerProductCardProps) {
   const displayImages = images.slice(0, 3);
-  const fetcher = useFetcher<{
-    ok?: boolean;
-    loginUrl?: string;
-    wishlisted?: boolean;
-  }>();
+  const fetcher = useFetcher<WishlistActionData>();
   const location = useLocation();
   const navigate = useNavigate();
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -112,6 +113,7 @@ export default function BestsellerProductCard({
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [wishlisted, setWishlisted] = useState(isWishlisted);
+  const [wishlistError, setWishlistError] = useState<string | null>(null);
   const priceLabel = formatPriceLabel(minPrice);
   const hasMultipleImages = displayImages.length > 1;
 
@@ -134,6 +136,7 @@ export default function BestsellerProductCard({
 
   useEffect(() => {
     setWishlisted(isWishlisted);
+    setWishlistError(null);
   }, [isWishlisted, productId]);
 
   useEffect(() => {
@@ -143,16 +146,27 @@ export default function BestsellerProductCard({
   }, [fetcher.data]);
 
   useEffect(() => {
-    if (!fetcher.data?.ok || typeof fetcher.data.wishlisted !== 'boolean') {
+    if (!fetcher.data) return;
+
+    if (!fetcher.data.ok) {
+      if (!fetcher.data.loginUrl) {
+        setWishlistError(WISHLIST_UPDATE_UNAVAILABLE_MESSAGE);
+      }
       return;
     }
 
+    if (typeof fetcher.data.wishlisted !== 'boolean') {
+      return;
+    }
+
+    setWishlistError(null);
     setWishlisted(fetcher.data.wishlisted);
   }, [fetcher.data]);
 
   const handleWishlistClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
+    setWishlistError(null);
 
     if (!isLoggedIn) {
       const returnTo = `${location.pathname}${location.search}${location.hash}`;
@@ -220,6 +234,12 @@ export default function BestsellerProductCard({
             </button>
           ) : null}
         </div>
+
+        {wishlistError ? (
+          <span className="wishlist-card-feedback" role="status">
+            {wishlistError}
+          </span>
+        ) : null}
 
         <div className="bestseller-card__viewport" ref={emblaRef}>
           <div className="bestseller-card__slides">

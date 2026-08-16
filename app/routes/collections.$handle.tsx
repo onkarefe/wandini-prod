@@ -24,11 +24,13 @@ import {
 } from '~/lib/collectionParams';
 import {buildSimilarProductsPath} from '~/lib/similar-products';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
+import {WISHLIST_LOAD_UNAVAILABLE_MESSAGE} from '~/lib/wishlist';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {redirectToLocalePath} from '~/lib/locale';
 import {getRobotsDirective} from '~/lib/seo';
 import type {Route} from './+types/collections.$handle';
 import '../styles/collections.css';
+import '../styles/wishlistFeedback.css';
 
 type CollectionData = NonNullable<CustomCollectionQuery['collection']>;
 type CollectionProduct = CollectionData['products']['nodes'][number];
@@ -341,8 +343,6 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const selectedSort = getSelectedCollectionSort(url.searchParams.get('sort'));
   const {reverse, sortKey} = getCollectionSortVariables(selectedSort);
   const filters = parseCollectionFilters(url.searchParams);
-  const isLoggedIn = await customerAccount.isLoggedIn();
-
   const [data, wishlistState] = await Promise.all([
     storefront.query(CUSTOM_COLLECTION_QUERY, {
       variables: {
@@ -356,10 +356,10 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     loadCustomerWishlistState({
       customerAccount,
       env: context.env,
-      isLoggedIn,
+      request,
     }),
   ]);
-  const {wishlistProductIds} = wishlistState;
+  const {isLoggedIn, wishlistProductIds, wishlistStatus} = wishlistState;
 
   let collection = data.collection as CollectionWithSeo | null | undefined;
 
@@ -391,6 +391,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     isNoisyCollectionUrl,
     isLoggedIn,
     wishlistProductIds,
+    wishlistStatus,
   };
 }
 
@@ -406,6 +407,7 @@ export default function Collection() {
     isNoisyCollectionUrl,
     isLoggedIn,
     wishlistProductIds,
+    wishlistStatus,
   } = data;
   const collectionPageJsonLd = isNoisyCollectionUrl
     ? null
@@ -419,6 +421,11 @@ export default function Collection() {
 
   return (
     <div className="collection">
+      {isLoggedIn && wishlistStatus === 'unavailable' ? (
+        <p className="wishlist-page-feedback" role="status">
+          {WISHLIST_LOAD_UNAVAILABLE_MESSAGE}
+        </p>
+      ) : null}
       {collectionPageJsonLd ? (
         <script
           type="application/ld+json"

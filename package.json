@@ -9,6 +9,7 @@
     "dev": "shopify hydrogen dev --codegen",
     "preview": "shopify hydrogen preview --build",
     "lint": "eslint --no-error-on-unmatched-pattern .",
+    "test": "vitest run",
     "typecheck": "react-router typegen && tsc --noEmit",
     "codegen": "shopify hydrogen codegen && react-router typegen"
   },
@@ -57,7 +58,8 @@
     "prettier": "^3.4.2",
     "typescript": "^5.9.2",
     "vite": "^6.2.4",
-    "vite-tsconfig-paths": "^4.3.1"
+    "vite-tsconfig-paths": "^4.3.1",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=18.0.0"

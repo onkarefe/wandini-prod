@@ -1,7 +1,12 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import {useFetcher, useLocation, useNavigate} from 'react-router';
+import {
+  WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
+  type WishlistActionData,
+} from '~/lib/wishlist';
 import '../styles/customProductCard.css';
+import '../styles/wishlistFeedback.css';
 
 type ProductPrice = {
   amount: string;
@@ -92,17 +97,13 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   onWishlistChange,
 }) => {
   const displayImages = images.slice(0, 3);
-  const fetcher = useFetcher<{
-    ok?: boolean;
-    loginUrl?: string;
-    message?: string;
-    wishlisted?: boolean;
-  }>();
+  const fetcher = useFetcher<WishlistActionData>();
   const location = useLocation();
   const navigate = useNavigate();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start' });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [wishlisted, setWishlisted] = useState(isWishlisted);
+  const [wishlistError, setWishlistError] = useState<string | null>(null);
   const priceLabel = formatPriceLabel(minPrice);
 
   const onSelect = useCallback(() => {
@@ -121,6 +122,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
 
   useEffect(() => {
     setWishlisted(isWishlisted);
+    setWishlistError(null);
   }, [isWishlisted, productId]);
 
   useEffect(() => {
@@ -129,10 +131,20 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   }, [fetcher.data]);
 
   useEffect(() => {
-    if (!fetcher.data?.ok || typeof fetcher.data.wishlisted !== 'boolean') {
+    if (!fetcher.data) return;
+
+    if (!fetcher.data.ok) {
+      if (!fetcher.data.loginUrl) {
+        setWishlistError(WISHLIST_UPDATE_UNAVAILABLE_MESSAGE);
+      }
       return;
     }
 
+    if (typeof fetcher.data.wishlisted !== 'boolean') {
+      return;
+    }
+
+    setWishlistError(null);
     setWishlisted(fetcher.data.wishlisted);
     onWishlistChange?.(fetcher.data.wishlisted);
   }, [fetcher.data, onWishlistChange]);
@@ -140,6 +152,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   const handleWishlistClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
+    setWishlistError(null);
 
     if (!isLoggedIn) {
       const returnTo = `${location.pathname}${location.search}${location.hash}`;
@@ -177,6 +190,11 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
       >
         {wishlisted ? <HeartFilledIcon /> : <HeartOutlineIcon />}
       </button>
+      {wishlistError ? (
+        <span className="wishlist-card-feedback" role="status">
+          {wishlistError}
+        </span>
+      ) : null}
       {showSimilarMotifsButton ? (
         <button
           type="button"

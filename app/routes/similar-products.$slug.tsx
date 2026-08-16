@@ -8,7 +8,9 @@ import {
   type SimilarProductsBaseProduct,
 } from '~/lib/similar-products';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
+import {WISHLIST_LOAD_UNAVAILABLE_MESSAGE} from '~/lib/wishlist';
 import '../styles/collections.css';
+import '../styles/wishlistFeedback.css';
 
 const PAGE_SIZE = 9;
 
@@ -100,6 +102,7 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
     loadCustomerWishlistState({
       customerAccount: context.customerAccount,
       env: context.env,
+      request,
     }),
   ]);
 
@@ -110,6 +113,7 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
     canonicalUrl: `${url.origin}${url.pathname}`,
     isLoggedIn: wishlistState.isLoggedIn,
     wishlistProductIds: wishlistState.wishlistProductIds,
+    wishlistStatus: wishlistState.wishlistStatus,
   };
 }
 
@@ -202,6 +206,12 @@ export default function SimilarProductsSlugPage() {
 
   return (
     <div className="collection">
+      {initialData.isLoggedIn &&
+      initialData.wishlistStatus === 'unavailable' ? (
+        <p className="wishlist-page-feedback" role="status">
+          {WISHLIST_LOAD_UNAVAILABLE_MESSAGE}
+        </p>
+      ) : null}
       <div
         className="collectionMainHeroDiv"
         style={

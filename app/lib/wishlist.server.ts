@@ -1,3 +1,5 @@
+import {WishlistServiceError} from '~/lib/wishlist-errors.server';
+
 const ADMIN_API_VERSION = '2026-07';
 const WISHLIST_NAMESPACE = 'custom';
 const WISHLIST_KEY = 'wishlist';
@@ -16,7 +18,10 @@ type WishlistEnv = Pick<
 
 type AdminGraphqlResponse<T> = {
   data?: T;
-  errors?: Array<{message: string}>;
+  errors?: Array<{
+    message: string;
+    extensions?: {code?: string};
+  }>;
 };
 
 type CustomerWishlistQuery = {
@@ -67,13 +72,20 @@ function normalizeShopDomain(value: string) {
 
   try {
     url = new URL(candidate);
-  } catch {
-    throw new Error('Wishlist store domain is invalid.');
+  } catch (cause) {
+    throw new WishlistServiceError(
+      'CONFIGURATION_ERROR',
+      'Wishlist store domain is invalid.',
+      {cause},
+    );
   }
 
   const hostname = url.hostname.toLowerCase();
   if (!hostname.endsWith('.myshopify.com')) {
-    throw new Error('Wishlist store domain must be a myshopify.com domain.');
+    throw new WishlistServiceError(
+      'CONFIGURATION_ERROR',
+      'Wishlist store domain must be a myshopify.com domain.',
+    );
   }
 
   return hostname;
@@ -84,9 +96,24 @@ function getWishlistConfig(env: WishlistEnv) {
   const clientId = env.SHOPIFY_CLIENT_ID;
   const clientSecret = env.SHOPIFY_CLIENT_SECRET;
 
-  if (!shopValue) throw new Error('Wishlist store domain is not configured.');
-  if (!clientId) throw new Error('Wishlist client ID is not configured.');
-  if (!clientSecret) throw new Error('Wishlist client secret is not configured.');
+  if (!shopValue) {
+    throw new WishlistServiceError(
+      'CONFIGURATION_ERROR',
+      'Wishlist store domain is not configured.',
+    );
+  }
+  if (!clientId) {
+    throw new WishlistServiceError(
+      'CONFIGURATION_ERROR',
+      'Wishlist client ID is not configured.',
+    );
+  }
+  if (!clientSecret) {
+    throw new WishlistServiceError(
+      'CONFIGURATION_ERROR',
+      'Wishlist client secret is not configured.',
+    );
+  }
 
   return {
     shop: normalizeShopDomain(shopValue),
@@ -117,32 +144,58 @@ async function getAdminAccessToken(env: WishlistEnv) {
     return {shop, accessToken: cachedAdminAccessToken.accessToken};
   }
 
-  const response = await fetchWithTimeout(
-    `https://${shop}/admin/oauth/access_token`,
-    {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: new URLSearchParams({
-        grant_type: 'client_credentials',
-        client_id: clientId,
-        client_secret: clientSecret,
-      }),
-    },
-  );
+  let response: Response;
 
-  if (!response.ok) {
-    throw new Error(
-      `Wishlist authentication failed with status ${response.status}.`,
+  try {
+    response = await fetchWithTimeout(
+      `https://${shop}/admin/oauth/access_token`,
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({
+          grant_type: 'client_credentials',
+          client_id: clientId,
+          client_secret: clientSecret,
+        }),
+      },
+    );
+  } catch (cause) {
+    throw new WishlistServiceError(
+      'AUTHENTICATION_ERROR',
+      'Wishlist authentication request failed.',
+      {cause, retryable: true},
     );
   }
 
-  const payload = (await response.json()) as {
-    access_token?: string;
-    expires_in?: number;
-  };
+  if (!response.ok) {
+    throw new WishlistServiceError(
+      'AUTHENTICATION_ERROR',
+      `Wishlist authentication failed with status ${response.status}.`,
+      {
+        retryable: response.status === 429 || response.status >= 500,
+        shopifyStatus: response.status,
+      },
+    );
+  }
+
+  let payload: {access_token?: string; expires_in?: number};
+
+  try {
+    payload = (await response.json()) as typeof payload;
+  } catch (cause) {
+    throw new WishlistServiceError(
+      'INVALID_ADMIN_RESPONSE',
+      'Wishlist authentication returned an invalid response.',
+      {cause, retryable: true},
+    );
+  }
 
   if (!payload.access_token) {
-    throw new Error('Wishlist authentication returned no access token.');
+    throw new WishlistServiceError(
+      'INVALID_ADMIN_RESPONSE',
+      'Wishlist authentication returned no access token.',
+      {retryable: true},
+    );
   }
 
   cachedAdminAccessToken = {
@@ -164,28 +217,75 @@ async function adminGraphql<T>({
   variables?: Record<string, unknown>;
 }): Promise<T> {
   const {shop, accessToken} = await getAdminAccessToken(env);
-  const response = await fetchWithTimeout(
-    `https://${shop}/admin/api/${ADMIN_API_VERSION}/graphql.json`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': accessToken,
+  let response: Response;
+
+  try {
+    response = await fetchWithTimeout(
+      `https://${shop}/admin/api/${ADMIN_API_VERSION}/graphql.json`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Access-Token': accessToken,
+        },
+        body: JSON.stringify({query, variables}),
       },
-      body: JSON.stringify({query, variables}),
-    },
-  );
+    );
+  } catch (cause) {
+    throw new WishlistServiceError(
+      'ADMIN_API_ERROR',
+      'Wishlist Admin API request failed.',
+      {cause, retryable: true},
+    );
+  }
 
   if (!response.ok) {
-    throw new Error(`Wishlist Admin API failed with status ${response.status}.`);
+    if (response.status === 401 || response.status === 403) {
+      cachedAdminAccessToken = null;
+    }
+
+    throw new WishlistServiceError(
+      'ADMIN_API_ERROR',
+      `Wishlist Admin API failed with status ${response.status}.`,
+      {
+        retryable: response.status === 429 || response.status >= 500,
+        shopifyStatus: response.status,
+      },
+    );
   }
 
-  const payload = (await response.json()) as AdminGraphqlResponse<T>;
+  let payload: AdminGraphqlResponse<T>;
+
+  try {
+    payload = (await response.json()) as AdminGraphqlResponse<T>;
+  } catch (cause) {
+    throw new WishlistServiceError(
+      'INVALID_ADMIN_RESPONSE',
+      'Wishlist Admin API returned an invalid response.',
+      {cause, retryable: true},
+    );
+  }
+
   if (payload.errors?.length) {
-    throw new Error('Wishlist Admin API returned a GraphQL error.');
+    const shopifyCodes = payload.errors.flatMap((error) =>
+      error.extensions?.code ? [error.extensions.code] : [],
+    );
+
+    throw new WishlistServiceError(
+      'ADMIN_GRAPHQL_ERROR',
+      'Wishlist Admin API returned a GraphQL error.',
+      {
+        retryable: shopifyCodes.includes('THROTTLED'),
+        shopifyCodes,
+      },
+    );
   }
   if (!payload.data) {
-    throw new Error('Wishlist Admin API returned no data.');
+    throw new WishlistServiceError(
+      'INVALID_ADMIN_RESPONSE',
+      'Wishlist Admin API returned no data.',
+      {retryable: true},
+    );
   }
 
   return payload.data;
@@ -250,7 +350,14 @@ async function getCustomerWishlistSnapshot({
   };
 }
 
-class WishlistStaleWriteError extends Error {}
+class WishlistStaleWriteError extends WishlistServiceError {
+  constructor() {
+    super('STALE_WRITE_ERROR', 'Wishlist write conflicted with a newer value.', {
+      retryable: true,
+      shopifyCodes: ['STALE_OBJECT'],
+    });
+  }
+}
 
 async function setCustomerWishlist({
   env,
@@ -302,7 +409,15 @@ async function setCustomerWishlist({
     throw new WishlistStaleWriteError();
   }
 
-  throw new Error('Wishlist could not be saved.');
+  throw new WishlistServiceError(
+    'METAFIELD_WRITE_ERROR',
+    'Wishlist could not be saved.',
+    {
+      shopifyCodes: userErrors.flatMap((error) =>
+        error.code ? [error.code] : [],
+      ),
+    },
+  );
 }
 
 export async function getCustomerWishlistProductIds({
@@ -345,9 +460,17 @@ export async function toggleProductInCustomerWishlist({
   desiredWishlisted?: boolean;
 }): Promise<WishlistResult> {
   if (!/^gid:\/\/shopify\/Customer\/\d+$/.test(customerId)) {
-    throw new Error('Invalid wishlist customer.');
+    throw new WishlistServiceError(
+      'INVALID_CUSTOMER',
+      'Invalid wishlist customer.',
+    );
   }
-  if (!isProductGid(productId)) throw new Error('Invalid wishlist product.');
+  if (!isProductGid(productId)) {
+    throw new WishlistServiceError(
+      'INVALID_PRODUCT',
+      'Invalid wishlist product.',
+    );
+  }
 
   for (let attempt = 0; attempt < MAX_STALE_WRITE_RETRIES; attempt += 1) {
     const snapshot = await getCustomerWishlistSnapshot({env, customerId});
@@ -380,5 +503,9 @@ export async function toggleProductInCustomerWishlist({
     }
   }
 
-  throw new Error('Wishlist could not be saved.');
+  throw new WishlistServiceError(
+    'STALE_WRITE_ERROR',
+    'Wishlist could not be saved after conflict retries.',
+    {retryable: true, shopifyCodes: ['STALE_OBJECT']},
+  );
 }

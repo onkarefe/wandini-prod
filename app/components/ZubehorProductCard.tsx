@@ -1,6 +1,11 @@
 import {useEffect, useState} from 'react';
 import {useFetcher, useLocation} from 'react-router';
 import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {
+  WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
+  type WishlistActionData,
+} from '~/lib/wishlist';
+import '../styles/wishlistFeedback.css';
 
 type ProductImage = {
   url: string;
@@ -69,19 +74,17 @@ export function ZubehorProductCard({
   isLoggedIn,
   isWishlisted,
 }: ZubehorProductCardProps) {
-  const fetcher = useFetcher<{
-    ok?: boolean;
-    loginUrl?: string;
-    wishlisted?: boolean;
-  }>();
+  const fetcher = useFetcher<WishlistActionData>();
   const location = useLocation();
   const loginPath = usePrefixPathWithLocale('/account/login');
   const [wishlisted, setWishlisted] = useState(isWishlisted);
+  const [wishlistError, setWishlistError] = useState<string | null>(null);
   const priceLabel = formatPriceLabel(minPrice);
   const isPending = fetcher.state !== 'idle';
 
   useEffect(() => {
     setWishlisted(isWishlisted);
+    setWishlistError(null);
   }, [isWishlisted, productId]);
 
   useEffect(() => {
@@ -91,10 +94,20 @@ export function ZubehorProductCard({
   }, [fetcher.data]);
 
   useEffect(() => {
-    if (!fetcher.data?.ok || typeof fetcher.data.wishlisted !== 'boolean') {
+    if (!fetcher.data) return;
+
+    if (!fetcher.data.ok) {
+      if (!fetcher.data.loginUrl) {
+        setWishlistError(WISHLIST_UPDATE_UNAVAILABLE_MESSAGE);
+      }
       return;
     }
 
+    if (typeof fetcher.data.wishlisted !== 'boolean') {
+      return;
+    }
+
+    setWishlistError(null);
     setWishlisted(fetcher.data.wishlisted);
   }, [fetcher.data]);
 
@@ -105,6 +118,8 @@ export function ZubehorProductCard({
       : 'Zu Favoriten hinzufügen';
 
   const handleWishlistClick = () => {
+    setWishlistError(null);
+
     if (isPending) {
       return;
     }
@@ -167,6 +182,11 @@ export function ZubehorProductCard({
       >
         {wishlisted ? <HeartFilledIcon /> : <HeartOutlineIcon />}
       </button>
+      {wishlistError ? (
+        <span className="wishlist-card-feedback" role="status">
+          {wishlistError}
+        </span>
+      ) : null}
     </article>
   );
 }

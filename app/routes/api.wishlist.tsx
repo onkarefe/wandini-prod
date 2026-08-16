@@ -1,5 +1,15 @@
 import type {Route} from './+types/api.wishlist';
 import {CUSTOMER_WISHLIST_OWNER_QUERY} from '~/graphql/customer-account/WishlistCustomerOwnerQuery';
+import {
+  getWishlistRequestId,
+  logWishlistError,
+  WishlistServiceError,
+  type WishlistOperation,
+} from '~/lib/wishlist-errors.server';
+import {
+  WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
+  type WishlistActionData,
+} from '~/lib/wishlist';
 import {toggleProductInCustomerWishlist} from '~/lib/wishlist.server';
 
 function getLoginUrl(request: Request) {
@@ -34,8 +44,34 @@ function parseDesiredWishlisted(value: FormDataEntryValue | null) {
   return null;
 }
 
+function unavailableResponse(requestId: string, status = 503) {
+  return Response.json(
+    {
+      ok: false,
+      message: WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
+    } satisfies WishlistActionData,
+    {
+      status,
+      headers: {
+        'Cache-Control': 'no-store',
+        'X-Wishlist-Request-Id': requestId,
+      },
+    },
+  );
+}
+
 export async function action({request, context}: Route.ActionArgs) {
-  if (!(await context.customerAccount.isLoggedIn())) {
+  const requestId = getWishlistRequestId(request);
+  let isLoggedIn: boolean;
+
+  try {
+    isLoggedIn = await context.customerAccount.isLoggedIn();
+  } catch (error) {
+    logWishlistError({error, operation: 'resolve_customer', requestId});
+    return unavailableResponse(requestId);
+  }
+
+  if (!isLoggedIn) {
     return Response.json(
       {
         ok: false,
@@ -53,30 +89,28 @@ export async function action({request, context}: Route.ActionArgs) {
   );
 
   if (!isValidProductGid(productId) || desiredWishlisted === null) {
-    return Response.json(
-      {ok: false, message: 'Invalid wishlist request.'},
-      {status: 400},
-    );
+    return unavailableResponse(requestId, 400);
   }
 
-  const {data, errors} = await context.customerAccount.query(
-    CUSTOMER_WISHLIST_OWNER_QUERY,
-    {
-      variables: {language: context.customerAccount.i18n.language},
-    },
-  );
-
-  if (errors?.length || !data?.customer?.id) {
-    return Response.json(
-      {
-        ok: false,
-        message: 'Customer could not be resolved for wishlist updates.',
-      },
-      {status: 500},
-    );
-  }
+  let operation: WishlistOperation = 'resolve_customer';
 
   try {
+    const {data, errors} = await context.customerAccount.query(
+      CUSTOMER_WISHLIST_OWNER_QUERY,
+      {
+        variables: {language: context.customerAccount.i18n.language},
+      },
+    );
+
+    if (errors?.length || !data?.customer?.id) {
+      throw new WishlistServiceError(
+        'CUSTOMER_ACCOUNT_ERROR',
+        'Customer could not be resolved for a wishlist update.',
+        {retryable: true},
+      );
+    }
+
+    operation = 'update_wishlist';
     const result = await toggleProductInCustomerWishlist({
       env: context.env,
       customerId: data.customer.id,
@@ -84,18 +118,16 @@ export async function action({request, context}: Route.ActionArgs) {
       desiredWishlisted,
     });
 
-    return Response.json({
-      ok: true,
-      message: result.wishlisted
-        ? 'Product added to wishlist.'
-        : 'Product removed from wishlist.',
-      wishlistCount: result.wishlist.length,
-      wishlisted: result.wishlisted,
-    });
-  } catch {
     return Response.json(
-      {ok: false, message: 'Wishlist update failed.'},
-      {status: 502},
+      {
+        ok: true,
+        wishlistCount: result.wishlist.length,
+        wishlisted: result.wishlisted,
+      } satisfies WishlistActionData,
+      {headers: {'Cache-Control': 'no-store'}},
     );
+  } catch (error) {
+    logWishlistError({error, operation, requestId});
+    return unavailableResponse(requestId);
   }
 }
