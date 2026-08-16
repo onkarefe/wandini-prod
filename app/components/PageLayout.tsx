@@ -75,10 +75,13 @@ function SearchAside() {
   return (
     <Aside type="search" heading="SUCHE">
       <div className="predictive-search">
-        <br />
         <SearchFormPredictive>
           {({fetchResults, inputRef}) => (
-            <>
+            <div className="predictive-search-form__field">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="6.5" />
+                <path d="m16 16 4 4" />
+              </svg>
               <input
                 data-predictive-search-input="true"
                 name="q"
@@ -89,9 +92,12 @@ function SearchAside() {
                 type="search"
                 list={queriesDatalistId}
               />
-              &nbsp;
-              <button type="submit">Suchen</button>
-            </>
+              <button type="submit" aria-label="Suchen">
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M4 10h11M11 6l4 4-4 4" />
+                </svg>
+              </button>
+            </div>
           )}
         </SearchFormPredictive>
 
@@ -104,8 +110,13 @@ function SearchAside() {
                 }).toString()}`
               : SEARCH_ENDPOINT;
 
-            if (state === 'loading' && term.current) {
-              return <div>Wird geladen …</div>;
+            if (state !== 'idle' && term.current) {
+              return (
+                <div className="predictive-search__loading" role="status">
+                  <span aria-hidden="true" />
+                  Wird gesucht …
+                </div>
+              );
             }
 
             if (!total) {
@@ -139,12 +150,17 @@ function SearchAside() {
                   term={term}
                 />
                 {term.current && total ? (
-                  <Link onClick={closeSearch} to={searchUrl}>
-                    <p>
+                  <Link
+                    className="predictive-search__all"
+                    onClick={closeSearch}
+                    to={searchUrl}
+                  >
+                    <span>
                       Alle Ergebnisse für <q>{term.current}</q> anzeigen
-                      {' '}
-                      {'->'}
-                    </p>
+                    </span>
+                    <svg viewBox="0 0 20 20" aria-hidden="true">
+                      <path d="M4 10h11M11 6l4 4-4 4" />
+                    </svg>
                   </Link>
                 ) : null}
               </>
