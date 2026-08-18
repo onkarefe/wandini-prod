@@ -237,6 +237,17 @@ export const HEADER_QUERY = `#graphql
       ...Menu
     }
 
+    headerBanners: metaobjects(type: "header_banner", first: 1) {
+      nodes {
+        id
+        handle
+        fields {
+          key
+          value
+        }
+      }
+    }
+
     megaMenus: metaobjects(type: "mega_menu", first: 50) {
       nodes {
         id
@@ -324,8 +335,6 @@ export const HEADER_QUERY = `#graphql
 
   ${MENU_FRAGMENT}
 ` as const;
-
-
 
 export const FOOTER_QUERY = `#graphql
   query Footer(

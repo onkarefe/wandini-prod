@@ -20,6 +20,7 @@ type SearchFormPredictiveProps = Omit<FormProps, 'children'> & {
   children: SearchFormPredictiveChildren | null;
   fetcherKey?: string;
   onSearchSubmit?: () => void;
+  predictiveLimit?: number;
 };
 
 export const SEARCH_ENDPOINT = '/search';
@@ -32,6 +33,7 @@ export function SearchFormPredictive({
   className = 'predictive-search-form customAsideSearchBox',
   fetcherKey = 'search',
   onSearchSubmit,
+  predictiveLimit = 5,
   ...props
 }: SearchFormPredictiveProps) {
   const fetcher = useFetcher<PredictiveSearchReturn>({key: fetcherKey});
@@ -80,7 +82,7 @@ export function SearchFormPredictive({
     debounceTimer.current = setTimeout(
       () => {
         void fetcher.submit(
-          {q: value, limit: 5, predictive: true},
+          {q: value, limit: predictiveLimit, predictive: true},
           {method: 'GET', action: searchEndpoint},
         );
       },

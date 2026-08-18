@@ -17,12 +17,10 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import navStyles from '~/styles/nav.css?url';
+import desktopHeaderStyles from '~/styles/desktop-header.css?url';
 import {PageLayout} from './components/PageLayout';
 import {getLocaleFromI18n} from '~/lib/locale';
-import {
-  SEO_DISABLED_ROBOTS_DIRECTIVE,
-  SEO_ENABLED,
-} from '~/lib/seo';
+import {SEO_DISABLED_ROBOTS_DIRECTIVE, SEO_ENABLED} from '~/lib/seo';
 
 export type RootLoader = typeof loader;
 
@@ -61,6 +59,7 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
 export function links() {
   return [
     {rel: 'stylesheet', href: navStyles},
+    {rel: 'stylesheet', href: desktopHeaderStyles},
     {
       rel: 'preconnect',
       href: 'https://cdn.shopify.com',
@@ -203,7 +202,11 @@ export default function App() {
     Boolean(data.consent.storefrontAccessToken);
 
   const renderedApp = hasAnalyticsConsentConfig ? (
-    <Analytics.Provider cart={data.cart} shop={data.shop} consent={data.consent}>
+    <Analytics.Provider
+      cart={data.cart}
+      shop={data.shop}
+      consent={data.consent}
+    >
       {appContent}
     </Analytics.Provider>
   ) : (

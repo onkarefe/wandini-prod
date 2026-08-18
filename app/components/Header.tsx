@@ -8,22 +8,21 @@ import React, {
   useId,
   useRef,
 } from 'react';
-import { Await, useAsyncValue } from 'react-router';
+import {Await, useAsyncValue} from 'react-router';
 import {
   type CartViewPayload,
   useAnalytics,
   useOptimisticCart,
 } from '@shopify/hydrogen';
-import type { CartApiQueryFragment, HeaderQuery } from 'storefrontapi.generated';
-import { useAside } from '~/components/Aside';
+import type {CartApiQueryFragment, HeaderQuery} from 'storefrontapi.generated';
+import {useAside} from '~/components/Aside';
+import {DesktopHeader} from '~/components/DesktopHeader';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {Link, NavLink} from '~/lib/i18n-router';
-
-import '~/styles/nav.css';
 
 type FieldRecord = {
   key?: string | null;
@@ -86,7 +85,10 @@ function normalizeToHandleLike(value: string) {
     .replace(/^-|-$/g, '');
 }
 
-function buildFilterUrl(baseCollectionHandle: string, taxonomyValueGid: string) {
+function buildFilterUrl(
+  baseCollectionHandle: string,
+  taxonomyValueGid: string,
+) {
   const payload = {
     taxonomyMetafield: {
       namespace: 'shopify',
@@ -109,41 +111,18 @@ type HeaderProps = {
   publicStoreDomain: string;
 };
 
-export function Header({ header, cart, isLoggedIn, publicStoreDomain }: HeaderProps) {
-  const shop = header?.shop ?? null;
-
+export function Header({
+  header,
+  cart,
+  publicStoreDomain,
+}: HeaderProps) {
   return (
-    <header className="h-header">
-      <div className="container mx-auto headerContainer">
-        <div className="headerRow">
-          <div className="h-headerLeft">
-            <NavLink to="/" className="h-logoLink" aria-label="Go to homepage">
-              {shop?.brand?.logo?.image?.url ? (
-                <img
-                  src={shop.brand.logo.image.url}
-                  alt={shop?.name || 'Logo'}
-                  className="h-logoImg"
-                />
-              ) : (
-                <span className="h-logoText">{shop?.name || 'Store'}</span>
-              )}
-            </NavLink>
-
-            <HeaderSearch />
-          </div>
-
-          <div className="h-headerCenter">
-            <HeaderMenu header={header} publicStoreDomain={publicStoreDomain} />
-          </div>
-
-          <div className="h-headerRight">
-            <HeaderCtas
-              isLoggedIn={isLoggedIn}
-              cart={cart}
-            />
-          </div>
-        </div>
-      </div>
+    <header className="h-header dh-headerHost">
+      <DesktopHeader
+        header={header}
+        cart={cart}
+        publicStoreDomain={publicStoreDomain}
+      />
     </header>
   );
 }
@@ -180,31 +159,68 @@ function HeaderSearch() {
     };
   }, [closeResults, isOpen]);
 
+  function handleResultsKeyDown(event: React.KeyboardEvent<HTMLFormElement>) {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+
+    const input =
+      containerRef.current?.querySelector<HTMLInputElement>('input');
+    const resultLinks = Array.from(
+      containerRef.current?.querySelectorAll<HTMLAnchorElement>(
+        '.h-desktopSearchResults a[href]',
+      ) ?? [],
+    );
+
+    if (!input || resultLinks.length === 0) return;
+
+    event.preventDefault();
+    const currentIndex = resultLinks.indexOf(
+      document.activeElement as HTMLAnchorElement,
+    );
+
+    if (event.key === 'ArrowDown') {
+      resultLinks[Math.min(currentIndex + 1, resultLinks.length - 1)]?.focus();
+      return;
+    }
+
+    if (currentIndex <= 0) {
+      input.focus();
+      return;
+    }
+
+    resultLinks[currentIndex - 1]?.focus();
+  }
+
   return (
     <div className="h-desktopSearchWrap" ref={containerRef}>
       <SearchFormPredictive
         className="h-desktopSearch"
         fetcherKey="header-search"
+        onKeyDown={handleResultsKeyDown}
         onSearchSubmit={closeResults}
         role="search"
         aria-label="Produktsuche"
       >
         {({fetchResults, inputRef}) => (
           <>
-            <svg
-              className="h-desktopSearchIcon"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
+            <button
+              className="h-desktopSearchSubmit"
+              type="submit"
+              aria-label="Suche starten"
             >
-              <circle cx="11" cy="11" r="6.5" />
-              <path d="m16 16 4 4" />
-            </svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="10.8" cy="10.8" r="6.4" />
+                <path d="m15.6 15.6 4.1 4.1" />
+              </svg>
+            </button>
 
             <label className="h-visuallyHidden" htmlFor="header-search-query">
               Produkte suchen
             </label>
             <input
               autoComplete="off"
+              aria-autocomplete="list"
+              aria-controls="header-search-results"
+              aria-expanded={isOpen}
               data-header-predictive-search-input="true"
               enterKeyHint="search"
               id="header-search-query"
@@ -220,14 +236,9 @@ function HeaderSearch() {
               }}
               placeholder="Produkte suchen ..."
               ref={inputRef}
+              role="combobox"
               type="search"
             />
-
-            <button type="submit" aria-label="Suche starten">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="m9 6 6 6-6 6" />
-              </svg>
-            </button>
           </>
         )}
       </SearchFormPredictive>
@@ -240,7 +251,7 @@ function HeaderSearch() {
         {({items, total, term, state, closeSearch}) => {
           if (!isOpen || !term.current) return null;
 
-          const {articles, collections, pages, products, queries} = items;
+          const {collections, products, queries} = items;
           const searchUrl = `${SEARCH_ENDPOINT}?${new URLSearchParams({
             q: term.current,
           }).toString()}`;
@@ -248,6 +259,7 @@ function HeaderSearch() {
           return (
             <div
               className="h-desktopSearchResults"
+              id="header-search-results"
               aria-live="polite"
               aria-label="Suchvorschläge"
             >
@@ -263,26 +275,20 @@ function HeaderSearch() {
                 </div>
               ) : total ? (
                 <div className="h-desktopSearchResultsList">
-                  <SearchResultsPredictive.Products
-                    products={products}
-                    closeSearch={closeSearch}
-                    term={term}
-                  />
-                  <SearchResultsPredictive.Collections
-                    collections={collections}
-                    closeSearch={closeSearch}
-                    term={term}
-                  />
-                  <SearchResultsPredictive.Pages
-                    pages={pages}
-                    closeSearch={closeSearch}
-                    term={term}
-                  />
-                  <SearchResultsPredictive.Articles
-                    articles={articles}
-                    closeSearch={closeSearch}
-                    term={term}
-                  />
+                  <div className="h-desktopProductResults">
+                    <SearchResultsPredictive.Products
+                      products={products}
+                      closeSearch={closeSearch}
+                      term={term}
+                    />
+                  </div>
+                  <div className="h-desktopCollectionResults">
+                    <SearchResultsPredictive.Collections
+                      collections={collections}
+                      closeSearch={closeSearch}
+                      term={term}
+                    />
+                  </div>
 
                   <Link
                     className="h-desktopSearchAll"
@@ -305,6 +311,46 @@ function HeaderSearch() {
         }}
       </SearchResultsPredictive>
     </div>
+  );
+}
+
+function HeaderLogo({shop}: {shop: HeaderQuery['shop'] | null}) {
+  return (
+    <NavLink to="/" className="h-logoLink wh-logo" aria-label="Zur Startseite">
+      {shop?.brand?.logo?.image?.url ? (
+        <img
+          src={shop.brand.logo.image.url}
+          alt={shop?.name || 'Logo'}
+          className="h-logoImg"
+        />
+      ) : (
+        <span className="h-logoText">{shop?.name || 'Store'}</span>
+      )}
+    </NavLink>
+  );
+}
+
+function DesktopHeaderActions({
+  cart,
+}: {
+  cart: Promise<CartApiQueryFragment | null>;
+}) {
+  return (
+    <nav className="wh-actions" aria-label="Schnellzugriff">
+      <NavLink
+        to="/account/favorites"
+        className="wh-actionButton"
+        aria-label="Favoriten"
+      >
+        <span className="wh-actionIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 20.75l7.78-7.3 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z" />
+          </svg>
+        </span>
+        <span className="wh-actionLabel">Favoriten</span>
+      </NavLink>
+      <CartToggle cart={cart} showLabel />
+    </nav>
   );
 }
 
@@ -335,7 +381,8 @@ export function HeaderMenu({
 
         const host = url.hostname;
         const isShopifyDomain =
-          (!primaryHost || host === primaryHost) ||
+          !primaryHost ||
+          host === primaryHost ||
           host === publicHost ||
           host.endsWith('.myshopify.com');
 
@@ -367,11 +414,48 @@ export function HeaderMenu({
   const [openId, setOpenId] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileOpenKey, setMobileOpenKey] = useState<string | null>(null);
+  const megaHoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const closeMobile = useCallback(() => {
     setMobileOpen(false);
     setMobileOpenKey(null);
   }, []);
+
+  const clearMegaHoverTimer = useCallback(() => {
+    if (!megaHoverTimer.current) return;
+    clearTimeout(megaHoverTimer.current);
+    megaHoverTimer.current = null;
+  }, []);
+
+  const scheduleMegaOpen = useCallback(
+    (key: string) => {
+      clearMegaHoverTimer();
+      megaHoverTimer.current = setTimeout(() => setOpenId(key), 110);
+    },
+    [clearMegaHoverTimer],
+  );
+
+  const scheduleMegaClose = useCallback(
+    (key: string) => {
+      clearMegaHoverTimer();
+      megaHoverTimer.current = setTimeout(() => {
+        setOpenId((current) => (current === key ? null : current));
+      }, 130);
+    },
+    [clearMegaHoverTimer],
+  );
+
+  useEffect(() => {
+    function closeDesktopMenu(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpenId(null);
+    }
+
+    document.addEventListener('keydown', closeDesktopMenu);
+    return () => {
+      document.removeEventListener('keydown', closeDesktopMenu);
+      clearMegaHoverTimer();
+    };
+  }, [clearMegaHoverTimer]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -394,7 +478,9 @@ export function HeaderMenu({
     const href: string = item?._href || '/';
     const byUrlHandle = collectionHandleFromPath(href);
     const byTitleHandle = normalizeToHandleLike(item?.title || '');
-    const triggerCandidates = [byUrlHandle, byTitleHandle].filter(Boolean) as string[];
+    const triggerCandidates = [byUrlHandle, byTitleHandle].filter(
+      Boolean,
+    ) as string[];
 
     for (const t of triggerCandidates) {
       const found = megaByTrigger.get(t);
@@ -422,19 +508,39 @@ export function HeaderMenu({
             <div
               key={key}
               className="h-navItemWrap"
-              onMouseEnter={() => hasMega && setOpenId(String(key))}
-              onMouseLeave={() =>
-                hasMega && setOpenId((cur) => (cur === String(key) ? null : cur))
-              }
+              onBlur={(event) => {
+                if (
+                  hasMega &&
+                  !event.currentTarget.contains(event.relatedTarget)
+                ) {
+                  setOpenId(null);
+                }
+              }}
+              onFocus={() => hasMega && setOpenId(String(key))}
+              onMouseEnter={() => hasMega && scheduleMegaOpen(String(key))}
+              onMouseLeave={() => hasMega && scheduleMegaClose(String(key))}
             >
-              <NavLink to={href} className="h-navLink">
-                {item?.title || 'Link'}
+              <NavLink
+                to={href}
+                className={({isActive}) =>
+                  `h-navLink${isActive ? ' is-active' : ''}`
+                }
+                aria-expanded={hasMega ? openId === String(key) : undefined}
+              >
+                <span>{item?.title || 'Link'}</span>
+                {hasMega ? (
+                  <svg
+                    className="h-navChevron"
+                    viewBox="0 0 12 8"
+                    aria-hidden="true"
+                  >
+                    <path d="m1 1.5 5 5 5-5" />
+                  </svg>
+                ) : null}
               </NavLink>
 
               {hasMega && openId === String(key) ? (
-                <MegaMenuPanel
-                  mega={mega}
-                />
+                <MegaMenuPanel mega={mega} />
               ) : null}
             </div>
           );
@@ -454,7 +560,12 @@ export function HeaderMenu({
       </div>
 
       {mobileOpen ? (
-        <div className="h-mobileOverlay" role="dialog" aria-modal="true" aria-label="Mobile menu">
+        <div
+          className="h-mobileOverlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile menu"
+        >
           <button
             type="button"
             className="h-mobileOverlayBackdrop"
@@ -503,7 +614,11 @@ export function HeaderMenu({
                   if (!hasMega) {
                     return (
                       <li key={key} className="h-mobileItem">
-                        <NavLink to={href} className="h-mobileNavLink" onClick={closeMobile}>
+                        <NavLink
+                          to={href}
+                          className="h-mobileNavLink"
+                          onClick={closeMobile}
+                        >
                           {label}
                         </NavLink>
                       </li>
@@ -527,10 +642,16 @@ export function HeaderMenu({
                         <button
                           type="button"
                           className="h-mobileAccordionBtn"
-                          onClick={() => setMobileOpenKey((cur) => (cur === key ? null : key))}
+                          onClick={() =>
+                            setMobileOpenKey((cur) =>
+                              cur === key ? null : key,
+                            )
+                          }
                           aria-expanded={isOpen}
                           aria-controls={`h-mobile-sub-${key}`}
-                          aria-label={isOpen ? `Collapse ${label}` : `Expand ${label}`}
+                          aria-label={
+                            isOpen ? `Collapse ${label}` : `Expand ${label}`
+                          }
                         >
                           <span
                             className="h-mobileAccordionIcon"
@@ -538,14 +659,18 @@ export function HeaderMenu({
                             style={{
                               display: 'inline-flex',
                               transition: 'transform 0.2s ease',
-                              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                              transform: isOpen
+                                ? 'rotate(180deg)'
+                                : 'rotate(0deg)',
                             }}
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 640 640"
+                            >
                               <path d="M297.4 470.6C309.9 483.1 330.2 483.1 342.7 470.6L534.7 278.6C547.2 266.1 547.2 245.8 534.7 233.3C522.2 220.8 501.9 220.8 489.4 233.3L320 402.7L150.6 233.4C138.1 220.9 117.8 220.9 105.3 233.4C92.8 245.9 92.8 266.2 105.3 278.7L297.3 470.7z" />
                             </svg>
                           </span>
-
                         </button>
                       </div>
 
@@ -571,25 +696,27 @@ export function HeaderMenu({
   );
 }
 
-function MegaMenuPanel({
-  mega,
-}: {
-  mega: MegaMenuNode;
-}) {
+function MegaMenuPanel({mega}: {mega: MegaMenuNode}) {
   const baseCollection = getRef<CollectionReference>(mega, 'base_collection');
   const baseHandle = baseCollection?.handle;
-  const columns = getRefs<FieldContainer & {id?: string | null}>(mega, 'columns');
+  const columns = getRefs<FieldContainer & {id?: string | null}>(
+    mega,
+    'columns',
+  );
 
   if (!baseHandle || columns.length === 0) return null;
 
   return (
     <div className="h-megaWrap">
       <div className="h-megaShell">
-        <div className="h-megaInner">
+        <div className="container mx-auto h-megaInner">
           <div className="h-megaGrid">
             {columns.map((col) => {
               const title = getValue(col, 'title') || '';
-              const items = getRefs<FieldContainer & {id?: string | null}>(col, 'items');
+              const items = getRefs<FieldContainer & {id?: string | null}>(
+                col,
+                'items',
+              );
 
               return (
                 <div key={col?.id || title} className="h-megaCol">
@@ -607,15 +734,18 @@ function MegaMenuPanel({
                       } else if (action === 'filter_preset') {
                         const fp = getRef<FieldContainer>(it, 'filter_preset');
                         const gid =
-                          fp?.fields?.find((field) => field.key === 'taxonomy_value_gid')?.value ??
-                          null;
+                          fp?.fields?.find(
+                            (field) => field.key === 'taxonomy_value_gid',
+                          )?.value ?? null;
                         if (gid) href = buildFilterUrl(baseHandle, gid);
                       } else if (action === 'sort_preset') {
                         const sp = getRef<FieldContainer>(it, 'sort_preset');
                         const sortValue =
-                          sp?.fields?.find((field) => field.key === 'sort_value')?.value ??
-                          null;
-                        if (sortValue) href = buildSortUrl(baseHandle, sortValue);
+                          sp?.fields?.find(
+                            (field) => field.key === 'sort_value',
+                          )?.value ?? null;
+                        if (sortValue)
+                          href = buildSortUrl(baseHandle, sortValue);
                       }
 
                       return (
@@ -648,7 +778,10 @@ function MobileMegaContent({
 }) {
   const baseCollection = getRef<CollectionReference>(mega, 'base_collection');
   const baseHandle = baseCollection?.handle;
-  const columns = getRefs<FieldContainer & {id?: string | null}>(mega, 'columns');
+  const columns = getRefs<FieldContainer & {id?: string | null}>(
+    mega,
+    'columns',
+  );
 
   if (!baseHandle || columns.length === 0) {
     return (
@@ -668,7 +801,10 @@ function MobileMegaContent({
     <div className="h-mobileMega">
       {columns.map((col) => {
         const title = getValue(col, 'title') || '';
-        const items = getRefs<FieldContainer & {id?: string | null}>(col, 'items');
+        const items = getRefs<FieldContainer & {id?: string | null}>(
+          col,
+          'items',
+        );
 
         return (
           <div key={col?.id || title} className="h-mobileMegaCol">
@@ -687,19 +823,25 @@ function MobileMegaContent({
                 } else if (action === 'filter_preset') {
                   const fp = getRef<FieldContainer>(it, 'filter_preset');
                   const gid =
-                    fp?.fields?.find((field) => field.key === 'taxonomy_value_gid')?.value ??
-                    null;
+                    fp?.fields?.find(
+                      (field) => field.key === 'taxonomy_value_gid',
+                    )?.value ?? null;
                   if (gid) href = buildFilterUrl(baseHandle, gid);
                 } else if (action === 'sort_preset') {
                   const sp = getRef<FieldContainer>(it, 'sort_preset');
                   const sortValue =
-                    sp?.fields?.find((field) => field.key === 'sort_value')?.value ?? null;
+                    sp?.fields?.find((field) => field.key === 'sort_value')
+                      ?.value ?? null;
                   if (sortValue) href = buildSortUrl(baseHandle, sortValue);
                 }
 
                 return (
                   <li key={it?.id || label} className="h-mobileMegaItem">
-                    <NavLink to={href} className="h-mobileMegaLink" onClick={onNavigate}>
+                    <NavLink
+                      to={href}
+                      className="h-mobileMegaLink"
+                      onClick={onNavigate}
+                    >
                       {label}
                     </NavLink>
                   </li>
@@ -726,7 +868,11 @@ function HeaderCtas({
         <Suspense fallback={null}>
           <Await resolve={isLoggedIn} errorElement={null}>
             {() => (
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" aria-hidden="true">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 640 640"
+                aria-hidden="true"
+              >
                 <path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z" />
               </svg>
             )}
@@ -742,7 +888,7 @@ function HeaderCtas({
 }
 
 function SearchToggle() {
-  const { open } = useAside();
+  const {open} = useAside();
 
   return (
     <button
@@ -751,40 +897,55 @@ function SearchToggle() {
       onClick={() => open('search')}
       aria-label="Suchen"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 512 512"
+        aria-hidden="true"
+      >
         <path d="M416 208c0 45.9-14.9 88.3-40.1 122.7l108.7 108.7c9.4 9.4 9.4 24.6 0 33.9l-11.3 11.3c-9.4 9.4-24.6 9.4-33.9 0L330.7 375.9C296.3 401.1 253.9 416 208 416 93.1 416 0 322.9 0 208S93.1 0 208 0s208 93.1 208 208zm-208 144c79.5 0 144-64.5 144-144S287.5 64 208 64 64 128.5 64 208s64.5 144 144 144z" />
       </svg>
     </button>
   );
 }
 
-function CartToggle({ cart }: { cart: Promise<CartApiQueryFragment | null> }) {
+function CartToggle({
+  cart,
+  showLabel = false,
+}: {
+  cart: Promise<CartApiQueryFragment | null>;
+  showLabel?: boolean;
+}) {
   return (
-    <Suspense fallback={<CartBadge count={null} />}>
+    <Suspense fallback={<CartBadge count={null} showLabel={showLabel} />}>
       <Await resolve={cart}>
-        <CartBanner />
+        <CartBanner showLabel={showLabel} />
       </Await>
     </Suspense>
   );
 }
 
-function CartBanner() {
+function CartBanner({showLabel}: {showLabel: boolean}) {
   const originalCart = useAsyncValue() as CartApiQueryFragment | null;
   const cart = useOptimisticCart(originalCart);
 
-  return <CartBadge count={cart?.totalQuantity ?? 0} />;
+  return <CartBadge count={cart?.totalQuantity ?? 0} showLabel={showLabel} />;
 }
 
-
-function CartBadge({ count }: { count: number | null }) {
-  const { open } = useAside();
-  const { publish, shop, cart, prevCart } = useAnalytics();
+function CartBadge({
+  count,
+  showLabel = false,
+}: {
+  count: number | null;
+  showLabel?: boolean;
+}) {
+  const {open} = useAside();
+  const {publish, shop, cart, prevCart} = useAnalytics();
 
   return (
     <a
       href="/cart"
       className="h-cartBox"
-      aria-label="Cart"
+      aria-label="Warenkorb"
       onClick={(e) => {
         e.preventDefault();
         open('cart');
@@ -796,11 +957,30 @@ function CartBadge({ count }: { count: number | null }) {
         } as CartViewPayload);
       }}
     >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" aria-hidden="true">
-        <path d="M24 48C10.7 48 0 58.7 0 72C0 85.3 10.7 96 24 96L69.3 96C73.2 96 76.5 98.8 77.2 102.6L129.3 388.9C135.5 423.1 165.3 448 200.1 448L456 448C469.3 448 480 437.3 480 424C480 410.7 469.3 400 456 400L200.1 400C188.5 400 178.6 391.7 176.5 380.3L171.4 352L475 352C505.8 352 532.2 330.1 537.9 299.8L568.9 133.9C572.6 114.2 557.5 96 537.4 96L124.7 96L124.3 94C119.5 67.4 96.3 48 69.2 48L24 48zM208 576C234.5 576 256 554.5 256 528C256 501.5 234.5 480 208 480C181.5 480 160 501.5 160 528C160 554.5 181.5 576 208 576zM432 576C458.5 576 480 554.5 480 528C480 501.5 458.5 480 432 480C405.5 480 384 501.5 384 528C384 554.5 405.5 576 432 576z" />
-      </svg>
-
-      {count !== null && count > 0 ? <span className="h-cartCount">{count}</span> : null}
+      <span
+        className={
+          showLabel ? 'wh-actionIcon h-cartIconWrap' : 'h-cartIconWrap'
+        }
+      >
+        {showLabel ? (
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6.5 8.5h11l1 12h-13l1-12Z" />
+            <path d="M9 9V6.5a3 3 0 0 1 6 0V9" />
+          </svg>
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 640 640"
+            aria-hidden="true"
+          >
+            <path d="M24 48C10.7 48 0 58.7 0 72C0 85.3 10.7 96 24 96L69.3 96C73.2 96 76.5 98.8 77.2 102.6L129.3 388.9C135.5 423.1 165.3 448 200.1 448L456 448C469.3 448 480 437.3 480 424C480 410.7 469.3 400 456 400L200.1 400C188.5 400 178.6 391.7 176.5 380.3L171.4 352L475 352C505.8 352 532.2 330.1 537.9 299.8L568.9 133.9C572.6 114.2 557.5 96 537.4 96L124.7 96L124.3 94C119.5 67.4 96.3 48 69.2 48L24 48zM208 576C234.5 576 256 554.5 256 528C256 501.5 234.5 480 208 480C181.5 480 160 501.5 160 528C160 554.5 181.5 576 208 576zM432 576C458.5 576 480 554.5 480 528C480 501.5 458.5 480 432 480C405.5 480 384 501.5 384 528C384 554.5 405.5 576 432 576z" />
+          </svg>
+        )}
+        {count !== null && count > 0 ? (
+          <span className="h-cartCount">{count}</span>
+        ) : null}
+      </span>
+      {showLabel ? <span className="wh-actionLabel">Warenkorb</span> : null}
     </a>
   );
 }

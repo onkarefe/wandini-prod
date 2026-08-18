@@ -15,8 +15,12 @@
       rgba(255, 255, 255, 0) 42%
     );
   width: 100%;
-  height: calc(100vh - 57px);
-  height: calc(100svh - 57px);
+  height: calc(
+    100vh - var(--wandini-header-height, var(--header-height, 57px))
+  );
+  height: calc(
+    100svh - var(--wandini-header-height, var(--header-height, 57px))
+  );
   position: relative;
   overflow: hidden;
   display: flex;
@@ -46,14 +50,6 @@
   position: relative;
   color: white;
   font-family: 'Archivo', sans-serif;
-}
-
-.hero-st1,
-.hero-mainTitle,
-.hero-st2 {
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.7),
-    0 3px 12px rgba(0, 0, 0, 0.45);
 }
 
 .hero-st1,
@@ -95,6 +91,23 @@
 .defaultButton:hover {
   background-color: #777777;
   color: white;
+}
+
+@media (min-width: 1023.98px) {
+  .mainHeroDiv {
+    --hero-overlay: linear-gradient(
+      90deg,
+      rgb(8 8 8 / 48%) 0%,
+      rgb(8 8 8 / 36%) 18%,
+      rgb(8 8 8 / 18%) 36%,
+      rgb(8 8 8 / 6%) 49%,
+      transparent 62%
+    );
+  }
+
+  .hero-ContentContainer {
+    padding-inline: 24px;
+  }
 }
 
 /* uspbar */
@@ -885,8 +898,8 @@
         rgba(255, 255, 255, 0.1) 0%,
         rgba(255, 255, 255, 0) 44%
       );
-    height: calc(100vh - 89px);
-    height: calc(100svh - 89px);
+    height: calc(100vh - var(--wandini-header-height, 148px));
+    height: calc(100svh - var(--wandini-header-height, 148px));
     align-items: flex-end;
   }
 
