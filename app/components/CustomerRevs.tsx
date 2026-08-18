@@ -5,6 +5,7 @@ type CustomerReview = {
   id: string;
   customerName: string;
   customerComment: string;
+  commentTitle: string;
   image: {
     url: string;
     altText?: string;
@@ -174,6 +175,12 @@ export default function CustomerRevs({
                   ) : null}
 
                   <CustomerReviewStars rating={rating} />
+
+                  {review.commentTitle ? (
+                    <h3 className="customerReviewCard__commentTitle">
+                      {review.commentTitle}
+                    </h3>
+                  ) : null}
 
                   {review.customerComment ? (
                     <p className="customerReviewCard__comment">

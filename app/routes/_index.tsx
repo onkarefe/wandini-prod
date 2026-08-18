@@ -513,6 +513,9 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const customerComments = safeJsonArray(
     customerReviewsFieldMap.customer_comment?.value,
   );
+  const customerCommentTitles = safeJsonArray(
+    customerReviewsFieldMap.comment_title?.value,
+  );
   const customerImages =
     customerReviewsFieldMap.image?.references?.nodes?.filter(Boolean) ?? [];
   const customerStars = safeJsonUnknownArray(
@@ -521,6 +524,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const customerReviewCount = Math.max(
     customerNames.length,
     customerComments.length,
+    customerCommentTitles.length,
     customerImages.length,
     customerStars.length,
   );
@@ -529,6 +533,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       id: `customer-review-${index + 1}`,
       customerName: customerNames[index] ?? '',
       customerComment: customerComments[index] ?? '',
+      commentTitle: customerCommentTitles[index] ?? '',
       image:
         normalizeReferenceImage(
           customerImages[index],
@@ -540,6 +545,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       (review) =>
         review.customerName ||
         review.customerComment ||
+        review.commentTitle ||
         review.image ||
         review.stars,
     );
