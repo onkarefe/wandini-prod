@@ -11,7 +11,9 @@ import type {
 import { ProductItem } from '~/components/ProductItem';
 import HeroSection from '~/components/HeroSection';
 import UspBar from '~/components/UspBar';
-import AllProduts from '~/components/AllProduts';
+import AllProdutsNew, {
+  type BestsellerProduct,
+} from '~/components/AllProdutsNew';
 import CustomGrid, {type CustomGridItem} from '~/components/CustomGrid';
 import CustomOrder from '~/components/CustomOrder';
 import CustomerRevs from '~/components/CustomerRevs';
@@ -290,7 +292,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     { collections },
     heroRes,
     uspRes,
-    collectionSwiperRes,
+    bestsellerRes,
     customGridRes,
     stepByStepRes,
     customerReviewsRes,
@@ -298,7 +300,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     context.storefront.query(FEATURED_COLLECTION_QUERY),
     context.storefront.query(HERO_QUERY),
     context.storefront.query(USPBAR_QUERY),
-    context.storefront.query(COLLECTION_SWIPER_QUERY),
+    context.storefront.query(BESTSELLER_PRODUCTS_QUERY),
     context.storefront.query(CUSTOM_GRID_QUERY),
     context.storefront.query(STEP_BY_STEP_QUERY),
     context.storefront.query(CUSTOMER_REVIEWS_QUERY),
@@ -379,62 +381,10 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       }))
       : [];
 
-  // --- collection_swiper metaobject (parallel field lists)
-  const collectionSwiperNode = collectionSwiperRes?.metaobjects?.nodes?.[0];
-  const collectionSwiperFields = Array.isArray(collectionSwiperNode?.fields)
-    ? collectionSwiperNode.fields
-    : [];
-  const collectionSwiperFieldMap = Object.fromEntries(
-    collectionSwiperFields.map((field: any) => [field.key, field]),
-  );
-  const collectionSwiperSectionTitle =
-    collectionSwiperFieldMap.section_title?.value ?? 'All Products';
-  const collectionTitles = safeJsonArray(
-    collectionSwiperFieldMap.collection_title?.value,
-  );
-  const collectionSubtitles = safeJsonArray(
-    collectionSwiperFieldMap.collection_subtitle?.value,
-  );
-  const collectionImages =
-    collectionSwiperFieldMap.collection_image?.references?.nodes?.filter(
-      Boolean,
-    ) ?? [];
-  const collectionLinks =
-    collectionSwiperFieldMap.collection_link?.references?.nodes?.filter(
-      Boolean,
-    ) ?? [];
-  const collectionItemCount = Math.max(
-    collectionTitles.length,
-    collectionSubtitles.length,
-    collectionImages.length,
-    collectionLinks.length,
-  );
-  const collectionSwiperItems: Array<{
-    id: string;
-    title: string;
-    subtitle: string;
-    image: { url: string; altText?: string; width?: number; height?: number } | null;
-    link: string;
-  }> = Array.from({length: collectionItemCount})
-    .map((_, index) => {
-      const collection = collectionLinks[index];
-      const title = collectionTitles[index] ?? collection?.title ?? '';
-      const image = normalizeReferenceImage(collectionImages[index], title);
-
-      return {
-        id:
-          collection?.id ??
-          collectionImages[index]?.id ??
-          `collection-swiper-${index + 1}`,
-        title,
-        subtitle: collectionSubtitles[index] ?? '',
-        image,
-        link: collection?.handle
-          ? `/collections/${collection.handle}`
-          : '',
-      };
-    })
-    .filter((item) => item.title || item.subtitle || item.image || item.link);
+  const bestsellerCollection = bestsellerRes?.collection ?? null;
+  const bestsellerProducts: BestsellerProduct[] =
+    bestsellerCollection?.products.nodes ?? [];
+  const bestsellerSectionTitle = bestsellerCollection?.title ?? 'Bestseller';
 
   const customGridNode = customGridRes?.metaobjects?.nodes?.[0];
   const customGridFields = Array.isArray(customGridNode?.fields)
@@ -602,8 +552,8 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     featuredCollection: collections.nodes[0],
     uspItems,
     uspNode,
-    collectionSwiperItems,
-    collectionSwiperSectionTitle,
+    bestsellerProducts,
+    bestsellerSectionTitle,
     customGridItems,
     customGridSectionTitle,
     stepByStep,
@@ -664,9 +614,9 @@ export default function Homepage() {
         backgroundImage={data.hero.backgroundImage}
       />
       <UspBar items={data.uspItems} node={data.uspNode} />
-      <AllProduts
-        items={data.collectionSwiperItems ?? []}
-        sectionTitle={data.collectionSwiperSectionTitle}
+      <AllProdutsNew
+        products={data.bestsellerProducts ?? []}
+        sectionTitle={data.bestsellerSectionTitle}
       />
       <CustomGrid
         items={data.customGridItems ?? []}
@@ -791,35 +741,29 @@ const USPBAR_ICONS_QUERY = `#graphql
   }
 ` as const;
 
-const COLLECTION_SWIPER_QUERY = `#graphql
-  query CollectionSwiperHomepage {
-    metaobjects(type: "collection_swiper", first: 1) {
-      nodes {
-        id
-        handle
-        fields {
-          key
-          value
-          references(first: 20) {
+const BESTSELLER_PRODUCTS_QUERY = `#graphql
+  query BestsellerProductsHomepage {
+    collection(handle: "bestseller") {
+      id
+      title
+      products(first: 6) {
+        nodes {
+          id
+          handle
+          title
+          images(first: 2) {
             nodes {
-              ... on MediaImage {
-                id
-                image {
-                  url
-                  altText
-                  width
-                  height
-                }
-              }
-              ... on GenericFile {
-                id
-                url
-              }
-              ... on Collection {
-                id
-                handle
-                title
-              }
+              id
+              url
+              altText
+              width
+              height
+            }
+          }
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
             }
           }
         }

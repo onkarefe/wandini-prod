@@ -647,35 +647,35 @@ export type UspBarIconsQuery = {
   >;
 };
 
-export type CollectionSwiperHomepageQueryVariables = StorefrontAPI.Exact<{
+export type BestsellerProductsHomepageQueryVariables = StorefrontAPI.Exact<{
   [key: string]: never;
 }>;
 
-export type CollectionSwiperHomepageQuery = {
-  metaobjects: {
-    nodes: Array<
-      Pick<StorefrontAPI.Metaobject, 'id' | 'handle'> & {
-        fields: Array<
-          Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'> & {
-            references?: StorefrontAPI.Maybe<{
+export type BestsellerProductsHomepageQuery = {
+  collection?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Collection, 'id' | 'title'> & {
+      products: {
+        nodes: Array<
+          Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
+            images: {
               nodes: Array<
-                | Pick<StorefrontAPI.Collection, 'id' | 'handle' | 'title'>
-                | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
-                | (Pick<StorefrontAPI.MediaImage, 'id'> & {
-                    image?: StorefrontAPI.Maybe<
-                      Pick<
-                        StorefrontAPI.Image,
-                        'url' | 'altText' | 'width' | 'height'
-                      >
-                    >;
-                  })
+                Pick<
+                  StorefrontAPI.Image,
+                  'id' | 'url' | 'altText' | 'width' | 'height'
+                >
               >;
-            }>;
+            };
+            priceRange: {
+              minVariantPrice: Pick<
+                StorefrontAPI.MoneyV2,
+                'amount' | 'currencyCode'
+              >;
+            };
           }
         >;
-      }
-    >;
-  };
+      };
+    }
+  >;
 };
 
 export type CustomGridMetaobjectsQueryVariables = StorefrontAPI.Exact<{
@@ -2223,9 +2223,9 @@ interface GeneratedQueryTypes {
     return: UspBarIconsQuery;
     variables: UspBarIconsQueryVariables;
   };
-  '#graphql\n  query CollectionSwiperHomepage {\n    metaobjects(type: "collection_swiper", first: 1) {\n      nodes {\n        id\n        handle\n        fields {\n          key\n          value\n          references(first: 20) {\n            nodes {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                id\n                url\n              }\n              ... on Collection {\n                id\n                handle\n                title\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
-    return: CollectionSwiperHomepageQuery;
-    variables: CollectionSwiperHomepageQueryVariables;
+  '#graphql\n  query BestsellerProductsHomepage {\n    collection(handle: "bestseller") {\n      id\n      title\n      products(first: 6) {\n        nodes {\n          id\n          handle\n          title\n          images(first: 2) {\n            nodes {\n              id\n              url\n              altText\n              width\n              height\n            }\n          }\n          priceRange {\n            minVariantPrice {\n              amount\n              currencyCode\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+    return: BestsellerProductsHomepageQuery;
+    variables: BestsellerProductsHomepageQueryVariables;
   };
   '#graphql\n  query CustomGridMetaobjects {\n    metaobjects(type: "custom_grid", first: 1) {\n      nodes {\n        id\n        handle\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n            ... on Collection {\n              id\n              handle\n              title\n            }\n          }\n          references(first: 6) {\n            nodes {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                id\n                url\n              }\n              ... on Collection {\n                id\n                handle\n                title\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: CustomGridMetaobjectsQuery;
