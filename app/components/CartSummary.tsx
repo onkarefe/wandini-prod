@@ -1,14 +1,21 @@
-import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import type {CartApiQueryFragment} from 'storefrontapi.generated';
+import type {MoneyV2} from '@shopify/hydrogen/storefront-api-types';
 import type { CartLayout } from '~/components/CartMain';
 import { CartForm, Money, type OptimisticCart } from '@shopify/hydrogen';
 import { useEffect, useRef, useState } from 'react';
-import { useFetcher } from 'react-router';
+import {useFetcher} from 'react-router';
 import type { FetcherWithComponents } from 'react-router';
 import {
   getGiftCardStorageKey,
   getPersistedGiftCardCodes,
   rememberGiftCardCode,
 } from '~/lib/cartGiftCardCodeStorage';
+import {
+  calculateCartDisplaySubtotal,
+  hasConfiguredCartLines,
+  type CartLinePricingLike,
+} from '~/lib/cart-pricing';
+import {usePrefixPathWithLocale} from '~/lib/i18n-router';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -18,14 +25,20 @@ type CartSummaryProps = {
 export function CartSummary({ cart, layout }: CartSummaryProps) {
   const className =
     layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
+  const cartPath = usePrefixPathWithLocale('/cart');
+  const lines = (cart?.lines?.nodes ?? []) as unknown as CartLinePricingLike[];
+  const hasConfiguredLines = hasConfiguredCartLines(lines);
+  const subtotal = hasConfiguredLines
+    ? calculateCartDisplaySubtotal(lines)
+    : cart?.cost?.subtotalAmount;
 
   return (
     <div aria-labelledby="cart-summary" className={className}>
       <dl className="cart-subtotal">
         <dt>Subtotal</dt>
         <dd>
-          {cart?.cost?.subtotalAmount?.amount ? (
-            <Money data={cart?.cost?.subtotalAmount} />
+          {subtotal?.amount ? (
+            <Money data={subtotal as MoneyV2} />
           ) : (
             '-'
           )}
@@ -36,17 +49,15 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
         cartId={cart?.id}
         giftCardCodes={cart?.appliedGiftCards}
       />
-      <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
+      <CartCheckoutActions cartPath={cartPath} />
     </div>
   );
 }
 
-function CartCheckoutActions({ checkoutUrl }: { checkoutUrl?: string }) {
-  if (!checkoutUrl) return null;
-
+function CartCheckoutActions({cartPath}: {cartPath: string}) {
   return (
     <div>
-      <a href={checkoutUrl} target="_self">
+      <a href={cartPath} target="_self">
         <p>Continue to Checkout &rarr;</p>
       </a>
       <br />

@@ -478,6 +478,9 @@
   font-weight: 650;
   text-decoration: none;
   transition: background-color 150ms ease;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
 .order-summary__checkout:hover {

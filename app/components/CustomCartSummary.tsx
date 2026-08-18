@@ -1,8 +1,15 @@
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useEffect, useRef, useState, type ReactNode} from 'react';
-import {useFetcher, type FetcherWithComponents} from 'react-router';
+import {Form, useFetcher, type FetcherWithComponents} from 'react-router';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {CartLayout} from '~/components/CartMain';
+import {
+  calculateCartDisplaySubtotal,
+  hasConfiguredCartLines,
+  type CartLinePricingLike,
+} from '~/lib/cart-pricing';
+import type {ConfiguredMoney} from '~/lib/configurator-pricing';
+import {usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {
   getGiftCardStorageKey,
   getPersistedGiftCardCodes,
@@ -12,6 +19,12 @@ import {
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
   layout: CartLayout;
+  pricingQuote?: {
+    subtotalAmount: ConfiguredMoney;
+    totalAmount: ConfiguredMoney;
+    discountCodes: string[];
+  } | null;
+  checkoutMode: 'native' | 'draft' | 'blocked';
 };
 
 type CartFetcher = FetcherWithComponents<unknown>;
@@ -22,8 +35,27 @@ function hasErrors(data: unknown) {
   return Array.isArray(errors) ? errors.length > 0 : Boolean(errors);
 }
 
-export function CartSummary({cart, layout}: CartSummaryProps) {
+export function CartSummary({
+  cart,
+  layout,
+  pricingQuote,
+  checkoutMode,
+}: CartSummaryProps) {
   const quantity = cart?.totalQuantity ?? 0;
+  const checkoutPath = usePrefixPathWithLocale('/checkout');
+  const lines = (cart?.lines?.nodes ?? []) as unknown as CartLinePricingLike[];
+  const hasConfiguredLines = hasConfiguredCartLines(lines);
+  const configuredSubtotal = hasConfiguredLines
+    ? calculateCartDisplaySubtotal(lines)
+    : null;
+  const subtotalAmount =
+    pricingQuote?.subtotalAmount ??
+    configuredSubtotal ??
+    cart?.cost?.subtotalAmount;
+  const totalAmount =
+    pricingQuote?.totalAmount ??
+    configuredSubtotal ??
+    cart?.cost?.totalAmount;
 
   return (
     <section
@@ -39,8 +71,14 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
         <div>
           <dt>Zwischensumme</dt>
           <dd>
-            {cart?.cost?.subtotalAmount?.amount ? (
-              <Money data={cart.cost.subtotalAmount} />
+            {subtotalAmount?.amount ? (
+              <Money
+                data={
+                  subtotalAmount as NonNullable<
+                    CartApiQueryFragment['cost']['subtotalAmount']
+                  >
+                }
+              />
             ) : (
               '–'
             )}
@@ -53,8 +91,14 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
         <div className="order-summary__total">
           <dt>Gesamtsumme</dt>
           <dd>
-            {cart?.cost?.totalAmount?.amount ? (
-              <Money data={cart.cost.totalAmount} />
+            {totalAmount?.amount ? (
+              <Money
+                data={
+                  totalAmount as NonNullable<
+                    CartApiQueryFragment['cost']['totalAmount']
+                  >
+                }
+              />
             ) : (
               '–'
             )}
@@ -63,30 +107,57 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
       </dl>
 
       <div className="order-summary__codes">
-        <DiscountCode discountCodes={cart?.discountCodes} />
+        <DiscountCode
+          discountCodes={cart?.discountCodes}
+          validatedCodes={pricingQuote?.discountCodes}
+        />
         <GiftCard cartId={cart?.id} giftCardCodes={cart?.appliedGiftCards} />
       </div>
 
-      {cart?.checkoutUrl ? (
+      {checkoutMode === 'draft' ? (
+        <>
+          {cart?.appliedGiftCards?.length ? (
+            <p className="order-summary__error">
+              Geschenkkarten müssen im Shopify Checkout erneut eingegeben werden.
+            </p>
+          ) : null}
+          <Form method="post" action={checkoutPath}>
+            <button className="order-summary__checkout" type="submit">
+              Zur Kasse
+            </button>
+          </Form>
+        </>
+      ) : checkoutMode === 'native' && cart?.checkoutUrl ? (
         <a className="order-summary__checkout" href={cart.checkoutUrl}>
           Zur Kasse
         </a>
-      ) : null}
+      ) : (
+        <p className="order-summary__error" role="alert">
+          Der Checkout ist für diesen Warenkorb derzeit nicht verfügbar. Bitte
+          prüfen Sie die Produktkonfiguration.
+        </p>
+      )}
     </section>
   );
 }
 
 function DiscountCode({
   discountCodes,
+  validatedCodes,
 }: {
   discountCodes?: CartApiQueryFragment['discountCodes'];
+  validatedCodes?: string[];
 }) {
-  const appliedCodes =
+  const appliedCodes = validatedCodes ??
     discountCodes?.filter(({applicable}) => applicable).map(({code}) => code) ??
     [];
-  const hasInvalidCode = Boolean(
-    discountCodes?.some(({applicable}) => !applicable),
-  );
+  const hasInvalidCode = validatedCodes
+    ? Boolean(
+        discountCodes?.some(
+          ({code}) => !validatedCodes.includes(code),
+        ),
+      )
+    : Boolean(discountCodes?.some(({applicable}) => !applicable));
 
   return (
     <div className="order-summary__code-group">

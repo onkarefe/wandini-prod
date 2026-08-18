@@ -18,6 +18,8 @@ type SearchFormPredictiveChildren = (args: {
 
 type SearchFormPredictiveProps = Omit<FormProps, 'children'> & {
   children: SearchFormPredictiveChildren | null;
+  fetcherKey?: string;
+  onSearchSubmit?: () => void;
 };
 
 export const SEARCH_ENDPOINT = '/search';
@@ -28,9 +30,11 @@ export const SEARCH_ENDPOINT = '/search';
 export function SearchFormPredictive({
   children,
   className = 'predictive-search-form customAsideSearchBox',
+  fetcherKey = 'search',
+  onSearchSubmit,
   ...props
 }: SearchFormPredictiveProps) {
-  const fetcher = useFetcher<PredictiveSearchReturn>({key: 'search'});
+  const fetcher = useFetcher<PredictiveSearchReturn>({key: fetcherKey});
   const inputRef = useRef<HTMLInputElement | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
@@ -64,6 +68,7 @@ export function SearchFormPredictive({
     inputRef.current?.blur();
     void navigate(getSearchUrl(term));
     aside.close();
+    onSearchSubmit?.();
   }
 
   /** Fetch search results based on the input value */

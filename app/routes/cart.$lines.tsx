@@ -2,6 +2,10 @@ import {Form, redirect, useLoaderData, useLocation} from 'react-router';
 import type {Route} from './+types/cart.$lines';
 import {redirectToLocalePath} from '~/lib/locale';
 import {Link} from '~/lib/i18n-router';
+import {
+  DynamicPricingError,
+  validateCartLineInputsForAdd,
+} from '~/lib/dynamic-pricing.server';
 
 type CartCheckoutConfirmation = {
   discountCode: string | null;
@@ -87,6 +91,18 @@ export async function action({request, context, params}: Route.ActionArgs) {
   const searchParams = new URLSearchParams(url.search);
   const discount = searchParams.get('discount');
   const discountArray = discount ? [discount] : [];
+
+  try {
+    await validateCartLineInputsForAdd(linesMap, context.env);
+  } catch (error) {
+    console.error('Cart permalink validation failed.', {
+      code:
+        error instanceof DynamicPricingError ? error.code : 'UNEXPECTED_ERROR',
+    });
+    throw new Response('This cart link contains an invalid product configuration.', {
+      status: 422,
+    });
+  }
 
   // create a cart
   const result = await cart.create({

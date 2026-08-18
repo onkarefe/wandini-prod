@@ -11,5 +11,7 @@ declare global {
     SHOPIFY_SHOP?: string;
     SHOPIFY_CLIENT_ID?: string;
     SHOPIFY_CLIENT_SECRET?: string;
+    SHOPIFY_PRICING_CLIENT_ID?: string;
+    SHOPIFY_PRICING_CLIENT_SECRET?: string;
   }
 }

@@ -1,5 +1,11 @@
 import {Suspense} from 'react';
-import {Await, useLoaderData, data, type HeadersFunction} from 'react-router';
+import {
+  Await,
+  useLoaderData,
+  useLocation,
+  data,
+  type HeadersFunction,
+} from 'react-router';
 import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm, useOptimisticCart} from '@shopify/hydrogen';
@@ -10,6 +16,13 @@ import {
 } from '~/components/CartUpsellCard';
 import {CartSummary as CustomCartSummary} from '~/components/CustomCartSummary';
 import {getLocaleFromRequest, prefixPathWithLocale} from '~/lib/locale';
+import {
+  DynamicPricingError,
+  getCartPricingEvaluation,
+  validateCartLineInputsForAdd,
+  type DynamicPricingCart,
+  type DynamicPricingCartLineInput,
+} from '~/lib/dynamic-pricing.server';
 import '~/styles/cart.css';
 
 const INTERNAL_REDIRECT_ORIGIN = 'https://wandini.internal';
@@ -78,6 +91,28 @@ export async function action({request, context}: Route.ActionArgs) {
 
   switch (action) {
     case CartForm.ACTIONS.LinesAdd:
+      try {
+        await validateCartLineInputsForAdd(
+          inputs.lines as DynamicPricingCartLineInput[],
+          context.env,
+        );
+      } catch (error) {
+        console.error('Cart line validation failed.', {
+          code:
+            error instanceof DynamicPricingError
+              ? error.code
+              : 'UNEXPECTED_ERROR',
+        });
+        return data(
+          {
+            cart: null,
+            errors: [{message: 'The selected product configuration is invalid.'}],
+            warnings: [],
+            analytics: {cartId: null},
+          },
+          {status: 422},
+        );
+      }
       result = await cart.addLines(inputs.lines);
       break;
     case CartForm.ACTIONS.LinesUpdate:
@@ -167,6 +202,7 @@ export async function action({request, context}: Route.ActionArgs) {
 
 export async function loader({context}: Route.LoaderArgs) {
   const {cart, storefront} = context;
+  const cartData = await cart.get();
   const cartUpsellProducts = storefront
     .query(CART_UPSELL_PRODUCTS_QUERY, {
       cache: storefront.CacheLong(),
@@ -204,14 +240,38 @@ export async function loader({context}: Route.LoaderArgs) {
       return [] as CartUpsellProduct[];
     });
 
+  let pricingQuote = null;
+  let checkoutMode: 'native' | 'draft' | 'blocked' = 'blocked';
+  if (cartData?.lines.nodes.length) {
+    try {
+      const evaluation = await getCartPricingEvaluation(
+        cartData as unknown as DynamicPricingCart,
+        context.env,
+      );
+      pricingQuote = evaluation.pricingQuote;
+      checkoutMode = evaluation.checkoutMode;
+    } catch (error) {
+      console.error('Cart pricing validation failed.', {
+        code:
+          error instanceof DynamicPricingError ? error.code : 'UNEXPECTED_ERROR',
+        retryable:
+          error instanceof DynamicPricingError ? error.retryable : false,
+      });
+    }
+  }
+
   return {
-    cart: await cart.get(),
+    cart: cartData,
     cartUpsellProducts,
+    pricingQuote,
+    checkoutMode,
   };
 }
 
 export default function Cart() {
-  const {cart, cartUpsellProducts} = useLoaderData<typeof loader>();
+  const {cart, cartUpsellProducts, pricingQuote, checkoutMode} =
+    useLoaderData<typeof loader>();
+  const location = useLocation();
   const optimisticCart = useOptimisticCart(cart);
   const cartHasItems = optimisticCart?.totalQuantity
     ? optimisticCart.totalQuantity > 0
@@ -223,13 +283,24 @@ export default function Cart() {
         <h1>Warenkorb</h1>
         <p>Überprüfen Sie Ihre Auswahl und schließen Sie Ihre Bestellung ab.</p>
       </header>
+      {new URLSearchParams(location.search).get('checkout') === 'error' ? (
+        <p className="order-summary__error" role="alert">
+          Der Checkout konnte nicht vorbereitet werden. Bitte prüfen Sie Ihre
+          Konfiguration und versuchen Sie es erneut.
+        </p>
+      ) : null}
       <div className="cartMainRow">
         <div className="cartLeft">
           <CustomCart layout="page" cart={cart} />
         </div>
         <div className="cartRight">
           {cartHasItems && (
-            <CustomCartSummary cart={optimisticCart} layout="page" />
+            <CustomCartSummary
+              cart={optimisticCart}
+              layout="page"
+              pricingQuote={pricingQuote}
+              checkoutMode={checkoutMode}
+            />
           )}
         </div>
         <div className="cartExtras">

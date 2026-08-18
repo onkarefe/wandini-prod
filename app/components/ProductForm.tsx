@@ -1,3 +1,4 @@
+import {useState} from 'react';
 import {useNavigate} from 'react-router';
 import { type MappedProductOptions } from '@shopify/hydrogen';
 import type {
@@ -9,8 +10,11 @@ import { useAside } from './Aside';
 import type { ProductFragment } from 'storefrontapi.generated';
 import {Link} from '~/lib/i18n-router';
 import {
-  calculateConfiguratorAreaM2,
-  calculateConfiguratorBillingUnits,
+  CONFIGURATOR_PAYLOAD_ATTRIBUTE,
+  CONFIGURATOR_INSTANCE_ATTRIBUTE,
+  createConfiguratorPayload,
+  createConfiguratorInstanceId,
+  resolveConfiguratorPricePerM2,
 } from '~/lib/configurator-pricing';
 
 type CropRect = {
@@ -43,6 +47,9 @@ export function ProductForm({
 }) {
   const navigate = useNavigate();
   const { open } = useAside();
+  const [configurationInstanceId, setConfigurationInstanceId] = useState(
+    createConfiguratorInstanceId,
+  );
 
   // -----------------------------
   // QUALITY PROPERTIES (UNCHANGED)
@@ -71,32 +78,12 @@ export function ProductForm({
   // -----------------------------
   const isSizeValid = size.width > 0 && size.height > 0;
 
-  // One Shopify quantity represents 0.01 m². See configurator-pricing.ts.
-  const areaM2 = calculateConfiguratorAreaM2(size.width, size.height);
-  const billingUnits = calculateConfiguratorBillingUnits(areaM2);
-
-  // -----------------------------
-  // ✅ CONFIGURATOR PAYLOAD
-  // SINGLE SOURCE OF TRUTH
-  // -----------------------------
-  const configuratorPayload = {
-    
-    version: 1,
-    master_asset_id: masterAssetId,
-    output: {
-      unit: 'mm',
-      width: Math.round(size.width * 10),
-      height: Math.round(size.height * 10),
-    },
-    crop_ratio: crop
-      ? {
-          x: crop.x,
-          y: crop.y,
-          w: crop.w,
-          h: crop.h,
-        }
-      : null,
-  };
+  const configuratorPayload = createConfiguratorPayload({
+    widthCm: size.width,
+    heightCm: size.height,
+    crop,
+    masterAssetId,
+  });
 
   if (!selectedVariant) {
     return null;
@@ -128,7 +115,13 @@ export function ProductForm({
                       printQuality = (v as any).printQuality.reference;
                     }
                     if (v.price?.amount && v.price?.currencyCode) {
-                      m2Price = (Number(v.price.amount) * 100).toFixed(2);
+                      const resolvedPrice = resolveConfiguratorPricePerM2(
+                        (v as any).printQuality?.reference?.pricePerM2?.value,
+                        v.price.amount,
+                      );
+                      m2Price = resolvedPrice
+                        ? Number(resolvedPrice).toFixed(2)
+                        : null;
                       m2Currency = v.price.currencyCode;
                     }
                   }
@@ -241,18 +234,25 @@ export function ProductForm({
       )}
 
       {/* ADD TO CART */}
-      {showInlineAddToCart && isConfiguring && (
+      {showInlineAddToCart && isConfiguring && configuratorPayload && (
         <AddToCartButton
           disabled={!selectedVariant || !selectedVariant.availableForSale}
           onClick={() => open('cart')}
+          onSuccess={() =>
+            setConfigurationInstanceId(createConfiguratorInstanceId())
+          }
           lines={[
             {
               merchandiseId: selectedVariant.id,
-              quantity: billingUnits,
+              quantity: 1,
               attributes: [
                 {
-                  key: 'configurator_payload',
+                  key: CONFIGURATOR_PAYLOAD_ATTRIBUTE,
                   value: JSON.stringify(configuratorPayload),
+                },
+                {
+                  key: CONFIGURATOR_INSTANCE_ATTRIBUTE,
+                  value: configurationInstanceId,
                 },
               ],
               selectedVariant,

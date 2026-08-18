@@ -41,6 +41,7 @@ export type CartLineFragment = Pick<
 > & {
   attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
   cost: {
+    subtotalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
     totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
     amountPerQuantity: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
     compareAtAmountPerQuantity?: StorefrontAPI.Maybe<
@@ -55,6 +56,13 @@ export type CartLineFragment = Pick<
       Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
     >;
     price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+    printQuality?: StorefrontAPI.Maybe<{
+      reference?: StorefrontAPI.Maybe<{
+        pricePerM2?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.MetaobjectField, 'value'>
+        >;
+      }>;
+    }>;
     image?: StorefrontAPI.Maybe<
       Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
     >;
@@ -71,6 +79,7 @@ export type CartLineComponentFragment = Pick<
 > & {
   attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
   cost: {
+    subtotalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
     totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
     amountPerQuantity: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
     compareAtAmountPerQuantity?: StorefrontAPI.Maybe<
@@ -85,6 +94,13 @@ export type CartLineComponentFragment = Pick<
       Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
     >;
     price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+    printQuality?: StorefrontAPI.Maybe<{
+      reference?: StorefrontAPI.Maybe<{
+        pricePerM2?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.MetaobjectField, 'value'>
+        >;
+      }>;
+    }>;
     image?: StorefrontAPI.Maybe<
       Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
     >;
@@ -120,6 +136,10 @@ export type CartApiQueryFragment = Pick<
       | (Pick<StorefrontAPI.CartLine, 'id' | 'quantity'> & {
           attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
           cost: {
+            subtotalAmount: Pick<
+              StorefrontAPI.MoneyV2,
+              'currencyCode' | 'amount'
+            >;
             totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
             amountPerQuantity: Pick<
               StorefrontAPI.MoneyV2,
@@ -137,6 +157,13 @@ export type CartApiQueryFragment = Pick<
               Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
             >;
             price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+            printQuality?: StorefrontAPI.Maybe<{
+              reference?: StorefrontAPI.Maybe<{
+                pricePerM2?: StorefrontAPI.Maybe<
+                  Pick<StorefrontAPI.MetaobjectField, 'value'>
+                >;
+              }>;
+            }>;
             image?: StorefrontAPI.Maybe<
               Pick<
                 StorefrontAPI.Image,
@@ -155,6 +182,10 @@ export type CartApiQueryFragment = Pick<
       | (Pick<StorefrontAPI.ComponentizableCartLine, 'id' | 'quantity'> & {
           attributes: Array<Pick<StorefrontAPI.Attribute, 'key' | 'value'>>;
           cost: {
+            subtotalAmount: Pick<
+              StorefrontAPI.MoneyV2,
+              'currencyCode' | 'amount'
+            >;
             totalAmount: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
             amountPerQuantity: Pick<
               StorefrontAPI.MoneyV2,
@@ -172,6 +203,13 @@ export type CartApiQueryFragment = Pick<
               Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
             >;
             price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+            printQuality?: StorefrontAPI.Maybe<{
+              reference?: StorefrontAPI.Maybe<{
+                pricePerM2?: StorefrontAPI.Maybe<
+                  Pick<StorefrontAPI.MetaobjectField, 'value'>
+                >;
+              }>;
+            }>;
             image?: StorefrontAPI.Maybe<
               Pick<
                 StorefrontAPI.Image,

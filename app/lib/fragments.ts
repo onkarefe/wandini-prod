@@ -12,6 +12,9 @@ export const CART_QUERY_FRAGMENT = `#graphql
       value
     }
     cost {
+      subtotalAmount {
+        ...Money
+      }
       totalAmount {
         ...Money
       }
@@ -31,6 +34,15 @@ export const CART_QUERY_FRAGMENT = `#graphql
         }
         price {
           ...Money
+        }
+        printQuality: metafield(namespace: "custom", key: "print_quality") {
+          reference {
+            ... on Metaobject {
+              pricePerM2: field(key: "price_per_m2") {
+                value
+              }
+            }
+          }
         }
         requiresShipping
         title
@@ -63,6 +75,9 @@ export const CART_QUERY_FRAGMENT = `#graphql
       value
     }
     cost {
+      subtotalAmount {
+        ...Money
+      }
       totalAmount {
         ...Money
       }
@@ -82,6 +97,15 @@ export const CART_QUERY_FRAGMENT = `#graphql
         }
         price {
           ...Money
+        }
+        printQuality: metafield(namespace: "custom", key: "print_quality") {
+          reference {
+            ... on Metaobject {
+              pricePerM2: field(key: "price_per_m2") {
+                value
+              }
+            }
+          }
         }
         requiresShipping
         title

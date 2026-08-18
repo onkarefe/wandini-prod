@@ -16,6 +16,15 @@ import {ProductDetailTabs} from '~/components/ProductDetailTabs';
 import {ProductForm} from '~/components/ProductForm';
 import {ProductImage} from '~/components/ProductImage';
 import {ProductSize} from '~/components/productSize';
+import {
+  CONFIGURATOR_INSTANCE_ATTRIBUTE,
+  CONFIGURATOR_PAYLOAD_ATTRIBUTE,
+  calculateConfiguredWallpaperPrice,
+  calculateConfiguratorAreaM2,
+  createConfiguratorPayload,
+  createConfiguratorInstanceId,
+  resolveConfiguratorPricePerM2,
+} from '~/lib/configurator-pricing';
 import {usePrefixPathWithLocale} from '~/lib/i18n-router';
 import '~/styles/productDetail.css';
 
@@ -105,6 +114,9 @@ export default function WallpaperProductLayout({
   const [isConfiguring, setIsConfiguring] = useState(false);
   const [size, setSize] = useState({width: 0, height: 0});
   const [crop, setCrop] = useState<CropRect | null>(null);
+  const [configurationInstanceId, setConfigurationInstanceId] = useState(
+    createConfiguratorInstanceId,
+  );
 
   const handleCloseConfigurator = () => {
     setCrop(null);
@@ -130,13 +142,18 @@ export default function WallpaperProductLayout({
         | (NonNullable<typeof value.firstSelectableVariant> & {
             printQuality?: {
               reference?: {
+                pricePerM2?: {value?: string | null} | null;
                 priceWithoutDiscount?: {value?: string | null} | null;
               } | null;
             } | null;
           })
         | null
         | undefined;
-      const amount = Number(variant?.price?.amount);
+      const pricePerM2 = resolveConfiguratorPricePerM2(
+        variant?.printQuality?.reference?.pricePerM2?.value,
+        variant?.price?.amount,
+      );
+      const amount = Number(pricePerM2);
 
       if (!variant || !Number.isFinite(amount) || amount <= 0) return null;
 
@@ -174,17 +191,18 @@ export default function WallpaperProductLayout({
       maximumFractionDigits: 2,
     }).format(amount);
 
-  const wallAreaM2 =
-    size.width > 0 && size.height > 0 ? (size.width * size.height) / 10_000 : 0;
+  const wallAreaM2 = calculateConfiguratorAreaM2(size.width, size.height);
   const isSizeValid = size.width > 0 && size.height > 0;
-  const billingUnitM2 = 0.01;
-  const areaM2 = isSizeValid ? (size.width * size.height) / 10_000 : 0;
-  const billingUnits = isSizeValid
-    ? Math.max(1, Math.ceil(areaM2 / billingUnitM2))
-    : 0;
+  const outputWidthMm = Math.round(size.width * 10);
+  const outputHeightMm = Math.round(size.height * 10);
   const startingTotalPrice = materialStartingPrice
-    ? wallAreaM2 * materialStartingPrice.amount
-    : 0;
+    ? calculateConfiguredWallpaperPrice({
+        pricePerM2: materialStartingPrice.amount,
+        widthMm: outputWidthMm,
+        heightMm: outputHeightMm,
+        currencyCode: materialStartingPrice.currencyCode,
+      })
+    : null;
   const formattedWallArea = new Intl.NumberFormat('de-DE', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -253,10 +271,18 @@ export default function WallpaperProductLayout({
     ? [...qualityOption.optionValues]
         .sort((firstValue, secondValue) => {
           const firstPrice = Number(
-            firstValue.firstSelectableVariant?.price?.amount,
+            resolveConfiguratorPricePerM2(
+              (firstValue.firstSelectableVariant as any)?.printQuality?.reference
+                ?.pricePerM2?.value,
+              firstValue.firstSelectableVariant?.price?.amount,
+            ),
           );
           const secondPrice = Number(
-            secondValue.firstSelectableVariant?.price?.amount,
+            resolveConfiguratorPricePerM2(
+              (secondValue.firstSelectableVariant as any)?.printQuality
+                ?.reference?.pricePerM2?.value,
+              secondValue.firstSelectableVariant?.price?.amount,
+            ),
           );
 
           return (
@@ -273,19 +299,30 @@ export default function WallpaperProductLayout({
           const variant = value.firstSelectableVariant;
           const printQuality = (variant as any)?.printQuality?.reference;
           const optionTitle = printQuality?.title?.value || name;
-          const unitPrice = Number(variant?.price?.amount);
+          const pricePerM2 = resolveConfiguratorPricePerM2(
+            printQuality?.pricePerM2?.value,
+            variant?.price?.amount,
+          );
           const currencyCode = variant?.price?.currencyCode;
-          const hasPrice =
-            Number.isFinite(unitPrice) &&
-            unitPrice >= 0 &&
-            Boolean(currencyCode);
+          const configuredPrice =
+            pricePerM2 && currencyCode && isSizeValid
+              ? calculateConfiguredWallpaperPrice({
+                  pricePerM2,
+                  widthMm: outputWidthMm,
+                  heightMm: outputHeightMm,
+                  currencyCode: String(currencyCode),
+                })
+              : null;
 
           return {
             id: `${qualityOption.name}-${name}`,
             title: optionTitle,
             calculatedPrice:
-              hasPrice && isSizeValid
-                ? formatMaterialPrice(unitPrice * areaM2, String(currencyCode))
+              configuredPrice
+                ? formatMaterialPrice(
+                    Number(configuredPrice.amount),
+                    configuredPrice.currencyCode,
+                  )
                 : '—',
             properties: getPropertiesForQuality(value),
             isBestseller: optionTitle
@@ -299,41 +336,33 @@ export default function WallpaperProductLayout({
         })
     : [];
 
-  const configuratorPayload = crop
-    ? {
-        version: 1,
-        master_asset_id: product.masterAssetId?.value ?? '',
-        output: {
-          unit: 'mm',
-          width: Math.round(size.width * 10),
-          height: Math.round(size.height * 10),
-        },
-        crop_ratio: {
-          x: crop.x,
-          y: crop.y,
-          w: crop.w,
-          h: crop.h,
-        },
-      }
-    : null;
+  const configuratorPayload = createConfiguratorPayload({
+    widthCm: size.width,
+    heightCm: size.height,
+    crop,
+    masterAssetId: product.masterAssetId?.value,
+  });
 
   const confirmButton =
     selectedVariant && configuratorPayload ? (
       <AddToCartButton
         disabled={!selectedVariant.availableForSale || !isSizeValid || !crop}
-        onClick={() => {
-          setTimeout(() => {
-            void navigate(cartPath);
-          }, 0);
+        onSuccess={() => {
+          setConfigurationInstanceId(createConfiguratorInstanceId());
+          void navigate(cartPath);
         }}
         lines={[
           {
             merchandiseId: selectedVariant.id,
-            quantity: billingUnits,
+            quantity: 1,
             attributes: [
               {
-                key: 'configurator_payload',
+                key: CONFIGURATOR_PAYLOAD_ATTRIBUTE,
                 value: JSON.stringify(configuratorPayload),
+              },
+              {
+                key: CONFIGURATOR_INSTANCE_ATTRIBUTE,
+                value: configurationInstanceId,
               },
             ],
             selectedVariant,
@@ -428,10 +457,10 @@ export default function WallpaperProductLayout({
                 <div className="productOrderSummaryItem productOrderSummaryItemPrice">
                   <span className="productOrderSummaryLabel">Preis ab</span>
                   <strong className="productOrderSummaryValue">
-                    {wallAreaM2 > 0 && materialStartingPrice
+                    {wallAreaM2 > 0 && startingTotalPrice
                       ? formatMaterialPrice(
-                          startingTotalPrice,
-                          materialStartingPrice.currencyCode,
+                          Number(startingTotalPrice.amount),
+                          startingTotalPrice.currencyCode,
                         )
                       : '—'}
                   </strong>

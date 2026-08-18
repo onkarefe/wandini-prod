@@ -1,4 +1,7 @@
-import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
+import type {
+  CartLineUpdateInput,
+  MoneyV2,
+} from '@shopify/hydrogen/storefront-api-types';
 import type {CartLayout} from '~/components/CartMain';
 import {CartForm, Image, type OptimisticCartLine} from '@shopify/hydrogen';
 import {useVariantUrl} from '~/lib/variants';
@@ -6,6 +9,10 @@ import {Link} from '~/lib/i18n-router';
 import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
+import {
+  getCartLineDisplayTotal,
+  type CartLinePricingLike,
+} from '~/lib/cart-pricing';
 
 type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 
@@ -24,6 +31,9 @@ export function CartLineItem({
   const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   const {close} = useAside();
+  const displayPrice = getCartLineDisplayTotal(
+    line as unknown as CartLinePricingLike,
+  );
 
   return (
     <li key={id} className={`custom-cart-line custom-cart-line--${layout}`}>
@@ -52,7 +62,9 @@ export function CartLineItem({
             <strong>{product.title}</strong>
           </p>
         </Link>
-        <ProductPrice price={line?.cost?.totalAmount} />
+        <ProductPrice
+          price={(displayPrice ?? undefined) as MoneyV2 | undefined}
+        />
         <ul className="custom-cart-line__options">
           {selectedOptions.map((option) => (
             <li key={option.name}>

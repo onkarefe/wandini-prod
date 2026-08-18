@@ -39,13 +39,22 @@ type PartialPredictiveSearchResult<
 
 type SearchResultsPredictiveProps = {
   children: (args: SearchResultsPredictiveArgs) => React.ReactNode;
+  fetcherKey?: string;
+  inputSelector?: string;
+  onClose?: () => void;
 };
 
 export function SearchResultsPredictive({
   children,
+  fetcherKey = 'search',
+  inputSelector = PREDICTIVE_SEARCH_INPUT_SELECTOR,
+  onClose,
 }: SearchResultsPredictiveProps) {
   const aside = useAside();
-  const {term, inputRef, fetcher, total, items} = usePredictiveSearch();
+  const {term, inputRef, fetcher, total, items} = usePredictiveSearch(
+    fetcherKey,
+    inputSelector,
+  );
 
   function closeSearch() {
     if (inputRef.current) {
@@ -55,6 +64,7 @@ export function SearchResultsPredictive({
 
     term.current = '';
     aside.close();
+    onClose?.();
   }
 
   return children({
@@ -285,8 +295,11 @@ function ResultArrow() {
   );
 }
 
-function usePredictiveSearch(): UsePredictiveSearchReturn {
-  const fetcher = useFetcher<PredictiveSearchReturn>({key: 'search'});
+function usePredictiveSearch(
+  fetcherKey: string,
+  inputSelector: string,
+): UsePredictiveSearchReturn {
+  const fetcher = useFetcher<PredictiveSearchReturn>({key: fetcherKey});
   const term = useRef('');
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -297,10 +310,10 @@ function usePredictiveSearch(): UsePredictiveSearchReturn {
   useEffect(() => {
     if (!inputRef.current) {
       inputRef.current = document.querySelector<HTMLInputElement>(
-        PREDICTIVE_SEARCH_INPUT_SELECTOR,
+        inputSelector,
       );
     }
-  }, []);
+  }, [inputSelector]);
 
   const result = fetcher.data?.result ?? getEmptyPredictiveSearchResult();
   const {items, total} = term.current

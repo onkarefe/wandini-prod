@@ -1,5 +1,13 @@
 // app/components/Header.tsx
-import React, { Suspense, useMemo, useState, useEffect, useCallback } from 'react';
+import React, {
+  Suspense,
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+  useId,
+  useRef,
+} from 'react';
 import { Await, useAsyncValue } from 'react-router';
 import {
   type CartViewPayload,
@@ -8,7 +16,12 @@ import {
 } from '@shopify/hydrogen';
 import type { CartApiQueryFragment, HeaderQuery } from 'storefrontapi.generated';
 import { useAside } from '~/components/Aside';
-import {NavLink} from '~/lib/i18n-router';
+import {
+  SEARCH_ENDPOINT,
+  SearchFormPredictive,
+} from '~/components/SearchFormPredictive';
+import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
+import {Link, NavLink} from '~/lib/i18n-router';
 
 import '~/styles/nav.css';
 
@@ -115,6 +128,8 @@ export function Header({ header, cart, isLoggedIn, publicStoreDomain }: HeaderPr
                 <span className="h-logoText">{shop?.name || 'Store'}</span>
               )}
             </NavLink>
+
+            <HeaderSearch />
           </div>
 
           <div className="h-headerCenter">
@@ -130,6 +145,166 @@ export function Header({ header, cart, isLoggedIn, publicStoreDomain }: HeaderPr
         </div>
       </div>
     </header>
+  );
+}
+
+function HeaderSearch() {
+  const queriesDatalistId = useId();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const closeResults = useCallback(() => setIsOpen(false), []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        closeResults();
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return;
+
+      closeResults();
+      containerRef.current?.querySelector('input')?.blur();
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [closeResults, isOpen]);
+
+  return (
+    <div className="h-desktopSearchWrap" ref={containerRef}>
+      <SearchFormPredictive
+        className="h-desktopSearch"
+        fetcherKey="header-search"
+        onSearchSubmit={closeResults}
+        role="search"
+        aria-label="Produktsuche"
+      >
+        {({fetchResults, inputRef}) => (
+          <>
+            <svg
+              className="h-desktopSearchIcon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="m16 16 4 4" />
+            </svg>
+
+            <label className="h-visuallyHidden" htmlFor="header-search-query">
+              Produkte suchen
+            </label>
+            <input
+              autoComplete="off"
+              data-header-predictive-search-input="true"
+              enterKeyHint="search"
+              id="header-search-query"
+              list={queriesDatalistId}
+              name="q"
+              onChange={(event) => {
+                setIsOpen(Boolean(event.currentTarget.value.trim()));
+                fetchResults(event);
+              }}
+              onFocus={(event) => {
+                setIsOpen(Boolean(event.currentTarget.value.trim()));
+                fetchResults(event);
+              }}
+              placeholder="Produkte suchen ..."
+              ref={inputRef}
+              type="search"
+            />
+
+            <button type="submit" aria-label="Suche starten">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m9 6 6 6-6 6" />
+              </svg>
+            </button>
+          </>
+        )}
+      </SearchFormPredictive>
+
+      <SearchResultsPredictive
+        fetcherKey="header-search"
+        inputSelector='[data-header-predictive-search-input="true"]'
+        onClose={closeResults}
+      >
+        {({items, total, term, state, closeSearch}) => {
+          if (!isOpen || !term.current) return null;
+
+          const {articles, collections, pages, products, queries} = items;
+          const searchUrl = `${SEARCH_ENDPOINT}?${new URLSearchParams({
+            q: term.current,
+          }).toString()}`;
+
+          return (
+            <div
+              className="h-desktopSearchResults"
+              aria-live="polite"
+              aria-label="Suchvorschläge"
+            >
+              <SearchResultsPredictive.Queries
+                queries={queries}
+                queriesDatalistId={queriesDatalistId}
+              />
+
+              {state !== 'idle' ? (
+                <div className="h-desktopSearchLoading" role="status">
+                  <span aria-hidden="true" />
+                  Wird gesucht …
+                </div>
+              ) : total ? (
+                <div className="h-desktopSearchResultsList">
+                  <SearchResultsPredictive.Products
+                    products={products}
+                    closeSearch={closeSearch}
+                    term={term}
+                  />
+                  <SearchResultsPredictive.Collections
+                    collections={collections}
+                    closeSearch={closeSearch}
+                    term={term}
+                  />
+                  <SearchResultsPredictive.Pages
+                    pages={pages}
+                    closeSearch={closeSearch}
+                    term={term}
+                  />
+                  <SearchResultsPredictive.Articles
+                    articles={articles}
+                    closeSearch={closeSearch}
+                    term={term}
+                  />
+
+                  <Link
+                    className="h-desktopSearchAll"
+                    onClick={closeSearch}
+                    to={searchUrl}
+                  >
+                    <span>
+                      Alle Ergebnisse für <q>{term.current}</q>
+                    </span>
+                    <svg viewBox="0 0 20 20" aria-hidden="true">
+                      <path d="M4 10h11M11 6l4 4-4 4" />
+                    </svg>
+                  </Link>
+                </div>
+              ) : (
+                <SearchResultsPredictive.Empty term={term} />
+              )}
+            </div>
+          );
+        }}
+      </SearchResultsPredictive>
+    </div>
   );
 }
 
@@ -597,10 +772,7 @@ function CartBanner() {
   const originalCart = useAsyncValue() as CartApiQueryFragment | null;
   const cart = useOptimisticCart(originalCart);
 
-  // totalQuantity yerine "line count" (ürün satırı sayısı)
-  const lineCount = cart?.lines?.nodes?.length ?? 0;
-
-  return <CartBadge count={lineCount} />;
+  return <CartBadge count={cart?.totalQuantity ?? 0} />;
 }
 
 
