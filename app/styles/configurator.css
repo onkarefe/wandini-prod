@@ -931,7 +931,7 @@
   min-height: 0;
   display: flex;
   align-items: center;
-  padding: 12px 18px 14px;
+  padding: 8px 14px 10px;
   background: #f7f8f7;
   overflow: hidden;
   box-sizing: border-box;
@@ -1201,7 +1201,7 @@
 .configuratorMaterialsGrid {
   grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
   gap: 12px;
-  padding: 4px 2px;
+  padding: 2px;
   align-content: center;
 }
 
@@ -1249,7 +1249,8 @@
 .configuratorMaterialMedia {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  height: clamp(128px, 21.5dvh, 184px);
+  aspect-ratio: auto;
   flex: 0 0 auto;
   background: #e9ecea;
   overflow: hidden;
@@ -1341,7 +1342,7 @@
 
 .configuratorMaterialCardBody {
   min-height: 0;
-  padding: 14px 14px 13px;
+  padding: 11px 13px 10px;
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
@@ -1349,7 +1350,7 @@
 
 .configuratorMaterialCardHeader {
   min-height: 23px;
-  margin-bottom: 10px;
+  margin-bottom: 7px;
 }
 
 .configuratorMaterialCard h3 {
@@ -1361,7 +1362,7 @@
 }
 
 .configuratorMaterialFeatures {
-  gap: 5px;
+  gap: 4px;
   color: #5b625e;
   font-size: 12px;
   font-weight: 520;
@@ -1381,7 +1382,7 @@
 
 .configuratorMaterialTotal {
   margin-top: auto;
-  padding-top: 10px;
+  padding-top: 8px;
   border-top-color: #e8ebe9;
   flex-direction: row;
   align-items: flex-end;
@@ -1405,8 +1406,8 @@
 }
 
 .configuratorMaterialSelectButton {
-  min-height: 38px;
-  margin-top: 10px;
+  min-height: 36px;
+  margin-top: 8px;
   padding: 8px 10px 8px 12px;
   border-color: #d4d8d6;
   border-radius: 9px;

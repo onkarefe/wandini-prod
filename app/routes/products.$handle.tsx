@@ -467,6 +467,16 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
           properties: field(key: "properties") {
             value
           }
+          image: field(key: "image") {
+            reference {
+              ... on MediaImage {
+                image {
+                  url
+                  altText
+                }
+              }
+            }
+          }
         }
       }
     }

@@ -102,6 +102,15 @@ function parseJsonMetafield<T>(value?: string | null) {
   }
 }
 
+function splitMaterialProperties(value?: string | null) {
+  if (!value) return [];
+
+  return value
+    .split(/\s+[-\u2010-\u2015\u2212]\s+/u)
+    .map((property) => property.trim())
+    .filter(Boolean);
+}
+
 export type WallpaperProductLayoutProps = {
   product: ProductFragment;
 };
@@ -220,22 +229,24 @@ export default function WallpaperProductLayout({
     if (
       value?.firstSelectableVariant?.printQuality?.reference?.properties?.value
     ) {
-      return value.firstSelectableVariant.printQuality.reference.properties.value.split(
-        ' - ',
+      return splitMaterialProperties(
+        value.firstSelectableVariant.printQuality.reference.properties.value,
       );
     }
     if (value?.printQuality?.reference?.properties?.value) {
-      return value.printQuality.reference.properties.value.split(' - ');
+      return splitMaterialProperties(
+        value.printQuality.reference.properties.value,
+      );
     }
     if (value?.properties?.value) {
-      return value.properties.value.split(' - ');
+      return splitMaterialProperties(value.properties.value);
     }
     if (
       selectedVariant?.printQuality?.reference?.title?.value === value.name &&
       selectedVariant?.printQuality?.reference?.properties?.value
     ) {
-      return selectedVariant.printQuality.reference.properties.value.split(
-        ' - ',
+      return splitMaterialProperties(
+        selectedVariant.printQuality.reference.properties.value,
       );
     }
     return [];
@@ -299,6 +310,7 @@ export default function WallpaperProductLayout({
           const variant = value.firstSelectableVariant;
           const printQuality = (variant as any)?.printQuality?.reference;
           const optionTitle = printQuality?.title?.value || name;
+          const materialImage = printQuality?.image?.reference?.image;
           const pricePerM2 = resolveConfiguratorPricePerM2(
             printQuality?.pricePerM2?.value,
             variant?.price?.amount,
@@ -325,6 +337,12 @@ export default function WallpaperProductLayout({
                   )
                 : '—',
             properties: getPropertiesForQuality(value),
+            image: materialImage?.url
+              ? {
+                  url: materialImage.url,
+                  altText: materialImage.altText,
+                }
+              : null,
             isBestseller: optionTitle
               .trim()
               .toLowerCase()

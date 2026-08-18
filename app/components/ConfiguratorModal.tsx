@@ -19,6 +19,10 @@ export type ConfiguratorMaterialOption = {
   title: string;
   calculatedPrice: string;
   properties: string[];
+  image: {
+    url: string;
+    altText?: string | null;
+  } | null;
   isBestseller: boolean;
   selected: boolean;
   exists: boolean;
@@ -37,7 +41,6 @@ const CONFIGURATOR_STEPS: Array<{
 ];
 
 type ConfiguratorMaterialVisual = {
-  imageUrl: string;
   badge?: string;
   featured?: boolean;
   objectPosition?: string;
@@ -45,29 +48,19 @@ type ConfiguratorMaterialVisual = {
 
 const MATERIAL_VISUALS = {
   standard: {
-    imageUrl:
-      'https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_Material_01_Standard.jpg?v=1786026504',
   },
   premium: {
-    imageUrl:
-      'https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_Material_02_Premium.jpg?v=1786026504',
     badge: 'Am beliebtesten',
     featured: true,
   },
   premiumVinyl: {
-    imageUrl:
-      'https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_Material_03_PremiumVinyl.jpg?v=1786026505',
     badge: 'Empfohlen',
   },
   selfAdhesive: {
-    imageUrl:
-      'https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_Material_04_Selbstklebend.jpg?v=1786026504',
     badge: 'Kein Klebstoff nötig',
     objectPosition: 'center bottom',
   },
   airtex: {
-    imageUrl:
-      'https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_Material_05_AirtexBahnenlos.jpg?v=1786026505',
     badge: 'Bahnenlos',
   },
 } satisfies Record<string, ConfiguratorMaterialVisual>;
@@ -451,19 +444,22 @@ export function ConfiguratorModal({
                             : ''
                         }`}
                       >
-                        {materialVisual && (
+                        {material.image && (
                           <div className="configuratorMaterialMedia">
                             <img
-                              src={materialVisual.imageUrl}
-                              alt={`Materialoberfläche ${material.title}`}
+                              src={material.image.url}
+                              alt={
+                                material.image.altText ||
+                                `Materialoberfläche ${material.title}`
+                              }
                               decoding="async"
                               draggable={false}
                               style={{
-                                objectPosition: materialVisual.objectPosition,
+                                objectPosition: materialVisual?.objectPosition,
                               }}
                             />
 
-                            {materialVisual.badge && (
+                            {materialVisual?.badge && (
                               <span
                                 className={`configuratorMaterialBadge${
                                   materialVisual.featured
