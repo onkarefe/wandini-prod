@@ -47,7 +47,7 @@ function formatPrice(price: ProductMoney) {
   }
 }
 
-function BestsellerCard({product}: {product: BestsellerProduct}) {
+export function BestsellerCard({product}: {product: BestsellerProduct}) {
   const primaryImage = product.images.nodes[0] ?? null;
   const listingImage = product.images.nodes[1] ?? primaryImage;
   const hasHoverImage =
@@ -59,7 +59,7 @@ function BestsellerCard({product}: {product: BestsellerProduct}) {
       to={`/products/${product.handle}`}
       className="all-product-row all-product-link bestseller-product-card"
       aria-label={product.title}
-      style={{display: 'block', textDecoration: 'none', color: 'inherit'}}
+      style={{textDecoration: 'none', color: 'inherit'}}
     >
       {listingImage ? (
         <div className="all-productIMGBOX bestseller-product-media">

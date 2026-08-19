@@ -1,4 +1,10 @@
-import {useCallback, useEffect, useState, type MouseEvent} from 'react';
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type FocusEvent,
+  type MouseEvent,
+} from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import {Link, useFetcher, useLocation, useNavigate} from 'react-router';
 import {
@@ -50,21 +56,6 @@ function SimilarMotifsIcon() {
   );
 }
 
-function ArrowIcon({direction}: {direction: 'previous' | 'next'}) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path
-        d={direction === 'previous' ? 'm15 5-7 7 7 7' : 'm9 5 7 7-7 7'}
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.6"
-      />
-    </svg>
-  );
-}
-
 function formatPriceLabel(price?: ProductPrice): string | null {
   if (!price) return null;
 
@@ -103,7 +94,10 @@ export default function BestsellerProductCard({
   similarProductsSourceTitle,
   similarProductsSourceImageUrl,
 }: BestsellerProductCardProps) {
-  const displayImages = images.slice(0, 3);
+  const displayImages =
+    images.length > 1
+      ? [images[1], images[0], ...images.slice(2, 3)]
+      : images.slice(0, 1);
   const fetcher = useFetcher<WishlistActionData>();
   const location = useLocation();
   const navigate = useNavigate();
@@ -116,6 +110,7 @@ export default function BestsellerProductCard({
   const [wishlistError, setWishlistError] = useState<string | null>(null);
   const priceLabel = formatPriceLabel(minPrice);
   const hasMultipleImages = displayImages.length > 1;
+  const hasHoverMotif = images.length > 1;
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -191,10 +186,33 @@ export default function BestsellerProductCard({
       : 'Zu Favoriten hinzufügen';
   const similarMotifsLabel = 'Ähnliche Motive anzeigen';
 
+  const showMotifImage = () => {
+    if (hasHoverMotif) emblaApi?.scrollTo(1);
+  };
+
+  const showListingImage = () => {
+    if (hasHoverMotif) emblaApi?.scrollTo(0);
+  };
+
+  const handleCardBlur = (event: FocusEvent<HTMLElement>) => {
+    if (
+      event.relatedTarget &&
+      event.currentTarget.contains(event.relatedTarget as Node)
+    ) {
+      return;
+    }
+
+    showListingImage();
+  };
+
   return (
     <article
       className="bestseller-card"
       aria-labelledby={`product-${productId}`}
+      onMouseEnter={showMotifImage}
+      onMouseLeave={showListingImage}
+      onFocusCapture={showMotifImage}
+      onBlurCapture={handleCardBlur}
     >
       <div className="bestseller-card__media-shell">
         <div className="bestseller-card__actions">
@@ -274,41 +292,20 @@ export default function BestsellerProductCard({
         </div>
 
         {hasMultipleImages ? (
-          <>
-            <button
-              type="button"
-              className="bestseller-card__arrow bestseller-card__arrow--previous"
-              aria-label="Vorheriges Produktbild"
-              onClick={() => emblaApi?.scrollPrev()}
-            >
-              <ArrowIcon direction="previous" />
-            </button>
-            <button
-              type="button"
-              className="bestseller-card__arrow bestseller-card__arrow--next"
-              aria-label="Nächstes Produktbild"
-              onClick={() => emblaApi?.scrollNext()}
-            >
-              <ArrowIcon direction="next" />
-            </button>
-
-            <div className="bestseller-card__dots" aria-label="Produktbilder">
-              {displayImages.map((image, imageIndex) => (
-                <button
-                  key={`${image.url}-dot`}
-                  type="button"
-                  aria-label={`Zu Bild ${imageIndex + 1} wechseln`}
-                  aria-current={
-                    imageIndex === selectedIndex ? 'true' : undefined
-                  }
-                  className={`bestseller-card__dot ${
-                    imageIndex === selectedIndex ? 'is-active' : ''
-                  }`}
-                  onClick={() => emblaApi?.scrollTo(imageIndex)}
-                />
-              ))}
-            </div>
-          </>
+          <div className="bestseller-card__dots" aria-label="Produktbilder">
+            {displayImages.map((image, imageIndex) => (
+              <button
+                key={`${image.url}-dot`}
+                type="button"
+                aria-label={`Zu Bild ${imageIndex + 1} wechseln`}
+                aria-current={imageIndex === selectedIndex ? 'true' : undefined}
+                className={`bestseller-card__dot ${
+                  imageIndex === selectedIndex ? 'is-active' : ''
+                }`}
+                onClick={() => emblaApi?.scrollTo(imageIndex)}
+              />
+            ))}
+          </div>
         ) : null}
       </div>
 

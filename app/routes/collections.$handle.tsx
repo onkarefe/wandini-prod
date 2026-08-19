@@ -371,7 +371,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     const bestsellerData = (await storefront.query(CUSTOM_COLLECTION_QUERY, {
       variables: {
         handle,
-        first: 14,
+        first: 250,
         filters: [],
         sortKey: 'BEST_SELLING',
         reverse: false,
@@ -457,8 +457,6 @@ export default function Collection() {
         >
           <BestsellerCollectionLayout
             collection={collection}
-            isLoggedIn={isLoggedIn}
-            wishlistProductIds={wishlistProductIds}
           />
         </Suspense>
       ) : isZubehorCollection(collection) ? (
