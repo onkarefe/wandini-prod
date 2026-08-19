@@ -28,16 +28,7 @@ export default function ZubehorCollectionLayout({
 
   return (
     <div className="zubehor-collection">
-      <section
-        className="zubehor-collection__hero container mx-auto"
-        style={
-          collection.image?.url
-            ? {
-                backgroundImage: `url('${collection.image.url}')`,
-              }
-            : undefined
-        }
-      >
+      <section className="zubehor-collection__hero container mx-auto">
         <h1>{collection.title}</h1>
       </section>
 
