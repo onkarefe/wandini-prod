@@ -80,27 +80,6 @@ export function Footer({ footer: footerPromise, header, publicStoreDomain }: Foo
                     <span className="footer-logo-text">{header.shop.name}</span>
                   ) : null}
 
-                  <div className="footerLogoSubtext">
-                    Fragen oder besondere Wünsche?
-                    <br />
-                    Unser Team hilft dir persönlich weiter und findet die
-                    passende Lösung für dein Projekt.
-                  </div>
-
-                  <div className="footerCallCenterBox">
-                    <div className="callCenterIcon">
-                      <img
-                        src="https://cdn.shopify.com/s/files/1/0953/1323/2152/files/footerSvg.png?v=1761919410"
-                        alt=""
-                      />
-                    </div>
-                    <div className="callCenterTextBox">
-                      <div className="callCenterTitle">Support Hotline</div>
-                      <a className="footerTel" href="tel:+4902433939920">
-                        +49 (0)2433 93992-0
-                      </a>
-                    </div>
-                  </div>
                 </div>
 
                 {/* ----- FOOTER MENÜ BÖLÜMLERİ ----- */}
