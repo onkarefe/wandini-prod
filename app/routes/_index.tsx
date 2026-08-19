@@ -16,6 +16,7 @@ import AllProdutsNew, {
 } from '~/components/AllProdutsNew';
 import CustomGrid, {type CustomGridItem} from '~/components/CustomGrid';
 import CustomOrder from '~/components/CustomOrder';
+import UberUnsHomepage from '~/components/UberUnsHomepage';
 import CustomerRevs from '~/components/CustomerRevs';
 import homepageStyles from '~/styles/homepage.css?url';
 import {getRobotsDirective} from '~/lib/seo';
@@ -295,6 +296,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     bestsellerRes,
     customGridRes,
     stepByStepRes,
+    uberUnsRes,
     customerReviewsRes,
   ] = await Promise.all([
     context.storefront.query(FEATURED_COLLECTION_QUERY),
@@ -303,6 +305,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     context.storefront.query(BESTSELLER_PRODUCTS_QUERY),
     context.storefront.query(CUSTOM_GRID_QUERY),
     context.storefront.query(STEP_BY_STEP_QUERY),
+    context.storefront.query(UBER_UNS_QUERY),
     context.storefront.query(CUSTOMER_REVIEWS_QUERY),
   ]);
 
@@ -498,6 +501,26 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     bullets,
   };
 
+  const uberUnsNode = uberUnsRes?.metaobjects?.nodes?.[0];
+  const uberUnsFields = Array.isArray(uberUnsNode?.fields)
+    ? uberUnsNode.fields
+    : [];
+  const uberUnsFieldMap = Object.fromEntries(
+    uberUnsFields.map((field: any) => [field.key, field]),
+  );
+  const uberUnsSectionTitle = uberUnsFieldMap.section_title?.value ?? '';
+  const uberUnsImageField =
+    uberUnsFieldMap.section_image ?? uberUnsFieldMap.section_i_mage;
+  const uberUns = {
+    sectionTitle: uberUnsSectionTitle,
+    sectionContent: uberUnsFieldMap.section_content?.value ?? '',
+    sectionImage:
+      normalizeReferenceImage(
+        uberUnsImageField?.reference,
+        uberUnsSectionTitle,
+      ) ?? null,
+  };
+
   const customerReviewsNode = customerReviewsRes?.metaobjects?.nodes?.[0];
   const customerReviewsFields = Array.isArray(customerReviewsNode?.fields)
     ? customerReviewsNode.fields
@@ -563,6 +586,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     customGridItems,
     customGridSectionTitle,
     stepByStep,
+    uberUns,
     customerReviews,
     customerReviewsSectionTitle,
   };
@@ -629,6 +653,7 @@ export default function Homepage() {
         sectionTitle={data.customGridSectionTitle}
       />
       <CustomOrder content={data.stepByStep} />
+      <UberUnsHomepage content={data.uberUns} />
       <CustomerRevs
         reviews={data.customerReviews ?? []}
         sectionTitle={data.customerReviewsSectionTitle}
@@ -887,6 +912,38 @@ const STEP_BY_STEP_QUERY = `#graphql
                 handle
                 title
               }
+            }
+          }
+        }
+      }
+    }
+  }
+` as const;
+
+const UBER_UNS_QUERY = `#graphql
+  query UberUnsHomepageMetaobject {
+    metaobjects(type: "uber_uns", first: 1) {
+      nodes {
+        id
+        handle
+        type
+        fields {
+          key
+          value
+          type
+          reference {
+            ... on MediaImage {
+              id
+              image {
+                url
+                altText
+                width
+                height
+              }
+            }
+            ... on GenericFile {
+              id
+              url
             }
           }
         }
