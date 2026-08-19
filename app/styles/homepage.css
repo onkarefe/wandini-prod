@@ -85,12 +85,46 @@
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
-  transition: all 0.3s;
+  position: relative;
+  transform: translateY(0) scale(1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s ease,
+    background-color 0.28s ease,
+    color 0.28s ease;
 }
 
-.defaultButton:hover {
-  background-color: #777777;
-  color: white;
+@media (hover: hover) and (pointer: fine) {
+  .defaultButton:hover {
+    background-color: black;
+    color: white;
+    transform: translateY(-3px) scale(1.015);
+    box-shadow:
+      0 14px 28px rgba(0, 0, 0, 0.22),
+      0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.defaultButton:active {
+  transform: translateY(-1px) scale(1.005);
+  box-shadow: 0 7px 16px rgba(0, 0, 0, 0.18);
+}
+
+.defaultButton:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .defaultButton {
+    transition: none;
+  }
+
+  .defaultButton:hover,
+  .defaultButton:active {
+    transform: none;
+  }
 }
 
 @media (min-width: 1023.98px) {
