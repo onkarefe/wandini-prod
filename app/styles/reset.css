@@ -78,6 +78,10 @@ section {
   }
 }
 
+section[data-react-aria-top-layer][aria-live='polite'] {
+  padding: 0;
+}
+
 fieldset {
   display: flex;
   flex-direction: column;
