@@ -561,7 +561,7 @@ function DefaultCollectionLayout({
         ) : null}
 
         <div className="sort-Main">
-          <label htmlFor="sort-select">Sort:</label>
+          <label htmlFor="sort-select">Sortieren:</label>
           <select
             id="sort-select"
             value={selectedSort}

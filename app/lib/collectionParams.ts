@@ -14,17 +14,15 @@ export const STOREFRONT_COLLECTION_SORT_KEYS = [
 export type StorefrontCollectionSortKey =
   (typeof STOREFRONT_COLLECTION_SORT_KEYS)[number];
 
-export type CollectionSortValue = StorefrontCollectionSortKey | 'PRICE_DESC';
+export type CollectionSortValue = StorefrontCollectionSortKey;
 
 export const COLLECTION_SORT_OPTIONS = [
-  {label: 'Best Selling', value: 'BEST_SELLING'},
-  {label: 'Newest', value: 'CREATED'},
-  {label: 'Price: Low to High', value: 'PRICE'},
-  {label: 'Price: High to Low', value: 'PRICE_DESC'},
-  {label: 'A-Z', value: 'TITLE'},
-  {label: 'Relevance', value: 'RELEVANCE'},
-  {label: 'Default', value: 'COLLECTION_DEFAULT'},
-  {label: 'ID', value: 'ID'},
+  {label: 'Bestseller', value: 'BEST_SELLING'},
+  {label: 'Neueste', value: 'CREATED'},
+  {label: 'Preis: niedrig bis hoch', value: 'PRICE'},
+  {label: 'A bis Z', value: 'TITLE'},
+  {label: 'Relevanz', value: 'RELEVANCE'},
+  {label: 'Standard', value: 'COLLECTION_DEFAULT'},
 ] as const satisfies ReadonlyArray<{
   label: string;
   value: CollectionSortValue;
@@ -50,13 +48,6 @@ export function getCollectionSortVariables(sortValue: CollectionSortValue): {
   reverse: boolean;
   sortKey: StorefrontCollectionSortKey;
 } {
-  if (sortValue === 'PRICE_DESC') {
-    return {
-      reverse: true,
-      sortKey: 'PRICE',
-    };
-  }
-
   return {
     reverse: false,
     sortKey: sortValue,
