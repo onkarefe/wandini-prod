@@ -1,5 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import useEmblaCarousel from 'embla-carousel-react';
+import React, {useEffect, useState} from 'react';
 import {useFetcher, useLocation, useNavigate} from 'react-router';
 import {
   WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
@@ -61,24 +60,16 @@ function formatPriceLabel(price?: ProductPrice): string | null {
   if (!price) return null;
 
   const amount = Number(price.amount);
-  const fallbackAmount = Number.isFinite(amount)
-    ? new Intl.NumberFormat('en-US', {
-        minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
-        maximumFractionDigits: 2,
-      }).format(amount)
-    : price.amount;
 
   try {
-    const formattedAmount = new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('de-DE', {
       style: 'currency',
       currency: price.currencyCode,
       minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
       maximumFractionDigits: 2,
-    }).format(Number.isFinite(amount) ? amount : Number(price.amount));
-
-    return `${formattedAmount} / m²`;
+    }).format(amount);
   } catch {
-    return `${fallbackAmount} ${price.currencyCode} / m²`;
+    return `${price.amount} ${price.currencyCode}`;
   }
 }
 
@@ -96,29 +87,17 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   isWishlisted = false,
   onWishlistChange,
 }) => {
-  const displayImages = images.slice(0, 3);
+  const primaryImage = images[0] ?? null;
+  const listingImage = images[1] ?? primaryImage;
+  const hasHoverImage = Boolean(
+    primaryImage && listingImage && primaryImage.url !== listingImage.url,
+  );
   const fetcher = useFetcher<WishlistActionData>();
   const location = useLocation();
   const navigate = useNavigate();
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start' });
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const [wishlisted, setWishlisted] = useState(isWishlisted);
   const [wishlistError, setWishlistError] = useState<string | null>(null);
   const priceLabel = formatPriceLabel(minPrice);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    onSelect();
-    emblaApi.on('select', onSelect);
-    return () => {
-      emblaApi.off('select', onSelect);
-    };
-  }, [emblaApi, onSelect]);
 
   useEffect(() => {
     setWishlisted(isWishlisted);
@@ -219,44 +198,34 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
           <SimilarMotifsIcon />
         </button>
       ) : null}
-      <div className="custom-product-card__media" ref={emblaRef}>
-        <div className="custom-product-card__container">
-          {displayImages.map((img) => (
-            <div className="custom-product-card__slide" key={img.url}>
-              <img
-                src={img.url}
-                alt={img.altText || title}
-                className="custom-product-card__image"
-                loading="lazy"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Dots */}
-      <div className="custom-product-card__dots">
-        {displayImages.map((img, i) => (
-          <button
-            key={`dot-${img.url}`}
-            type="button"
-            aria-label={`Zu Bild ${i + 1} wechseln`}
-            className={
-              'custom-product-card__dot' +
-              (i === selectedIndex ? ' custom-product-card__dot--active' : '')
-            }
-            onClick={(e) => {
-              e.preventDefault(); // kartın linkine tıklamayı engellemeden slider’ı kontrol et
-              emblaApi?.scrollTo(i);
-            }}
+      {listingImage ? (
+        <div className="custom-product-card__media">
+          <img
+            src={listingImage.url}
+            alt={listingImage.altText || title}
+            className="custom-product-card__image custom-product-card__image--listing"
+            loading="lazy"
+            decoding="async"
           />
-        ))}
-      </div>
+          {hasHoverImage && primaryImage ? (
+            <img
+              src={primaryImage.url}
+              alt=""
+              aria-hidden="true"
+              className="custom-product-card__image custom-product-card__image--primary"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="custom-product-card__body">
         <h3 className="custom-product-card__title">{title}</h3>
         {priceLabel ? (
-          <p className="custom-product-card__price">{priceLabel}</p>
+          <p className="custom-product-card__price">
+            Ab {priceLabel} / m²
+          </p>
         ) : null}
       </div>
     </a>

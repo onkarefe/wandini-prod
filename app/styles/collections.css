@@ -45,7 +45,7 @@
   width: max-content;
   transition: all 0.3s;
   cursor: pointer;
-  margin: 8px auto 24px;
+  margin: 24px auto;
 }
 
 .collectionReloadButton:hover {

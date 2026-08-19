@@ -597,6 +597,8 @@ function DefaultCollectionLayout({
           <PaginatedResourceSection<CollectionProduct>
             connection={collection.products}
             resourcesClassName="custom-products-grid container mx-auto"
+            previousLabel="Vorherige Produkte laden"
+            nextLabel="Weitere Produkte laden +"
           >
             {({node: product}) => {
               const productWithSimilarFields =
