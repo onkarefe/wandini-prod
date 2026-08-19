@@ -547,21 +547,9 @@ function DefaultCollectionLayout({
   };
   return (
     <>
-      <div
-        className="collectionMainHeroDiv"
-        style={
-          collection.image?.url
-            ? {
-                backgroundImage: `url('${collection.image.url}')`,
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: 'cover',
-              }
-            : {}
-        }
-      >
+      <div className="collectionMainHeroDiv">
         <h1>{collection.title}</h1>
-        <p>{collection.description}</p>
+        {collection.description ? <p>{collection.description}</p> : null}
       </div>
 
       <div className="collection-controls container mx-auto">
