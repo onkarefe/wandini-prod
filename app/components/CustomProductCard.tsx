@@ -1,9 +1,10 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useFetcher, useLocation, useNavigate} from 'react-router';
 import {
   WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
   type WishlistActionData,
 } from '~/lib/wishlist';
+import {showWishlistSuccessToast} from '~/lib/wishlist-toast';
 import '../styles/customProductCard.css';
 import '../styles/wishlistFeedback.css';
 
@@ -93,6 +94,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
     primaryImage && listingImage && primaryImage.url !== listingImage.url,
   );
   const fetcher = useFetcher<WishlistActionData>();
+  const handledWishlistResponseRef = useRef<WishlistActionData | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const [wishlisted, setWishlisted] = useState(isWishlisted);
@@ -111,6 +113,8 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
 
   useEffect(() => {
     if (!fetcher.data) return;
+    if (handledWishlistResponseRef.current === fetcher.data) return;
+    handledWishlistResponseRef.current = fetcher.data;
 
     if (!fetcher.data.ok) {
       if (!fetcher.data.loginUrl) {
@@ -125,8 +129,9 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
 
     setWishlistError(null);
     setWishlisted(fetcher.data.wishlisted);
+    showWishlistSuccessToast(fetcher.data.wishlisted, title);
     onWishlistChange?.(fetcher.data.wishlisted);
-  }, [fetcher.data, onWishlistChange]);
+  }, [fetcher.data, onWishlistChange, title]);
 
   const handleWishlistClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();

@@ -1,10 +1,11 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useFetcher, useLocation} from 'react-router';
 import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {
   WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
   type WishlistActionData,
 } from '~/lib/wishlist';
+import {showWishlistSuccessToast} from '~/lib/wishlist-toast';
 import '../styles/wishlistFeedback.css';
 
 type ProductImage = {
@@ -75,6 +76,7 @@ export function ZubehorProductCard({
   isWishlisted,
 }: ZubehorProductCardProps) {
   const fetcher = useFetcher<WishlistActionData>();
+  const handledWishlistResponseRef = useRef<WishlistActionData | null>(null);
   const location = useLocation();
   const loginPath = usePrefixPathWithLocale('/account/login');
   const [wishlisted, setWishlisted] = useState(isWishlisted);
@@ -95,6 +97,8 @@ export function ZubehorProductCard({
 
   useEffect(() => {
     if (!fetcher.data) return;
+    if (handledWishlistResponseRef.current === fetcher.data) return;
+    handledWishlistResponseRef.current = fetcher.data;
 
     if (!fetcher.data.ok) {
       if (!fetcher.data.loginUrl) {
@@ -109,7 +113,8 @@ export function ZubehorProductCard({
 
     setWishlistError(null);
     setWishlisted(fetcher.data.wishlisted);
-  }, [fetcher.data]);
+    showWishlistSuccessToast(fetcher.data.wishlisted, title);
+  }, [fetcher.data, title]);
 
   const wishlistButtonLabel = isPending
     ? 'Favoriten werden aktualisiert'
