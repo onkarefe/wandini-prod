@@ -27,7 +27,7 @@ function cart(configuredQuantity = 1): DynamicPricingCart {
           ],
           merchandise: {
             id: 'gid://shopify/ProductVariant/1',
-            price: {amount: '0.29', currencyCode: 'EUR'},
+            price: {amount: '28.89', currencyCode: 'EUR'},
           },
         },
         {
@@ -51,6 +51,7 @@ function pricingClient(overrides: Record<string, unknown> = {}) {
     __typename: 'ProductVariant',
     id: 'gid://shopify/ProductVariant/1',
     availableForSale: true,
+    price: '28.89',
     product: {
       id: 'gid://shopify/Product/1',
       masterAssetId: {value: 'asset-1'},
@@ -61,7 +62,6 @@ function pricingClient(overrides: Record<string, unknown> = {}) {
         id: 'gid://shopify/Metaobject/1',
         pricePerM2: {value: '28.89'},
         minWidthCm: {value: '50'},
-        maxWidthCm: {value: '1000'},
         minHeightCm: {value: '50'},
         maxHeightCm: {value: '1000'},
       },
@@ -72,6 +72,7 @@ function pricingClient(overrides: Record<string, unknown> = {}) {
     __typename: 'ProductVariant',
     id: 'gid://shopify/ProductVariant/2',
     availableForSale: true,
+    price: '12.00',
     product: {
       id: 'gid://shopify/Product/2',
       masterAssetId: null,
@@ -174,9 +175,8 @@ describe('Draft Order line preparation', () => {
           id: 'gid://shopify/Metaobject/1',
           pricePerM2: {value: '28.89'},
           minWidthCm: null,
-          maxWidthCm: {value: '150'},
           minHeightCm: null,
-          maxHeightCm: null,
+          maxHeightCm: {value: '150'},
         },
       },
     });
@@ -188,17 +188,7 @@ describe('Draft Order line preparation', () => {
       prepareDraftOrder(
         cart(),
         pricingClient({
-          printQuality: {
-            reference: {
-              __typename: 'Metaobject',
-              id: 'gid://shopify/Metaobject/1',
-              pricePerM2: null,
-              minWidthCm: null,
-              maxWidthCm: null,
-              minHeightCm: null,
-              maxHeightCm: null,
-            },
-          },
+          price: '0',
         }),
       ),
     ).rejects.toMatchObject({code: 'PRICING_UNAVAILABLE'});

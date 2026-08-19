@@ -19,6 +19,7 @@ import {ProductSize} from '~/components/productSize';
 import {
   CONFIGURATOR_INSTANCE_ATTRIBUTE,
   CONFIGURATOR_PAYLOAD_ATTRIBUTE,
+  MAX_CONFIGURATOR_HEIGHT_CM,
   calculateConfiguredWallpaperPrice,
   calculateConfiguratorAreaM2,
   createConfiguratorPayload,
@@ -151,17 +152,13 @@ export default function WallpaperProductLayout({
         | (NonNullable<typeof value.firstSelectableVariant> & {
             printQuality?: {
               reference?: {
-                pricePerM2?: {value?: string | null} | null;
                 priceWithoutDiscount?: {value?: string | null} | null;
               } | null;
             } | null;
           })
         | null
         | undefined;
-      const pricePerM2 = resolveConfiguratorPricePerM2(
-        variant?.printQuality?.reference?.pricePerM2?.value,
-        variant?.price?.amount,
-      );
+      const pricePerM2 = resolveConfiguratorPricePerM2(variant?.price?.amount);
       const amount = Number(pricePerM2);
 
       if (!variant || !Number.isFinite(amount) || amount <= 0) return null;
@@ -201,7 +198,10 @@ export default function WallpaperProductLayout({
     }).format(amount);
 
   const wallAreaM2 = calculateConfiguratorAreaM2(size.width, size.height);
-  const isSizeValid = size.width > 0 && size.height > 0;
+  const isSizeValid =
+    size.width > 0 &&
+    size.height > 0 &&
+    size.height <= MAX_CONFIGURATOR_HEIGHT_CM;
   const outputWidthMm = Math.round(size.width * 10);
   const outputHeightMm = Math.round(size.height * 10);
   const startingTotalPrice = materialStartingPrice
@@ -283,15 +283,11 @@ export default function WallpaperProductLayout({
         .sort((firstValue, secondValue) => {
           const firstPrice = Number(
             resolveConfiguratorPricePerM2(
-              (firstValue.firstSelectableVariant as any)?.printQuality?.reference
-                ?.pricePerM2?.value,
               firstValue.firstSelectableVariant?.price?.amount,
             ),
           );
           const secondPrice = Number(
             resolveConfiguratorPricePerM2(
-              (secondValue.firstSelectableVariant as any)?.printQuality
-                ?.reference?.pricePerM2?.value,
               secondValue.firstSelectableVariant?.price?.amount,
             ),
           );
@@ -311,8 +307,8 @@ export default function WallpaperProductLayout({
           const printQuality = (variant as any)?.printQuality?.reference;
           const optionTitle = printQuality?.title?.value || name;
           const materialImage = printQuality?.image?.reference?.image;
+          const materialBadge = printQuality?.badge?.value?.trim() || null;
           const pricePerM2 = resolveConfiguratorPricePerM2(
-            printQuality?.pricePerM2?.value,
             variant?.price?.amount,
           );
           const currencyCode = variant?.price?.currencyCode;
@@ -343,10 +339,7 @@ export default function WallpaperProductLayout({
                   altText: materialImage.altText,
                 }
               : null,
-            isBestseller: optionTitle
-              .trim()
-              .toLowerCase()
-              .includes('selbstklebend'),
+            badge: materialBadge,
             selected,
             exists,
             variantUriQuery,

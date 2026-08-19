@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import {MAX_CONFIGURATOR_HEIGHT_CM} from '~/lib/configurator-pricing';
 
 // Props: Değerler değiştiğinde üst bileşene iletmek için
 type ProductSizeProps = {
@@ -62,6 +63,7 @@ export const ProductSize: React.FC<ProductSizeProps> = ({ onChange }) => {
 						id="product-height"
 						type="number"
 						min={0}
+						max={MAX_CONFIGURATOR_HEIGHT_CM}
 						value={height}
 						onFocus={handleHeightFocus}
 						onChange={handleHeightChange}

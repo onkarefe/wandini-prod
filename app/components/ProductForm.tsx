@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {toast} from 'sonner';
 import {useNavigate} from 'react-router';
 import { type MappedProductOptions } from '@shopify/hydrogen';
 import type {
@@ -12,6 +13,7 @@ import {Link} from '~/lib/i18n-router';
 import {
   CONFIGURATOR_PAYLOAD_ATTRIBUTE,
   CONFIGURATOR_INSTANCE_ATTRIBUTE,
+  MAX_CONFIGURATOR_HEIGHT_CM,
   createConfiguratorPayload,
   createConfiguratorInstanceId,
   resolveConfiguratorPricePerM2,
@@ -76,7 +78,43 @@ export function ProductForm({
   // -----------------------------
   // VALIDATION
   // -----------------------------
-  const isSizeValid = size.width > 0 && size.height > 0;
+  const isSizeValid =
+    size.width > 0 &&
+    size.height > 0 &&
+    size.height <= MAX_CONFIGURATOR_HEIGHT_CM;
+
+  const handleConfigureClick = () => {
+    const hasHeight = Number.isFinite(size.height) && size.height > 0;
+    const hasWidth = Number.isFinite(size.width) && size.width > 0;
+    const warningOptions = {
+      duration: 10_000,
+    };
+
+    if (!hasHeight && !hasWidth) {
+      toast.warning('Bitte geben Sie Höhe und Breite ein.', warningOptions);
+      return;
+    }
+
+    if (!hasHeight) {
+      toast.warning('Bitte geben Sie die Höhe ein.', warningOptions);
+      return;
+    }
+
+    if (!hasWidth) {
+      toast.warning('Bitte geben Sie die Breite ein.', warningOptions);
+      return;
+    }
+
+    if (size.height > MAX_CONFIGURATOR_HEIGHT_CM) {
+      toast.warning(
+        `Die maximale Höhe beträgt ${MAX_CONFIGURATOR_HEIGHT_CM} cm.`,
+        warningOptions,
+      );
+      return;
+    }
+
+    onConfigure();
+  };
 
   const configuratorPayload = createConfiguratorPayload({
     widthCm: size.width,
@@ -116,7 +154,6 @@ export function ProductForm({
                     }
                     if (v.price?.amount && v.price?.currencyCode) {
                       const resolvedPrice = resolveConfiguratorPricePerM2(
-                        (v as any).printQuality?.reference?.pricePerM2?.value,
                         v.price.amount,
                       );
                       m2Price = resolvedPrice
@@ -223,12 +260,14 @@ export function ProductForm({
 
       {/* CONFIGURE */}
       {!isConfiguring && (
-        <button
-          className="customAddToCartButton"
-          type="button"
-          disabled={!isSizeValid}
-          onClick={onConfigure}
-        >
+          <button
+            className={`customAddToCartButton${
+              !isSizeValid ? ' customAddToCartButton--inactive' : ''
+            }`}
+            type="button"
+            aria-disabled={!isSizeValid}
+            onClick={handleConfigureClick}
+          >
           Jetzt konfigurieren
         </button>
       )}

@@ -23,7 +23,7 @@ export type ConfiguratorMaterialOption = {
     url: string;
     altText?: string | null;
   } | null;
-  isBestseller: boolean;
+  badge: string | null;
   selected: boolean;
   exists: boolean;
   variantUriQuery: string;
@@ -41,7 +41,6 @@ const CONFIGURATOR_STEPS: Array<{
 ];
 
 type ConfiguratorMaterialVisual = {
-  badge?: string;
   featured?: boolean;
   objectPosition?: string;
 };
@@ -50,19 +49,13 @@ const MATERIAL_VISUALS = {
   standard: {
   },
   premium: {
-    badge: 'Am beliebtesten',
     featured: true,
   },
-  premiumVinyl: {
-    badge: 'Empfohlen',
-  },
+  premiumVinyl: {},
   selfAdhesive: {
-    badge: 'Kein Klebstoff nötig',
     objectPosition: 'center bottom',
   },
-  airtex: {
-    badge: 'Bahnenlos',
-  },
+  airtex: {},
 } satisfies Record<string, ConfiguratorMaterialVisual>;
 
 function resolveMaterialVisual(
@@ -459,15 +452,15 @@ export function ConfiguratorModal({
                               }}
                             />
 
-                            {materialVisual?.badge && (
+                            {material.badge && (
                               <span
                                 className={`configuratorMaterialBadge${
-                                  materialVisual.featured
+                                  materialVisual?.featured
                                     ? ' configuratorMaterialBadge--featured'
                                     : ''
                                 }`}
                               >
-                                {materialVisual.badge}
+                                {material.badge}
                               </span>
                             )}
 
@@ -499,7 +492,7 @@ export function ConfiguratorModal({
 
                           <div className="configuratorMaterialTotal">
                             <div>
-                              <span>Gesamtpreis</span>
+                              <span>Preis</span>
                             </div>
                             <strong>{material.calculatedPrice}</strong>
                           </div>

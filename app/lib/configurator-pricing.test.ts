@@ -47,10 +47,10 @@ describe('configured wallpaper pricing', () => {
     ).toEqual({amount: '83.60', currencyCode: 'EUR'});
   });
 
-  it('prefers price_per_m2 and treats catalog price directly as fallback', () => {
-    expect(resolveConfiguratorPricePerM2('31.50', '0.29')).toBe('31.50');
-    expect(resolveConfiguratorPricePerM2(null, '28.89')).toBe('28.89');
-    expect(resolveConfiguratorPricePerM2('0', '0')).toBeNull();
+  it('uses Shopify native variant price as the per-m² price', () => {
+    expect(resolveConfiguratorPricePerM2('31.50')).toBe('31.50');
+    expect(resolveConfiguratorPricePerM2('28.89')).toBe('28.89');
+    expect(resolveConfiguratorPricePerM2('0')).toBeNull();
   });
 
   it('validates production payloads strictly', () => {
@@ -61,6 +61,10 @@ describe('configured wallpaper pricing', () => {
       crop_ratio: {x: 0, y: 0.1, w: 1, h: 0.8},
     });
     expect(parseConfiguratorPayload(valid)?.output.width).toBe(2000);
+    expect(
+      parseConfiguratorPayload(valid.replace('2500', '3120'))?.output.height,
+    ).toBe(3120);
+    expect(parseConfiguratorPayload(valid.replace('2500', '3121'))).toBeNull();
     expect(parseConfiguratorPayload(valid.replace('2500', '-1'))).toBeNull();
     expect(
       parseConfiguratorPayload(valid.replace('"w":1', '"w":1.1')),

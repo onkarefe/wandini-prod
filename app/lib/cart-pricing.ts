@@ -61,7 +61,6 @@ export function resolveConfiguredCartLine(
   const payload = parseConfiguratorPayload(attribute.value);
   const currencyCode = line.merchandise.price?.currencyCode;
   const pricePerM2 = resolveConfiguratorPricePerM2(
-    line.merchandise.printQuality?.reference?.pricePerM2?.value,
     line.merchandise.price?.amount,
   );
 

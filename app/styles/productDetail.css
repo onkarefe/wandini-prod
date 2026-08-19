@@ -324,12 +324,21 @@
   opacity: 0.45;
 }
 
+.customAddToCartButton--inactive {
+  cursor: pointer;
+  opacity: 0.45;
+}
+
 .customAddToCartButtonWrapper {
   width: 100%;
 }
 
 .customAddToCartButton:hover {
   background-color: #333;
+}
+
+.customAddToCartButton--inactive:hover {
+  background-color: #171717;
 }
 
 /* Container */

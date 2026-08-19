@@ -60,6 +60,7 @@ type AdminVariant = {
   __typename: 'ProductVariant';
   id: string;
   availableForSale: boolean;
+  price: string;
   product: {
     id: string;
     masterAssetId: {value: string} | null;
@@ -68,9 +69,7 @@ type AdminVariant = {
     reference: {
       __typename: 'Metaobject';
       id: string;
-      pricePerM2: {value: string} | null;
       minWidthCm: {value: string} | null;
-      maxWidthCm: {value: string} | null;
       minHeightCm: {value: string} | null;
       maxHeightCm: {value: string} | null;
     } | null;
@@ -395,8 +394,7 @@ export function mapCartLineToDraftOrderLine(
   }
 
   const pricePerM2 = resolveConfiguratorPricePerM2(
-    variant.printQuality?.reference?.pricePerM2?.value,
-    null,
+    variant.price,
   );
   if (!pricePerM2) {
     throw new DynamicPricingError(
@@ -481,10 +479,7 @@ function validateLineConfiguration(
 
   validateMaterialDimensions(payload.output.width, payload.output.height, variant);
   if (
-    !resolveConfiguratorPricePerM2(
-      variant.printQuality?.reference?.pricePerM2?.value,
-      null,
-    )
+    !resolveConfiguratorPricePerM2(variant.price)
   ) {
     throw new DynamicPricingError(
       'PRICING_UNAVAILABLE',
@@ -571,14 +566,12 @@ function validateMaterialDimensions(
   const heightCm = heightMm / 10;
   const limits = {
     minWidth: parseOptionalPositiveNumber(material.minWidthCm?.value),
-    maxWidth: parseOptionalPositiveNumber(material.maxWidthCm?.value),
     minHeight: parseOptionalPositiveNumber(material.minHeightCm?.value),
     maxHeight: parseOptionalPositiveNumber(material.maxHeightCm?.value),
   };
 
   if (
     (limits.minWidth !== null && widthCm < limits.minWidth) ||
-    (limits.maxWidth !== null && widthCm > limits.maxWidth) ||
     (limits.minHeight !== null && heightCm < limits.minHeight) ||
     (limits.maxHeight !== null && heightCm > limits.maxHeight)
   ) {
@@ -899,6 +892,7 @@ const VARIANT_PRICING_QUERY = `
       ... on ProductVariant {
         id
         availableForSale
+        price
         product {
           id
           masterAssetId: metafield(namespace: "custom", key: "master_asset_id") {
@@ -910,9 +904,7 @@ const VARIANT_PRICING_QUERY = `
             __typename
             ... on Metaobject {
               id
-              pricePerM2: field(key: "price_per_m2") { value }
               minWidthCm: field(key: "min_width_cm") { value }
-              maxWidthCm: field(key: "max_width_cm") { value }
               minHeightCm: field(key: "min_height_cm") { value }
               maxHeightCm: field(key: "max_height_cm") { value }
             }

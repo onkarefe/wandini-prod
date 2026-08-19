@@ -446,6 +446,9 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
           title: field(key: "title") {
             value
           }
+          badge: field(key: "badge") {
+            value
+          }
           pricePerM2: field(key: "price_per_m2") {
             value
           }

@@ -24,14 +24,14 @@ function configuredLine(instanceId = 'configuration-1'): CartLinePricingLike {
       {key: 'configurator_instance_id', value: instanceId},
     ],
     cost: {
-      subtotalAmount: {amount: '0.29', currencyCode: 'EUR'},
-      totalAmount: {amount: '0.29', currencyCode: 'EUR'},
+      subtotalAmount: {amount: '28.89', currencyCode: 'EUR'},
+      totalAmount: {amount: '28.89', currencyCode: 'EUR'},
     },
     merchandise: {
       id: 'gid://shopify/ProductVariant/1',
-      price: {amount: '0.29', currencyCode: 'EUR'},
+      price: {amount: '28.89', currencyCode: 'EUR'},
       printQuality: {
-        reference: {pricePerM2: {value: '28.89'}},
+        reference: {pricePerM2: {value: '999.99'}},
       },
     },
   };

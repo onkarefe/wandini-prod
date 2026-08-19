@@ -1,6 +1,7 @@
 export const CONFIGURATOR_PAYLOAD_ATTRIBUTE = 'configurator_payload';
 export const CONFIGURATOR_INSTANCE_ATTRIBUTE = 'configurator_instance_id';
 export const CONFIGURATOR_PAYLOAD_VERSION = 1;
+export const MAX_CONFIGURATOR_HEIGHT_CM = 312;
 
 export type ConfiguratorCropRatio = {
   x: number;
@@ -106,6 +107,7 @@ export function validateConfiguratorPayload(
   if (!output || output.unit !== 'mm') return false;
   if (!isPositiveSafeInteger(output.width)) return false;
   if (!isPositiveSafeInteger(output.height)) return false;
+  if (output.height > MAX_CONFIGURATOR_HEIGHT_CM * 10) return false;
   if (!crop) return false;
 
   const coordinates = [crop.x, crop.y, crop.w, crop.h];
@@ -120,15 +122,11 @@ export function validateConfiguratorPayload(
 }
 
 export function resolveConfiguratorPricePerM2(
-  configuredPricePerM2Value: string | number | null | undefined,
-  catalogPriceValue: string | number | null | undefined,
+  variantPriceValue: string | number | null | undefined,
 ): string | null {
-  const configuredPrice = normalizePositiveDecimal(configuredPricePerM2Value);
-  if (configuredPrice) return configuredPrice;
-
-  // The accepted storefront UI treats the catalog amount directly as a per-m²
-  // fallback. It is never scaled to reverse the removed billing-unit model.
-  return normalizePositiveDecimal(catalogPriceValue);
+  // Shopify's native variant price is the single source of truth for the
+  // material's per-m² price in the configurator, cart and checkout quote.
+  return normalizePositiveDecimal(variantPriceValue);
 }
 
 export function calculateConfiguredWallpaperPrice({
