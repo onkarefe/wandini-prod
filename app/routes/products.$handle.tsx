@@ -5,6 +5,10 @@ import type {Route} from './+types/products.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {getRobotsDirective} from '~/lib/seo';
 import {getSimilarMotifsPreview} from '~/lib/similar-products-preview';
+import {
+  hasExplicitProductOptionSelection,
+  resolveInitialWallpaperVariant,
+} from '~/lib/wallpaper-variant-selection';
 
 const ZUBEHOR_PRODUCT_LAYOUT = 'zubehor';
 
@@ -282,8 +286,9 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   if (!handle) throw new Error('Expected product handle to be defined');
 
+  const requestedSelectedOptions = getSelectedProductOptions(request);
   const {product} = await storefront.query(PRODUCT_QUERY, {
-    variables: {handle, selectedOptions: getSelectedProductOptions(request)},
+    variables: {handle, selectedOptions: requestedSelectedOptions},
   });
 
   if (!product?.id) throw new Response(null, {status: 404});
@@ -291,11 +296,23 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
   const url = new URL(request.url);
+  const hasExplicitVariantSelection = hasExplicitProductOptionSelection(
+    product.options,
+    requestedSelectedOptions,
+  );
+  const initialVariant = isZubehorProduct(product)
+    ? product.selectedOrFirstAvailableVariant
+    : resolveInitialWallpaperVariant(
+        product.options,
+        product.selectedOrFirstAvailableVariant,
+        hasExplicitVariantSelection,
+      );
 
   return {
     canonicalUrl: `${url.origin}${url.pathname}`,
     product: {
       ...product,
+      selectedOrFirstAvailableVariant: initialVariant,
       descriptionHtml: sanitizeProductDescriptionHtml(product.descriptionHtml),
     },
   };
@@ -331,9 +348,9 @@ function loadDeferredData(
   return {similarMotifsPreview};
 }
 
-function isZubehorProduct(
-  product: Awaited<ReturnType<typeof loadCriticalData>>['product'],
-) {
+function isZubehorProduct(product: {
+  productLayout?: {value?: string | null} | null;
+}) {
   return (
     product.productLayout?.value?.trim().toLowerCase() ===
     ZUBEHOR_PRODUCT_LAYOUT
