@@ -123,6 +123,7 @@ export default function WallpaperProductLayout({
   const cartPath = usePrefixPathWithLocale('/cart');
   const [isConfiguring, setIsConfiguring] = useState(false);
   const [size, setSize] = useState({width: 0, height: 0});
+  const [showSizeErrors, setShowSizeErrors] = useState(false);
   const [crop, setCrop] = useState<CropRect | null>(null);
   const [configurationInstanceId, setConfigurationInstanceId] = useState(
     createConfiguratorInstanceId,
@@ -202,6 +203,16 @@ export default function WallpaperProductLayout({
     size.width > 0 &&
     size.height > 0 &&
     size.height <= MAX_CONFIGURATOR_HEIGHT_CM;
+  const widthError =
+    showSizeErrors && !(Number.isFinite(size.width) && size.width > 0)
+      ? 'Bitte geben Sie die Breite ein.'
+      : undefined;
+  const heightError =
+    showSizeErrors && !(Number.isFinite(size.height) && size.height > 0)
+      ? 'Bitte geben Sie die Höhe ein.'
+      : showSizeErrors && size.height > MAX_CONFIGURATOR_HEIGHT_CM
+        ? `Die maximale Höhe beträgt ${MAX_CONFIGURATOR_HEIGHT_CM} cm.`
+        : undefined;
   const outputWidthMm = Math.round(size.width * 10);
   const outputHeightMm = Math.round(size.height * 10);
   const startingTotalPrice = materialStartingPrice
@@ -456,7 +467,11 @@ export default function WallpaperProductLayout({
             <div className="productPurchaseCardDivider" aria-hidden="true" />
 
             <section className="productPurchaseCardConfiguration">
-              <ProductSize onChange={setSize} />
+              <ProductSize
+                onChange={setSize}
+                widthError={widthError}
+                heightError={heightError}
+              />
 
               <div className="productOrderSummary" aria-live="polite">
                 <div className="productOrderSummaryItem">
@@ -484,7 +499,11 @@ export default function WallpaperProductLayout({
                 size={size}
                 crop={crop}
                 isConfiguring={isConfiguring}
-                onConfigure={() => setIsConfiguring(true)}
+                onConfigure={() => {
+                  setShowSizeErrors(false);
+                  setIsConfiguring(true);
+                }}
+                onSizeValidationError={() => setShowSizeErrors(true)}
                 masterAssetId={product.masterAssetId?.value}
                 showQualityOptions={false}
               />

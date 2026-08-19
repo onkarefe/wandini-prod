@@ -412,6 +412,14 @@
   background-color: white;
 }
 
+.customSizeError {
+  margin: 6px 0 0;
+  color: #c62828;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
 /* Remove number input arrows (Chrome, Safari, Edge) */
 .customSizeField input::-webkit-outer-spin-button,
 .customSizeField input::-webkit-inner-spin-button {

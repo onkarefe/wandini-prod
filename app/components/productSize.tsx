@@ -4,9 +4,15 @@ import {MAX_CONFIGURATOR_HEIGHT_CM} from '~/lib/configurator-pricing';
 // Props: Değerler değiştiğinde üst bileşene iletmek için
 type ProductSizeProps = {
 	onChange?: (size: { width: number; height: number }) => void;
+	widthError?: string;
+	heightError?: string;
 };
 
-export const ProductSize: React.FC<ProductSizeProps> = ({ onChange }) => {
+export const ProductSize: React.FC<ProductSizeProps> = ({
+	onChange,
+	widthError,
+	heightError,
+}) => {
 	const [width, setWidth] = useState<string>('0');
 	const [height, setHeight] = useState<string>('0');
 	const [isWidthEdited, setIsWidthEdited] = useState<boolean>(false);
@@ -52,8 +58,15 @@ export const ProductSize: React.FC<ProductSizeProps> = ({ onChange }) => {
 						value={width}
 						onFocus={handleWidthFocus}
 						onChange={handleWidthChange}
+						aria-invalid={Boolean(widthError)}
+						aria-describedby={widthError ? 'product-width-error' : undefined}
 					/>
 				</div>
+				{widthError && (
+					<p id="product-width-error" className="customSizeError" role="alert">
+						{widthError}
+					</p>
+				)}
 			</div>
 
 			<div className="customSizeField">
@@ -67,8 +80,15 @@ export const ProductSize: React.FC<ProductSizeProps> = ({ onChange }) => {
 						value={height}
 						onFocus={handleHeightFocus}
 						onChange={handleHeightChange}
+						aria-invalid={Boolean(heightError)}
+						aria-describedby={heightError ? 'product-height-error' : undefined}
 					/>
 				</div>
+				{heightError && (
+					<p id="product-height-error" className="customSizeError" role="alert">
+						{heightError}
+					</p>
+				)}
 			</div>
 		</div>
 	);

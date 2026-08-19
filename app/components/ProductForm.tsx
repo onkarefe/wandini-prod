@@ -1,5 +1,4 @@
 import {useState} from 'react';
-import {toast} from 'sonner';
 import {useNavigate} from 'react-router';
 import { type MappedProductOptions } from '@shopify/hydrogen';
 import type {
@@ -33,6 +32,7 @@ export function ProductForm({
   crop,
   isConfiguring,
   onConfigure,
+  onSizeValidationError,
   masterAssetId,
   showInlineAddToCart = false,
   showQualityOptions = true,
@@ -43,6 +43,7 @@ export function ProductForm({
   crop?: CropRect | null;
   isConfiguring: boolean;
   onConfigure: () => void;
+  onSizeValidationError: () => void;
   masterAssetId?: string;
   showInlineAddToCart?: boolean;
   showQualityOptions?: boolean;
@@ -84,32 +85,8 @@ export function ProductForm({
     size.height <= MAX_CONFIGURATOR_HEIGHT_CM;
 
   const handleConfigureClick = () => {
-    const hasHeight = Number.isFinite(size.height) && size.height > 0;
-    const hasWidth = Number.isFinite(size.width) && size.width > 0;
-    const warningOptions = {
-      duration: 10_000,
-    };
-
-    if (!hasHeight && !hasWidth) {
-      toast.warning('Bitte geben Sie Höhe und Breite ein.', warningOptions);
-      return;
-    }
-
-    if (!hasHeight) {
-      toast.warning('Bitte geben Sie die Höhe ein.', warningOptions);
-      return;
-    }
-
-    if (!hasWidth) {
-      toast.warning('Bitte geben Sie die Breite ein.', warningOptions);
-      return;
-    }
-
-    if (size.height > MAX_CONFIGURATOR_HEIGHT_CM) {
-      toast.warning(
-        `Die maximale Höhe beträgt ${MAX_CONFIGURATOR_HEIGHT_CM} cm.`,
-        warningOptions,
-      );
+    if (!isSizeValid) {
+      onSizeValidationError();
       return;
     }
 
