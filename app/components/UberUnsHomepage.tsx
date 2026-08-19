@@ -25,19 +25,13 @@ export default function UberUnsHomepage({content}: UberUnsHomepageProps) {
   }
 
   const hasImage = Boolean(sectionImage?.url);
-  const hasText = Boolean(sectionContent);
+  const hasText = Boolean(sectionTitle || sectionContent);
 
   return (
     <section
       className="uberUnsHomepage container mx-auto"
       aria-labelledby={sectionTitle ? 'uber-uns-homepage-title' : undefined}
     >
-      {sectionTitle ? (
-        <div className="seperator uberUnsHomepage__heading">
-          <h3 id="uber-uns-homepage-title">{sectionTitle}</h3>
-        </div>
-      ) : null}
-
       <div
         className={`uberUnsHomepage__layout${
           !hasImage || !hasText ? ' uberUnsHomepage__layout--single' : ''
@@ -56,9 +50,12 @@ export default function UberUnsHomepage({content}: UberUnsHomepageProps) {
           </div>
         ) : null}
 
-        {sectionContent ? (
+        {hasText ? (
           <div className="uberUnsHomepage__content">
-            <p>{sectionContent}</p>
+            {sectionTitle ? (
+              <h3 id="uber-uns-homepage-title">{sectionTitle}</h3>
+            ) : null}
+            {sectionContent ? <p>{sectionContent}</p> : null}
           </div>
         ) : null}
       </div>
