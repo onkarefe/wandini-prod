@@ -388,6 +388,11 @@
   font-size: 18px;
 }
 
+.bestseller-product-price {
+  margin-top: 10px;
+  color: #6b6b6b;
+}
+
 .allProductsDots {
   display: flex;
   align-items: center;
