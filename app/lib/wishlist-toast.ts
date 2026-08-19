@@ -8,6 +8,6 @@ export function showWishlistSuccessToast(
     wishlisted
       ? 'Produkt wurde zu den Favoriten hinzugefügt.'
       : 'Produkt wurde aus den Favoriten entfernt.',
-    {description: productTitle},
+    productTitle ? {description: productTitle} : undefined,
   );
 }

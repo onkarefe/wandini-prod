@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useRef,
   useState,
   type FocusEvent,
   type MouseEvent,
@@ -12,7 +11,6 @@ import {
   WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
   type WishlistActionData,
 } from '~/lib/wishlist';
-import {showWishlistSuccessToast} from '~/lib/wishlist-toast';
 import '../styles/wishlistFeedback.css';
 
 type ProductPrice = {
@@ -101,7 +99,6 @@ export default function BestsellerProductCard({
       ? [images[1], images[0], ...images.slice(2, 3)]
       : images.slice(0, 1);
   const fetcher = useFetcher<WishlistActionData>();
-  const handledWishlistResponseRef = useRef<WishlistActionData | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -145,8 +142,6 @@ export default function BestsellerProductCard({
 
   useEffect(() => {
     if (!fetcher.data) return;
-    if (handledWishlistResponseRef.current === fetcher.data) return;
-    handledWishlistResponseRef.current = fetcher.data;
 
     if (!fetcher.data.ok) {
       if (!fetcher.data.loginUrl) {
@@ -161,8 +156,7 @@ export default function BestsellerProductCard({
 
     setWishlistError(null);
     setWishlisted(fetcher.data.wishlisted);
-    showWishlistSuccessToast(fetcher.data.wishlisted, title);
-  }, [fetcher.data, title]);
+  }, [fetcher.data]);
 
   const handleWishlistClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -177,6 +171,7 @@ export default function BestsellerProductCard({
 
     const formData = new FormData();
     formData.set('productId', productId);
+    formData.set('productTitle', title);
     formData.set('desiredWishlisted', String(!wishlisted));
     void fetcher.submit(formData, {
       method: 'post',

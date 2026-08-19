@@ -1,5 +1,6 @@
 import {Analytics, getShopAnalytics, useNonce} from '@shopify/hydrogen';
 import {Toaster} from 'sonner';
+import {WishlistToastListener} from '~/components/WishlistToastListener';
 import {
   Outlet,
   useRouteError,
@@ -179,6 +180,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
       <body>
         {children}
         <Toaster position="top-right" richColors expand />
+        <WishlistToastListener />
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>

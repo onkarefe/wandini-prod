@@ -1,0 +1,31 @@
+import {useEffect, useRef} from 'react';
+import {useFetchers} from 'react-router';
+import type {WishlistActionData} from '~/lib/wishlist';
+import {showWishlistSuccessToast} from '~/lib/wishlist-toast';
+
+export function WishlistToastListener() {
+  const fetchers = useFetchers();
+  const handledResponsesRef = useRef(new WeakSet<object>());
+
+  useEffect(() => {
+    for (const fetcher of fetchers) {
+      if (!fetcher.formAction?.endsWith('/api/wishlist')) continue;
+
+      const data = fetcher.data as WishlistActionData | undefined;
+      if (!data || typeof data !== 'object') continue;
+      if (handledResponsesRef.current.has(data)) continue;
+
+      handledResponsesRef.current.add(data);
+
+      if (!data.ok || typeof data.wishlisted !== 'boolean') continue;
+
+      const productTitle = fetcher.formData?.get('productTitle');
+      showWishlistSuccessToast(
+        data.wishlisted,
+        typeof productTitle === 'string' ? productTitle : '',
+      );
+    }
+  }, [fetchers]);
+
+  return null;
+}
