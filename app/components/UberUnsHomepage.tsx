@@ -1,3 +1,5 @@
+import wandIcon from '~/assets/Icons/wand.png';
+
 export type UberUnsHomepageImage = {
   url: string;
   altText?: string;
@@ -56,6 +58,15 @@ export default function UberUnsHomepage({content}: UberUnsHomepageProps) {
               <h3 id="uber-uns-homepage-title">{sectionTitle}</h3>
             ) : null}
             {sectionContent ? <p>{sectionContent}</p> : null}
+            <img
+              className="uberUnsHomepage__wandIcon"
+              src={wandIcon}
+              alt=""
+              width={60}
+              height={60}
+              loading="lazy"
+              aria-hidden="true"
+            />
           </div>
         ) : null}
       </div>
