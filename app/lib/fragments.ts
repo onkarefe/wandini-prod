@@ -37,7 +37,9 @@ export const CART_QUERY_FRAGMENT = `#graphql
         }
         printQuality: metafield(namespace: "custom", key: "print_quality") {
           reference {
+            __typename
             ... on Metaobject {
+              id
               pricePerM2: field(key: "price_per_m2") {
                 value
               }
@@ -59,6 +61,9 @@ export const CART_QUERY_FRAGMENT = `#graphql
           title
           id
           vendor
+          masterAssetId: metafield(namespace: "custom", key: "master_asset_id") {
+            value
+          }
         }
         selectedOptions {
           name
@@ -100,7 +105,9 @@ export const CART_QUERY_FRAGMENT = `#graphql
         }
         printQuality: metafield(namespace: "custom", key: "print_quality") {
           reference {
+            __typename
             ... on Metaobject {
+              id
               pricePerM2: field(key: "price_per_m2") {
                 value
               }
@@ -121,6 +128,9 @@ export const CART_QUERY_FRAGMENT = `#graphql
           title
           id
           vendor
+          masterAssetId: metafield(namespace: "custom", key: "master_asset_id") {
+            value
+          }
         }
         selectedOptions {
           name

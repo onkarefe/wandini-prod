@@ -6,6 +6,13 @@ import {
   resolveConfiguratorPricePerM2,
   type ConfiguredMoney,
 } from '~/lib/configurator-pricing';
+import {
+  CONFIGURED_PRODUCT_CLASSIFICATION,
+  classifyConfiguredProductMetafields,
+  type ConfiguredProductClassification,
+  type ShopifyMasterAssetMetafield,
+  type ShopifyPrintQualityMetafield,
+} from '~/lib/configured-product-classification';
 
 const ADMIN_API_VERSION = '2026-07';
 const ADMIN_REQUEST_TIMEOUT_MS = 15_000;
@@ -31,6 +38,10 @@ export type DynamicPricingCartLine = {
     id: string;
     availableForSale?: boolean;
     price?: ConfiguredMoney | null;
+    product?: {
+      masterAssetId?: ShopifyMasterAssetMetafield;
+    };
+    printQuality?: ShopifyPrintQualityMetafield;
   };
 };
 
@@ -56,6 +67,13 @@ export type DynamicPricingCartLineInput = {
   attributes?: CartAttribute[] | null;
 };
 
+export type DynamicPricingCartLineUpdateInput = {
+  id: string;
+  quantity?: number | null;
+  merchandiseId?: string | null;
+  attributes?: CartAttribute[] | null;
+};
+
 type AdminVariant = {
   __typename: 'ProductVariant';
   id: string;
@@ -71,7 +89,6 @@ type AdminVariant = {
       id: string;
       minWidthCm: {value: string} | null;
       minHeightCm: {value: string} | null;
-      maxHeightCm: {value: string} | null;
     } | null;
   } | null;
 };
@@ -145,6 +162,10 @@ export type DynamicPricingErrorCode =
   | 'SHOPIFY_API_ERROR'
   | 'INVALID_CART'
   | 'INVALID_CONFIGURATION'
+  | 'PARTIALLY_CONFIGURED_PRODUCT'
+  | 'INVALID_CONFIGURED_QUANTITY'
+  | 'INVALID_CONFIGURATOR_INSTANCE_ID'
+  | 'DIMENSION_LIMIT_VIOLATION'
   | 'PRICING_UNAVAILABLE'
   | 'CURRENCY_MISMATCH'
   | 'DRAFT_ORDER_ERROR';
@@ -172,6 +193,11 @@ export async function getCartPricingEvaluation(
   cart: DynamicPricingCart,
   env: DynamicPricingEnv,
 ): Promise<CartPricingEvaluation> {
+  const storefrontClassification = classifyStorefrontCart(cart);
+  if (storefrontClassification === CONFIGURED_PRODUCT_CLASSIFICATION.ORDINARY) {
+    return {checkoutMode: 'native', pricingQuote: null};
+  }
+
   const client = createAdminClient(env);
   const prepared = await prepareDraftOrder(cart, client);
   if (prepared.configuredLineCount === 0) {
@@ -206,6 +232,7 @@ export async function getCartPricingEvaluation(
 export async function validateCartLineInputsForAdd(
   lines: DynamicPricingCartLineInput[],
   env: DynamicPricingEnv,
+  existingCart?: DynamicPricingCart | null,
 ) {
   if (!lines.length) {
     throw new DynamicPricingError('INVALID_CART', 'No cart lines were provided.');
@@ -225,10 +252,85 @@ export async function validateCartLineInputsForAdd(
   });
   const client = createAdminClient(env);
   const variants = await getAdminVariants(normalizedLines, client);
+  const instanceIds = new Set<string>();
+
+  if (existingCart) {
+    for (const line of existingCart.lines.nodes) {
+      const classification = classifyStorefrontCartLine(line);
+      assertStorefrontLineClassification(line, classification);
+      if (classification === CONFIGURED_PRODUCT_CLASSIFICATION.CONFIGURED) {
+        registerConfiguratorInstanceId(line, instanceIds);
+      }
+    }
+  }
 
   for (const line of normalizedLines) {
     const variant = getAvailableAdminVariant(line, variants);
-    validateLineConfiguration(line, variant);
+    const payload = validateLineConfiguration(line, variant);
+    if (payload) registerConfiguratorInstanceId(line, instanceIds);
+  }
+}
+
+export function validateCartLineInputsForUpdate(
+  updates: DynamicPricingCartLineUpdateInput[],
+  cart: DynamicPricingCart,
+) {
+  if (!updates.length) {
+    throw new DynamicPricingError(
+      'INVALID_CART',
+      'No cart lines were provided.',
+    );
+  }
+
+  const currentLines = new Map(cart.lines.nodes.map((line) => [line.id, line]));
+  for (const update of updates) {
+    const currentLine = currentLines.get(update.id);
+    if (!currentLine) {
+      throw new DynamicPricingError(
+        'INVALID_CART',
+        'A cart line update is invalid.',
+      );
+    }
+
+    const classification = classifyStorefrontCartLine(currentLine);
+    assertStorefrontLineClassification(currentLine, classification);
+
+    if (
+      update.quantity !== undefined &&
+      update.quantity !== null &&
+      (!Number.isSafeInteger(update.quantity) || update.quantity < 0)
+    ) {
+      throw new DynamicPricingError(
+        'INVALID_CART',
+        'A cart quantity is invalid.',
+      );
+    }
+
+    if (classification === CONFIGURED_PRODUCT_CLASSIFICATION.CONFIGURED) {
+      if (update.quantity !== undefined && update.quantity !== 1) {
+        throw new DynamicPricingError(
+          'INVALID_CONFIGURED_QUANTITY',
+          'Configured wallpaper quantity must be one.',
+        );
+      }
+      if (
+        update.merchandiseId !== undefined ||
+        update.attributes !== undefined
+      ) {
+        throw new DynamicPricingError(
+          'INVALID_CONFIGURATION',
+          'Configured wallpaper cannot be changed through a cart line update.',
+        );
+      }
+      continue;
+    }
+
+    if (update.merchandiseId !== undefined || update.attributes !== undefined) {
+      throw new DynamicPricingError(
+        'INVALID_CONFIGURATION',
+        'Cart line identity and configuration cannot be changed here.',
+      );
+    }
   }
 }
 
@@ -273,11 +375,19 @@ export async function prepareDraftOrder(
       .map((variant) => [variant.id, variant]),
   );
   let configuredLineCount = 0;
+  const instanceIds = new Set<string>();
 
   const lineItems = cart.lines.nodes.map((line) => {
-    const variant = getAvailableAdminVariant(line, variants);
-    if (isTrustedConfigurableVariant(variant)) configuredLineCount += 1;
-    return mapCartLineToDraftOrderLine(line, variants, shopCurrency);
+    const mappedLine = mapCartLineToDraftOrderLine(
+      line,
+      variants,
+      shopCurrency,
+    );
+    if (mappedLine.priceOverride) {
+      configuredLineCount += 1;
+      registerConfiguratorInstanceId(line, instanceIds);
+    }
+    return mappedLine;
   });
   const discountCodes = [
     ...new Set(
@@ -354,9 +464,10 @@ export function mapCartLineToDraftOrderLine(
     ({key}) => key === CONFIGURATOR_PAYLOAD_ATTRIBUTE,
   );
   const variant = getAvailableAdminVariant(line, variants);
-  const isConfigurable = isTrustedConfigurableVariant(variant);
+  const classification = classifyAdminVariant(variant);
+  assertValidProductClassification(classification);
 
-  if (!isConfigurable) {
+  if (classification === CONFIGURED_PRODUCT_CLASSIFICATION.ORDINARY) {
     if (payloadAttribute) {
       throw new DynamicPricingError(
         'INVALID_CONFIGURATION',
@@ -427,7 +538,10 @@ function validateLineConfiguration(
     ({key}) => key === CONFIGURATOR_PAYLOAD_ATTRIBUTE,
   );
 
-  if (!isTrustedConfigurableVariant(variant)) {
+  const classification = classifyAdminVariant(variant);
+  assertValidProductClassification(classification);
+
+  if (classification === CONFIGURED_PRODUCT_CLASSIFICATION.ORDINARY) {
     if (payloadAttribute) {
       throw new DynamicPricingError(
         'INVALID_CONFIGURATION',
@@ -446,20 +560,12 @@ function validateLineConfiguration(
 
   if (line.quantity !== 1) {
     throw new DynamicPricingError(
-      'INVALID_CONFIGURATION',
+      'INVALID_CONFIGURED_QUANTITY',
       'Configured wallpaper quantity must be one.',
     );
   }
 
-  const instanceId = line.attributes.find(
-    ({key}) => key === CONFIGURATOR_INSTANCE_ATTRIBUTE,
-  )?.value;
-  if (!instanceId || instanceId.length > 100) {
-    throw new DynamicPricingError(
-      'INVALID_CONFIGURATION',
-      'Configured wallpaper identity is missing.',
-    );
-  }
+  getConfiguratorInstanceId(line);
 
   const payload = parseConfiguratorPayload(payloadAttribute.value);
   if (!payload) {
@@ -567,16 +673,14 @@ function validateMaterialDimensions(
   const limits = {
     minWidth: parseOptionalPositiveNumber(material.minWidthCm?.value),
     minHeight: parseOptionalPositiveNumber(material.minHeightCm?.value),
-    maxHeight: parseOptionalPositiveNumber(material.maxHeightCm?.value),
   };
 
   if (
     (limits.minWidth !== null && widthCm < limits.minWidth) ||
-    (limits.minHeight !== null && heightCm < limits.minHeight) ||
-    (limits.maxHeight !== null && heightCm > limits.maxHeight)
+    (limits.minHeight !== null && heightCm < limits.minHeight)
   ) {
     throw new DynamicPricingError(
-      'INVALID_CONFIGURATION',
+      'DIMENSION_LIMIT_VIOLATION',
       'The configured dimensions are outside the selected material limits.',
     );
   }
@@ -630,11 +734,94 @@ function getAvailableAdminVariant(
   return variant;
 }
 
-function isTrustedConfigurableVariant(variant: AdminVariant) {
-  return Boolean(
-    variant.product.masterAssetId?.value?.trim() ||
-      variant.printQuality?.reference?.__typename === 'Metaobject',
+function classifyAdminVariant(variant: AdminVariant) {
+  return classifyConfiguredProductMetafields({
+    masterAssetMetafield: variant.product.masterAssetId,
+    printQualityMetafield: variant.printQuality,
+  });
+}
+
+function classifyStorefrontCartLine(line: DynamicPricingCartLine) {
+  return classifyConfiguredProductMetafields({
+    masterAssetMetafield: line.merchandise.product?.masterAssetId,
+    printQualityMetafield: line.merchandise.printQuality,
+  });
+}
+
+function classifyStorefrontCart(cart: DynamicPricingCart) {
+  if (!cart.id || cart.lines.nodes.length === 0) {
+    throw new DynamicPricingError('INVALID_CART', 'The cart is empty.');
+  }
+
+  let cartClassification: ConfiguredProductClassification =
+    CONFIGURED_PRODUCT_CLASSIFICATION.ORDINARY;
+  for (const line of cart.lines.nodes) {
+    const classification = classifyStorefrontCartLine(line);
+    assertStorefrontLineClassification(line, classification);
+    if (classification === CONFIGURED_PRODUCT_CLASSIFICATION.CONFIGURED) {
+      cartClassification = classification;
+    }
+  }
+  return cartClassification;
+}
+
+function assertStorefrontLineClassification(
+  line: DynamicPricingCartLine,
+  classification: ConfiguredProductClassification,
+) {
+  assertValidProductClassification(classification);
+  const hasPayload = line.attributes.some(
+    ({key}) => key === CONFIGURATOR_PAYLOAD_ATTRIBUTE,
   );
+  if (
+    (classification === CONFIGURED_PRODUCT_CLASSIFICATION.ORDINARY &&
+      hasPayload) ||
+    (classification === CONFIGURED_PRODUCT_CLASSIFICATION.CONFIGURED &&
+      !hasPayload)
+  ) {
+    throw new DynamicPricingError(
+      'INVALID_CONFIGURATION',
+      'The cart line configuration does not match its Shopify product metadata.',
+    );
+  }
+}
+
+function assertValidProductClassification(
+  classification: ConfiguredProductClassification,
+) {
+  if (classification === CONFIGURED_PRODUCT_CLASSIFICATION.INVALID) {
+    throw new DynamicPricingError(
+      'PARTIALLY_CONFIGURED_PRODUCT',
+      'The selected product has incomplete configuration metadata.',
+    );
+  }
+}
+
+function getConfiguratorInstanceId(line: DynamicPricingCartLine) {
+  const instanceId = line.attributes.find(
+    ({key}) => key === CONFIGURATOR_INSTANCE_ATTRIBUTE,
+  )?.value;
+  if (!instanceId || !/^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$/.test(instanceId)) {
+    throw new DynamicPricingError(
+      'INVALID_CONFIGURATOR_INSTANCE_ID',
+      'Configured wallpaper identity is invalid.',
+    );
+  }
+  return instanceId;
+}
+
+function registerConfiguratorInstanceId(
+  line: DynamicPricingCartLine,
+  instanceIds: Set<string>,
+) {
+  const instanceId = getConfiguratorInstanceId(line);
+  if (instanceIds.has(instanceId)) {
+    throw new DynamicPricingError(
+      'INVALID_CONFIGURATOR_INSTANCE_ID',
+      'Configured wallpaper identity must be unique.',
+    );
+  }
+  instanceIds.add(instanceId);
 }
 
 function getVariantId(line: DynamicPricingCartLine) {
@@ -906,7 +1093,6 @@ const VARIANT_PRICING_QUERY = `
               id
               minWidthCm: field(key: "min_width_cm") { value }
               minHeightCm: field(key: "min_height_cm") { value }
-              maxHeightCm: field(key: "max_height_cm") { value }
             }
           }
         }

@@ -57,16 +57,36 @@ export type CartLineFragment = Pick<
     >;
     price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
     printQuality?: StorefrontAPI.Maybe<{
-      reference?: StorefrontAPI.Maybe<{
-        pricePerM2?: StorefrontAPI.Maybe<
-          Pick<StorefrontAPI.MetaobjectField, 'value'>
-        >;
-      }>;
+      reference?: StorefrontAPI.Maybe<
+        | {
+            __typename:
+              | 'Collection'
+              | 'GenericFile'
+              | 'MediaImage'
+              | 'Model3d'
+              | 'Page'
+              | 'Product'
+              | 'ProductVariant'
+              | 'Video';
+          }
+        | ({__typename: 'Metaobject'} & Pick<StorefrontAPI.Metaobject, 'id'> & {
+              pricePerM2?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.MetaobjectField, 'value'>
+              >;
+            })
+      >;
     }>;
     image?: StorefrontAPI.Maybe<
       Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
     >;
-    product: Pick<StorefrontAPI.Product, 'handle' | 'title' | 'id' | 'vendor'>;
+    product: Pick<
+      StorefrontAPI.Product,
+      'handle' | 'title' | 'id' | 'vendor'
+    > & {
+      masterAssetId?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'value'>
+      >;
+    };
     selectedOptions: Array<
       Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
     >;
@@ -95,16 +115,36 @@ export type CartLineComponentFragment = Pick<
     >;
     price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
     printQuality?: StorefrontAPI.Maybe<{
-      reference?: StorefrontAPI.Maybe<{
-        pricePerM2?: StorefrontAPI.Maybe<
-          Pick<StorefrontAPI.MetaobjectField, 'value'>
-        >;
-      }>;
+      reference?: StorefrontAPI.Maybe<
+        | {
+            __typename:
+              | 'Collection'
+              | 'GenericFile'
+              | 'MediaImage'
+              | 'Model3d'
+              | 'Page'
+              | 'Product'
+              | 'ProductVariant'
+              | 'Video';
+          }
+        | ({__typename: 'Metaobject'} & Pick<StorefrontAPI.Metaobject, 'id'> & {
+              pricePerM2?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.MetaobjectField, 'value'>
+              >;
+            })
+      >;
     }>;
     image?: StorefrontAPI.Maybe<
       Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
     >;
-    product: Pick<StorefrontAPI.Product, 'handle' | 'title' | 'id' | 'vendor'>;
+    product: Pick<
+      StorefrontAPI.Product,
+      'handle' | 'title' | 'id' | 'vendor'
+    > & {
+      masterAssetId?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'value'>
+      >;
+    };
     selectedOptions: Array<
       Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
     >;
@@ -158,11 +198,27 @@ export type CartApiQueryFragment = Pick<
             >;
             price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
             printQuality?: StorefrontAPI.Maybe<{
-              reference?: StorefrontAPI.Maybe<{
-                pricePerM2?: StorefrontAPI.Maybe<
-                  Pick<StorefrontAPI.MetaobjectField, 'value'>
-                >;
-              }>;
+              reference?: StorefrontAPI.Maybe<
+                | {
+                    __typename:
+                      | 'Collection'
+                      | 'GenericFile'
+                      | 'MediaImage'
+                      | 'Model3d'
+                      | 'Page'
+                      | 'Product'
+                      | 'ProductVariant'
+                      | 'Video';
+                  }
+                | ({__typename: 'Metaobject'} & Pick<
+                    StorefrontAPI.Metaobject,
+                    'id'
+                  > & {
+                      pricePerM2?: StorefrontAPI.Maybe<
+                        Pick<StorefrontAPI.MetaobjectField, 'value'>
+                      >;
+                    })
+              >;
             }>;
             image?: StorefrontAPI.Maybe<
               Pick<
@@ -173,7 +229,11 @@ export type CartApiQueryFragment = Pick<
             product: Pick<
               StorefrontAPI.Product,
               'handle' | 'title' | 'id' | 'vendor'
-            >;
+            > & {
+              masterAssetId?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.Metafield, 'value'>
+              >;
+            };
             selectedOptions: Array<
               Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
             >;
@@ -204,11 +264,27 @@ export type CartApiQueryFragment = Pick<
             >;
             price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
             printQuality?: StorefrontAPI.Maybe<{
-              reference?: StorefrontAPI.Maybe<{
-                pricePerM2?: StorefrontAPI.Maybe<
-                  Pick<StorefrontAPI.MetaobjectField, 'value'>
-                >;
-              }>;
+              reference?: StorefrontAPI.Maybe<
+                | {
+                    __typename:
+                      | 'Collection'
+                      | 'GenericFile'
+                      | 'MediaImage'
+                      | 'Model3d'
+                      | 'Page'
+                      | 'Product'
+                      | 'ProductVariant'
+                      | 'Video';
+                  }
+                | ({__typename: 'Metaobject'} & Pick<
+                    StorefrontAPI.Metaobject,
+                    'id'
+                  > & {
+                      pricePerM2?: StorefrontAPI.Maybe<
+                        Pick<StorefrontAPI.MetaobjectField, 'value'>
+                      >;
+                    })
+              >;
             }>;
             image?: StorefrontAPI.Maybe<
               Pick<
@@ -219,7 +295,11 @@ export type CartApiQueryFragment = Pick<
             product: Pick<
               StorefrontAPI.Product,
               'handle' | 'title' | 'id' | 'vendor'
-            >;
+            > & {
+              masterAssetId?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.Metafield, 'value'>
+              >;
+            };
             selectedOptions: Array<
               Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
             >;
@@ -757,6 +837,34 @@ export type StepByStepMetaobjectQuery = {
                   })
               >;
             }>;
+          }
+        >;
+      }
+    >;
+  };
+};
+
+export type UberUnsHomepageMetaobjectQueryVariables = StorefrontAPI.Exact<{
+  [key: string]: never;
+}>;
+
+export type UberUnsHomepageMetaobjectQuery = {
+  metaobjects: {
+    nodes: Array<
+      Pick<StorefrontAPI.Metaobject, 'id' | 'handle' | 'type'> & {
+        fields: Array<
+          Pick<StorefrontAPI.MetaobjectField, 'key' | 'value' | 'type'> & {
+            reference?: StorefrontAPI.Maybe<
+              | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
+              | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+                  image?: StorefrontAPI.Maybe<
+                    Pick<
+                      StorefrontAPI.Image,
+                      'url' | 'altText' | 'width' | 'height'
+                    >
+                  >;
+                })
+            >;
           }
         >;
       }
@@ -2304,6 +2412,10 @@ interface GeneratedQueryTypes {
   '#graphql\n  query StepByStepMetaobject {\n    metaobjects(type: "step_by_step", first: 1) {\n      nodes {\n        id\n        handle\n        type\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n            ... on Collection {\n              id\n              handle\n              title\n            }\n          }\n          references(first: 10) {\n            nodes {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                id\n                url\n              }\n              ... on Collection {\n                id\n                handle\n                title\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: StepByStepMetaobjectQuery;
     variables: StepByStepMetaobjectQueryVariables;
+  };
+  '#graphql\n  query UberUnsHomepageMetaobject {\n    metaobjects(type: "uber_uns", first: 1) {\n      nodes {\n        id\n        handle\n        type\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+    return: UberUnsHomepageMetaobjectQuery;
+    variables: UberUnsHomepageMetaobjectQueryVariables;
   };
   '#graphql\n  query CustomerReviewsMetaobject {\n    metaobjects(type: "customer_reviews", first: 1) {\n      nodes {\n        id\n        handle\n        type\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n          }\n          references(first: 10) {\n            nodes {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                id\n                url\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: CustomerReviewsMetaobjectQuery;

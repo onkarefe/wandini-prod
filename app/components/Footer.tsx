@@ -1,6 +1,7 @@
-import { Suspense } from 'react';
-import { Await } from 'react-router';
-import type { FooterQuery, HeaderQuery } from 'storefrontapi.generated';
+import {Suspense} from 'react';
+import {Await} from 'react-router';
+import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
+import wandiniWhiteLogo from '~/assets/logos/wanWhite.png';
 import {NavLink} from '~/lib/i18n-router';
 
 interface FooterProps {
@@ -45,80 +46,97 @@ function normalizeMenuUrl(
   }
 }
 
-export function Footer({ footer: footerPromise, header, publicStoreDomain }: FooterProps) {
+export function Footer({
+  footer: footerPromise,
+  header,
+  publicStoreDomain,
+}: FooterProps) {
   return (
     <Suspense>
       <Await resolve={footerPromise}>
         {(footer) => (
-          <footer className="custom-footer">
-            <div className="footer-subsBox">
-              <div className="footerSubsTitle">Newsletter abonnieren</div>
+          <footer className='custom-footer'>
+            <div className='footer-subsBox'>
+              <div className='footerSubsTitle'>Newsletter abonnieren</div>
 
-              <div className="footerSubsSubtitle">
-                Abonnieren Sie unseren Newsletter und erhalten Sie als Erste aktuelle
-                Neuigkeiten, Angebote und Informationen zu unseren Produkten. Bleiben Sie
-                über die neuesten Trends auf dem Laufenden.
+              <div className='footerSubsSubtitle'>
+                Abonnieren Sie unseren Newsletter und erhalten Sie als Erste
+                aktuelle Neuigkeiten, Angebote und Informationen zu unseren
+                Produkten. Bleiben Sie über die neuesten Trends auf dem
+                Laufenden.
               </div>
 
-              <div className="footerInputBox">
-                <input type="email" placeholder="E-Mail-Adresse eingeben" className="footerEmailInput" />
-                <button className="footerSubscribeButton">Abonnieren</button>
+              <div className='footerInputBox'>
+                <svg
+                  className='footerEmailIcon'
+                  viewBox='0 0 24 24'
+                  aria-hidden='true'
+                >
+                  <path d='M3.5 5.5h17v13h-17z' />
+                  <path d='m4 6 8 6 8-6' />
+                </svg>
+                <input
+                  type='email'
+                  placeholder='E-Mail-Adresse eingeben'
+                  className='footerEmailInput'
+                />
+                <button className='footerSubscribeButton'>Abonnieren</button>
               </div>
             </div>
 
-            <div className="container mx-auto">
-              <div className="footerRow">
-                {/* ----- LOGO & INFO ----- */}
-                <div className="footer-logoCol">
-                  {header?.shop?.brand?.logo?.image?.url ? (
+            <div className='footer-main'>
+              <div className='container mx-auto'>
+                <div className='footerRow'>
+                  <div className='footer-logoCol'>
                     <img
-                      src={header.shop.brand.logo.image.url}
-                      alt={header.shop.brand.logo.image.altText || header.shop.name || 'Logo'}
-                      className="footer-logo-img"
+                      src={wandiniWhiteLogo}
+                      alt={header.shop.name || 'Wandini'}
+                      className='footer-logo-img'
                     />
-                  ) : header?.shop?.name ? (
-                    <span className="footer-logo-text">{header.shop.name}</span>
-                  ) : null}
+                  </div>
 
+                  {/* ----- FOOTER MENÜ BÖLÜMLERİ ----- */}
+                  {footer?.menu && (
+                    <nav className='footer-sections' aria-label='Footer'>
+                      {footer.menu.items.map((section) => (
+                        <div className='footer-section' key={section.id}>
+                          <div className='footer-section-title'>
+                            {section.title}
+                          </div>
+
+                          {section.items && section.items.length > 0 && (
+                            <ul className='footer-links'>
+                              {section.items.map((item) => {
+                                const cleanedUrl = normalizeMenuUrl(
+                                  item.url ?? '#',
+                                  publicStoreDomain,
+                                  header.shop.primaryDomain.url,
+                                );
+
+                                return (
+                                  <li key={item.id}>
+                                    <NavLink
+                                      to={cleanedUrl}
+                                      className='footer-link'
+                                    >
+                                      {item.title}
+                                    </NavLink>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          )}
+                        </div>
+                      ))}
+                    </nav>
+                  )}
                 </div>
 
-                {/* ----- FOOTER MENÜ BÖLÜMLERİ ----- */}
-                {footer?.menu && (
-                  <div className="footer-sections">
-                    {footer.menu.items.map((section) => (
-                      <div className="footer-section" key={section.id}>
-                        <div className="footer-section-title">{section.title}</div>
-
-                        {section.items && section.items.length > 0 && (
-                          <ul className="footer-links">
-                            {section.items.map((item) => {
-                              const cleanedUrl = normalizeMenuUrl(
-                                item.url ?? '#',
-                                publicStoreDomain,
-                                header.shop.primaryDomain.url,
-                              );
-
-                              return (
-                                <li key={item.id}>
-                                  <NavLink to={cleanedUrl} className="footer-link">
-                                    {item.title}
-                                  </NavLink>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="footerSubBanner">
-              <div className="container mx-auto">
-                <span>Copyright © 2026 – Wandini. Alle Rechte vorbehalten.</span>
+                <div className='footerSubBanner'>
+                  <span>
+                    Copyright © 2026 – Wandini. Alle Rechte vorbehalten.
+                  </span>
+                </div>
               </div>
             </div>
           </footer>

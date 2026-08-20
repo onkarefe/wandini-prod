@@ -30,8 +30,13 @@ function configuredLine(instanceId = 'configuration-1'): CartLinePricingLike {
     merchandise: {
       id: 'gid://shopify/ProductVariant/1',
       price: {amount: '28.89', currencyCode: 'EUR'},
+      product: {masterAssetId: {value: 'asset-1'}},
       printQuality: {
-        reference: {pricePerM2: {value: '999.99'}},
+        reference: {
+          __typename: 'Metaobject',
+          id: 'gid://shopify/Metaobject/1',
+          pricePerM2: {value: '999.99'},
+        },
       },
     },
   };
@@ -50,7 +55,11 @@ function ordinaryLine(
       subtotalAmount: {amount: total, currencyCode: 'EUR'},
       totalAmount: {amount: total, currencyCode: 'EUR'},
     },
-    merchandise: {id: `gid://shopify/ProductVariant/${id}`},
+    merchandise: {
+      id: `gid://shopify/ProductVariant/${id}`,
+      product: {masterAssetId: null},
+      printQuality: null,
+    },
   };
 }
 
@@ -91,6 +100,17 @@ describe('configured cart pricing', () => {
     const line = configuredLine();
     line.attributes![0].value = '{}';
     expect(isConfiguredCartLine(line)).toBe(true);
+    expect(getCartLineDisplayTotal(line)).toBeNull();
+    expect(
+      calculateCartDisplaySubtotal([line, ordinaryLine('2', 1, '12.00')]),
+    ).toBeNull();
+  });
+
+  it('does not fall back to ordinary display pricing for partial Shopify metadata', () => {
+    const line = configuredLine();
+    line.merchandise.printQuality = null;
+
+    expect(isConfiguredCartLine(line)).toBe(false);
     expect(getCartLineDisplayTotal(line)).toBeNull();
     expect(
       calculateCartDisplaySubtotal([line, ordinaryLine('2', 1, '12.00')]),

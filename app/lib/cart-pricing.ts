@@ -7,6 +7,10 @@ import {
   type ConfiguredMoney,
   type ConfiguratorPayload,
 } from '~/lib/configurator-pricing';
+import {
+  CONFIGURED_PRODUCT_CLASSIFICATION,
+  classifyConfiguredProductMetafields,
+} from '~/lib/configured-product-classification';
 
 export type CartAttributeLike = {
   key: string;
@@ -24,8 +28,13 @@ export type CartLinePricingLike = {
   merchandise: {
     id: string;
     price?: ConfiguredMoney | null;
+    product?: {
+      masterAssetId?: {value?: string | null} | null;
+    };
     printQuality?: {
       reference?: {
+        __typename?: string | null;
+        id?: string | null;
         pricePerM2?: {value?: string | null} | null;
       } | null;
     } | null;
@@ -47,9 +56,21 @@ export function getConfiguratorPayloadAttribute(
 }
 
 export function isConfiguredCartLine(
-  line: Pick<CartLinePricingLike, 'attributes'>,
+  line: Pick<CartLinePricingLike, 'merchandise'>,
 ) {
-  return Boolean(getConfiguratorPayloadAttribute(line));
+  return (
+    getCartLineProductClassification(line) ===
+    CONFIGURED_PRODUCT_CLASSIFICATION.CONFIGURED
+  );
+}
+
+export function getCartLineProductClassification(
+  line: Pick<CartLinePricingLike, 'merchandise'>,
+) {
+  return classifyConfiguredProductMetafields({
+    masterAssetMetafield: line.merchandise.product?.masterAssetId,
+    printQualityMetafield: line.merchandise.printQuality,
+  });
 }
 
 export function resolveConfiguredCartLine(
@@ -80,9 +101,11 @@ export function getCartLineDisplayTotal(
   line: CartLinePricingLike,
   beforeLineDiscounts = false,
 ): ConfiguredMoney | null {
-  if (isConfiguredCartLine(line)) {
+  const classification = getCartLineProductClassification(line);
+  if (classification === CONFIGURED_PRODUCT_CLASSIFICATION.CONFIGURED) {
     return resolveConfiguredCartLine(line)?.total ?? null;
   }
+  if (classification === CONFIGURED_PRODUCT_CLASSIFICATION.INVALID) return null;
 
   return beforeLineDiscounts
     ? line.cost?.subtotalAmount ?? line.cost?.totalAmount ?? null

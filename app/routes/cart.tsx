@@ -20,8 +20,10 @@ import {
   DynamicPricingError,
   getCartPricingEvaluation,
   validateCartLineInputsForAdd,
+  validateCartLineInputsForUpdate,
   type DynamicPricingCart,
   type DynamicPricingCartLineInput,
+  type DynamicPricingCartLineUpdateInput,
 } from '~/lib/dynamic-pricing.server';
 import '~/styles/cart.css';
 
@@ -92,9 +94,11 @@ export async function action({request, context}: Route.ActionArgs) {
   switch (action) {
     case CartForm.ACTIONS.LinesAdd:
       try {
+        const currentCart = await cart.get();
         await validateCartLineInputsForAdd(
           inputs.lines as DynamicPricingCartLineInput[],
           context.env,
+          currentCart as unknown as DynamicPricingCart | null,
         );
       } catch (error) {
         console.error('Cart line validation failed.', {
@@ -116,6 +120,32 @@ export async function action({request, context}: Route.ActionArgs) {
       result = await cart.addLines(inputs.lines);
       break;
     case CartForm.ACTIONS.LinesUpdate:
+      try {
+        const currentCart = await cart.get();
+        if (!currentCart) {
+          throw new DynamicPricingError('INVALID_CART', 'The cart is empty.');
+        }
+        validateCartLineInputsForUpdate(
+          inputs.lines as DynamicPricingCartLineUpdateInput[],
+          currentCart as unknown as DynamicPricingCart,
+        );
+      } catch (error) {
+        console.error('Cart line update validation failed.', {
+          code:
+            error instanceof DynamicPricingError
+              ? error.code
+              : 'UNEXPECTED_ERROR',
+        });
+        return data(
+          {
+            cart: null,
+            errors: [{message: 'The selected cart update is invalid.'}],
+            warnings: [],
+            analytics: {cartId: null},
+          },
+          {status: 422},
+        );
+      }
       result = await cart.updateLines(inputs.lines);
       break;
     case CartForm.ACTIONS.LinesRemove:
