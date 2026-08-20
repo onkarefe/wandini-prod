@@ -19,6 +19,7 @@ const ADMIN_REQUEST_TIMEOUT_MS = 15_000;
 const CHECKOUT_FINGERPRINT_ATTRIBUTE = 'wandini_checkout_fingerprint';
 const CHECKOUT_CART_ATTRIBUTE = 'wandini_cart_id';
 const CHECKOUT_TAG = 'wandini-dynamic-pricing';
+const CHECKOUT_FINGERPRINT_VERSION = 1;
 
 type DynamicPricingEnv = Pick<
   Env,
@@ -26,6 +27,7 @@ type DynamicPricingEnv = Pick<
   | 'SHOPIFY_SHOP'
   | 'SHOPIFY_PRICING_CLIENT_ID'
   | 'SHOPIFY_PRICING_CLIENT_SECRET'
+  | 'DYNAMIC_PRICING_CHECKOUT_ENABLED'
 >;
 
 type CartAttribute = {key: string; value?: string | null};
@@ -168,6 +170,7 @@ export type DynamicPricingErrorCode =
   | 'DIMENSION_LIMIT_VIOLATION'
   | 'PRICING_UNAVAILABLE'
   | 'CURRENCY_MISMATCH'
+  | 'DYNAMIC_CHECKOUT_DISABLED'
   | 'DRAFT_ORDER_ERROR';
 
 export class DynamicPricingError extends Error {
@@ -198,6 +201,7 @@ export async function getCartPricingEvaluation(
     return {checkoutMode: 'native', pricingQuote: null};
   }
 
+  assertDynamicCheckoutEnabled(env);
   const client = createAdminClient(env);
   const prepared = await prepareDraftOrder(cart, client);
   if (prepared.configuredLineCount === 0) {
@@ -235,13 +239,19 @@ export async function validateCartLineInputsForAdd(
   existingCart?: DynamicPricingCart | null,
 ) {
   if (!lines.length) {
-    throw new DynamicPricingError('INVALID_CART', 'No cart lines were provided.');
+    throw new DynamicPricingError(
+      'INVALID_CART',
+      'No cart lines were provided.',
+    );
   }
 
   const normalizedLines: DynamicPricingCartLine[] = lines.map((line, index) => {
     const quantity = line.quantity ?? 1;
     if (!Number.isSafeInteger(quantity) || quantity < 1) {
-      throw new DynamicPricingError('INVALID_CART', 'A cart quantity is invalid.');
+      throw new DynamicPricingError(
+        'INVALID_CART',
+        'A cart quantity is invalid.',
+      );
     }
     return {
       id: `pending-${index}`,
@@ -338,6 +348,14 @@ export async function getOrCreateDraftOrderCheckout(
   cart: DynamicPricingCart,
   env: DynamicPricingEnv,
 ): Promise<DraftOrderCheckout> {
+  const storefrontClassification = classifyStorefrontCart(cart);
+  if (storefrontClassification === CONFIGURED_PRODUCT_CLASSIFICATION.ORDINARY) {
+    throw new DynamicPricingError(
+      'INVALID_CART',
+      'The cart does not contain a configurable wallpaper.',
+    );
+  }
+  assertDynamicCheckoutEnabled(env);
   const client = createAdminClient(env);
   const prepared = await prepareDraftOrder(cart, client);
   if (prepared.configuredLineCount === 0) {
@@ -371,7 +389,9 @@ export async function prepareDraftOrder(
   const shopCurrency = pricingData.shop.currencyCode.toUpperCase();
   const variants = new Map(
     pricingData.nodes
-      .filter((node): node is AdminVariant => node?.__typename === 'ProductVariant')
+      .filter(
+        (node): node is AdminVariant => node?.__typename === 'ProductVariant',
+      )
       .map((variant) => [variant.id, variant]),
   );
   let configuredLineCount = 0;
@@ -396,19 +416,36 @@ export async function prepareDraftOrder(
         .filter(Boolean),
     ),
   ];
+  const normalizedDiscountCodes = [...discountCodes].sort(compareStrings);
   const copiedCartAttributes = (cart.attributes ?? [])
     .filter(hasStringValue)
     .map(({key, value}) => ({key, value}));
+  const normalizedCartAttributes = sortAttributes(copiedCartAttributes);
+  const normalizedLineItems = [...lineItems]
+    .map((lineItem) => ({
+      variantId: lineItem.variantId,
+      quantity: lineItem.quantity,
+      customAttributes: sortAttributes(lineItem.customAttributes ?? []),
+      priceOverride: lineItem.priceOverride ?? null,
+    }))
+    .sort((first, second) =>
+      compareStrings(canonicalJson(first), canonicalJson(second)),
+    );
   const fingerprintSource = canonicalJson({
+    version: CHECKOUT_FINGERPRINT_VERSION,
     cartId: cart.id,
-    lineItems,
-    discountCodes,
-    cartAttributes: copiedCartAttributes,
-    note: cart.note ?? null,
+    lineItems: normalizedLineItems,
+    discountCodes: normalizedDiscountCodes,
+    cartAttributes: normalizedCartAttributes,
+    note: cart.note || null,
     buyerCountry: cart.buyerIdentity?.countryCode ?? null,
     buyerCustomerId: cart.buyerIdentity?.customer?.id ?? null,
     buyerEmail: cart.buyerIdentity?.email ?? null,
     buyerPhone: cart.buyerIdentity?.phone ?? null,
+    currency: {
+      presentment: shopCurrency,
+      shop: shopCurrency,
+    },
   });
   const fingerprint = await sha256(fingerprintSource);
   const fingerprintTag = `wandini-checkout-${fingerprint.slice(0, 20)}`;
@@ -454,7 +491,10 @@ export function mapCartLineToDraftOrderLine(
 ): DraftOrderLineInput {
   const variantId = getVariantId(line);
   if (!Number.isSafeInteger(line.quantity) || line.quantity < 1) {
-    throw new DynamicPricingError('INVALID_CART', 'A cart quantity is invalid.');
+    throw new DynamicPricingError(
+      'INVALID_CART',
+      'A cart quantity is invalid.',
+    );
   }
 
   const customAttributes = line.attributes
@@ -504,9 +544,7 @@ export function mapCartLineToDraftOrderLine(
     );
   }
 
-  const pricePerM2 = resolveConfiguratorPricePerM2(
-    variant.price,
-  );
+  const pricePerM2 = resolveConfiguratorPricePerM2(variant.price);
   if (!pricePerM2) {
     throw new DynamicPricingError(
       'PRICING_UNAVAILABLE',
@@ -576,17 +614,22 @@ function validateLineConfiguration(
   }
 
   const authoritativeAssetId = variant.product.masterAssetId?.value?.trim();
-  if (!authoritativeAssetId || authoritativeAssetId !== payload.master_asset_id) {
+  if (
+    !authoritativeAssetId ||
+    authoritativeAssetId !== payload.master_asset_id
+  ) {
     throw new DynamicPricingError(
       'INVALID_CONFIGURATION',
       'The wallpaper artwork does not match the selected variant.',
     );
   }
 
-  validateMaterialDimensions(payload.output.width, payload.output.height, variant);
-  if (
-    !resolveConfiguratorPricePerM2(variant.price)
-  ) {
+  validateMaterialDimensions(
+    payload.output.width,
+    payload.output.height,
+    variant,
+  );
+  if (!resolveConfiguratorPricePerM2(variant.price)) {
     throw new DynamicPricingError(
       'PRICING_UNAVAILABLE',
       'The selected wallpaper material has no valid price.',
@@ -599,27 +642,24 @@ export async function findOrCreateDraftOrder(
   prepared: PreparedDraftOrder,
   client: AdminClient,
 ): Promise<DraftOrderCheckout> {
-  const existing = await client.request<ExistingDraftOrdersResponse>(
-    EXISTING_DRAFT_ORDER_QUERY,
-    {query: `status:OPEN tag:${prepared.fingerprintTag}`},
+  const existingDrafts = await findDraftOrdersByFingerprintTag(
+    prepared,
+    client,
   );
-  const matchingDraft = existing.draftOrders.nodes.find((draftOrder) => {
-    const fingerprint = draftOrder.customAttributes.find(
-      ({key}) => key === CHECKOUT_FINGERPRINT_ATTRIBUTE,
-    )?.value;
-    return (
-      draftOrder.status === 'OPEN' && fingerprint === prepared.fingerprint
-    );
-  });
+  const matchingDrafts = getExactOpenFingerprintMatches(
+    existingDrafts,
+    prepared.fingerprint,
+  );
+  const reusableDraft = selectCanonicalDraft(matchingDrafts);
 
-  if (matchingDraft?.invoiceUrl) {
+  if (reusableDraft) {
     return {
-      draftOrderId: matchingDraft.id,
-      invoiceUrl: matchingDraft.invoiceUrl,
+      draftOrderId: reusableDraft.id,
+      invoiceUrl: reusableDraft.invoiceUrl,
       reused: true,
     };
   }
-  if (matchingDraft) {
+  if (hasExactOpenFingerprintMatch(existingDrafts, prepared.fingerprint)) {
     throw new DynamicPricingError(
       'DRAFT_ORDER_ERROR',
       'The existing checkout no longer has an invoice URL.',
@@ -648,11 +688,93 @@ export async function findOrCreateDraftOrder(
     );
   }
 
+  const reconciledDrafts = await findDraftOrdersByFingerprintTag(
+    prepared,
+    client,
+  );
+  const canonicalDraft = selectCanonicalDraft([
+    ...getExactOpenFingerprintMatches(reconciledDrafts, prepared.fingerprint),
+    {
+      id: draftOrder.id,
+      status: 'OPEN',
+      invoiceUrl: draftOrder.invoiceUrl,
+      customAttributes: [
+        {key: CHECKOUT_FINGERPRINT_ATTRIBUTE, value: prepared.fingerprint},
+      ],
+    },
+  ]);
+  if (!canonicalDraft) {
+    throw new DynamicPricingError(
+      'DRAFT_ORDER_ERROR',
+      'Shopify could not reconcile the configured checkout.',
+      {retryable: true},
+    );
+  }
+
   return {
-    draftOrderId: draftOrder.id,
-    invoiceUrl: draftOrder.invoiceUrl,
-    reused: false,
+    draftOrderId: canonicalDraft.id,
+    invoiceUrl: canonicalDraft.invoiceUrl,
+    reused: canonicalDraft.id !== draftOrder.id,
   };
+}
+
+async function findDraftOrdersByFingerprintTag(
+  prepared: PreparedDraftOrder,
+  client: AdminClient,
+) {
+  const result = await client.request<ExistingDraftOrdersResponse>(
+    EXISTING_DRAFT_ORDER_QUERY,
+    {query: `status:OPEN tag:${prepared.fingerprintTag}`},
+  );
+  return result.draftOrders.nodes;
+}
+
+function hasExactOpenFingerprintMatch(
+  drafts: DraftOrderSummary[],
+  fingerprint: string,
+) {
+  return drafts.some(
+    (draft) =>
+      draft.status === 'OPEN' && getDraftFingerprint(draft) === fingerprint,
+  );
+}
+
+function getExactOpenFingerprintMatches(
+  drafts: DraftOrderSummary[],
+  fingerprint: string,
+) {
+  return drafts.filter(
+    (draft): draft is DraftOrderSummary & {invoiceUrl: string} =>
+      draft.status === 'OPEN' &&
+      getDraftFingerprint(draft) === fingerprint &&
+      Boolean(draft.invoiceUrl?.trim()),
+  );
+}
+
+function getDraftFingerprint(draft: DraftOrderSummary) {
+  return draft.customAttributes.find(
+    ({key}) => key === CHECKOUT_FINGERPRINT_ATTRIBUTE,
+  )?.value;
+}
+
+export function selectCanonicalDraft(
+  drafts: Array<DraftOrderSummary & {invoiceUrl: string}>,
+) {
+  return [...drafts].sort((first, second) =>
+    compareShopifyGids(first.id, second.id),
+  )[0];
+}
+
+function compareShopifyGids(first: string, second: string) {
+  const firstNumericId = first.match(/\/(\d+)$/)?.[1];
+  const secondNumericId = second.match(/\/(\d+)$/)?.[1];
+  if (firstNumericId && secondNumericId) {
+    return (
+      firstNumericId.length - secondNumericId.length ||
+      compareStrings(firstNumericId, secondNumericId)
+    );
+  }
+  return compareStrings(first, second);
 }
 
 function validateMaterialDimensions(
@@ -715,7 +837,9 @@ async function getAdminVariants(
   const pricingData = await getAdminVariantPricing(lines, client);
   return new Map(
     pricingData.nodes
-      .filter((node): node is AdminVariant => node?.__typename === 'ProductVariant')
+      .filter(
+        (node): node is AdminVariant => node?.__typename === 'ProductVariant',
+      )
       .map((variant) => [variant.id, variant]),
   );
 }
@@ -838,6 +962,20 @@ function hasStringValue(
   return Boolean(attribute.key && typeof attribute.value === 'string');
 }
 
+function sortAttributes<T extends {key: string; value: string}>(
+  attributes: T[],
+) {
+  return [...attributes].sort(
+    (first, second) =>
+      compareStrings(first.key, second.key) ||
+      compareStrings(first.value, second.value),
+  );
+}
+
+function compareStrings(first: string, second: string) {
+  return first < second ? -1 : first > second ? 1 : 0;
+}
+
 function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) {
     return `[${value.map(canonicalJson).join(',')}]`;
@@ -867,12 +1005,22 @@ function createAdminClient(env: DynamicPricingEnv): AdminClient {
     async request<T>(query: string, variables: Record<string, unknown>) {
       const config = getPricingConfig(env);
       let token = await getAdminAccessToken(config);
-      let response = await fetchAdminGraphql(config.shop, token, query, variables);
+      let response = await fetchAdminGraphql(
+        config.shop,
+        token,
+        query,
+        variables,
+      );
 
       if (response.status === 401) {
         cachedAdminAccessToken = null;
         token = await getAdminAccessToken(config);
-        response = await fetchAdminGraphql(config.shop, token, query, variables);
+        response = await fetchAdminGraphql(
+          config.shop,
+          token,
+          query,
+          variables,
+        );
       }
 
       let body: AdminGraphqlResponse<T>;
@@ -902,6 +1050,15 @@ function createAdminClient(env: DynamicPricingEnv): AdminClient {
   };
 }
 
+function assertDynamicCheckoutEnabled(env: DynamicPricingEnv) {
+  if (env.DYNAMIC_PRICING_CHECKOUT_ENABLED !== 'true') {
+    throw new DynamicPricingError(
+      'DYNAMIC_CHECKOUT_DISABLED',
+      'Configured wallpaper checkout is currently disabled.',
+    );
+  }
+}
+
 function getPricingConfig(env: DynamicPricingEnv) {
   const shopValue = env.SHOPIFY_SHOP ?? env.PUBLIC_STORE_DOMAIN;
   const clientId = env.SHOPIFY_PRICING_CLIENT_ID;
@@ -913,7 +1070,9 @@ function getPricingConfig(env: DynamicPricingEnv) {
     );
   }
 
-  const candidate = shopValue.includes('://') ? shopValue : `https://${shopValue}`;
+  const candidate = shopValue.includes('://')
+    ? shopValue
+    : `https://${shopValue}`;
   let hostname: string;
   try {
     hostname = new URL(candidate).hostname.toLowerCase();
@@ -1025,7 +1184,10 @@ async function fetchAdminGraphql(
 
 async function fetchWithTimeout(input: string, init: RequestInit) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), ADMIN_REQUEST_TIMEOUT_MS);
+  const timeout = setTimeout(
+    () => controller.abort(),
+    ADMIN_REQUEST_TIMEOUT_MS,
+  );
   try {
     return await fetch(input, {...init, signal: controller.signal});
   } finally {
@@ -1049,14 +1211,16 @@ type DraftOrderCalculateResponse = {
   };
 };
 
+type DraftOrderSummary = {
+  id: string;
+  status: 'OPEN' | 'INVOICE_SENT' | 'COMPLETED';
+  invoiceUrl: string | null;
+  customAttributes: Array<{key: string; value: string}>;
+};
+
 type ExistingDraftOrdersResponse = {
   draftOrders: {
-    nodes: Array<{
-      id: string;
-      status: 'OPEN' | 'INVOICE_SENT' | 'COMPLETED';
-      invoiceUrl: string | null;
-      customAttributes: Array<{key: string; value: string}>;
-    }>;
+    nodes: DraftOrderSummary[];
   };
 };
 
@@ -1120,7 +1284,7 @@ const DRAFT_ORDER_CALCULATE_MUTATION = `
 
 const EXISTING_DRAFT_ORDER_QUERY = `
   query WandiniExistingDraftOrder($query: String!) {
-    draftOrders(first: 10, query: $query, reverse: true) {
+    draftOrders(first: 100, query: $query, reverse: true) {
       nodes {
         id
         status

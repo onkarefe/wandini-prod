@@ -1,6 +1,11 @@
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useEffect, useRef, useState, type ReactNode} from 'react';
-import {Form, useFetcher, type FetcherWithComponents} from 'react-router';
+import {
+  Form,
+  useFetcher,
+  useNavigation,
+  type FetcherWithComponents,
+} from 'react-router';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {CartLayout} from '~/components/CartMain';
 import {
@@ -15,6 +20,10 @@ import {
   getPersistedGiftCardCodes,
   rememberGiftCardCode,
 } from '~/lib/cartGiftCardCodeStorage';
+import {
+  claimConfiguredCheckoutSubmission,
+  releaseConfiguredCheckoutSubmission,
+} from '~/lib/configured-checkout-submission';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -43,6 +52,11 @@ export function CartSummary({
 }: CartSummaryProps) {
   const quantity = cart?.totalQuantity ?? 0;
   const checkoutPath = usePrefixPathWithLocale('/checkout');
+  const navigation = useNavigation();
+  const checkoutSubmissionLock = useRef(false);
+  const [checkoutSubmissionClaimed, setCheckoutSubmissionClaimed] =
+    useState(false);
+  const configuredCheckoutPending = checkoutSubmissionClaimed;
   const lines = (cart?.lines?.nodes ?? []) as unknown as CartLinePricingLike[];
   const hasConfiguredLines = hasConfiguredCartLines(lines);
   const configuredSubtotal = hasConfiguredLines
@@ -53,9 +67,14 @@ export function CartSummary({
     configuredSubtotal ??
     cart?.cost?.subtotalAmount;
   const totalAmount =
-    pricingQuote?.totalAmount ??
-    configuredSubtotal ??
-    cart?.cost?.totalAmount;
+    pricingQuote?.totalAmount ?? configuredSubtotal ?? cart?.cost?.totalAmount;
+
+  useEffect(() => {
+    if (navigation.state === 'idle') {
+      releaseConfiguredCheckoutSubmission(checkoutSubmissionLock);
+      setCheckoutSubmissionClaimed(false);
+    }
+  }, [navigation.state]);
 
   return (
     <section
@@ -118,12 +137,28 @@ export function CartSummary({
         <>
           {cart?.appliedGiftCards?.length ? (
             <p className="order-summary__error">
-              Geschenkkarten müssen im Shopify Checkout erneut eingegeben werden.
+              Geschenkkarten müssen im Shopify Checkout erneut eingegeben
+              werden.
             </p>
           ) : null}
-          <Form method="post" action={checkoutPath}>
-            <button className="order-summary__checkout" type="submit">
-              Zur Kasse
+          <Form
+            method="post"
+            action={checkoutPath}
+            onSubmit={(event) => {
+              if (!claimConfiguredCheckoutSubmission(checkoutSubmissionLock)) {
+                event.preventDefault();
+                return;
+              }
+              setCheckoutSubmissionClaimed(true);
+            }}
+          >
+            <button
+              className="order-summary__checkout"
+              type="submit"
+              disabled={configuredCheckoutPending}
+              aria-busy={configuredCheckoutPending || undefined}
+            >
+              {configuredCheckoutPending ? 'Bitte warten' : 'Zur Kasse'}
             </button>
           </Form>
         </>
@@ -148,15 +183,12 @@ function DiscountCode({
   discountCodes?: CartApiQueryFragment['discountCodes'];
   validatedCodes?: string[];
 }) {
-  const appliedCodes = validatedCodes ??
+  const appliedCodes =
+    validatedCodes ??
     discountCodes?.filter(({applicable}) => applicable).map(({code}) => code) ??
     [];
   const hasInvalidCode = validatedCodes
-    ? Boolean(
-        discountCodes?.some(
-          ({code}) => !validatedCodes.includes(code),
-        ),
-      )
+    ? Boolean(discountCodes?.some(({code}) => !validatedCodes.includes(code)))
     : Boolean(discountCodes?.some(({applicable}) => !applicable));
 
   return (

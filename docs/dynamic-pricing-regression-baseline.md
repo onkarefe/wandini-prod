@@ -5,9 +5,11 @@ Date: 2026-08-20
 Checkpoint 1 established the no-production-change regression baseline.
 Checkpoint 2 minimally changes production behavior for authoritative
 classification, cart integrity, configured instance identity, and ordinary-cart
-native-checkout independence. No Shopify data/configuration, orchestrator code
-or contract, deployment, Draft Order distributed idempotency, gift-card
-behavior, permalink policy, or customer-facing attribute design was changed.
+native-checkout independence. Checkpoint 3 hardens configured Draft checkout
+execution, fingerprinting, reuse/reconciliation, freeze behavior, and
+double-submit UX. No Shopify data/configuration, orchestrator code or contract,
+deployment, gift-card behavior, permalink policy, or customer-facing attribute
+design was changed.
 
 ## Locked architecture
 
@@ -72,6 +74,74 @@ behavior, permalink policy, or customer-facing attribute design was changed.
    `priceOverride`. Display-only fields and forged client values remain
    ignored.
 
+## Checkpoint 3 changes completed
+
+1. **Fail-closed checkout kill switch.**
+   `DYNAMIC_PRICING_CHECKOUT_ENABLED` permits configured Draft checkout only
+   when its value is exactly the string `true`. Missing, empty, `false`,
+   differently cased, or otherwise invalid values produce
+   `DYNAMIC_CHECKOUT_DISABLED` before Admin pricing, calculation, lookup, or
+   Draft creation. There is no native-checkout fallback for configured carts.
+   Conclusively ordinary carts return native mode before consulting the flag.
+   The variable is typed only; no real environment was changed. It must be set
+   manually to exactly `true` in each intended runtime before configured
+   checkout can be released.
+
+2. **Versioned full fingerprint contract.** The SHA-256 fingerprint
+   deterministically covers:
+   - fingerprint schema version and Shopify cart ID;
+   - every real variant ID and native quantity;
+   - all line custom attributes, including the exact configurator payload and
+     `configurator_instance_id`;
+   - each configured server-calculated `priceOverride` amount and currency;
+   - ordinary Draft line attributes and quantities;
+   - copied cart attributes, discount codes, and note;
+   - buyer country, customer ID, email, and phone;
+   - authoritative Shopify shop/presentment currency.
+
+   Object keys are canonicalized. Line ordering, attribute ordering, cart
+   attribute ordering, and discount-code ordering are normalized for hashing,
+   so semantically equivalent reorderings reuse the same Draft. Cart
+   `updatedAt` and other unstable request values are intentionally excluded.
+   Gift cards remain outside the Draft behavior and fingerprint pending their
+   separate policy checkpoint.
+
+3. **Three distinct reuse layers.**
+   - The process-local Promise map coalesces concurrent requests handled by one
+     Oxygen worker. It is only an optimization.
+   - Persistent reuse queries Shopify for the shortened tag, then requires an
+     exact full-fingerprint custom-attribute match, `OPEN` status, and a
+     nonempty `invoiceUrl`.
+   - Cross-worker reconciliation repeats the exact-match OPEN lookup after
+     creation. When multiple usable exact matches are visible, the lowest
+     numeric Shopify Draft Order GID is the deterministic canonical checkout.
+
+   Completed or invoice-sent/non-OPEN Drafts, shortened-tag-only matches,
+   mismatching full fingerprints, and Drafts without usable invoice URLs are
+   never reused. Lookup now examines up to 100 tag candidates.
+
+4. **Cross-worker limitation documented honestly.** Redundant OPEN Drafts are
+   not deleted. Shopify can keep a Draft in OPEN state after a buyer has opened
+   its invoice URL, so status plus exact fingerprint is insufficient proof that
+   deletion cannot disrupt an active checkout. Reconciliation converges on one
+   URL when competing Drafts are visible, but without an external lock two
+   workers can still both create and complete their reconciliation lookups
+   before the other Draft becomes visible. Exactly-once creation is therefore
+   not guaranteed.
+
+5. **Draft freeze invariant.** Checkout reuse is read-only. The application
+   contains no `draftOrderUpdate` path for Wandini checkout Drafts. A
+   meaningful cart/buyer/discount/configuration change creates a new
+   fingerprint and therefore a new or separately reusable Draft; an already
+   selected Draft is never rewritten.
+
+6. **Configured double-submit protection.** The configured checkout form uses
+   an immediate in-memory submission claim plus a disabled/pending button.
+   Repeated submits during the same navigation are prevented. The claim is
+   released when navigation returns to idle, and an error redirect remounts the
+   form, so recoverable failures can be retried. The ordinary native checkout
+   link is unchanged. This is UX protection, not server idempotency.
+
 ## Regression coverage
 
 Checkpoint 1 coverage remains in
@@ -101,6 +171,21 @@ Checkpoint 2 adds explicit coverage for:
 - partial Storefront metadata and forged ordinary payload failing before Admin;
 - unchanged Admin-native-price authority despite fabricated client values.
 
+Checkpoint 3 adds explicit coverage for:
+
+- configured checkout enabled only by the exact `true` flag;
+- missing/false/invalid flag values failing before any Admin request;
+- ordinary native checkout remaining independent of the flag;
+- controlled disabled-checkout route behavior;
+- complete fingerprint field sensitivity and stable unordered
+  canonicalization;
+- exact full-fingerprint OPEN reuse and rejection of completed,
+  invoice-sent, mismatching, or invoice-URL-less Drafts;
+- post-create lookup and deterministic cross-worker canonical selection;
+- lookup/create/lookup freeze behavior with no Draft update;
+- configured submit lock, repeat prevention, and retry release;
+- unchanged Admin-native price authority and Draft line mapping.
+
 ## Intentional display-only fields
 
 The following remain intentionally present:
@@ -114,43 +199,54 @@ None is queried by the Admin Draft Order pricing path or used to calculate
 
 ## Remaining known gaps and future checkpoints
 
-1. **Distributed Draft Order idempotency.** The in-process pending map does not
-   prevent cross-worker query/create races. This remains explicitly deferred.
+1. **Native checkout URL hardening / Checkout Validation Function.**
+   Configured cart UI selects Draft checkout, but the underlying Storefront
+   cart still has a native checkout URL. The separate server-side/public-app
+   validation guard is mandatory and remains a production release blocker.
 
 2. **Permalink/native checkout policy.** `cart.$lines.tsx` still creates a
-   cart and redirects to native checkout. It was not changed in checkpoint 2.
+   cart and redirects to native checkout. It was not changed in checkpoint 3.
    Correct classification policy for that route remains a future decision.
 
-3. **Native checkout URL hardening.** Configured cart UI selects Draft checkout,
-   but the underlying Storefront cart still has a native checkout URL.
-   Server-side policy beyond the protected Wandini route remains future work.
-
-4. **Gift cards.** Storefront gift cards are not transferred into Draft Order
+3. **Gift cards.** Storefront gift cards are not transferred into Draft Order
    input or its fingerprint. This remains deferred.
 
-5. **Customer-visible configurator attributes.** Raw payload and instance ID
+4. **Customer-visible configurator attributes.** Raw payload and instance ID
    remain copied to Draft Order custom attributes. Visibility/redesign is
    deferred.
 
-6. **Draft checkout hardening.** Distributed creation guarantees, final
-   permalink policy, and any further checkout-entry enforcement remain future
-   checkpoints.
+5. **Legacy/dead-code cleanup.** Commented quantity controls and other
+   confirmed dead remnants remain untouched.
 
-7. **Line-add Admin dependency.** Existing cart line addition still validates
+6. **Final server-module refactor.** The checkout hardening was implemented
+   without a broad refactor of `dynamic-pricing.server.ts`.
+
+7. **Real Shopify E2E verification.** No live Draft mutation, checkout, payment,
+   discount, shipping, tax, Markets, or gift-card flow was executed. Full
+   end-to-end verification remains mandatory before release.
+
+8. **Residual cross-worker create race.** Prelookup, post-create reconciliation,
+   and deterministic canonical selection reduce divergence but cannot provide
+   exactly-once creation without an external lock/coordination store. Cleanup
+   is intentionally omitted because OPEN status does not prove that no buyer
+   checkout is active.
+
+9. **Line-add Admin dependency.** Existing cart line addition still validates
    the target variant through trusted Admin data because the submitted target
    variant and attributes are customer-controlled. Checkpoint 2 removes the
    unnecessary Admin dependency from conclusively ordinary cart evaluation and
    checkout selection, not from trusted classification of a newly submitted
    variant.
 
-8. **Crop-to-asset semantics.** Crop values are structurally validated, but the
-   server does not rerun the orchestrator or derive crop/output aspect
-   consistency from master-image geometry. The orchestrator contract remains
-   unchanged.
+10. **Crop-to-asset semantics.** Crop values are structurally validated, but the
+    server does not rerun the orchestrator or derive crop/output aspect
+    consistency from master-image geometry. The orchestrator contract remains
+    unchanged.
 
-9. **Discount parity.** Discount codes and automatic discounts are passed to
-   Shopify Draft Order calculation, but exact parity with native checkout
-   remains dependent on Shopify Draft Order semantics.
+11. **Discount parity.** Discount codes and automatic discounts are passed to
+    Shopify Draft Order calculation, but exact parity with native checkout
+    remains dependent on Shopify Draft Order semantics.
 
-10. **Commented quantity UI remnants.** Commented legacy quantity controls
-    remain in `CartLineItem.tsx`. They are not active checkout pricing logic.
+12. **Kill-switch runtime configuration.** Until
+    `DYNAMIC_PRICING_CHECKOUT_ENABLED=true` is manually configured in the
+    intended runtime, configured checkout is intentionally blocked.

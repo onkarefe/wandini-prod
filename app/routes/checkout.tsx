@@ -33,7 +33,13 @@ export async function action({request, context}: Route.ActionArgs) {
         error instanceof DynamicPricingError ? error.code : 'UNEXPECTED_ERROR',
       retryable: error instanceof DynamicPricingError ? error.retryable : false,
     });
-    return redirectToLocalePath(request, '/cart?checkout=error');
+    return redirectToLocalePath(
+      request,
+      error instanceof DynamicPricingError &&
+        error.code === 'DYNAMIC_CHECKOUT_DISABLED'
+        ? '/cart?checkout=disabled'
+        : '/cart?checkout=error',
+    );
   }
 }
 

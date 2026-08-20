@@ -110,7 +110,9 @@ export async function action({request, context}: Route.ActionArgs) {
         return data(
           {
             cart: null,
-            errors: [{message: 'The selected product configuration is invalid.'}],
+            errors: [
+              {message: 'The selected product configuration is invalid.'},
+            ],
             warnings: [],
             analytics: {cartId: null},
           },
@@ -283,7 +285,9 @@ export async function loader({context}: Route.LoaderArgs) {
     } catch (error) {
       console.error('Cart pricing validation failed.', {
         code:
-          error instanceof DynamicPricingError ? error.code : 'UNEXPECTED_ERROR',
+          error instanceof DynamicPricingError
+            ? error.code
+            : 'UNEXPECTED_ERROR',
         retryable:
           error instanceof DynamicPricingError ? error.retryable : false,
       });
@@ -313,7 +317,12 @@ export default function Cart() {
         <h1>Warenkorb</h1>
         <p>Überprüfen Sie Ihre Auswahl und schließen Sie Ihre Bestellung ab.</p>
       </header>
-      {new URLSearchParams(location.search).get('checkout') === 'error' ? (
+      {new URLSearchParams(location.search).get('checkout') === 'disabled' ? (
+        <p className="order-summary__error" role="alert">
+          Der Checkout für konfigurierte Tapeten ist derzeit deaktiviert. Bitte
+          versuchen Sie es später erneut.
+        </p>
+      ) : new URLSearchParams(location.search).get('checkout') === 'error' ? (
         <p className="order-summary__error" role="alert">
           Der Checkout konnte nicht vorbereitet werden. Bitte prüfen Sie Ihre
           Konfiguration und versuchen Sie es erneut.

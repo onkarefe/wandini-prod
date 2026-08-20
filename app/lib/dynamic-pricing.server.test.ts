@@ -3,6 +3,7 @@ import {
   DynamicPricingError,
   findOrCreateDraftOrder,
   getCartPricingEvaluation,
+  getOrCreateDraftOrderCheckout,
   prepareDraftOrder,
   validateCartLineInputsForAdd,
   validateCartLineInputsForUpdate,
@@ -117,6 +118,26 @@ function pricingClient(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function checkoutEnv(
+  overrides: Partial<Env> = {},
+): Pick<
+  Env,
+  | 'PUBLIC_STORE_DOMAIN'
+  | 'SHOPIFY_SHOP'
+  | 'SHOPIFY_PRICING_CLIENT_ID'
+  | 'SHOPIFY_PRICING_CLIENT_SECRET'
+  | 'DYNAMIC_PRICING_CHECKOUT_ENABLED'
+> {
+  return {
+    PUBLIC_STORE_DOMAIN: 'checkout-test.myshopify.com',
+    SHOPIFY_SHOP: 'checkout-test.myshopify.com',
+    SHOPIFY_PRICING_CLIENT_ID: 'checkout-test-client',
+    SHOPIFY_PRICING_CLIENT_SECRET: 'secret',
+    DYNAMIC_PRICING_CHECKOUT_ENABLED: 'true',
+    ...overrides,
+  };
+}
+
 function stubAdminApi({
   nodes,
   calculatedDraftOrder,
@@ -215,6 +236,122 @@ describe('Draft Order line preparation', () => {
     expect(retry.fingerprint).toBe(first.fingerprint);
     expect(changed.fingerprint).not.toBe(first.fingerprint);
     expect(changedBuyerDraft.fingerprint).not.toBe(first.fingerprint);
+  });
+
+  it('canonicalizes semantically unordered checkout collections', async () => {
+    const firstCart = cart();
+    firstCart.attributes = [
+      {key: 'second', value: '2'},
+      {key: 'first', value: '1'},
+    ];
+    firstCart.discountCodes = [
+      {code: 'VIP', applicable: true},
+      {code: 'WAND10', applicable: true},
+    ];
+    const reorderedCart = structuredClone(firstCart);
+    reorderedCart.attributes!.reverse();
+    reorderedCart.discountCodes!.reverse();
+    reorderedCart.lines.nodes[0].attributes.reverse();
+    reorderedCart.lines.nodes.reverse();
+
+    const first = await prepareDraftOrder(firstCart, pricingClient());
+    const reordered = await prepareDraftOrder(reorderedCart, pricingClient());
+
+    expect(reordered.fingerprint).toBe(first.fingerprint);
+  });
+
+  it('fingerprints every checkout-affecting cart and buyer field', async () => {
+    const baseCart = cart();
+    baseCart.attributes = [{key: 'delivery-note', value: 'front door'}];
+    baseCart.note = 'Call on arrival';
+    baseCart.buyerIdentity = {
+      countryCode: 'DE',
+      customer: {id: 'gid://shopify/Customer/1'},
+      email: 'buyer@example.com',
+      phone: '+49123456789',
+    };
+    const base = await prepareDraftOrder(baseCart, pricingClient());
+
+    const mutations: Array<(value: DynamicPricingCart) => void> = [
+      (value) => {
+        value.id = 'gid://shopify/Cart/cart-2';
+      },
+      (value) => {
+        value.lines.nodes[0].attributes[0].value = secondPayload;
+      },
+      (value) => {
+        value.lines.nodes[0].attributes[1].value = 'configuration-2';
+      },
+      (value) => {
+        value.lines.nodes[1].quantity = 3;
+      },
+      (value) => {
+        value.lines.nodes[1].attributes = [{key: 'size', value: 'large'}];
+      },
+      (value) => {
+        value.attributes = [{key: 'delivery-note', value: 'back door'}];
+      },
+      (value) => {
+        value.discountCodes = [{code: 'VIP', applicable: true}];
+      },
+      (value) => {
+        value.note = 'Leave silently';
+      },
+      (value) => {
+        value.buyerIdentity!.countryCode = 'AT';
+      },
+      (value) => {
+        value.buyerIdentity!.customer = {id: 'gid://shopify/Customer/2'};
+      },
+      (value) => {
+        value.buyerIdentity!.email = 'other@example.com';
+      },
+      (value) => {
+        value.buyerIdentity!.phone = '+43987654321';
+      },
+    ];
+
+    for (const mutate of mutations) {
+      const changedCart = structuredClone(baseCart);
+      mutate(changedCart);
+      const changed = await prepareDraftOrder(changedCart, pricingClient());
+      expect(changed.fingerprint).not.toBe(base.fingerprint);
+    }
+
+    const changedVariantCart = structuredClone(baseCart);
+    changedVariantCart.lines.nodes[1].merchandise.id =
+      'gid://shopify/ProductVariant/3';
+    const changedVariant = await prepareDraftOrder(changedVariantCart, {
+      request: async <T>() =>
+        ({
+          shop: {currencyCode: 'EUR'},
+          nodes: [
+            configuredVariant(),
+            {
+              ...accessoryVariant(),
+              id: 'gid://shopify/ProductVariant/3',
+            },
+          ],
+        }) as T,
+    });
+    expect(changedVariant.fingerprint).not.toBe(base.fingerprint);
+
+    const changedPrice = await prepareDraftOrder(
+      baseCart,
+      pricingClient({price: '30.00'}),
+    );
+    expect(changedPrice.fingerprint).not.toBe(base.fingerprint);
+
+    const changedCurrencyCart = structuredClone(baseCart);
+    changedCurrencyCart.lines.nodes[0].merchandise.price!.currencyCode = 'USD';
+    const changedCurrency = await prepareDraftOrder(changedCurrencyCart, {
+      request: async <T>() =>
+        ({
+          shop: {currencyCode: 'USD'},
+          nodes: [configuredVariant(), accessoryVariant()],
+        }) as T,
+    });
+    expect(changedCurrency.fingerprint).not.toBe(base.fingerprint);
   });
 
   it('keeps differently configured wallpapers as separate lines and identities', async () => {
@@ -619,6 +756,7 @@ describe('Draft Order line preparation', () => {
         SHOPIFY_SHOP: 'mode-draft.myshopify.com',
         SHOPIFY_PRICING_CLIENT_ID: 'draft-client',
         SHOPIFY_PRICING_CLIENT_SECRET: 'secret',
+        DYNAMIC_PRICING_CHECKOUT_ENABLED: 'true',
       }),
     ).resolves.toEqual({
       checkoutMode: 'draft',
@@ -645,6 +783,109 @@ describe('Draft Order line preparation', () => {
       }),
     ).resolves.toEqual({checkoutMode: 'native', pricingQuote: null});
     expect(operations).toEqual([]);
+  });
+
+  it.each([undefined, 'false', 'TRUE', '1', ''])(
+    'fails closed for configured checkout when the flag is %s',
+    async (flag) => {
+      const operations = stubAdminApi({
+        nodes: [configuredVariant(), accessoryVariant()],
+      });
+
+      await expect(
+        getCartPricingEvaluation(
+          cart(),
+          checkoutEnv({DYNAMIC_PRICING_CHECKOUT_ENABLED: flag}),
+        ),
+      ).rejects.toMatchObject({code: 'DYNAMIC_CHECKOUT_DISABLED'});
+      expect(operations).toEqual([]);
+    },
+  );
+
+  it('blocks configured checkout execution before Admin when the flag is missing', async () => {
+    const operations = stubAdminApi({
+      nodes: [configuredVariant(), accessoryVariant()],
+    });
+
+    await expect(
+      getOrCreateDraftOrderCheckout(
+        cart(),
+        checkoutEnv({DYNAMIC_PRICING_CHECKOUT_ENABLED: undefined}),
+      ),
+    ).rejects.toMatchObject({code: 'DYNAMIC_CHECKOUT_DISABLED'});
+    expect(operations).toEqual([]);
+  });
+
+  it('allows configured Draft checkout execution when the flag is exactly true', async () => {
+    const operations: string[] = [];
+    let lookupCount = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url = String(input);
+        if (url.endsWith('/admin/oauth/access_token')) {
+          return new Response(
+            JSON.stringify({access_token: 'test-token', expires_in: 3600}),
+            {status: 200, headers: {'Content-Type': 'application/json'}},
+          );
+        }
+
+        const request = JSON.parse(String(init?.body)) as {query: string};
+        if (request.query.includes('WandiniConfiguredVariantPricing')) {
+          operations.push('variant-pricing');
+          return new Response(
+            JSON.stringify({
+              data: {
+                shop: {currencyCode: 'EUR'},
+                nodes: [configuredVariant(), accessoryVariant()],
+              },
+            }),
+            {status: 200, headers: {'Content-Type': 'application/json'}},
+          );
+        }
+        if (request.query.includes('WandiniExistingDraftOrder')) {
+          lookupCount += 1;
+          operations.push('lookup');
+          return new Response(
+            JSON.stringify({data: {draftOrders: {nodes: []}}}),
+            {status: 200, headers: {'Content-Type': 'application/json'}},
+          );
+        }
+        if (request.query.includes('WandiniDraftOrderCreate')) {
+          operations.push('create');
+          return new Response(
+            JSON.stringify({
+              data: {
+                draftOrderCreate: {
+                  draftOrder: {
+                    id: 'gid://shopify/DraftOrder/10',
+                    invoiceUrl: 'https://example.myshopify.com/invoice/10',
+                  },
+                  userErrors: [],
+                },
+              },
+            }),
+            {status: 200, headers: {'Content-Type': 'application/json'}},
+          );
+        }
+        throw new Error('Unexpected Admin API operation in test.');
+      }),
+    );
+
+    await expect(
+      getOrCreateDraftOrderCheckout(cart(), checkoutEnv()),
+    ).resolves.toEqual({
+      draftOrderId: 'gid://shopify/DraftOrder/10',
+      invoiceUrl: 'https://example.myshopify.com/invoice/10',
+      reused: false,
+    });
+    expect(lookupCount).toBe(2);
+    expect(operations).toEqual([
+      'variant-pricing',
+      'lookup',
+      'create',
+      'lookup',
+    ]);
   });
 
   it('fails closed on partial Storefront classification without calling Admin', async () => {
@@ -719,36 +960,126 @@ describe('Draft Order line preparation', () => {
     expect(requestCount).toBe(1);
   });
 
-  it('does not reuse a completed Draft Order', async () => {
+  it.each(['COMPLETED', 'INVOICE_SENT'] as const)(
+    'does not reuse a %s Draft Order',
+    async (status) => {
+      const prepared = await prepareDraftOrder(cart(), pricingClient());
+      let requestCount = 0;
+      const client = {
+        request: async <T>() => {
+          requestCount += 1;
+          if (requestCount === 1) {
+            return {
+              draftOrders: {
+                nodes: [
+                  {
+                    id: 'gid://shopify/DraftOrder/paid',
+                    status,
+                    invoiceUrl: 'https://example.myshopify.com/invoice/paid',
+                    customAttributes: [
+                      {
+                        key: 'wandini_checkout_fingerprint',
+                        value: prepared.fingerprint,
+                      },
+                    ],
+                  },
+                ],
+              },
+            } as T;
+          }
+          if (requestCount === 2) {
+            return {
+              draftOrderCreate: {
+                draftOrder: {
+                  id: 'gid://shopify/DraftOrder/new',
+                  invoiceUrl: 'https://example.myshopify.com/invoice/new',
+                },
+                userErrors: [],
+              },
+            } as T;
+          }
+          return {draftOrders: {nodes: []}} as T;
+        },
+      };
+
+      await expect(findOrCreateDraftOrder(prepared, client)).resolves.toEqual({
+        draftOrderId: 'gid://shopify/DraftOrder/new',
+        invoiceUrl: 'https://example.myshopify.com/invoice/new',
+        reused: false,
+      });
+      expect(requestCount).toBe(3);
+    },
+  );
+
+  it('does not reuse an exact OPEN Draft without a usable invoice URL', async () => {
     const prepared = await prepareDraftOrder(cart(), pricingClient());
     let requestCount = 0;
     const client = {
       request: async <T>() => {
         requestCount += 1;
-        if (requestCount === 1) {
+        return {
+          draftOrders: {
+            nodes: [
+              {
+                id: 'gid://shopify/DraftOrder/1',
+                status: 'OPEN',
+                invoiceUrl: null,
+                customAttributes: [
+                  {
+                    key: 'wandini_checkout_fingerprint',
+                    value: prepared.fingerprint,
+                  },
+                ],
+              },
+            ],
+          },
+        } as T;
+      },
+    };
+
+    await expect(
+      findOrCreateDraftOrder(prepared, client),
+    ).rejects.toMatchObject({code: 'DRAFT_ORDER_ERROR'});
+    expect(requestCount).toBe(1);
+  });
+
+  it('creates for a full-fingerprint mismatch and reconciles without updating a Draft', async () => {
+    const prepared = await prepareDraftOrder(cart(), pricingClient());
+    const operations: string[] = [];
+    let requestCount = 0;
+    const client = {
+      request: async <T>(query: string) => {
+        requestCount += 1;
+        if (query.includes('WandiniExistingDraftOrder')) {
+          operations.push('lookup');
           return {
             draftOrders: {
-              nodes: [
-                {
-                  id: 'gid://shopify/DraftOrder/paid',
-                  status: 'COMPLETED',
-                  invoiceUrl: 'https://example.myshopify.com/invoice/paid',
-                  customAttributes: [
-                    {
-                      key: 'wandini_checkout_fingerprint',
-                      value: prepared.fingerprint,
-                    },
-                  ],
-                },
-              ],
+              nodes:
+                requestCount === 1
+                  ? [
+                      {
+                        id: 'gid://shopify/DraftOrder/1',
+                        status: 'OPEN',
+                        invoiceUrl:
+                          'https://example.myshopify.com/invoice/stale',
+                        customAttributes: [
+                          {
+                            key: 'wandini_checkout_fingerprint',
+                            value: 'different-full-fingerprint',
+                          },
+                        ],
+                      },
+                    ]
+                  : [],
             },
           } as T;
         }
+        operations.push('create');
         return {
           draftOrderCreate: {
             draftOrder: {
-              id: 'gid://shopify/DraftOrder/new',
-              invoiceUrl: 'https://example.myshopify.com/invoice/new',
+              id: 'gid://shopify/DraftOrder/20',
+              invoiceUrl: 'https://example.myshopify.com/invoice/20',
             },
             userErrors: [],
           },
@@ -757,10 +1088,89 @@ describe('Draft Order line preparation', () => {
     };
 
     await expect(findOrCreateDraftOrder(prepared, client)).resolves.toEqual({
-      draftOrderId: 'gid://shopify/DraftOrder/new',
-      invoiceUrl: 'https://example.myshopify.com/invoice/new',
+      draftOrderId: 'gid://shopify/DraftOrder/20',
+      invoiceUrl: 'https://example.myshopify.com/invoice/20',
       reused: false,
     });
-    expect(requestCount).toBe(2);
+    expect(operations).toEqual(['lookup', 'create', 'lookup']);
+    expect(operations).not.toContain('update');
+  });
+
+  it('selects one deterministic canonical Draft after a cross-worker create race', async () => {
+    const prepared = await prepareDraftOrder(cart(), pricingClient());
+    let requestCount = 0;
+    const exactAttributes = [
+      {
+        key: 'wandini_checkout_fingerprint',
+        value: prepared.fingerprint,
+      },
+    ];
+    const client = {
+      request: async <T>() => {
+        requestCount += 1;
+        if (requestCount === 1) {
+          return {draftOrders: {nodes: []}} as T;
+        }
+        if (requestCount === 2) {
+          return {
+            draftOrderCreate: {
+              draftOrder: {
+                id: 'gid://shopify/DraftOrder/20',
+                invoiceUrl: 'https://example.myshopify.com/invoice/20',
+              },
+              userErrors: [],
+            },
+          } as T;
+        }
+        return {
+          draftOrders: {
+            nodes: [
+              {
+                id: 'gid://shopify/DraftOrder/20',
+                status: 'OPEN',
+                invoiceUrl: 'https://example.myshopify.com/invoice/20',
+                customAttributes: exactAttributes,
+              },
+              {
+                id: 'gid://shopify/DraftOrder/3',
+                status: 'OPEN',
+                invoiceUrl: 'https://example.myshopify.com/invoice/3',
+                customAttributes: exactAttributes,
+              },
+              {
+                id: 'gid://shopify/DraftOrder/1',
+                status: 'OPEN',
+                invoiceUrl: 'https://example.myshopify.com/invoice/mismatch',
+                customAttributes: [
+                  {
+                    key: 'wandini_checkout_fingerprint',
+                    value: 'different-full-fingerprint',
+                  },
+                ],
+              },
+              {
+                id: 'gid://shopify/DraftOrder/2',
+                status: 'COMPLETED',
+                invoiceUrl: 'https://example.myshopify.com/invoice/completed',
+                customAttributes: exactAttributes,
+              },
+              {
+                id: 'gid://shopify/DraftOrder/0',
+                status: 'OPEN',
+                invoiceUrl: null,
+                customAttributes: exactAttributes,
+              },
+            ],
+          },
+        } as T;
+      },
+    };
+
+    await expect(findOrCreateDraftOrder(prepared, client)).resolves.toEqual({
+      draftOrderId: 'gid://shopify/DraftOrder/3',
+      invoiceUrl: 'https://example.myshopify.com/invoice/3',
+      reused: true,
+    });
+    expect(requestCount).toBe(3);
   });
 });
