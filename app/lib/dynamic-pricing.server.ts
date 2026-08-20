@@ -13,6 +13,11 @@ import {
   type ShopifyMasterAssetMetafield,
   type ShopifyPrintQualityMetafield,
 } from '~/lib/configured-product-classification';
+import {
+  CHECKOUT_PROOF_ATTRIBUTE,
+  CheckoutProofError,
+  createCheckoutProof,
+} from '~/lib/checkout-proof.server';
 
 const ADMIN_API_VERSION = '2026-07';
 const ADMIN_REQUEST_TIMEOUT_MS = 15_000;
@@ -27,6 +32,7 @@ type DynamicPricingEnv = Pick<
   | 'SHOPIFY_SHOP'
   | 'SHOPIFY_PRICING_CLIENT_ID'
   | 'SHOPIFY_PRICING_CLIENT_SECRET'
+  | 'SHOPIFY_CHECKOUT_GUARD_SECRET'
   | 'DYNAMIC_PRICING_CHECKOUT_ENABLED'
 >;
 
@@ -203,7 +209,11 @@ export async function getCartPricingEvaluation(
 
   assertDynamicCheckoutEnabled(env);
   const client = createAdminClient(env);
-  const prepared = await prepareDraftOrder(cart, client);
+  const prepared = await prepareDraftOrder(
+    cart,
+    client,
+    env.SHOPIFY_CHECKOUT_GUARD_SECRET,
+  );
   if (prepared.configuredLineCount === 0) {
     return {checkoutMode: 'native', pricingQuote: null};
   }
@@ -357,7 +367,11 @@ export async function getOrCreateDraftOrderCheckout(
   }
   assertDynamicCheckoutEnabled(env);
   const client = createAdminClient(env);
-  const prepared = await prepareDraftOrder(cart, client);
+  const prepared = await prepareDraftOrder(
+    cart,
+    client,
+    env.SHOPIFY_CHECKOUT_GUARD_SECRET,
+  );
   if (prepared.configuredLineCount === 0) {
     throw new DynamicPricingError(
       'INVALID_CART',
@@ -380,6 +394,7 @@ export async function getOrCreateDraftOrderCheckout(
 export async function prepareDraftOrder(
   cart: DynamicPricingCart,
   client: AdminClient,
+  checkoutGuardSecret?: string,
 ): Promise<PreparedDraftOrder> {
   if (!cart.id || cart.lines.nodes.length === 0) {
     throw new DynamicPricingError('INVALID_CART', 'The cart is empty.');
@@ -397,7 +412,8 @@ export async function prepareDraftOrder(
   let configuredLineCount = 0;
   const instanceIds = new Set<string>();
 
-  const lineItems = cart.lines.nodes.map((line) => {
+  const lineItems: DraftOrderLineInput[] = [];
+  for (const line of cart.lines.nodes) {
     const mappedLine = mapCartLineToDraftOrderLine(
       line,
       variants,
@@ -405,10 +421,39 @@ export async function prepareDraftOrder(
     );
     if (mappedLine.priceOverride) {
       configuredLineCount += 1;
-      registerConfiguratorInstanceId(line, instanceIds);
+      const instanceId = registerConfiguratorInstanceId(line, instanceIds);
+      const payloadValue = line.attributes.find(
+        ({key}) => key === CONFIGURATOR_PAYLOAD_ATTRIBUTE,
+      )?.value;
+      if (typeof payloadValue !== 'string') {
+        throw new DynamicPricingError(
+          'INVALID_CONFIGURATION',
+          'The configurable wallpaper is missing its configuration.',
+        );
+      }
+
+      try {
+        const {proof} = await createCheckoutProof(
+          {
+            variantId: mappedLine.variantId,
+            instanceId,
+            payload: payloadValue,
+            quantity: mappedLine.quantity,
+            amount: mappedLine.priceOverride.amount,
+            currencyCode: mappedLine.priceOverride.currencyCode,
+          },
+          checkoutGuardSecret,
+        );
+        mappedLine.customAttributes = [
+          ...(mappedLine.customAttributes ?? []),
+          {key: CHECKOUT_PROOF_ATTRIBUTE, value: proof},
+        ];
+      } catch (cause) {
+        throw mapCheckoutProofError(cause);
+      }
     }
-    return mappedLine;
-  });
+    lineItems.push(mappedLine);
+  }
   const discountCodes = [
     ...new Set(
       (cart.discountCodes ?? [])
@@ -498,6 +543,7 @@ export function mapCartLineToDraftOrderLine(
   }
 
   const customAttributes = line.attributes
+    .filter(({key}) => key !== CHECKOUT_PROOF_ATTRIBUTE)
     .filter(hasStringValue)
     .map(({key, value}) => ({key, value}));
   const payloadAttribute = line.attributes.find(
@@ -946,6 +992,50 @@ function registerConfiguratorInstanceId(
     );
   }
   instanceIds.add(instanceId);
+  return instanceId;
+}
+
+function mapCheckoutProofError(cause: unknown) {
+  if (cause instanceof CheckoutProofError) {
+    switch (cause.code) {
+      case 'INVALID_SECRET':
+        return new DynamicPricingError(
+          'CONFIGURATION_ERROR',
+          'The configured checkout proof is not configured.',
+          {cause},
+        );
+      case 'INVALID_CURRENCY':
+        return new DynamicPricingError(
+          'CURRENCY_MISMATCH',
+          'Configured checkout is only available in EUR.',
+          {cause},
+        );
+      case 'INVALID_QUANTITY':
+        return new DynamicPricingError(
+          'INVALID_CONFIGURED_QUANTITY',
+          'Configured wallpaper quantity must be one.',
+          {cause},
+        );
+      case 'INVALID_AMOUNT':
+        return new DynamicPricingError(
+          'PRICING_UNAVAILABLE',
+          'The configured wallpaper price could not be signed.',
+          {cause},
+        );
+      case 'INVALID_CLAIM':
+        return new DynamicPricingError(
+          'INVALID_CONFIGURATION',
+          'The configured checkout proof claims are invalid.',
+          {cause},
+        );
+    }
+  }
+
+  return new DynamicPricingError(
+    'DRAFT_ORDER_ERROR',
+    'The configured checkout proof could not be generated.',
+    {cause},
+  );
 }
 
 function getVariantId(line: DynamicPricingCartLine) {
