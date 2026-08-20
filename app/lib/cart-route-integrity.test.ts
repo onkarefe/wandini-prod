@@ -1,4 +1,4 @@
-import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {action as cartAction} from '~/routes/cart';
 
 const configuredCart = {
@@ -63,9 +63,16 @@ function cartContext() {
   return {
     cart: {
       get: vi.fn().mockResolvedValue(structuredClone(configuredCart)),
+      addLines: vi.fn().mockResolvedValue(result),
       updateLines: vi.fn().mockResolvedValue(result),
       removeLines: vi.fn().mockResolvedValue(result),
       setCartId: vi.fn().mockReturnValue(new Headers()),
+    },
+    env: {
+      PUBLIC_STORE_DOMAIN: 'cart-add-test.myshopify.com',
+      SHOPIFY_SHOP: 'cart-add-test.myshopify.com',
+      SHOPIFY_PRICING_CLIENT_ID: 'cart-add-client',
+      SHOPIFY_PRICING_CLIENT_SECRET: 'secret',
     },
   };
 }
@@ -74,7 +81,80 @@ beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe('cart route configured-line integrity', () => {
+  it('passes a valid configured wallpaper line through to Shopify LinesAdd', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        if (String(input).endsWith('/admin/oauth/access_token')) {
+          return Response.json({access_token: 'test-token', expires_in: 3600});
+        }
+
+        const request = JSON.parse(String(init?.body)) as {query: string};
+        if (request.query.includes('WandiniConfiguredVariantPricing')) {
+          return Response.json({
+            data: {
+              shop: {currencyCode: 'EUR'},
+              nodes: [
+                {
+                  __typename: 'ProductVariant',
+                  id: 'gid://shopify/ProductVariant/1',
+                  availableForSale: true,
+                  price: '28.89',
+                  product: {
+                    id: 'gid://shopify/Product/1',
+                    masterAssetId: {value: 'asset-1'},
+                  },
+                  printQuality: {
+                    reference: {
+                      __typename: 'Metaobject',
+                      id: 'gid://shopify/Metaobject/1',
+                      minWidthCm: {value: '50'},
+                      minHeightCm: {value: '50'},
+                    },
+                  },
+                },
+              ],
+            },
+          });
+        }
+
+        throw new Error('Unexpected Admin API operation in test.');
+      }),
+    );
+
+    const context = cartContext();
+    const lines = [
+      {
+        merchandiseId: 'gid://shopify/ProductVariant/1',
+        quantity: 1,
+        attributes: [
+          {
+            key: 'configurator_payload',
+            value: JSON.stringify({
+              version: 1,
+              master_asset_id: 'asset-1',
+              output: {unit: 'mm', width: 2000, height: 2500},
+              crop_ratio: {x: 0.501, y: 0.251, w: 0.499, h: 0.749},
+            }),
+          },
+          {key: 'configurator_instance_id', value: 'configuration-2'},
+        ],
+      },
+    ];
+
+    await cartAction({
+      request: cartRequest('LinesAdd', {lines}),
+      context,
+    } as never);
+
+    expect(context.cart.addLines).toHaveBeenCalledWith(lines);
+  });
+
   it('does not call Shopify LinesUpdate for configured quantity tampering', async () => {
     const context = cartContext();
 

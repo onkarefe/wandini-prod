@@ -32,6 +32,36 @@ const MAX_PANEL_CM = 70;
 const clamp = (v: number, min: number, max: number) =>
   Math.min(Math.max(v, min), max);
 
+export function createNormalizedCropRatio({
+  x,
+  y,
+  width,
+  height,
+  imageWidth,
+  imageHeight,
+}: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  imageWidth: number;
+  imageHeight: number;
+}) {
+  const naturalWidth = Math.max(1, Math.round(imageWidth));
+  const naturalHeight = Math.max(1, Math.round(imageHeight));
+  const startX = clamp(Math.round(x), 0, naturalWidth - 1);
+  const startY = clamp(Math.round(y), 0, naturalHeight - 1);
+  const endX = clamp(Math.round(x + width), startX + 1, naturalWidth);
+  const endY = clamp(Math.round(y + height), startY + 1, naturalHeight);
+
+  return {
+    x: startX / naturalWidth,
+    y: startY / naturalHeight,
+    w: (endX - startX) / naturalWidth,
+    h: (endY - startY) / naturalHeight,
+  };
+}
+
 export function Configurator({
   imageUrl,
   width: realWcm,
@@ -283,17 +313,16 @@ export function Configurator({
     const relX = selection.x - imgRect.left;
     const relY = selection.y - imgRect.top;
 
-    const x = Math.max(0, Math.round(relX * scaleX));
-    const y = Math.max(0, Math.round(relY * scaleY));
-    const w = Math.max(1, Math.round(selection.w * scaleX));
-    const h = Math.max(1, Math.round(selection.h * scaleY));
-
-    onCropChange({
-      x: x / naturalW,
-      y: y / naturalH,
-      w: w / naturalW,
-      h: h / naturalH,
-    });
+    onCropChange(
+      createNormalizedCropRatio({
+        x: relX * scaleX,
+        y: relY * scaleY,
+        width: selection.w * scaleX,
+        height: selection.h * scaleY,
+        imageWidth: naturalW,
+        imageHeight: naturalH,
+      }),
+    );
 
   }, [selection, imageLoaded, getImageRectInContainer, onCropChange]);
 
