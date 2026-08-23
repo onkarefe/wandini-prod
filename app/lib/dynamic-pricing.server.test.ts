@@ -233,6 +233,7 @@ describe('Draft Order line preparation', () => {
     ]);
     expect(prepared.input.discountCodes).toEqual(['WAND10']);
     expect(prepared.input.sessionToken).toBe(prepared.fingerprint);
+    expect(prepared.input).not.toHaveProperty('visibleToCustomer');
     const configuredProof = prepared.input.lineItems[0].customAttributes?.find(
       ({key}) => key === '_wandini_checkout_proof',
     )?.value;

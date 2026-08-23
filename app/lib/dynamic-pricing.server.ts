@@ -120,7 +120,6 @@ export type DraftOrderInput = {
   discountCodes?: string[];
   acceptAutomaticDiscounts: true;
   allowDiscountCodesInCheckout: true;
-  visibleToCustomer: true;
   sessionToken: string;
   useCustomerDefaultAddress?: true;
 };
@@ -508,7 +507,6 @@ export async function prepareDraftOrder(
     sessionToken: fingerprint,
     acceptAutomaticDiscounts: true,
     allowDiscountCodesInCheckout: true,
-    visibleToCustomer: true,
     ...(cart.note ? {note: cart.note} : {}),
     ...(cart.buyerIdentity?.email ? {email: cart.buyerIdentity.email} : {}),
     ...(cart.buyerIdentity?.phone ? {phone: cart.buyerIdentity.phone} : {}),
