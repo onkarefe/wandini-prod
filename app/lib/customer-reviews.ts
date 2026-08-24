@@ -8,6 +8,7 @@ export type CustomerReviewImage = {
 export type CustomerReview = {
   id: string;
   customerName: string;
+  commentTitle: string;
   customerComment: string;
   image: CustomerReviewImage | null;
   stars: unknown;
@@ -185,6 +186,7 @@ export function parseCustomerReviewsMetaobject(
   const customerComments = safeJsonArray(
     fieldMap.get('customer_comment')?.value,
   );
+  const commentTitles = safeJsonArray(fieldMap.get('comment_title')?.value);
   const customerImages =
     fieldMap.get('image')?.references?.nodes?.filter(Boolean) ?? [];
   const customerStars = safeJsonUnknownArray(fieldMap.get('stars')?.value).map(
@@ -192,6 +194,7 @@ export function parseCustomerReviewsMetaobject(
   );
   const reviewCount = Math.max(
     customerNames.length,
+    commentTitles.length,
     customerComments.length,
     customerImages.length,
     customerStars.length,
@@ -201,6 +204,7 @@ export function parseCustomerReviewsMetaobject(
     .map((_, index) => ({
       id: `customer-review-${index + 1}`,
       customerName: customerNames[index] ?? '',
+      commentTitle: commentTitles[index] ?? '',
       customerComment: customerComments[index] ?? '',
       image: normalizeReferenceImage(
         customerImages[index],
@@ -211,6 +215,7 @@ export function parseCustomerReviewsMetaobject(
     .filter(
       (review) =>
         review.customerName ||
+        review.commentTitle ||
         review.customerComment ||
         review.image ||
         review.stars,

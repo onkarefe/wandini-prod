@@ -48,13 +48,30 @@ function ReviewStars({rating}: {rating: number}) {
       aria-label={`${rating} von 5 Sternen`}
     >
       {getStarStates(rating).map(({position, state}) => (
-        <span
+        <svg
           className={`customer-reviews-page__star customer-reviews-page__star--${state}`}
+          viewBox="0 0 24 24"
           aria-hidden="true"
+          focusable="false"
           key={position}
         >
-          ★
-        </span>
+          <rect
+            className="customer-reviews-page__star-base"
+            width="24"
+            height="24"
+          />
+          {state !== 'empty' ? (
+            <rect
+              className="customer-reviews-page__star-fill"
+              width={state === 'half' ? 12 : 24}
+              height="24"
+            />
+          ) : null}
+          <path
+            className="customer-reviews-page__star-shape"
+            d="m12 3.45 2.58 5.24 5.78.84-4.18 4.07.99 5.75L12 16.63l-5.17 2.72.99-5.75-4.18-4.07 5.78-.84L12 3.45Z"
+          />
+        </svg>
       ))}
     </div>
   );
@@ -128,17 +145,22 @@ function ReviewStory({review}: {review: CustomerReview}) {
         <div className="customer-reviews-page__story-content">
           {rating > 0 ? <ReviewStars rating={rating} /> : null}
 
+          {review.customerName ? (
+            <footer className="customer-reviews-page__customer">
+              <cite>{review.customerName}</cite>
+            </footer>
+          ) : null}
+
+          {review.commentTitle ? (
+            <h3 className="customer-reviews-page__comment-title">
+              {review.commentTitle}
+            </h3>
+          ) : null}
+
           {review.customerComment ? (
             <blockquote className="customer-reviews-page__quote">
               <p>{review.customerComment}</p>
             </blockquote>
-          ) : null}
-
-          {review.customerName ? (
-            <footer className="customer-reviews-page__customer">
-              <span aria-hidden="true" />
-              <cite>{review.customerName}</cite>
-            </footer>
           ) : null}
         </div>
       </article>
@@ -155,6 +177,12 @@ function ReviewsShowcase({
 }) {
   if (!reviews.length) return null;
 
+  const averageRating =
+    reviews.reduce(
+      (total, review) => total + getCustomerReviewRatingValue(review.stars),
+      0,
+    ) / reviews.length;
+
   return (
     <section
       className="customer-reviews-page__showcase"
@@ -167,6 +195,24 @@ function ReviewsShowcase({
             <h2 id="customer-reviews-heading">{sectionTitle}</h2>
           </header>
         ) : null}
+
+        <div className="customer-reviews-page__summary">
+          <ReviewStars rating={averageRating} />
+          <p>
+            <strong>{averageRating.toFixed(1)}</strong>
+            <span> / 5</span>
+            <span
+              className="customer-reviews-page__summary-separator"
+              aria-hidden="true"
+            >
+              |
+            </span>
+            <span>
+              {reviews.length}{' '}
+              {reviews.length === 1 ? 'Bewertung' : 'Bewertungen'}
+            </span>
+          </p>
+        </div>
 
         <ol className="customer-reviews-page__stories">
           {reviews.map((review) => (
