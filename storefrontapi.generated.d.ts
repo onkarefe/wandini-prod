@@ -1359,6 +1359,51 @@ export type CatalogQuery = {
   };
 };
 
+export type FaqQueryVariables = StorefrontAPI.Exact<{
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  faqCategoryType: StorefrontAPI.Scalars['String']['input'];
+  faqItemType: StorefrontAPI.Scalars['String']['input'];
+  titleKey: StorefrontAPI.Scalars['String']['input'];
+  orderKey: StorefrontAPI.Scalars['String']['input'];
+  questionKey: StorefrontAPI.Scalars['String']['input'];
+  answerKey: StorefrontAPI.Scalars['String']['input'];
+  categoryKey: StorefrontAPI.Scalars['String']['input'];
+}>;
+
+export type FaqQuery = {
+  faqCategories: {
+    nodes: Array<
+      Pick<StorefrontAPI.Metaobject, 'id'> & {
+        title?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.MetaobjectField, 'value'>
+        >;
+        order?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.MetaobjectField, 'value'>
+        >;
+      }
+    >;
+  };
+  faqItems: {
+    nodes: Array<
+      Pick<StorefrontAPI.Metaobject, 'id'> & {
+        question?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.MetaobjectField, 'value'>
+        >;
+        answer?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.MetaobjectField, 'value'>
+        >;
+        category?: StorefrontAPI.Maybe<{
+          reference?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metaobject, 'id'>>;
+        }>;
+        order?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.MetaobjectField, 'value'>
+        >;
+      }
+    >;
+  };
+};
+
 export type CustomerReviewsPageMetaobjectFragment = Pick<
   StorefrontAPI.Metaobject,
   'id' | 'handle' | 'type'
@@ -2456,6 +2501,10 @@ interface GeneratedQueryTypes {
   '#graphql\n  query Catalog(\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    products(first: $first, last: $last, before: $startCursor, after: $endCursor) {\n      nodes {\n        ...CollectionItem\n      }\n      pageInfo {\n        hasPreviousPage\n        hasNextPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n  #graphql\n  fragment MoneyCollectionItem on MoneyV2 {\n    amount\n    currencyCode\n  }\n  fragment CollectionItem on Product {\n    id\n    handle\n    title\n    featuredImage {\n      id\n      altText\n      url\n      width\n      height\n    }\n    priceRange {\n      minVariantPrice {\n        ...MoneyCollectionItem\n      }\n      maxVariantPrice {\n        ...MoneyCollectionItem\n      }\n    }\n  }\n\n': {
     return: CatalogQuery;
     variables: CatalogQueryVariables;
+  };
+  '#graphql\n  query FAQ(\n    $language: LanguageCode\n    $country: CountryCode\n    $faqCategoryType: String!\n    $faqItemType: String!\n    $titleKey: String!\n    $orderKey: String!\n    $questionKey: String!\n    $answerKey: String!\n    $categoryKey: String!\n  )\n  @inContext(language: $language, country: $country) {\n    faqCategories: metaobjects(first: 250, type: $faqCategoryType) {\n      nodes {\n        id\n        title: field(key: $titleKey) {\n          value\n        }\n        order: field(key: $orderKey) {\n          value\n        }\n      }\n    }\n    faqItems: metaobjects(first: 250, type: $faqItemType) {\n      nodes {\n        id\n        question: field(key: $questionKey) {\n          value\n        }\n        answer: field(key: $answerKey) {\n          value\n        }\n        category: field(key: $categoryKey) {\n          reference {\n            ... on Metaobject {\n              id\n            }\n          }\n        }\n        order: field(key: $orderKey) {\n          value\n        }\n      }\n    }\n  }\n': {
+    return: FAQQuery;
+    variables: FAQQueryVariables;
   };
   '#graphql\n  fragment CustomerReviewsPageMetaobject on Metaobject {\n    id\n    handle\n    type\n      fields {\n        key\n        value\n        type\n        reference {\n          ... on MediaImage {\n            id\n            image {\n              url\n              altText\n              width\n              height\n            }\n          }\n          ... on GenericFile {\n            id\n            url\n          }\n        }\n        references(first: 50) {\n        nodes {\n          ... on MediaImage {\n            id\n            image {\n              url\n              altText\n              width\n              height\n            }\n          }\n          ... on GenericFile {\n            id\n            url\n          }\n        }\n      }\n    }\n  }\n\n  query Page(\n    $language: LanguageCode,\n    $country: CountryCode,\n    $handle: String!\n  )\n  @inContext(language: $language, country: $country) {\n    page(handle: $handle) {\n      handle\n      id\n      title\n      body\n      pageType: metafield(namespace: "custom", key: "page_type") {\n        value\n      }\n      erfahrungenHero: metafield(\n        namespace: "custom"\n        key: "erfahrungen_hero"\n      ) {\n        type\n        reference {\n          ...CustomerReviewsPageMetaobject\n        }\n      }\n      customerReviews: metafield(\n        namespace: "custom"\n        key: "reviews_page_comments"\n      ) {\n        type\n        reference {\n          ...CustomerReviewsPageMetaobject\n        }\n        references(first: 5) {\n          nodes {\n            ...CustomerReviewsPageMetaobject\n          }\n        }\n      }\n      erfahrungenSteps: metafield(\n        namespace: "custom"\n        key: "erfahrungen_steps"\n      ) {\n        type\n        reference {\n          ...CustomerReviewsPageMetaobject\n        }\n      }\n      seo {\n        description\n        title\n      }\n    }\n  }\n': {
     return: PageQuery;
