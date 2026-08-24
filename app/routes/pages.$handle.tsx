@@ -4,11 +4,8 @@ import type {Route} from './+types/pages.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import staticPagesStyles from '~/styles/staticPages.css?url';
 import {getRobotsDirective} from '~/lib/seo';
-import type {
-  FAQCategory,
-  FAQContactActionData,
-  FAQCopy,
-} from '~/components/FAQ';
+import type {FAQCategory, FAQCopy} from '~/components/FAQ';
+import type {KontaktPageData} from '~/components/kontakt';
 import {
   parseCustomerReviewsHeroMetaobject,
   parseCustomerReviewsMetaobject,
@@ -35,8 +32,10 @@ const PAGE_META_BRAND = 'Wandini';
 const PAGE_META_DESCRIPTION_MAX_LENGTH = 160;
 const ERFAHRUNGEN_PAGE_TYPE = 'erfahrungen';
 const FAQ_PAGE_TYPE = 'faq';
+const KONTAKT_PAGE_TYPE = 'kontakt';
 
 const FAQ = lazy(() => import('~/components/FAQ'));
+const Kontakt = lazy(() => import('~/components/kontakt'));
 
 const CustomerReviewsPage = lazy(
   () => import('~/components/customer-reviews-page'),
@@ -63,6 +62,10 @@ function isFaqPage(page?: PageWithType | null) {
   return page?.pageType?.value?.trim().toLowerCase() === FAQ_PAGE_TYPE;
 }
 
+function isKontaktPage(page?: PageWithType | null) {
+  return page?.pageType?.value?.trim().toLowerCase() === KONTAKT_PAGE_TYPE;
+}
+
 const FAQ_COPY: FAQCopy = {
   contactEyebrow: 'Kontakt',
   contactTitle: 'Ihre Frage ist noch offen?',
@@ -83,6 +86,15 @@ const FAQ_ACTION_MESSAGES = {
   success: 'Vielen Dank. Ihre Frage wurde erfolgreich gesendet.',
   error:
     'Ihre Frage konnte gerade nicht gesendet werden. Bitte versuchen Sie es erneut.',
+} as const;
+
+const KONTAKT_ACTION_MESSAGES = {
+  required: 'Bitte f\u00fcllen Sie dieses Feld aus.',
+  invalidEmail: 'Bitte geben Sie eine g\u00fcltige E-Mail-Adresse ein.',
+  invalidMessage: 'Ihre Nachricht muss mindestens 10 Zeichen enthalten.',
+  success: 'Vielen Dank. Ihre Nachricht wurde erfolgreich gesendet.',
+  error:
+    'Ihre Nachricht konnte gerade nicht gesendet werden. Bitte versuchen Sie es erneut.',
 } as const;
 
 function normalizeMetaText(value?: string | null) {
@@ -279,6 +291,115 @@ function parseFAQMetaobjects(value: unknown): FAQCategory[] {
     }));
 }
 
+type KontaktField = {value?: unknown} | null;
+
+type KontaktMetaobjectNode = {
+  address?: KontaktField;
+  mobile?: KontaktField;
+  mail?: KontaktField;
+  googleMaps?: KontaktField;
+  links?: {
+    references?: {
+      nodes?: unknown;
+    } | null;
+  } | null;
+};
+
+type KontaktPageReference = {
+  id?: unknown;
+  handle?: unknown;
+  title?: unknown;
+};
+
+function getKontaktFieldText(field?: KontaktField) {
+  return typeof field?.value === 'string' ? field.value.trim() : '';
+}
+
+function extractGoogleMapsUrl(value: string) {
+  if (!value) return '';
+
+  const iframeSrc = value.match(
+    /<iframe\b[^>]*\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i,
+  );
+  const candidate = (
+    iframeSrc?.[1] ??
+    iframeSrc?.[2] ??
+    iframeSrc?.[3] ??
+    value
+  )
+    .trim()
+    .replace(/&amp;/gi, '&')
+    .replace(/&#0*38;/gi, '&');
+
+  try {
+    const url = new URL(candidate);
+    const allowedHost =
+      url.hostname === 'www.google.com' ||
+      url.hostname === 'maps.google.com' ||
+      url.hostname === 'www.google.de' ||
+      url.hostname === 'maps.google.de';
+    const allowedPath = /^\/maps\/(?:d\/)?embed(?:\/|$)/.test(url.pathname);
+
+    if (url.protocol !== 'https:' || !allowedHost || !allowedPath) return '';
+
+    url.username = '';
+    url.password = '';
+    url.hash = '';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+function parseKontaktPageDetails(value: unknown): KontaktPageData {
+  const emptyData: KontaktPageData = {
+    address: '',
+    mobile: '',
+    mail: '',
+    mapUrl: '',
+    links: [],
+  };
+
+  if (!value || typeof value !== 'object') return emptyData;
+
+  const connection = (value as {kontaktPageDetails?: unknown})
+    .kontaktPageDetails;
+  if (!connection || typeof connection !== 'object') return emptyData;
+
+  const nodes = (connection as {nodes?: unknown}).nodes;
+  if (!Array.isArray(nodes) || !nodes.length) return emptyData;
+
+  const node = nodes[0] as KontaktMetaobjectNode;
+  const references = node.links?.references?.nodes;
+  const links = Array.isArray(references)
+    ? references.flatMap((reference) => {
+        if (!reference || typeof reference !== 'object') return [];
+
+        const pageReference = reference as KontaktPageReference;
+        const id =
+          typeof pageReference.id === 'string' ? pageReference.id.trim() : '';
+        const handle =
+          typeof pageReference.handle === 'string'
+            ? pageReference.handle.trim()
+            : '';
+        const title =
+          typeof pageReference.title === 'string'
+            ? pageReference.title.trim()
+            : '';
+
+        return id && handle && title ? [{id, handle, title}] : [];
+      })
+    : [];
+
+  return {
+    address: getKontaktFieldText(node.address),
+    mobile: getKontaktFieldText(node.mobile),
+    mail: getKontaktFieldText(node.mail),
+    mapUrl: extractGoogleMapsUrl(getKontaktFieldText(node.googleMaps)),
+    links,
+  };
+}
+
 function getRichTextPlainText(value: string) {
   try {
     const root: unknown = JSON.parse(value);
@@ -316,6 +437,52 @@ function getFAQMetaDescription(
     .join(' — ');
 
   return description ? truncateMetaDescription(description) : null;
+}
+
+function getKontaktMetaDescription(
+  title: string | null | undefined,
+  data?: KontaktPageData | null,
+) {
+  if (!data) return null;
+
+  const description = [
+    normalizeMetaText(title),
+    normalizeMetaText(data.address),
+    normalizeMetaText(data.mail),
+  ]
+    .filter(Boolean)
+    .join(' - ');
+
+  return description ? truncateMetaDescription(description) : null;
+}
+
+function buildKontaktJsonLd(
+  title: string | null | undefined,
+  canonicalUrl: string,
+  data: KontaktPageData,
+) {
+  const name = normalizeMetaText(title);
+  if (!name) return null;
+
+  const hasContactData = Boolean(data.address || data.mail || data.mobile);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    name,
+    url: canonicalUrl,
+    ...(hasContactData
+      ? {
+          mainEntity: {
+            '@type': 'Organization',
+            name: PAGE_META_BRAND,
+            ...(data.address ? {address: data.address} : {}),
+            ...(data.mail ? {email: data.mail} : {}),
+            ...(data.mobile ? {telephone: data.mobile} : {}),
+          },
+        }
+      : {}),
+  };
 }
 
 function buildFAQJsonLd(categories: FAQCategory[]) {
@@ -365,7 +532,9 @@ export const meta: Route.MetaFunction = ({data, params}) => {
     getPageMetaDescription(page) ||
     (isFaqPage(page)
       ? getFAQMetaDescription(page?.title, data?.faqCategories ?? [])
-      : null);
+      : isKontaktPage(page)
+        ? getKontaktMetaDescription(page?.title, data?.kontakt)
+        : null);
   const canonicalUrl = data?.canonicalUrl ?? `/pages/${params.handle ?? ''}`;
 
   return [
@@ -415,20 +584,33 @@ function getShopifyContactUrl(domain: string | undefined) {
   }
 }
 
+type ContactFieldErrors = Partial<
+  Record<'fullName' | 'email' | 'phone' | 'question' | 'message', string>
+>;
+
 export async function action({
   context,
   request,
 }: Route.ActionArgs): Promise<Response> {
-  const messages = FAQ_ACTION_MESSAGES;
-
   if (request.method !== 'POST') {
-    return Response.json({ok: false, message: messages.error}, {status: 405});
+    return Response.json(
+      {ok: false, message: FAQ_ACTION_MESSAGES.error},
+      {status: 405},
+    );
   }
 
   const formData = await request.formData();
-  if (readFAQFormValue(formData, 'intent') !== 'faq-contact') {
-    return Response.json({ok: false, message: messages.error}, {status: 400});
+  const intent = readFAQFormValue(formData, 'intent');
+  const isKontaktForm = intent === 'kontakt-contact';
+  if (!isKontaktForm && intent !== 'faq-contact') {
+    return Response.json(
+      {ok: false, message: FAQ_ACTION_MESSAGES.error},
+      {status: 400},
+    );
   }
+  const messages = isKontaktForm
+    ? KONTAKT_ACTION_MESSAGES
+    : FAQ_ACTION_MESSAGES;
 
   if (readFAQFormValue(formData, 'company')) {
     return Response.json({
@@ -441,7 +623,9 @@ export async function action({
   const email = readFAQFormValue(formData, 'email');
   const phone = readFAQFormValue(formData, 'phone');
   const question = readFAQFormValue(formData, 'question');
-  const fieldErrors: NonNullable<FAQContactActionData['fieldErrors']> = {};
+  const message = readFAQFormValue(formData, 'message');
+  const body = isKontaktForm ? message : question;
+  const fieldErrors: ContactFieldErrors = {};
 
   if (fullName.length < 2 || fullName.length > 120) {
     fieldErrors.fullName = messages.required;
@@ -452,8 +636,12 @@ export async function action({
   if (!phone || phone.length > 40) {
     fieldErrors.phone = messages.required;
   }
-  if (question.length < 10 || question.length > 3000) {
-    fieldErrors.question = messages.invalidQuestion;
+  if (body.length < 10 || body.length > 3000) {
+    if (isKontaktForm) {
+      fieldErrors.message = KONTAKT_ACTION_MESSAGES.invalidMessage;
+    } else {
+      fieldErrors.question = FAQ_ACTION_MESSAGES.invalidQuestion;
+    }
   }
 
   if (Object.keys(fieldErrors).length) {
@@ -471,7 +659,7 @@ export async function action({
     'contact[name]': fullName,
     'contact[email]': email,
     'contact[phone]': phone,
-    'contact[body]': question,
+    'contact[body]': body,
   });
 
   try {
@@ -542,6 +730,19 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
         },
       })
     : null;
+  const kontaktMetaobjects = isKontaktPage(page)
+    ? await context.storefront.query(KONTAKT_QUERY, {
+        cache: context.storefront.CacheShort(),
+        variables: {
+          kontaktType: 'kontakt_page_detatils',
+          addressKey: 'adress',
+          mobileKey: 'mobile',
+          mailKey: 'mail',
+          linksKey: 'links',
+          googleMapsKey: 'google_maps',
+        },
+      })
+    : null;
   const url = new URL(request.url);
   const customerReviewsMetaobject =
     page.customerReviews?.reference ??
@@ -555,6 +756,7 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
     canonicalUrl: `${url.origin}${url.pathname}`,
     faqCategories: parseFAQMetaobjects(faqMetaobjects),
     faqCopy: FAQ_COPY,
+    kontakt: parseKontaktPageDetails(kontaktMetaobjects),
     customerReviewsHero: parseCustomerReviewsHeroMetaobject(
       customerReviewsHeroMetaobject,
     ),
@@ -583,14 +785,40 @@ function loadDeferredData(_: Route.LoaderArgs) {
 
 export default function Page() {
   const {
+    canonicalUrl,
     customerReviews,
     customerReviewsHero,
     customerReviewsSectionTitle,
     customerReviewsSteps,
     faqCategories,
     faqCopy,
+    kontakt,
     page,
   } = useLoaderData<typeof loader>();
+
+  if (isKontaktPage(page)) {
+    const kontaktJsonLd = buildKontaktJsonLd(page.title, canonicalUrl, kontakt);
+
+    return (
+      <>
+        {kontaktJsonLd ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{__html: stringifyJsonLd(kontaktJsonLd)}}
+          />
+        ) : null}
+        <Suspense
+          fallback={
+            <main className="kontakt-page" aria-busy="true">
+              <div className="kontakt-page__hero container mx-auto" />
+            </main>
+          }
+        >
+          <Kontakt title={page.title} data={kontakt} />
+        </Suspense>
+      </>
+    );
+  }
 
   if (isFaqPage(page)) {
     const faqJsonLd = buildFAQJsonLd(faqCategories);
@@ -649,6 +877,48 @@ export default function Page() {
     </main>
   );
 }
+
+const KONTAKT_QUERY = `#graphql
+  query KontaktPageDetails(
+    $language: LanguageCode
+    $country: CountryCode
+    $kontaktType: String!
+    $addressKey: String!
+    $mobileKey: String!
+    $mailKey: String!
+    $linksKey: String!
+    $googleMapsKey: String!
+  )
+  @inContext(language: $language, country: $country) {
+    kontaktPageDetails: metaobjects(first: 1, type: $kontaktType) {
+      nodes {
+        address: field(key: $addressKey) {
+          value
+        }
+        mobile: field(key: $mobileKey) {
+          value
+        }
+        mail: field(key: $mailKey) {
+          value
+        }
+        links: field(key: $linksKey) {
+          references(first: 50) {
+            nodes {
+              ... on Page {
+                id
+                handle
+                title
+              }
+            }
+          }
+        }
+        googleMaps: field(key: $googleMapsKey) {
+          value
+        }
+      }
+    }
+  }
+` as const;
 
 const FAQ_QUERY = `#graphql
   query FAQ(

@@ -1359,6 +1359,39 @@ export type CatalogQuery = {
   };
 };
 
+export type KontaktPageDetailsQueryVariables = StorefrontAPI.Exact<{
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  kontaktType: StorefrontAPI.Scalars['String']['input'];
+  addressKey: StorefrontAPI.Scalars['String']['input'];
+  mobileKey: StorefrontAPI.Scalars['String']['input'];
+  mailKey: StorefrontAPI.Scalars['String']['input'];
+  linksKey: StorefrontAPI.Scalars['String']['input'];
+  googleMapsKey: StorefrontAPI.Scalars['String']['input'];
+}>;
+
+export type KontaktPageDetailsQuery = {
+  kontaktPageDetails: {
+    nodes: Array<{
+      address?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.MetaobjectField, 'value'>
+      >;
+      mobile?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.MetaobjectField, 'value'>
+      >;
+      mail?: StorefrontAPI.Maybe<Pick<StorefrontAPI.MetaobjectField, 'value'>>;
+      links?: StorefrontAPI.Maybe<{
+        references?: StorefrontAPI.Maybe<{
+          nodes: Array<Pick<StorefrontAPI.Page, 'id' | 'handle' | 'title'>>;
+        }>;
+      }>;
+      googleMaps?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.MetaobjectField, 'value'>
+      >;
+    }>;
+  };
+};
+
 export type FaqQueryVariables = StorefrontAPI.Exact<{
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
@@ -2501,6 +2534,10 @@ interface GeneratedQueryTypes {
   '#graphql\n  query Catalog(\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    products(first: $first, last: $last, before: $startCursor, after: $endCursor) {\n      nodes {\n        ...CollectionItem\n      }\n      pageInfo {\n        hasPreviousPage\n        hasNextPage\n        startCursor\n        endCursor\n      }\n    }\n  }\n  #graphql\n  fragment MoneyCollectionItem on MoneyV2 {\n    amount\n    currencyCode\n  }\n  fragment CollectionItem on Product {\n    id\n    handle\n    title\n    featuredImage {\n      id\n      altText\n      url\n      width\n      height\n    }\n    priceRange {\n      minVariantPrice {\n        ...MoneyCollectionItem\n      }\n      maxVariantPrice {\n        ...MoneyCollectionItem\n      }\n    }\n  }\n\n': {
     return: CatalogQuery;
     variables: CatalogQueryVariables;
+  };
+  '#graphql\n  query KontaktPageDetails(\n    $language: LanguageCode\n    $country: CountryCode\n    $kontaktType: String!\n    $addressKey: String!\n    $mobileKey: String!\n    $mailKey: String!\n    $linksKey: String!\n    $googleMapsKey: String!\n  )\n  @inContext(language: $language, country: $country) {\n    kontaktPageDetails: metaobjects(first: 1, type: $kontaktType) {\n      nodes {\n        address: field(key: $addressKey) {\n          value\n        }\n        mobile: field(key: $mobileKey) {\n          value\n        }\n        mail: field(key: $mailKey) {\n          value\n        }\n        links: field(key: $linksKey) {\n          references(first: 50) {\n            nodes {\n              ... on Page {\n                id\n                handle\n                title\n              }\n            }\n          }\n        }\n        googleMaps: field(key: $googleMapsKey) {\n          value\n        }\n      }\n    }\n  }\n': {
+    return: KontaktPageDetailsQuery;
+    variables: KontaktPageDetailsQueryVariables;
   };
   '#graphql\n  query FAQ(\n    $language: LanguageCode\n    $country: CountryCode\n    $faqCategoryType: String!\n    $faqItemType: String!\n    $titleKey: String!\n    $orderKey: String!\n    $questionKey: String!\n    $answerKey: String!\n    $categoryKey: String!\n  )\n  @inContext(language: $language, country: $country) {\n    faqCategories: metaobjects(first: 250, type: $faqCategoryType) {\n      nodes {\n        id\n        title: field(key: $titleKey) {\n          value\n        }\n        order: field(key: $orderKey) {\n          value\n        }\n      }\n    }\n    faqItems: metaobjects(first: 250, type: $faqItemType) {\n      nodes {\n        id\n        question: field(key: $questionKey) {\n          value\n        }\n        answer: field(key: $answerKey) {\n          value\n        }\n        category: field(key: $categoryKey) {\n          reference {\n            ... on Metaobject {\n              id\n            }\n          }\n        }\n        order: field(key: $orderKey) {\n          value\n        }\n      }\n    }\n  }\n': {
     return: FAQQuery;
