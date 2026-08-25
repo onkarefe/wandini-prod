@@ -19,7 +19,9 @@ import {
 import type {ProductFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {ProductPrice} from '~/components/ProductPrice';
-import {Link} from '~/lib/i18n-router';
+import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
+import {prefixPathWithLocale, type SelectedLocale} from '~/lib/locale';
 import '../styles/zubehor-product-detail.css';
 
 type ProductImageNode = ProductFragment['images']['edges'][number]['node'];
@@ -109,6 +111,7 @@ function ZubehorProductGallery({
   productId: string;
   productTitle: string;
 }) {
+  const {t} = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const hasMultipleImages = images.length > 1;
@@ -155,12 +158,12 @@ function ZubehorProductGallery({
       className={`zpd-gallery${
         hasMultipleImages ? ' zpd-gallery--multiple' : ''
       }`}
-      aria-label={`${productTitle} Produktbilder`}
+      aria-label={t('product.imagesLabel', {title: productTitle})}
     >
       <div
         className="zpd-gallery__stage"
         role="group"
-        aria-label="Produktbildanzeige"
+        aria-label={t('product.imageViewer')}
         onTouchStart={(event) => {
           touchStartX.current = event.touches[0]?.clientX ?? null;
         }}
@@ -194,7 +197,7 @@ function ZubehorProductGallery({
             <button
               type="button"
               onClick={() => showImage(activeIndex - 1)}
-              aria-label="Vorheriges Produktbild"
+              aria-label={t('product.previousImage')}
             >
               <ArrowIcon direction="left" />
             </button>
@@ -204,7 +207,7 @@ function ZubehorProductGallery({
             <button
               type="button"
               onClick={() => showImage(activeIndex + 1)}
-              aria-label="Nächstes Produktbild"
+              aria-label={t('product.nextImage')}
             >
               <ArrowIcon direction="right" />
             </button>
@@ -215,7 +218,7 @@ function ZubehorProductGallery({
       {hasMultipleImages ? (
         <div
           className="zpd-gallery__thumbnails"
-          aria-label="Produktbild auswählen"
+          aria-label={t('product.selectImage')}
         >
           {images.map((image, index) => (
             <button
@@ -223,7 +226,7 @@ function ZubehorProductGallery({
               key={`thumbnail-${getImageKey(image) ?? index}`}
               className={index === activeIndex ? 'is-active' : undefined}
               onClick={() => showImage(index)}
-              aria-label={`Produktbild ${index + 1} anzeigen`}
+              aria-label={t('product.showImage', {number: index + 1})}
               aria-current={index === activeIndex ? 'true' : undefined}
             >
               <Image
@@ -241,14 +244,19 @@ function ZubehorProductGallery({
   );
 }
 
-function safeRichTextUrl(url?: string) {
+function safeRichTextUrl(url: string | undefined, locale: SelectedLocale) {
   if (!url) return '#';
-  return /^(https?:\/\/|mailto:|tel:|\/|#)/i.test(url) ? url : '#';
+  if (!/^(https?:\/\/|mailto:|tel:|\/|#)/i.test(url)) return '#';
+  return url.startsWith('/') ? prefixPathWithLocale(url, locale) : url;
 }
 
-function renderRichTextNode(node: RichTextNode, key: string): ReactNode {
+function renderRichTextNode(
+  node: RichTextNode,
+  key: string,
+  locale: SelectedLocale,
+): ReactNode {
   const children = node.children?.map((child, index) =>
-    renderRichTextNode(child, `${key}-${index}`),
+    renderRichTextNode(child, `${key}-${index}`, locale),
   );
 
   if (node.type === 'text' || (!node.type && node.value !== undefined)) {
@@ -277,7 +285,7 @@ function renderRichTextNode(node: RichTextNode, key: string): ReactNode {
       return <li key={key}>{children}</li>;
     case 'link':
       return (
-        <a key={key} href={safeRichTextUrl(node.url)}>
+        <a key={key} href={safeRichTextUrl(node.url, locale)}>
           {children}
         </a>
       );
@@ -286,13 +294,16 @@ function renderRichTextNode(node: RichTextNode, key: string): ReactNode {
   }
 }
 
-function renderProductInfo(productInfo: ProductFragment['productInfo']) {
+function renderProductInfo(
+  productInfo: ProductFragment['productInfo'],
+  locale: SelectedLocale,
+) {
   if (!productInfo?.value) return null;
 
   if (productInfo.type === 'rich_text_field') {
     try {
       const richText = JSON.parse(productInfo.value) as RichTextNode;
-      return renderRichTextNode(richText, 'product-info');
+      return renderRichTextNode(richText, 'product-info', locale);
     } catch {
       return null;
     }
@@ -311,6 +322,7 @@ function ZubehorCartSubmit({
   isAvailable: boolean;
 }) {
   const {open} = useAside();
+  const {t} = useTranslation();
   const submitted = useRef(false);
   const [feedback, setFeedback] = useState('');
   const isPending = fetcher.state !== 'idle';
@@ -328,13 +340,13 @@ function ZubehorCartSubmit({
     const response = fetcher.data as CartActionData | undefined;
     if (response?.errors?.length) {
       setFeedback(
-        'Das Produkt konnte nicht hinzugefügt werden. Bitte erneut versuchen.',
+        t('product.addError'),
       );
       return;
     }
 
     open('cart');
-  }, [fetcher.data, fetcher.state, open]);
+  }, [fetcher.data, fetcher.state, open, t]);
 
   return (
     <>
@@ -344,10 +356,10 @@ function ZubehorCartSubmit({
         disabled={disabled || isPending}
       >
         {isPending
-          ? 'Wird hinzugefügt …'
+          ? t('cart.adding')
           : isAvailable
-            ? 'In den Warenkorb'
-            : 'Nicht verfügbar'}
+            ? t('product.addToCart')
+            : t('product.unavailable')}
       </button>
       <p className="zpd-buy__feedback" aria-live="polite">
         {feedback}
@@ -363,17 +375,19 @@ function ZubehorAddToCart({
   line?: OptimisticCartLineInput;
   isAvailable: boolean;
 }) {
+  const {t} = useTranslation();
+  const cartPath = usePrefixPathWithLocale('/cart');
   if (!line) {
     return (
       <button className="zpd-buy__submit" type="button" disabled>
-        Nicht verfügbar
+        {t('product.unavailable')}
       </button>
     );
   }
 
   return (
     <CartForm
-      route="/cart"
+      route={cartPath}
       inputs={{lines: [line]}}
       action={CartForm.ACTIONS.LinesAdd}
     >
@@ -391,6 +405,7 @@ function ZubehorAddToCart({
 export default function ZubehorProductLayout({
   product,
 }: ZubehorProductLayoutProps) {
+  const {locale, t} = useTranslation();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const selectedVariant = useOptimisticVariant(
@@ -407,7 +422,7 @@ export default function ZubehorProductLayout({
   const visibleOptions = productOptions.filter(
     (option) => option.optionValues.length > 1,
   );
-  const productInfoContent = renderProductInfo(product.productInfo);
+  const productInfoContent = renderProductInfo(product.productInfo, locale);
   const isAvailable = Boolean(selectedVariant?.availableForSale);
   const compareAtPrice =
     selectedVariant?.compareAtPrice &&
@@ -474,10 +489,10 @@ export default function ZubehorProductLayout({
   return (
     <main className="zpd">
       <div className="zpd__shell">
-        <nav className="zpd-breadcrumb" aria-label="Breadcrumb">
+        <nav className="zpd-breadcrumb" aria-label={t('product.accessories')}>
           <Link to="/collections/zubehor">
             <ArrowIcon direction="left" />
-            <span>Zurück zu Zubehör</span>
+            <span>{t('product.backToAccessories')}</span>
           </Link>
         </nav>
 
@@ -492,7 +507,9 @@ export default function ZubehorProductLayout({
           />
 
           <section className="zpd-purchase" aria-labelledby="zpd-title">
-            <p className="zpd-purchase__eyebrow">Zubehör</p>
+            <p className="zpd-purchase__eyebrow">
+              {t('product.accessories')}
+            </p>
             <h1 id="zpd-title">{product.title}</h1>
             {selectedVariant?.sku ? (
               <p className="zpd-purchase__sku">
@@ -507,7 +524,8 @@ export default function ZubehorProductLayout({
               />
               {quantity > 1 && selectedVariant ? (
                 <p className="zpd-price__breakdown">
-                  {quantity} × <Money data={selectedVariant.price} /> je Stück
+                  {quantity} × <Money data={selectedVariant.price} />{' '}
+                  {t('product.perItem')}
                 </p>
               ) : null}
             </div>
@@ -574,7 +592,7 @@ export default function ZubehorProductLayout({
                             <span className="zpd-option-card__copy">
                               <strong>{name}</strong>
                               {!available ? (
-                                <small>Nicht verfügbar</small>
+                                <small>{t('product.unavailable')}</small>
                               ) : null}
                             </span>
 
@@ -633,18 +651,22 @@ export default function ZubehorProductLayout({
                 }`}
               >
                 <span aria-hidden="true" />
-                {isAvailable ? 'Auf Lager' : 'Derzeit nicht verfügbar'}
+                {isAvailable
+                  ? t('product.inStock')
+                  : t('product.currentlyUnavailable')}
               </p>
 
               <div className="zpd-buy__controls">
                 <div className="zpd-quantity">
-                  <span className="zpd-quantity__label">Menge</span>
+                  <span className="zpd-quantity__label">
+                    {t('product.quantity')}
+                  </span>
                   <div className="zpd-quantity__control">
                     <button
                       type="button"
                       onClick={() => changeQuantity(quantity - 1)}
                       disabled={quantity <= 1}
-                      aria-label="Menge verringern"
+                      aria-label={t('product.decreaseQuantity')}
                     >
                       −
                     </button>
@@ -656,12 +678,12 @@ export default function ZubehorProductLayout({
                       onChange={(event) =>
                         changeQuantity(Number(event.target.value))
                       }
-                      aria-label="Menge"
+                      aria-label={t('product.quantity')}
                     />
                     <button
                       type="button"
                       onClick={() => changeQuantity(quantity + 1)}
-                      aria-label="Menge erhöhen"
+                      aria-label={t('product.increaseQuantity')}
                     >
                       +
                     </button>
@@ -678,7 +700,7 @@ export default function ZubehorProductLayout({
           <div className="zpd-details">
             {product.descriptionHtml ? (
               <section className="zpd-details__section">
-                <h2>Beschreibung</h2>
+                <h2>{t('product.description')}</h2>
                 <div
                   className="zpd-details__content"
                   dangerouslySetInnerHTML={{__html: product.descriptionHtml}}
@@ -688,7 +710,7 @@ export default function ZubehorProductLayout({
 
             {productInfoContent ? (
               <section className="zpd-details__section">
-                <h2>Produktinformationen</h2>
+                <h2>{t('product.information')}</h2>
                 <div className="zpd-details__content">{productInfoContent}</div>
               </section>
             ) : null}

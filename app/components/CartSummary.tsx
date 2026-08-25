@@ -16,6 +16,7 @@ import {
   type CartLinePricingLike,
 } from '~/lib/cart-pricing';
 import {usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -23,6 +24,7 @@ type CartSummaryProps = {
 };
 
 export function CartSummary({ cart, layout }: CartSummaryProps) {
+  const {t} = useTranslation();
   const className =
     layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
   const cartPath = usePrefixPathWithLocale('/cart');
@@ -35,7 +37,7 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
   return (
     <div aria-labelledby="cart-summary" className={className}>
       <dl className="cart-subtotal">
-        <dt>Subtotal</dt>
+        <dt>{t('cart.subtotal')}</dt>
         <dd>
           {subtotal?.amount ? (
             <Money data={subtotal as MoneyV2} />
@@ -55,10 +57,11 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
 }
 
 function CartCheckoutActions({cartPath}: {cartPath: string}) {
+  const {t} = useTranslation();
   return (
     <div>
       <a href={cartPath} target="_self">
-        <p>Continue to Checkout &rarr;</p>
+        <p>{t('cart.checkout')} &rarr;</p>
       </a>
       <br />
     </div>
@@ -70,6 +73,7 @@ function CartDiscounts({
 }: {
   discountCodes?: CartApiQueryFragment['discountCodes'];
 }) {
+  const {t} = useTranslation();
   const codes: string[] =
     discountCodes
       ?.filter((discount) => discount.applicable)
@@ -80,12 +84,12 @@ function CartDiscounts({
       {/* Have existing discount, display it with a remove option */}
       <dl hidden={!codes.length}>
         <div>
-          <dt>Discount(s)</dt>
+          <dt>{t('cart.discountCode')}</dt>
           <UpdateDiscountForm>
             <div className="cart-discount">
               <code>{codes?.join(', ')}</code>
               &nbsp;
-              <button>Remove</button>
+              <button>{t('cart.remove')}</button>
             </div>
           </UpdateDiscountForm>
         </div>
@@ -94,9 +98,13 @@ function CartDiscounts({
       {/* Show an input to apply a discount */}
       <UpdateDiscountForm discountCodes={codes}>
         <div>
-          <input type="text" name="discountCode" placeholder="Discount code" />
+          <input
+            type="text"
+            name="discountCode"
+            placeholder={t('cart.discountCode')}
+          />
           &nbsp;
-          <button type="submit">Apply</button>
+          <button type="submit">{t('cart.redeem')}</button>
         </div>
       </UpdateDiscountForm>
     </div>
@@ -110,9 +118,10 @@ function UpdateDiscountForm({
   discountCodes?: string[];
   children: React.ReactNode;
 }) {
+  const cartPath = usePrefixPathWithLocale('/cart');
   return (
     <CartForm
-      route="/cart"
+      route={cartPath}
       action={CartForm.ACTIONS.DiscountCodesUpdate}
       inputs={{
         discountCodes: discountCodes || [],
@@ -130,6 +139,7 @@ function CartGiftCard({
   cartId?: string | null;
   giftCardCodes: CartApiQueryFragment['appliedGiftCards'] | undefined;
 }) {
+  const {t} = useTranslation();
   const giftCardCodeInput = useRef<HTMLInputElement>(null);
   const giftCardAddFetcher = useFetcher({ key: 'gift-card-add' });
   const storageKey = getGiftCardStorageKey(cartId);
@@ -159,7 +169,7 @@ function CartGiftCard({
       {/* Display applied gift cards with individual remove buttons */}
       {giftCardCodes && giftCardCodes.length > 0 && (
         <dl>
-          <dt>Applied Gift Card(s)</dt>
+          <dt>{t('cart.giftCard')}</dt>
           {giftCardCodes.map((giftCard) => (
             <RemoveGiftCardForm key={giftCard.id} giftCardId={giftCard.id}>
               <div className="cart-discount">
@@ -167,7 +177,7 @@ function CartGiftCard({
                 &nbsp;
                 <Money data={giftCard.amountUsed} />
                 &nbsp;
-                <button type="submit">Remove</button>
+                <button type="submit">{t('cart.remove')}</button>
               </div>
             </RemoveGiftCardForm>
           ))}
@@ -184,12 +194,12 @@ function CartGiftCard({
           <input
             type="text"
             name="giftCardCode"
-            placeholder="Gift card code"
+            placeholder={t('cart.giftCard')}
             ref={giftCardCodeInput}
           />
           &nbsp;
           <button type="submit" disabled={giftCardAddFetcher.state !== 'idle'}>
-            Apply
+            {t('cart.redeem')}
           </button>
         </div>
       </UpdateGiftCardForm>
@@ -208,10 +218,11 @@ function UpdateGiftCardForm({
   fetcherKey?: string;
   children: React.ReactNode;
 }) {
+  const cartPath = usePrefixPathWithLocale('/cart');
   return (
     <CartForm
       fetcherKey={fetcherKey}
-      route="/cart"
+      route={cartPath}
       action={CartForm.ACTIONS.GiftCardCodesUpdate}
       inputs={{
         giftCardCodes: giftCardCodes || [],
@@ -235,9 +246,10 @@ function RemoveGiftCardForm({
   giftCardId: string;
   children: React.ReactNode;
 }) {
+  const cartPath = usePrefixPathWithLocale('/cart');
   return (
     <CartForm
-      route="/cart"
+      route={cartPath}
       action={CartForm.ACTIONS.GiftCardCodesRemove}
       inputs={{
         giftCardCodes: [giftCardId],

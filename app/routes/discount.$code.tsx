@@ -2,6 +2,7 @@ import {Form, redirect, useLoaderData, useLocation} from 'react-router';
 import type {Route} from './+types/discount.$code';
 import {getLocaleFromRequest, prefixPathWithLocale} from '~/lib/locale';
 import {Link} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 
 const INTERNAL_REDIRECT_ORIGIN = 'https://wandini.internal';
 
@@ -127,6 +128,7 @@ export async function action({request, context, params}: Route.ActionArgs) {
 }
 
 export default function DiscountCodeConfirmation() {
+  const {t} = useTranslation();
   const {code, redirectUrl} = useLoaderData<typeof loader>();
   const location = useLocation();
 
@@ -150,16 +152,16 @@ export default function DiscountCodeConfirmation() {
         }}
       >
         <h1 style={{fontSize: '1.5rem', marginBottom: '0.75rem'}}>
-          Apply discount code?
+          {t('cart.applyDiscountTitle')}
         </h1>
         <p style={{marginBottom: '1rem'}}>
-          This will apply <strong>{code}</strong> to your cart and continue.
+          {t('cart.applyDiscountDescription', {code})}
         </p>
         <Form method="post" action={`${location.pathname}${location.search}`}>
-          <button type="submit">Apply discount</button>
+          <button type="submit">{t('cart.applyDiscount')}</button>
         </Form>
         <p style={{marginTop: '1rem'}}>
-          <Link to={redirectUrl}>Cancel</Link>
+          <Link to={redirectUrl}>{t('account.cancel')}</Link>
         </p>
       </div>
     </main>

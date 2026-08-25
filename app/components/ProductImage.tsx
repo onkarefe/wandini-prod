@@ -2,6 +2,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Image} from '@shopify/hydrogen';
 import type {ProductFragment} from 'storefrontapi.generated';
+import {useTranslation} from '~/i18n/useTranslation';
 import '../styles/productDetail.css';
 
 type ProductImages = ProductFragment['images'];
@@ -14,6 +15,7 @@ export function ProductImage({
   images: ProductImages | null | undefined;
   productTitle?: string | null;
 }) {
+  const {t} = useTranslation();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
   const [emblaRef, emblaApi] = useEmblaCarousel({loop: false});
@@ -50,7 +52,10 @@ export function ProductImage({
       <div className="embla embla--main" ref={emblaRef}>
         <div className="embla__container">
           {imageNodes.map((img, index) => (
-            <div className="embla__slide" key={img.id ?? img.url ?? `product-image-${index}`}>
+            <div
+              className="embla__slide"
+              key={img.id ?? img.url ?? `product-image-${index}`}
+            >
               <Image
                 alt={img.altText || fallbackAlt}
                 data={img}
@@ -67,7 +72,7 @@ export function ProductImage({
               className="productCarouselArrow productCarouselArrow--prev"
               onClick={() => emblaApi?.scrollPrev()}
               disabled={!canScrollPrev}
-              aria-label="Show previous product image"
+              aria-label={t('product.previousImage')}
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="m15 18-6-6 6-6" />
@@ -78,7 +83,7 @@ export function ProductImage({
               className="productCarouselArrow productCarouselArrow--next"
               onClick={() => emblaApi?.scrollNext()}
               disabled={!canScrollNext}
-              aria-label="Show next product image"
+              aria-label={t('product.nextImage')}
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="m9 18 6-6-6-6" />

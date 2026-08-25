@@ -27,6 +27,12 @@ import {
   resolveConfiguratorPricePerM2,
 } from '~/lib/configurator-pricing';
 import {usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
+import {
+  formatLocaleCurrency,
+  formatLocaleNumber,
+} from '~/lib/locale-format';
+import {isWallpaperMaterialOption} from '~/lib/wallpaper-variant-selection';
 import '~/styles/productDetail.css';
 
 type CropRect = {
@@ -120,6 +126,7 @@ export default function WallpaperProductLayout({
   product,
 }: WallpaperProductLayoutProps) {
   const navigate = useNavigate();
+  const {locale, t} = useTranslation();
   const cartPath = usePrefixPathWithLocale('/cart');
   const [isConfiguring, setIsConfiguring] = useState(false);
   const [size, setSize] = useState({width: 0, height: 0});
@@ -145,10 +152,9 @@ export default function WallpaperProductLayout({
     ...product,
     selectedOrFirstAvailableVariant: selectedVariant,
   });
+  const qualityOption = productOptions.find(isWallpaperMaterialOption);
 
-  const materialStartingPrice = productOptions
-    .find((option) => option.name.toLowerCase() === 'quality')
-    ?.optionValues.map((value) => {
+  const materialStartingPrice = qualityOption?.optionValues.map((value) => {
       const variant = value.firstSelectableVariant as
         | (NonNullable<typeof value.firstSelectableVariant> & {
             printQuality?: {
@@ -191,12 +197,10 @@ export default function WallpaperProductLayout({
     )[0];
 
   const formatMaterialPrice = (amount: number, currencyCode: string) =>
-    new Intl.NumberFormat('de-DE', {
-      style: 'currency',
-      currency: currencyCode,
+    formatLocaleCurrency(amount, currencyCode, locale, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(amount);
+    });
 
   const wallAreaM2 = calculateConfiguratorAreaM2(size.width, size.height);
   const isSizeValid =
@@ -205,13 +209,13 @@ export default function WallpaperProductLayout({
     size.height <= MAX_CONFIGURATOR_HEIGHT_CM;
   const widthError =
     showSizeErrors && !(Number.isFinite(size.width) && size.width > 0)
-      ? 'Bitte geben Sie die Breite ein.'
+      ? t('product.widthRequired')
       : undefined;
   const heightError =
     showSizeErrors && !(Number.isFinite(size.height) && size.height > 0)
-      ? 'Bitte geben Sie die Höhe ein.'
+      ? t('product.heightRequired')
       : showSizeErrors && size.height > MAX_CONFIGURATOR_HEIGHT_CM
-        ? `Die maximale Höhe beträgt ${MAX_CONFIGURATOR_HEIGHT_CM} cm.`
+        ? t('product.maxHeight', {height: MAX_CONFIGURATOR_HEIGHT_CM})
         : undefined;
   const outputWidthMm = Math.round(size.width * 10);
   const outputHeightMm = Math.round(size.height * 10);
@@ -223,10 +227,10 @@ export default function WallpaperProductLayout({
         currencyCode: materialStartingPrice.currencyCode,
       })
     : null;
-  const formattedWallArea = new Intl.NumberFormat('de-DE', {
+  const formattedWallArea = formatLocaleNumber(wallAreaM2, locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(wallAreaM2);
+  });
 
   const {title, descriptionHtml, productInfo, deliveryAndShipping} = product;
   const parsedProductInfo = parseJsonMetafield<ShopifyRichText>(
@@ -253,7 +257,7 @@ export default function WallpaperProductLayout({
       return splitMaterialProperties(value.properties.value);
     }
     if (
-      selectedVariant?.printQuality?.reference?.title?.value === value.name &&
+      value?.selected &&
       selectedVariant?.printQuality?.reference?.properties?.value
     ) {
       return splitMaterialProperties(
@@ -262,10 +266,6 @@ export default function WallpaperProductLayout({
     }
     return [];
   }
-
-  const qualityOption = productOptions.find(
-    (option) => option.name.toLowerCase() === 'quality',
-  );
 
   const selectedQualitySummary: SelectedQualitySummary = qualityOption
     ? (() => {
@@ -334,7 +334,14 @@ export default function WallpaperProductLayout({
               : null;
 
           return {
-            id: `${qualityOption.name}-${name}`,
+            id: String(
+              printQuality?.id ??
+                variant?.id ??
+                `${qualityOption.name}-${name}`,
+            ),
+            identity: String(
+              printQuality?.handle ?? printQuality?.id ?? variant?.id ?? '',
+            ),
             title: optionTitle,
             calculatedPrice:
               configuredPrice
@@ -391,14 +398,14 @@ export default function WallpaperProductLayout({
           },
         ]}
       >
-        Bestätigen &amp; in den Warenkorb
+        {t('product.confirmAddToCart')}
       </AddToCartButton>
     ) : null;
 
   const tabTitles = [
-    'Beschreibung',
-    'Produktinformationen',
-    'Lieferung & Versand',
+    t('product.description'),
+    t('product.information'),
+    t('product.deliveryShipping'),
   ];
   const productInfoContent = parsedProductInfo
     ? renderShopifyRichText(parsedProductInfo)
@@ -410,11 +417,13 @@ export default function WallpaperProductLayout({
     descriptionHtml ? (
       <div key="desc" dangerouslySetInnerHTML={{__html: descriptionHtml}} />
     ) : (
-      <p key="nodesc">Açıklama yok.</p>
+      <p key="nodesc">{t('product.noDescription')}</p>
     ),
-    productInfoContent || <p key="noinfo">Ürün bilgisi bulunamadı.</p>,
+    productInfoContent || (
+      <p key="noinfo">{t('product.noInformation')}</p>
+    ),
     deliveryAndShippingContent || (
-      <p key="noshipping">Teslimat &amp; kargo bilgisi yok.</p>
+      <p key="noshipping">{t('product.noDeliveryShipping')}</p>
     ),
   ];
 
@@ -426,7 +435,7 @@ export default function WallpaperProductLayout({
           <ProductDetailTabs
             tabTitles={tabTitles}
             tabContents={tabContents}
-            headerNotice="Mit KI & Kreativität gestaltet. Motive und Visualisierungen können teilweise oder vollständig KI-generiert oder KI-bearbeitet sein."
+            headerNotice={t('product.aiNotice')}
           />
         </div>
 
@@ -435,23 +444,26 @@ export default function WallpaperProductLayout({
             <section className="productPurchaseCardIntro">
               <h1 className="productDetailTitle">{title}</h1>
               <p className="productPurchaseNote">
-                Bitte planen Sie bei Ihrer Bestellung umlaufend 6 cm
-                Beschnittzugabe für eine passgenaue Montage ein.
+                {t('product.trimNotice')}
               </p>
 
               {materialStartingPrice && (
                 <div
                   className="productStartingPrice"
-                  aria-label="Startpreis pro Quadratmeter"
+                  aria-label={t('product.startingPriceLabel')}
                 >
-                  <span className="productStartingPriceLabel">Ab</span>
+                  <span className="productStartingPriceLabel">
+                    {t('product.startingPrice')}
+                  </span>
                   <strong className="productStartingPriceAmount">
                     {formatMaterialPrice(
                       materialStartingPrice.amount,
                       materialStartingPrice.currencyCode,
                     )}
                   </strong>
-                  <span className="productStartingPriceUnit">/ m²</span>
+                  <span className="productStartingPriceUnit">
+                    {t('product.perSquareMeter')}
+                  </span>
                   {materialStartingPrice.priceWithoutDiscount && (
                     <del className="productStartingPricePrevious">
                       {formatMaterialPrice(
@@ -475,13 +487,17 @@ export default function WallpaperProductLayout({
 
               <div className="productOrderSummary" aria-live="polite">
                 <div className="productOrderSummaryItem">
-                  <span className="productOrderSummaryLabel">Wandfläche</span>
+                  <span className="productOrderSummaryLabel">
+                    {t('product.wallArea')}
+                  </span>
                   <strong className="productOrderSummaryValue">
                     {wallAreaM2 > 0 ? `${formattedWallArea} m²` : '— m²'}
                   </strong>
                 </div>
                 <div className="productOrderSummaryItem productOrderSummaryItemPrice">
-                  <span className="productOrderSummaryLabel">Preis ab</span>
+                  <span className="productOrderSummaryLabel">
+                    {t('product.priceFrom')}
+                  </span>
                   <strong className="productOrderSummaryValue">
                     {wallAreaM2 > 0 && startingTotalPrice
                       ? formatMaterialPrice(

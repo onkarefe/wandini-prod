@@ -2,6 +2,8 @@ import {useCallback, useEffect, useState} from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import {useTranslation} from '~/i18n/useTranslation';
 import {Link} from '~/lib/i18n-router';
+import {formatLocaleCurrency} from '~/lib/locale-format';
+import type {SelectedLocale} from '~/lib/locale';
 
 type ProductImage = {
   id?: string | null;
@@ -33,27 +35,26 @@ type AllProdutsNewProps = {
   sectionTitle?: string;
 };
 
-function formatPrice(price: ProductMoney) {
+function formatPrice(price: ProductMoney, locale: SelectedLocale) {
   const amount = Number(price.amount);
 
   try {
-    return new Intl.NumberFormat('de-DE', {
-      style: 'currency',
-      currency: price.currencyCode,
+    return formatLocaleCurrency(amount, price.currencyCode, locale, {
       minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
       maximumFractionDigits: 2,
-    }).format(amount);
+    });
   } catch {
     return `${price.amount} ${price.currencyCode}`;
   }
 }
 
 export function BestsellerCard({product}: {product: BestsellerProduct}) {
+  const {locale} = useTranslation();
   const primaryImage = product.images.nodes[0] ?? null;
   const listingImage = product.images.nodes[1] ?? primaryImage;
   const hasHoverImage =
     primaryImage && listingImage && primaryImage.url !== listingImage.url;
-  const price = formatPrice(product.priceRange.minVariantPrice);
+  const price = formatPrice(product.priceRange.minVariantPrice, locale);
 
   return (
     <Link

@@ -3,6 +3,8 @@ import useEmblaCarousel from 'embla-carousel-react';
 import {useCallback, useEffect, useState} from 'react';
 import {Link} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
+import {formatLocaleCurrency} from '~/lib/locale-format';
+import type {SelectedLocale} from '~/lib/locale';
 import type {
   SimilarMotifsPreviewData,
   SimilarMotifsPreviewProduct,
@@ -28,6 +30,7 @@ function MotifsIcon() {
 
 function formatPrice(
   price: SimilarMotifsPreviewProduct['minPrice'],
+  locale: SelectedLocale,
 ): string | null {
   if (!price) return null;
 
@@ -38,19 +41,18 @@ function formatPrice(
   }
 
   try {
-    return `${new Intl.NumberFormat('de-DE', {
-      style: 'currency',
-      currency: price.currencyCode,
+    return `${formatLocaleCurrency(amount, price.currencyCode, locale, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(amount)} / m²`;
+    })} / m²`;
   } catch {
     return `${price.amount} ${price.currencyCode} / m²`;
   }
 }
 
 function SimilarProductCard({product}: {product: SimilarMotifsPreviewProduct}) {
-  const priceLabel = formatPrice(product.minPrice);
+  const {locale} = useTranslation();
+  const priceLabel = formatPrice(product.minPrice, locale);
 
   return (
     <article className="similar-motifs-card">

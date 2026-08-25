@@ -8,6 +8,7 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogHandleStyles from '~/styles/blogHandle.css?url';
 import {Link} from '~/lib/i18n-router';
 import {getRobotsDirective} from '~/lib/seo';
+import {formatLocaleDate} from '~/lib/locale-format';
 
 export function links() {
   return [{rel: 'stylesheet', href: blogHandleStyles}];
@@ -191,12 +192,12 @@ function ArticleItem({
   article: BlogArticle;
   loading?: HTMLImageElement['loading'];
 }) {
-  const {t} = useTranslation();
-  const publishedAt = new Intl.DateTimeFormat('en-US', {
+  const {locale, t} = useTranslation();
+  const publishedAt = formatLocaleDate(article.publishedAt!, locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  }).format(new Date(article.publishedAt!));
+  });
   return (
     <div className="blog-article" key={article.id}>
       <Link

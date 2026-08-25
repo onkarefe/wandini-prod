@@ -2,6 +2,7 @@ import {useLoaderData} from 'react-router';
 import type {Route} from './+types/policies._index';
 import type {PoliciesQuery, PolicyItemFragment} from 'storefrontapi.generated';
 import {Link} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 
 export const meta: Route.MetaFunction = () => {
   return [{name: 'robots', content: 'noindex,follow'}];
@@ -27,11 +28,12 @@ export async function loader({context}: Route.LoaderArgs) {
 }
 
 export default function Policies() {
+  const {t} = useTranslation();
   const {policies} = useLoaderData<typeof loader>();
 
   return (
     <div className="policies">
-      <h1>Policies</h1>
+      <h1>{t('policies.title')}</h1>
       <div>
         {policies.map((policy) => (
           <fieldset key={policy.id}>

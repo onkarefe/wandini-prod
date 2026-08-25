@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {MAX_CONFIGURATOR_HEIGHT_CM} from '~/lib/configurator-pricing';
+import {useTranslation} from '~/i18n/useTranslation';
 
 // Props: Değerler değiştiğinde üst bileşene iletmek için
 type ProductSizeProps = {
@@ -13,6 +14,7 @@ export const ProductSize: React.FC<ProductSizeProps> = ({
 	widthError,
 	heightError,
 }) => {
+	const {t} = useTranslation();
 	const [width, setWidth] = useState<string>('0');
 	const [height, setHeight] = useState<string>('0');
 	const [isWidthEdited, setIsWidthEdited] = useState<boolean>(false);
@@ -49,7 +51,7 @@ export const ProductSize: React.FC<ProductSizeProps> = ({
 	return (
 		<div className="customSizeMainBox">
 			<div className="customSizeField">
-				<label htmlFor="product-width">Breite (cm)</label>
+				<label htmlFor="product-width">{t('product.widthCm')}</label>
 				<div className="relativeInputBox">
 					<input
 						id="product-width"
@@ -70,7 +72,7 @@ export const ProductSize: React.FC<ProductSizeProps> = ({
 			</div>
 
 			<div className="customSizeField">
-				<label htmlFor="product-height">Höhe (cm)</label>
+				<label htmlFor="product-height">{t('product.heightCm')}</label>
 				<div className="relativeInputBox">
 					<input
 						id="product-height"

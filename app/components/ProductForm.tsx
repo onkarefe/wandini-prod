@@ -17,6 +17,8 @@ import {
   createConfiguratorInstanceId,
   resolveConfiguratorPricePerM2,
 } from '~/lib/configurator-pricing';
+import {useTranslation} from '~/i18n/useTranslation';
+import {isWallpaperMaterialOption} from '~/lib/wallpaper-variant-selection';
 
 type CropRect = {
   x: number;
@@ -48,6 +50,7 @@ export function ProductForm({
   showInlineAddToCart?: boolean;
   showQualityOptions?: boolean;
 }) {
+  const {t} = useTranslation();
   const navigate = useNavigate();
   const { open } = useAside();
   const [configurationInstanceId, setConfigurationInstanceId] = useState(
@@ -68,7 +71,7 @@ export function ProductForm({
       return value.properties.value.split(' - ');
     }
     if (
-      selectedVariant?.printQuality?.reference?.title?.value === value.name &&
+      value?.selected &&
       selectedVariant?.printQuality?.reference?.properties?.value
     ) {
       return selectedVariant.printQuality.reference.properties.value.split(' - ');
@@ -110,12 +113,12 @@ export function ProductForm({
         if (option.optionValues.length === 1) return null;
 
         // -------- QUALITY / MATERIAL --------
-        if (option.name.toLowerCase() === 'quality') {
+        if (isWallpaperMaterialOption(option)) {
           if (!showQualityOptions) return null;
 
           return (
             <div className="product-options" key={option.name}>
-              <h5>Material auswählen</h5>
+              <h5>{t('product.selectMaterial')}</h5>
               <div>
                 {option.optionValues.map((value) => {
                   const { name, variantUriQuery, selected, exists } = value;
@@ -245,7 +248,7 @@ export function ProductForm({
             aria-disabled={!isSizeValid}
             onClick={handleConfigureClick}
           >
-          Jetzt konfigurieren
+          {t('product.configureNow')}
         </button>
       )}
 
@@ -275,7 +278,7 @@ export function ProductForm({
             },
           ]}
         >
-          In den Warenkorb
+          {t('product.addToCart')}
         </AddToCartButton>
       )}
     </div>

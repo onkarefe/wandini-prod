@@ -2,7 +2,6 @@ import {beforeEach, describe, expect, it, vi} from 'vitest';
 // Kept outside app/routes so React Router never treats this test as a route.
 import {action} from '~/routes/api.wishlist';
 import {WishlistServiceError} from '~/lib/wishlist-errors.server';
-import {WISHLIST_UPDATE_UNAVAILABLE_MESSAGE} from '~/lib/wishlist';
 import {toggleProductInCustomerWishlist} from '~/lib/wishlist.server';
 
 vi.mock('~/lib/wishlist.server', () => ({
@@ -66,7 +65,7 @@ describe('wishlist action', () => {
     expect(response.status).toBe(503);
     expect(payload).toEqual({
       ok: false,
-      message: WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
+      errorCode: 'UPDATE_UNAVAILABLE',
     });
     expect(response.headers.get('X-Wishlist-Request-Id')).toBeTruthy();
     expect(consoleSpy).toHaveBeenCalledOnce();
@@ -86,7 +85,7 @@ describe('wishlist action', () => {
     const payload = (await response.json()) as Record<string, unknown>;
 
     expect(response.status).toBe(503);
-    expect(payload.message).toBe(WISHLIST_UPDATE_UNAVAILABLE_MESSAGE);
+    expect(payload.errorCode).toBe('UPDATE_UNAVAILABLE');
     expect(toggleWishlistMock).not.toHaveBeenCalled();
     expect(String(consoleSpy.mock.calls[0]?.[0])).toContain(
       'CUSTOMER_ACCOUNT_ERROR',
@@ -107,7 +106,7 @@ describe('wishlist action', () => {
     const payload = (await response.json()) as Record<string, unknown>;
 
     expect(response.status).toBe(503);
-    expect(payload.message).toBe(WISHLIST_UPDATE_UNAVAILABLE_MESSAGE);
+    expect(payload.errorCode).toBe('UPDATE_UNAVAILABLE');
     expect(context.customerAccount.query).not.toHaveBeenCalled();
     expect(toggleWishlistMock).not.toHaveBeenCalled();
     expect(consoleSpy).toHaveBeenCalledOnce();

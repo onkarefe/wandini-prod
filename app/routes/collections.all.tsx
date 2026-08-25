@@ -8,7 +8,7 @@ import {useTranslation} from '~/i18n/useTranslation';
 import {redirectToLocalePath} from '~/lib/locale';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Products`}];
+  return [{title: 'Wandini'}];
 };
 
 export async function loader(args: Route.LoaderArgs) {

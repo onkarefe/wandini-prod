@@ -2,6 +2,7 @@ import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {loader as favoritesLoader} from '~/routes/account.favorites';
 import {getCustomerWishlistProductIds} from '~/lib/wishlist.server';
+import {GERMAN_LOCALE} from '~/lib/locale';
 
 vi.mock('~/lib/wishlist.server', () => ({
   getCustomerWishlistProductIds: vi.fn(),
@@ -85,7 +86,11 @@ describe('wishlist loaders', () => {
       },
     } as never);
 
-    expect(result).toEqual({favorites: [], wishlistStatus: 'ready'});
+    expect(result).toEqual({
+      favorites: [],
+      wishlistStatus: 'ready',
+      selectedLocale: GERMAN_LOCALE,
+    });
   });
 
   it('returns an unavailable state instead of throwing a favorites-page 500', async () => {
@@ -107,7 +112,11 @@ describe('wishlist loaders', () => {
       },
     } as never);
 
-    expect(result).toEqual({favorites: [], wishlistStatus: 'unavailable'});
+    expect(result).toEqual({
+      favorites: [],
+      wishlistStatus: 'unavailable',
+      selectedLocale: GERMAN_LOCALE,
+    });
     expect(consoleSpy).toHaveBeenCalledOnce();
   });
 });

@@ -25,25 +25,31 @@ import type {
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {Link} from '~/lib/i18n-router';
 import {
-  formatGermanFinancialStatus,
-  formatGermanFulfillmentStatus,
-  formatGermanOrderDate,
+  formatFinancialStatus,
+  formatFulfillmentStatus,
+  formatOrderDate,
 } from '~/lib/order-display';
 import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
+import {createTranslator} from '~/i18n';
+import {useTranslation} from '~/i18n/useTranslation';
+import {getLocaleFromRequest} from '~/lib/locale';
 
 type OrdersLoaderData = {
   customer: CustomerOrdersFragment;
   filters: OrderFilterParams;
+  selectedLocale: ReturnType<typeof getLocaleFromRequest>;
 };
 
-export const meta: Route.MetaFunction = () => {
+export const meta: Route.MetaFunction = ({data: routeData}) => {
   return [
-    {title: 'Bestellungen'},
+    {title: createTranslator(routeData?.selectedLocale)('account.orders')},
     {name: 'robots', content: PRIVATE_ROBOTS_DIRECTIVE},
   ];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {
+  const selectedLocale = getLocaleFromRequest(request);
+  const t = createTranslator(selectedLocale);
   const {customerAccount} = context;
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 20,
@@ -62,13 +68,14 @@ export async function loader({request, context}: Route.LoaderArgs) {
   });
 
   if (errors?.length || !data?.customer) {
-    throw new Response('Bestellungen nicht gefunden', {status: 404});
+    throw new Response(t('account.ordersNotFound'), {status: 404});
   }
 
-  return {customer: data.customer, filters};
+  return {customer: data.customer, filters, selectedLocale};
 }
 
 export default function Orders() {
+  const {t} = useTranslation();
   const {customer, filters} = useLoaderData<OrdersLoaderData>();
   const {orders} = customer;
 
@@ -76,11 +83,10 @@ export default function Orders() {
     <div className="account-page account-orders">
       <header className="account-page__header">
         <div>
-          <p className="account-page__eyebrow">Bestellübersicht</p>
-          <h2 className="account-page__title">Bestellungen</h2>
+          <p className="account-page__eyebrow">{t('account.ordersEyebrow')}</p>
+          <h2 className="account-page__title">{t('account.orders')}</h2>
           <p className="account-page__description">
-            Prüfen Sie den Status Ihrer Bestellungen und öffnen Sie alle
-            Bestelldetails.
+            {t('account.ordersDescription')}
           </p>
         </div>
       </header>
@@ -99,6 +105,7 @@ function OrdersTable({
   orders: CustomerOrdersFragment['orders'];
   filters: OrderFilterParams;
 }) {
+  const {t} = useTranslation();
   const hasFilters = !!(filters.name || filters.confirmationNumber);
   const orderCount = orders?.nodes.length ?? 0;
 
@@ -106,10 +113,10 @@ function OrdersTable({
     <section className="account-orders__section" aria-live="polite">
       <div className="account-orders__section-head">
         <div>
-          <h3 className="account-orders__title">Bestellverlauf</h3>
+          <h3 className="account-orders__title">{t('account.orderHistory')}</h3>
         </div>
         <p className="account-orders__count">
-          {orderCount} {orderCount === 1 ? 'Eintrag' : 'Einträge'} angezeigt
+          {t('account.entriesShown', {count: orderCount})}
         </p>
       </div>
 
@@ -117,8 +124,8 @@ function OrdersTable({
         <div className="account-orders__list">
           <PaginatedResourceSection
             connection={orders}
-            previousLabel="Vorherige Bestellungen"
-            nextLabel="Weitere Bestellungen"
+            previousLabel={t('account.previousOrders')}
+            nextLabel={t('account.nextOrders')}
           >
             {({node: order}) => <OrderItem key={order.id} order={order} />}
           </PaginatedResourceSection>
@@ -131,32 +138,31 @@ function OrdersTable({
 }
 
 function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
+  const {t} = useTranslation();
   return (
     <div className="account-orders__empty">
       {hasFilters ? (
         <>
           <p className="account-orders__empty-title">
-            Keine Bestellung entspricht Ihren aktuellen Filtern.
+            {t('account.noMatchingOrders')}
           </p>
           <p className="account-orders__empty-copy">
-            Versuchen Sie eine andere Bestellnummer oder setzen Sie die Filter
-            zurück.
+            {t('account.tryDifferentOrderSearch')}
           </p>
           <Link className="account-orders__empty-link" to="/account/orders">
-            Filter zurücksetzen
+            {t('account.resetFilters')}
           </Link>
         </>
       ) : (
         <>
           <p className="account-orders__empty-title">
-            Sie haben noch keine Bestellung aufgegeben.
+            {t('account.noOrdersTitle')}
           </p>
           <p className="account-orders__empty-copy">
-            Sobald Sie eine Bestellung aufgeben, erscheint sie hier zur
-            schnellen Nachverfolgung.
+            {t('account.noOrdersDescription')}
           </p>
           <Link className="account-orders__empty-link" to="/collections">
-            Jetzt einkaufen
+            {t('account.discoverProducts')}
           </Link>
         </>
       )}
@@ -169,6 +175,7 @@ function OrderSearchForm({
 }: {
   currentFilters: OrderFilterParams;
 }) {
+  const {t} = useTranslation();
   const [, setSearchParams] = useSearchParams();
   const location = useLocation();
   const navigation = useNavigation();
@@ -213,9 +220,9 @@ function OrderSearchForm({
     <section className="account-orders__section account-orders__section--filters">
       <div className="account-orders__section-head">
         <div>
-          <h3 className="account-orders__title">Bestellung finden</h3>
+          <h3 className="account-orders__title">{t('account.findOrder')}</h3>
           <p className="account-orders__section-copy">
-            Suchen Sie nach Bestell- oder Bestätigungsnummer.
+            {t('account.findOrderDescription')}
           </p>
         </div>
       </div>
@@ -224,17 +231,19 @@ function OrderSearchForm({
         ref={formRef}
         onSubmit={handleSubmit}
         className="account-orders__filters"
-        aria-label="Bestellungen durchsuchen"
+        aria-label={t('account.searchOrders')}
         aria-busy={isSearching}
       >
         <div className="account-orders__filter-grid">
           <label className="account-orders__field">
-            <span className="account-orders__field-label">Bestellnummer</span>
+            <span className="account-orders__field-label">
+              {t('account.orderNumber')}
+            </span>
             <input
               type="search"
               name={ORDER_FILTER_FIELDS.NAME}
-              placeholder="Bestellnummer"
-              aria-label="Bestellnummer"
+              placeholder={t('account.orderNumber')}
+              aria-label={t('account.orderNumber')}
               defaultValue={currentFilters.name || ''}
               className="account-orders__input"
             />
@@ -242,13 +251,13 @@ function OrderSearchForm({
 
           <label className="account-orders__field">
             <span className="account-orders__field-label">
-              Bestätigungsnummer
+              {t('account.confirmationNumber')}
             </span>
             <input
               type="search"
               name={ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER}
-              placeholder="Bestätigungsnummer"
-              aria-label="Bestätigungsnummer"
+              placeholder={t('account.confirmationNumber')}
+              aria-label={t('account.confirmationNumber')}
               defaultValue={currentFilters.confirmationNumber || ''}
               className="account-orders__input"
             />
@@ -261,7 +270,7 @@ function OrderSearchForm({
             type="submit"
             disabled={isSearching}
           >
-            {isSearching ? 'Suche läuft...' : 'Bestellungen suchen'}
+            {isSearching ? t('account.searching') : t('account.search')}
           </button>
 
           {hasFilters && (
@@ -277,7 +286,7 @@ function OrderSearchForm({
                 formRef.current?.reset();
               }}
             >
-              Filter zurücksetzen
+              {t('account.resetFilters')}
             </button>
           )}
         </div>
@@ -318,12 +327,14 @@ function DetailItem({label, value}: {label: string; value: React.ReactNode}) {
 }
 
 function OrderItem({order}: {order: OrderItemFragment}) {
+  const {locale, t} = useTranslation();
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
-  const formattedFinancialStatus = formatGermanFinancialStatus(
+  const formattedFinancialStatus = formatFinancialStatus(
     order.financialStatus,
+    t,
   );
   const formattedFulfillmentStatus =
-    formatGermanFulfillmentStatus(fulfillmentStatus);
+    formatFulfillmentStatus(fulfillmentStatus, t);
 
   return (
     <article className="account-orders__card">
@@ -333,10 +344,12 @@ function OrderItem({order}: {order: OrderItemFragment}) {
             className="account-orders__order-link"
             to={`/account/orders/${btoa(order.id)}`}
           >
-            Bestellung #{order.number}
+            {t('account.order', {number: order.number})}
           </Link>
           <p className="account-orders__date">
-            Bestellt am {formatGermanOrderDate(order.processedAt)}
+            {t('account.placedOn', {
+              date: formatOrderDate(order.processedAt, locale, t),
+            })}
           </p>
         </div>
 
@@ -345,12 +358,15 @@ function OrderItem({order}: {order: OrderItemFragment}) {
 
       <div className="account-orders__meta">
         {order.confirmationNumber && (
-          <DetailItem label="Bestätigung" value={order.confirmationNumber} />
+          <DetailItem
+            label={t('account.confirmation')}
+            value={order.confirmationNumber}
+          />
         )}
 
         {formattedFinancialStatus && (
           <DetailItem
-            label="Zahlung"
+            label={t('account.paymentStatus')}
             value={
               <StatusBadge
                 label={formattedFinancialStatus}
@@ -362,7 +378,7 @@ function OrderItem({order}: {order: OrderItemFragment}) {
 
         {formattedFulfillmentStatus && (
           <DetailItem
-            label="Versandstatus"
+            label={t('account.fulfillmentStatus')}
             value={<StatusBadge label={formattedFulfillmentStatus} />}
           />
         )}
@@ -373,7 +389,7 @@ function OrderItem({order}: {order: OrderItemFragment}) {
           className="account-orders__view-link"
           to={`/account/orders/${btoa(order.id)}`}
         >
-          Bestellung ansehen
+          {t('account.viewOrder')}
         </Link>
       </div>
     </article>

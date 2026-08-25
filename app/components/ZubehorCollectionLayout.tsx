@@ -2,6 +2,7 @@ import {useLocation, useNavigation} from 'react-router';
 import type {CustomCollectionQuery} from 'storefrontapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {ZubehorProductCard} from '~/components/ZubehorProductCard';
+import {useTranslation} from '~/i18n/useTranslation';
 import '../styles/zubehor-collection.css';
 
 type CollectionData = NonNullable<CustomCollectionQuery['collection']>;
@@ -18,6 +19,7 @@ export default function ZubehorCollectionLayout({
   isLoggedIn,
   wishlistProductIds,
 }: ZubehorCollectionLayoutProps) {
+  const {t} = useTranslation();
   const location = useLocation();
   const navigation = useNavigation();
   const wishlistProductIdSet = new Set(wishlistProductIds);
@@ -60,7 +62,7 @@ export default function ZubehorCollectionLayout({
           <div className="zubehor-collection__loader" aria-live="polite">
             <span className="zubehor-collection__spinner" aria-hidden="true" />
             <span className="zubehor-collection__loader-text">
-              Produkte werden aktualisiert
+              {t('filters.updating')}
             </span>
           </div>
         ) : null}

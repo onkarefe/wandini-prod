@@ -2,10 +2,9 @@ import {useEffect, useState} from 'react';
 import {useTranslation} from '~/i18n/useTranslation';
 import {useFetcher, useLocation} from 'react-router';
 import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
-import {
-  WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
-  type WishlistActionData,
-} from '~/lib/wishlist';
+import type {WishlistActionData} from '~/lib/wishlist';
+import {formatLocaleCurrency} from '~/lib/locale-format';
+import type {SelectedLocale} from '~/lib/locale';
 import '../styles/wishlistFeedback.css';
 
 type ProductImage = {
@@ -44,7 +43,7 @@ function HeartFilledIcon() {
   );
 }
 
-function formatPriceLabel(price: ProductPrice | null) {
+function formatPriceLabel(price: ProductPrice | null, locale: SelectedLocale) {
   if (!price) {
     return null;
   }
@@ -53,12 +52,15 @@ function formatPriceLabel(price: ProductPrice | null) {
   const numericAmount = Number.isFinite(amount) ? amount : 0;
 
   try {
-    const formattedAmount = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: price.currencyCode,
-      minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
-      maximumFractionDigits: 2,
-    }).format(numericAmount);
+    const formattedAmount = formatLocaleCurrency(
+      numericAmount,
+      price.currencyCode,
+      locale,
+      {
+        minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+        maximumFractionDigits: 2,
+      },
+    );
 
     return formattedAmount;
   } catch {
@@ -75,13 +77,14 @@ export function ZubehorProductCard({
   isLoggedIn,
   isWishlisted,
 }: ZubehorProductCardProps) {
-  const {t} = useTranslation();
+  const {locale, t} = useTranslation();
   const fetcher = useFetcher<WishlistActionData>();
   const location = useLocation();
   const loginPath = usePrefixPathWithLocale('/account/login');
+  const fetcherLoginUrl = usePrefixPathWithLocale(fetcher.data?.loginUrl ?? '');
   const [wishlisted, setWishlisted] = useState(isWishlisted);
   const [wishlistError, setWishlistError] = useState<string | null>(null);
-  const priceLabel = formatPriceLabel(minPrice);
+  const priceLabel = formatPriceLabel(minPrice, locale);
   const isPending = fetcher.state !== 'idle';
 
   useEffect(() => {
@@ -90,17 +93,17 @@ export function ZubehorProductCard({
   }, [isWishlisted, productId]);
 
   useEffect(() => {
-    if (fetcher.data?.loginUrl) {
-      window.location.href = fetcher.data.loginUrl;
+    if (fetcherLoginUrl) {
+      window.location.href = fetcherLoginUrl;
     }
-  }, [fetcher.data]);
+  }, [fetcherLoginUrl]);
 
   useEffect(() => {
     if (!fetcher.data) return;
 
     if (!fetcher.data.ok) {
       if (!fetcher.data.loginUrl) {
-        setWishlistError(WISHLIST_UPDATE_UNAVAILABLE_MESSAGE);
+        setWishlistError(t('wishlist.updateUnavailable'));
       }
       return;
     }
@@ -111,7 +114,7 @@ export function ZubehorProductCard({
 
     setWishlistError(null);
     setWishlisted(fetcher.data.wishlisted);
-  }, [fetcher.data]);
+  }, [fetcher.data, t]);
 
   const wishlistButtonLabel = isPending
     ? t('productCard.updatingFavorite')

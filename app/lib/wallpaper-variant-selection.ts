@@ -1,8 +1,13 @@
-const DEFAULT_WALLPAPER_OPTION_NAME = 'quality';
-const DEFAULT_WALLPAPER_OPTION_VALUE = 'selbstklebend';
+export const DEFAULT_WALLPAPER_MATERIAL_HANDLE = 'selbstklebend';
 
 type AvailableVariant = {
   availableForSale: boolean;
+  printQuality?: {
+    reference?: {
+      id?: string | null;
+      handle?: string | null;
+    } | null;
+  } | null;
 };
 
 type ProductOption<TVariant extends AvailableVariant> = {
@@ -17,21 +22,40 @@ type SelectedOption = {
   name: string;
 };
 
-const normalizeOptionValue = (value: string) => value.trim().toLowerCase();
+const NON_PRODUCT_QUERY_PARAMETERS = new Set([
+  'gclid',
+  'fbclid',
+  'ref',
+  'source',
+]);
+
+function isTrackingParameter(name: string) {
+  const normalizedName = name.trim().toLowerCase();
+  return (
+    normalizedName.startsWith('utm_') ||
+    NON_PRODUCT_QUERY_PARAMETERS.has(normalizedName)
+  );
+}
+
+function getMaterialHandle(variant: AvailableVariant | null | undefined) {
+  return variant?.printQuality?.reference?.handle?.trim().toLowerCase() ?? null;
+}
+
+export function isWallpaperMaterialOption<
+  TVariant extends AvailableVariant,
+>(option: ProductOption<TVariant>) {
+  return option.optionValues.some(
+    (value) => Boolean(value.firstSelectableVariant?.printQuality?.reference),
+  );
+}
 
 export function hasExplicitProductOptionSelection<
   TVariant extends AvailableVariant,
 >(
-  options: ReadonlyArray<ProductOption<TVariant>>,
+  _options: ReadonlyArray<ProductOption<TVariant>>,
   selectedOptions: ReadonlyArray<SelectedOption>,
 ) {
-  const productOptionNames = new Set(
-    options.map((option) => normalizeOptionValue(option.name)),
-  );
-
-  return selectedOptions.some((option) =>
-    productOptionNames.has(normalizeOptionValue(option.name)),
-  );
+  return selectedOptions.some((option) => !isTrackingParameter(option.name));
 }
 
 export function resolveInitialWallpaperVariant<
@@ -43,13 +67,11 @@ export function resolveInitialWallpaperVariant<
 ) {
   if (hasExplicitSelection) return nativeVariant;
 
-  const qualityOption = options.find(
-    (option) =>
-      normalizeOptionValue(option.name) === DEFAULT_WALLPAPER_OPTION_NAME,
-  );
-  const preferredVariant = qualityOption?.optionValues.find(
+  const materialOption = options.find(isWallpaperMaterialOption);
+  const preferredVariant = materialOption?.optionValues.find(
     (value) =>
-      normalizeOptionValue(value.name) === DEFAULT_WALLPAPER_OPTION_VALUE,
+      getMaterialHandle(value.firstSelectableVariant) ===
+      DEFAULT_WALLPAPER_MATERIAL_HANDLE,
   )?.firstSelectableVariant;
 
   return preferredVariant?.availableForSale ? preferredVariant : nativeVariant;

@@ -12,6 +12,8 @@ import {
   ScrollRestoration,
   useRouteLoaderData,
 } from 'react-router';
+import {useTranslation} from '~/i18n/useTranslation';
+import {Link} from '~/lib/i18n-router';
 import type {Route} from './+types/root';
 import favicon from '~/assets/favicon.png';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
@@ -224,9 +226,10 @@ export default function App() {
 }
 
 export function ErrorBoundary() {
+  const {t} = useTranslation();
   const error = useRouteError();
   const isDevelopment = import.meta.env.DEV;
-  let errorMessage = 'Something went wrong.';
+  let errorMessage = t('errors.generic');
   let errorStatus = 500;
 
   if (isRouteErrorResponse(error)) {
@@ -242,13 +245,14 @@ export function ErrorBoundary() {
 
   return (
     <div className="route-error">
-      <h1>Oops</h1>
+      <h1>{t('errors.title')}</h1>
       <h2>{errorStatus}</h2>
       {errorMessage && (
         <fieldset>
           <pre>{errorMessage}</pre>
         </fieldset>
       )}
+      <Link to="/">{t('errors.backHome')}</Link>
     </div>
   );
 }

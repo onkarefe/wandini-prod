@@ -6,6 +6,8 @@ import staticPagesStyles from '~/styles/staticPages.css?url';
 import {getRobotsDirective} from '~/lib/seo';
 import type {FAQCategory, FAQCopy} from '~/components/FAQ';
 import type {KontaktPageData} from '~/components/kontakt';
+import {createTranslator} from '~/i18n';
+import {getLocaleFromRequest} from '~/lib/locale';
 import {
   parseCustomerReviewsHeroMetaobject,
   parseCustomerReviewsMetaobject,
@@ -66,36 +68,20 @@ function isKontaktPage(page?: PageWithType | null) {
   return page?.pageType?.value?.trim().toLowerCase() === KONTAKT_PAGE_TYPE;
 }
 
-const FAQ_COPY: FAQCopy = {
-  contactEyebrow: 'Kontakt',
-  contactTitle: 'Ihre Frage ist noch offen?',
-  contactDescription:
-    'Schreiben Sie uns. Unser Team hilft Ihnen persönlich und zuverlässig weiter.',
-  fullNameLabel: 'Vor- und Nachname',
-  emailLabel: 'E-Mail-Adresse',
-  phoneLabel: 'Telefonnummer',
-  questionLabel: 'Ihre Frage',
-  submitLabel: 'Frage senden',
-  submittingLabel: 'Wird gesendet…',
-};
-
-const FAQ_ACTION_MESSAGES = {
-  required: 'Bitte füllen Sie dieses Feld aus.',
-  invalidEmail: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
-  invalidQuestion: 'Ihre Frage muss mindestens 10 Zeichen enthalten.',
-  success: 'Vielen Dank. Ihre Frage wurde erfolgreich gesendet.',
-  error:
-    'Ihre Frage konnte gerade nicht gesendet werden. Bitte versuchen Sie es erneut.',
-} as const;
-
-const KONTAKT_ACTION_MESSAGES = {
-  required: 'Bitte f\u00fcllen Sie dieses Feld aus.',
-  invalidEmail: 'Bitte geben Sie eine g\u00fcltige E-Mail-Adresse ein.',
-  invalidMessage: 'Ihre Nachricht muss mindestens 10 Zeichen enthalten.',
-  success: 'Vielen Dank. Ihre Nachricht wurde erfolgreich gesendet.',
-  error:
-    'Ihre Nachricht konnte gerade nicht gesendet werden. Bitte versuchen Sie es erneut.',
-} as const;
+function getFAQCopy(request: Request): FAQCopy {
+  const t = createTranslator(getLocaleFromRequest(request));
+  return {
+    contactEyebrow: t('contact.eyebrow'),
+    contactTitle: t('faq.contactTitle'),
+    contactDescription: t('faq.contactDescription'),
+    fullNameLabel: t('contact.fullName'),
+    emailLabel: t('contact.emailAddress'),
+    phoneLabel: t('contact.phoneNumber'),
+    questionLabel: t('faq.question'),
+    submitLabel: t('faq.send'),
+    submittingLabel: t('contact.sending'),
+  };
+}
 
 function normalizeMetaText(value?: string | null) {
   if (!value) {
@@ -592,6 +578,21 @@ export async function action({
   context,
   request,
 }: Route.ActionArgs): Promise<Response> {
+  const t = createTranslator(getLocaleFromRequest(request));
+  const FAQ_ACTION_MESSAGES = {
+    required: t('contact.required'),
+    invalidEmail: t('contact.invalidEmail'),
+    invalidQuestion: t('faq.invalidQuestion'),
+    success: t('faq.success'),
+    error: t('faq.error'),
+  };
+  const KONTAKT_ACTION_MESSAGES = {
+    required: t('contact.required'),
+    invalidEmail: t('contact.invalidEmail'),
+    invalidMessage: t('contact.invalidMessage'),
+    success: t('contact.success'),
+    error: t('contact.error'),
+  };
   if (request.method !== 'POST') {
     return Response.json(
       {ok: false, message: FAQ_ACTION_MESSAGES.error},
@@ -755,7 +756,7 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   return {
     canonicalUrl: `${url.origin}${url.pathname}`,
     faqCategories: parseFAQMetaobjects(faqMetaobjects),
-    faqCopy: FAQ_COPY,
+    faqCopy: getFAQCopy(request),
     kontakt: parseKontaktPageDetails(kontaktMetaobjects),
     customerReviewsHero: parseCustomerReviewsHeroMetaobject(
       customerReviewsHeroMetaobject,

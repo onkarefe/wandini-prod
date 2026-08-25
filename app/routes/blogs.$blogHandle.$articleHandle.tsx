@@ -6,6 +6,7 @@ import blogDetailStyles from '~/styles/blogDetail.css?url';
 import {Link} from '~/lib/i18n-router';
 import {getRobotsDirective} from '~/lib/seo';
 import {useTranslation} from '~/i18n/useTranslation';
+import {formatLocaleDate} from '~/lib/locale-format';
 
 const BLOCKED_HTML_TAGS = [
   'script',
@@ -363,7 +364,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 }
 
 export default function Article() {
-  const {t} = useTranslation();
+  const {locale, t} = useTranslation();
   const {article, relatedArticles, blogHandle, blogTitle, canonicalUrl} =
     useLoaderData<typeof loader>();
   const {title, image, contentHtml, author} = article;
@@ -375,11 +376,11 @@ export default function Article() {
     canonicalUrl,
   });
 
-  const publishedDate = new Intl.DateTimeFormat('en-US', {
+  const publishedDate = formatLocaleDate(article.publishedAt, locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  }).format(new Date(article.publishedAt));
+  });
 
   return (
     <div className="blog-detail-page">
@@ -428,11 +429,15 @@ export default function Article() {
               </p>
               <div className="blog-detail-sidebar__list">
                 {relatedArticles.map((relatedArticle) => {
-                  const relatedDate = new Intl.DateTimeFormat('en-US', {
+                  const relatedDate = formatLocaleDate(
+                    relatedArticle.publishedAt,
+                    locale,
+                    {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
-                  }).format(new Date(relatedArticle.publishedAt));
+                    },
+                  );
 
                   return (
                     <div

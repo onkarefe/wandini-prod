@@ -2,6 +2,7 @@ import {useLoaderData} from 'react-router';
 import type {Route} from './+types/policies.$handle';
 import {type Shop} from '@shopify/hydrogen/storefront-api-types';
 import {Link} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 
 const BLOCKED_HTML_TAGS = [
   'script',
@@ -67,7 +68,7 @@ type SelectedPolicies = keyof Pick<
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
-    {title: `Hydrogen | ${data?.policy.title ?? ''}`},
+    {title: data?.policy.title ?? 'Wandini'},
     {name: 'robots', content: 'noindex,follow'},
   ];
 };
@@ -107,6 +108,7 @@ export async function loader({params, context}: Route.LoaderArgs) {
 }
 
 export default function Policy() {
+  const {t} = useTranslation();
   const {policy} = useLoaderData<typeof loader>();
 
   return (
@@ -114,7 +116,7 @@ export default function Policy() {
       <br />
       <br />
       <div>
-        <Link to="/policies">← Back to Policies</Link>
+        <Link to="/policies">← {t('policies.back')}</Link>
       </div>
       <br />
       <h1>{policy.title}</h1>

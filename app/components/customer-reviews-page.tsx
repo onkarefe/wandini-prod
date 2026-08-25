@@ -4,6 +4,7 @@ import type {
   CustomerReviewsSteps,
 } from '~/lib/customer-reviews';
 import {getCustomerReviewRatingValue} from '~/lib/customer-reviews';
+import {useTranslation} from '~/i18n/useTranslation';
 import '../styles/customer-reviews-page.css';
 
 type CustomerReviewsPageProps = {
@@ -42,10 +43,11 @@ function getStarStates(
 }
 
 function ReviewStars({rating}: {rating: number}) {
+  const {t} = useTranslation();
   return (
     <div
       className="customer-reviews-page__stars"
-      aria-label={`${rating} von 5 Sternen`}
+      aria-label={t('reviews.rating', {rating})}
     >
       {getStarStates(rating).map(({position, state}) => (
         <svg
@@ -175,6 +177,7 @@ function ReviewsShowcase({
   reviews: CustomerReview[];
   sectionTitle: string;
 }) {
+  const {t} = useTranslation();
   if (!reviews.length) return null;
 
   const averageRating =
@@ -209,7 +212,7 @@ function ReviewsShowcase({
             </span>
             <span>
               {reviews.length}{' '}
-              {reviews.length === 1 ? 'Bewertung' : 'Bewertungen'}
+              {reviews.length === 1 ? t('reviews.one') : t('reviews.many')}
             </span>
           </p>
         </div>
@@ -285,6 +288,7 @@ function ExperienceSteps({content}: {content: CustomerReviewsSteps}) {
 const REVIEW_RATING_OPTIONS = [5, 4, 3, 2, 1] as const;
 
 function CustomerReviewForm() {
+  const {t} = useTranslation();
   return (
     <section
       className="customer-reviews-page__submission"
@@ -293,13 +297,11 @@ function CustomerReviewForm() {
       <div className="customer-reviews-page__submission-inner container mx-auto">
         <header className="customer-reviews-page__submission-header">
           <span className="customer-reviews-page__submission-kicker">
-            Ihre Perspektive
+            {t('reviews.formKicker')}
           </span>
-          <h2 id="customer-review-form-title">Ihre Erfahrung. Ihr Raum.</h2>
+          <h2 id="customer-review-form-title">{t('reviews.formTitle')}</h2>
           <p>
-            Wie wirkt Ihre Wandini Fototapete im Alltag? Teilen Sie Ihren
-            Eindruck und zeigen Sie uns, wie das Motiv Teil Ihres Zuhauses
-            geworden ist.
+            {t('reviews.formDescription')}
           </p>
         </header>
 
@@ -309,53 +311,53 @@ function CustomerReviewForm() {
         >
           <div className="customer-reviews-page__form-grid">
             <div className="customer-reviews-page__form-field">
-              <label htmlFor="review-first-name">Vorname</label>
+              <label htmlFor="review-first-name">{t('account.firstName')}</label>
               <input
                 id="review-first-name"
                 name="firstName"
                 type="text"
                 autoComplete="given-name"
-                placeholder="Anna"
+                placeholder={t('reviews.firstNamePlaceholder')}
               />
             </div>
 
             <div className="customer-reviews-page__form-field">
-              <label htmlFor="review-last-name">Nachname</label>
+              <label htmlFor="review-last-name">{t('account.lastName')}</label>
               <input
                 id="review-last-name"
                 name="lastName"
                 type="text"
                 autoComplete="family-name"
-                placeholder="Muster"
+                placeholder={t('reviews.lastNamePlaceholder')}
               />
             </div>
 
             <div className="customer-reviews-page__form-field">
-              <label htmlFor="review-email">E-Mail-Adresse</label>
+              <label htmlFor="review-email">{t('contact.emailAddress')}</label>
               <input
                 id="review-email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 inputMode="email"
-                placeholder="anna@beispiel.de"
+                placeholder={t('reviews.emailPlaceholder')}
               />
             </div>
 
             <div className="customer-reviews-page__form-field">
-              <label htmlFor="review-phone">Telefonnummer</label>
+              <label htmlFor="review-phone">{t('contact.phoneNumber')}</label>
               <input
                 id="review-phone"
                 name="phone"
                 type="tel"
                 autoComplete="tel"
                 inputMode="tel"
-                placeholder="+49 123 456789"
+                placeholder={t('reviews.phonePlaceholder')}
               />
             </div>
 
             <fieldset className="customer-reviews-page__rating-field">
-              <legend>Ihre Bewertung</legend>
+              <legend>{t('reviews.yourRating')}</legend>
               <div className="customer-reviews-page__rating-control">
                 {REVIEW_RATING_OPTIONS.map((rating) => (
                   <div key={rating}>
@@ -368,7 +370,7 @@ function CustomerReviewForm() {
                     <label htmlFor={`review-rating-${rating}`}>
                       <span aria-hidden="true">★</span>
                       <span className="customer-reviews-page__visually-hidden">
-                        {rating} von 5 Sternen
+                        {t('reviews.rating', {rating})}
                       </span>
                     </label>
                   </div>
@@ -377,29 +379,29 @@ function CustomerReviewForm() {
             </fieldset>
 
             <div className="customer-reviews-page__form-field customer-reviews-page__form-field--wide">
-              <label htmlFor="review-comment">Ihre Erfahrung</label>
+              <label htmlFor="review-comment">{t('reviews.experience')}</label>
               <textarea
                 id="review-comment"
                 name="comment"
                 rows={5}
-                placeholder="Erzählen Sie uns von Ihrem Motiv, dem Raum und Ihrem Eindruck."
+                placeholder={t('reviews.experiencePlaceholder')}
               />
             </div>
 
             <div className="customer-reviews-page__form-field customer-reviews-page__form-field--wide customer-reviews-page__upload-field">
-              <label htmlFor="review-photo">Foto Ihres Raumes</label>
+              <label htmlFor="review-photo">{t('reviews.photo')}</label>
               <input
                 id="review-photo"
                 name="photo"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
               />
-              <span>JPG, PNG oder WEBP</span>
+              <span>{t('reviews.fileTypes')}</span>
             </div>
           </div>
 
           <footer className="customer-reviews-page__submission-footer">
-            <button type="submit">Bewertung senden</button>
+            <button type="submit">{t('reviews.submit')}</button>
           </footer>
         </form>
       </div>

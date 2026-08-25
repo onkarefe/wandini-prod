@@ -15,6 +15,7 @@ import {
 } from '~/lib/cart-pricing';
 import type {ConfiguredMoney} from '~/lib/configurator-pricing';
 import {usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 import {
   getGiftCardStorageKey,
   getPersistedGiftCardCodes,
@@ -50,6 +51,7 @@ export function CartSummary({
   pricingQuote,
   checkoutMode,
 }: CartSummaryProps) {
+  const {t} = useTranslation();
   const quantity = cart?.totalQuantity ?? 0;
   const checkoutPath = usePrefixPathWithLocale('/checkout');
   const navigation = useNavigation();
@@ -82,13 +84,17 @@ export function CartSummary({
       aria-labelledby="order-summary-title"
     >
       <header className="order-summary__header">
-        <h2 id="order-summary-title">Bestellübersicht</h2>
-        <span>{quantity} Artikel</span>
+        <h2 id="order-summary-title">{t('cart.summary')}</h2>
+        <span>
+          {quantity === 1
+            ? t('cart.itemOne')
+            : t('cart.itemMany', {count: quantity})}
+        </span>
       </header>
 
       <dl className="order-summary__prices">
         <div>
-          <dt>Zwischensumme</dt>
+          <dt>{t('cart.subtotal')}</dt>
           <dd>
             {subtotalAmount?.amount ? (
               <Money
@@ -104,11 +110,11 @@ export function CartSummary({
           </dd>
         </div>
         <div>
-          <dt>Versand</dt>
-          <dd className="order-summary__shipping">An der Kasse</dd>
+          <dt>{t('cart.shipping')}</dt>
+          <dd className="order-summary__shipping">{t('cart.atCheckout')}</dd>
         </div>
         <div className="order-summary__total">
-          <dt>Gesamtsumme</dt>
+          <dt>{t('cart.total')}</dt>
           <dd>
             {totalAmount?.amount ? (
               <Money
@@ -137,8 +143,7 @@ export function CartSummary({
         <>
           {cart?.appliedGiftCards?.length ? (
             <p className="order-summary__error">
-              Geschenkkarten müssen im Shopify Checkout erneut eingegeben
-              werden.
+              {t('cart.giftCardCheckoutNotice')}
             </p>
           ) : null}
           <Form
@@ -158,18 +163,17 @@ export function CartSummary({
               disabled={configuredCheckoutPending}
               aria-busy={configuredCheckoutPending || undefined}
             >
-              {configuredCheckoutPending ? 'Bitte warten' : 'Zur Kasse'}
+              {configuredCheckoutPending ? t('cart.wait') : t('cart.checkout')}
             </button>
           </Form>
         </>
       ) : checkoutMode === 'native' && cart?.checkoutUrl ? (
         <a className="order-summary__checkout" href={cart.checkoutUrl}>
-          Zur Kasse
+          {t('cart.checkout')}
         </a>
       ) : (
         <p className="order-summary__error" role="alert">
-          Der Checkout ist für diesen Warenkorb derzeit nicht verfügbar. Bitte
-          prüfen Sie die Produktkonfiguration.
+          {t('cart.checkoutUnavailable')}
         </p>
       )}
     </section>
@@ -183,6 +187,7 @@ function DiscountCode({
   discountCodes?: CartApiQueryFragment['discountCodes'];
   validatedCodes?: string[];
 }) {
+  const {t} = useTranslation();
   const appliedCodes =
     validatedCodes ??
     discountCodes?.filter(({applicable}) => applicable).map(({code}) => code) ??
@@ -193,7 +198,7 @@ function DiscountCode({
 
   return (
     <div className="order-summary__code-group">
-      <label htmlFor="discount-code">Rabattcode</label>
+      <label htmlFor="discount-code">{t('cart.discountCode')}</label>
 
       {appliedCodes.map((code) => (
         <DiscountForm
@@ -204,7 +209,7 @@ function DiscountCode({
             <AppliedCode
               label={code}
               pending={fetcher.state !== 'idle'}
-              removeLabel={`Rabattcode ${code} entfernen`}
+              removeLabel={t('cart.removeDiscount', {code})}
             />
           )}
         </DiscountForm>
@@ -222,7 +227,7 @@ function DiscountCode({
                   id="discount-code"
                   name="discountCode"
                   type="text"
-                  placeholder="Code eingeben"
+                  placeholder={t('cart.enterCode')}
                   autoComplete="off"
                   spellCheck={false}
                   required
@@ -230,12 +235,12 @@ function DiscountCode({
                   aria-describedby={error ? 'discount-code-error' : undefined}
                 />
                 <button type="submit" disabled={pending}>
-                  {pending ? 'Bitte warten' : 'Einlösen'}
+                  {pending ? t('cart.wait') : t('cart.redeem')}
                 </button>
               </div>
               {error ? (
                 <p id="discount-code-error" className="order-summary__error">
-                  Dieser Rabattcode ist nicht gültig.
+                  {t('cart.invalidDiscount')}
                 </p>
               ) : null}
             </>
@@ -253,9 +258,11 @@ function DiscountForm({
   discountCodes: string[];
   children: (fetcher: CartFetcher) => ReactNode;
 }) {
+  const cartPath = usePrefixPathWithLocale('/cart');
+
   return (
     <CartForm
-      route="/cart"
+      route={cartPath}
       action={CartForm.ACTIONS.DiscountCodesUpdate}
       inputs={{discountCodes}}
     >
@@ -271,6 +278,7 @@ function GiftCard({
   cartId?: string | null;
   giftCardCodes: CartApiQueryFragment['appliedGiftCards'] | undefined;
 }) {
+  const {t} = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const submittedCode = useRef<string | null>(null);
   const fetcher = useFetcher({key: 'gift-card-add'});
@@ -311,7 +319,7 @@ function GiftCard({
 
   return (
     <div className="order-summary__code-group">
-      <label htmlFor="gift-card-code">Geschenkkarte</label>
+      <label htmlFor="gift-card-code">{t('cart.giftCard')}</label>
 
       {giftCardCodes?.map((giftCard) => (
         <RemoveGiftCardForm key={giftCard.id} giftCardId={giftCard.id}>
@@ -320,7 +328,9 @@ function GiftCard({
               label={`•••• ${giftCard.lastCharacters}`}
               amount={<Money data={giftCard.amountUsed} />}
               pending={removeFetcher.state !== 'idle'}
-              removeLabel={`Geschenkkarte mit der Endung ${giftCard.lastCharacters} entfernen`}
+              removeLabel={t('cart.removeGiftCard', {
+                characters: giftCard.lastCharacters,
+              })}
             />
           )}
         </RemoveGiftCardForm>
@@ -338,7 +348,7 @@ function GiftCard({
                   id="gift-card-code"
                   name="giftCardCode"
                   type="text"
-                  placeholder="Code eingeben"
+                  placeholder={t('cart.enterCode')}
                   autoComplete="off"
                   spellCheck={false}
                   required
@@ -347,12 +357,12 @@ function GiftCard({
                   aria-describedby={error ? 'gift-card-error' : undefined}
                 />
                 <button type="submit" disabled={pending}>
-                  {pending ? 'Bitte warten' : 'Einlösen'}
+                  {pending ? t('cart.wait') : t('cart.redeem')}
                 </button>
               </div>
               {error ? (
                 <p id="gift-card-error" className="order-summary__error">
-                  Die Geschenkkarte konnte nicht eingelöst werden.
+                  {t('cart.invalidGiftCard')}
                 </p>
               ) : null}
             </>
@@ -370,10 +380,12 @@ function GiftCardForm({
   giftCardCodes: string[];
   children: (fetcher: CartFetcher) => ReactNode;
 }) {
+  const cartPath = usePrefixPathWithLocale('/cart');
+
   return (
     <CartForm
       fetcherKey="gift-card-add"
-      route="/cart"
+      route={cartPath}
       action={CartForm.ACTIONS.GiftCardCodesUpdate}
       inputs={{giftCardCodes}}
     >
@@ -389,9 +401,11 @@ function RemoveGiftCardForm({
   giftCardId: string;
   children: (fetcher: CartFetcher) => ReactNode;
 }) {
+  const cartPath = usePrefixPathWithLocale('/cart');
+
   return (
     <CartForm
-      route="/cart"
+      route={cartPath}
       action={CartForm.ACTIONS.GiftCardCodesRemove}
       inputs={{giftCardCodes: [giftCardId]}}
     >
@@ -411,6 +425,8 @@ function AppliedCode({
   pending: boolean;
   removeLabel: string;
 }) {
+  const {t} = useTranslation();
+
   return (
     <div className="order-summary__applied-code">
       <span>
@@ -418,7 +434,7 @@ function AppliedCode({
         {amount}
       </span>
       <button type="submit" disabled={pending} aria-label={removeLabel}>
-        {pending ? 'Wird entfernt' : 'Entfernen'}
+        {pending ? t('cart.removing') : t('cart.remove')}
       </button>
     </div>
   );

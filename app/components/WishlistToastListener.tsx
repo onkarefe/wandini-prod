@@ -2,8 +2,10 @@ import {useEffect, useRef} from 'react';
 import {useFetchers} from 'react-router';
 import type {WishlistActionData} from '~/lib/wishlist';
 import {showWishlistSuccessToast} from '~/lib/wishlist-toast';
+import {useTranslation} from '~/i18n/useTranslation';
 
 export function WishlistToastListener() {
+  const {t} = useTranslation();
   const fetchers = useFetchers();
   const handledResponsesRef = useRef(new WeakSet<object>());
 
@@ -19,13 +21,11 @@ export function WishlistToastListener() {
 
       if (!data.ok || typeof data.wishlisted !== 'boolean') continue;
 
-      const productTitle = fetcher.formData?.get('productTitle');
       showWishlistSuccessToast(
-        data.wishlisted,
-        typeof productTitle === 'string' ? productTitle : '',
+        data.wishlisted ? t('wishlist.added') : t('wishlist.removed'),
       );
     }
-  }, [fetchers]);
+  }, [fetchers, t]);
 
   return null;
 }

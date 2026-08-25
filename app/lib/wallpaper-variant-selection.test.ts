@@ -7,6 +7,9 @@ import {
 type TestVariant = {
   id: string;
   availableForSale: boolean;
+  printQuality?: {
+    reference: {id: string; handle: string};
+  };
 };
 
 const nativeVariant: TestVariant = {
@@ -16,11 +19,17 @@ const nativeVariant: TestVariant = {
 const selbstklebendVariant: TestVariant = {
   id: 'selbstklebend',
   availableForSale: true,
+  printQuality: {
+    reference: {
+      id: 'gid://shopify/Metaobject/1',
+      handle: 'selbstklebend',
+    },
+  },
 };
 
 const options = [
   {
-    name: 'Quality',
+    name: 'Qualität',
     optionValues: [
       {
         name: 'Selbstklebend',
@@ -34,6 +43,24 @@ describe('wallpaper initial variant selection', () => {
   it('uses Selbstklebend when no product option was selected', () => {
     expect(
       resolveInitialWallpaperVariant(options, nativeVariant, false),
+    ).toBe(selbstklebendVariant);
+  });
+
+  it('uses stable material metadata when option and material labels are English', () => {
+    const englishOptions = [
+      {
+        name: 'Material',
+        optionValues: [
+          {
+            name: 'Self-adhesive wallpaper',
+            firstSelectableVariant: selbstklebendVariant,
+          },
+        ],
+      },
+    ];
+
+    expect(
+      resolveInitialWallpaperVariant(englishOptions, nativeVariant, false),
     ).toBe(selbstklebendVariant);
   });
 
@@ -57,8 +84,8 @@ describe('wallpaper initial variant selection', () => {
           {
             name: 'Selbstklebend',
             firstSelectableVariant: {
-              ...selbstklebendVariant,
-              availableForSale: false,
+            ...selbstklebendVariant,
+            availableForSale: false,
             },
           },
         ],

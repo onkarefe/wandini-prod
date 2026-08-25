@@ -1,5 +1,6 @@
 import {useEffect, useRef} from 'react';
 import {useFetcher} from 'react-router';
+import {useTranslation} from '~/i18n/useTranslation';
 import {Link} from '~/lib/i18n-router';
 import '../styles/kontakt.css';
 
@@ -44,6 +45,7 @@ function getTelephoneHref(phone: string) {
 }
 
 export default function Kontakt({title, data}: KontaktProps) {
+  const {t} = useTranslation();
   const hasDetails = Boolean(
     data.address || data.mobile || data.mail || data.mapUrl,
   );
@@ -56,7 +58,7 @@ export default function Kontakt({title, data}: KontaktProps) {
         </header>
 
         {data.links.length ? (
-          <nav className="kontakt-links" aria-label="Kontaktseiten">
+          <nav className="kontakt-links" aria-label={t('contact.navigation')}>
             {data.links.map((link) => (
               <Link
                 className="kontakt-links__card"
@@ -75,14 +77,14 @@ export default function Kontakt({title, data}: KontaktProps) {
       {hasDetails ? (
         <section
           className="kontakt-details container mx-auto"
-          aria-label="Kontaktdaten und Standort"
+          aria-label={t('contact.details')}
         >
           {data.address || data.mobile || data.mail ? (
             <div className="kontakt-details__information">
               <dl className="kontakt-details__list">
                 {data.address ? (
                   <div className="kontakt-details__item">
-                    <dt>Adresse</dt>
+                    <dt>{t('contact.address')}</dt>
                     <dd>
                       <address>{data.address}</address>
                     </dd>
@@ -91,7 +93,7 @@ export default function Kontakt({title, data}: KontaktProps) {
 
                 {data.mobile ? (
                   <div className="kontakt-details__item">
-                    <dt>Telefon</dt>
+                    <dt>{t('contact.phone')}</dt>
                     <dd>
                       <a href={getTelephoneHref(data.mobile)}>{data.mobile}</a>
                     </dd>
@@ -100,7 +102,7 @@ export default function Kontakt({title, data}: KontaktProps) {
 
                 {data.mail ? (
                   <div className="kontakt-details__item">
-                    <dt>E-Mail</dt>
+                    <dt>{t('contact.email')}</dt>
                     <dd>
                       <a href={`mailto:${data.mail}`}>{data.mail}</a>
                     </dd>
@@ -132,6 +134,7 @@ export default function Kontakt({title, data}: KontaktProps) {
 }
 
 function KontaktForm() {
+  const {t} = useTranslation();
   const fetcher = useFetcher<KontaktActionData>();
   const formRef = useRef<HTMLFormElement>(null);
   const isSubmitting = fetcher.state !== 'idle';
@@ -144,12 +147,9 @@ function KontaktForm() {
     <section className="kontakt-form" aria-labelledby="kontakt-form-title">
       <div className="kontakt-form__inner container mx-auto">
         <header className="kontakt-form__header">
-          <span className="kontakt-form__eyebrow">Kontakt</span>
-          <h2 id="kontakt-form-title">Wie k&ouml;nnen wir Ihnen helfen?</h2>
-          <p>
-            Schreiben Sie uns eine Nachricht. Unser Team hilft Ihnen
-            pers&ouml;nlich und zuverl&auml;ssig weiter.
-          </p>
+          <span className="kontakt-form__eyebrow">{t('contact.eyebrow')}</span>
+          <h2 id="kontakt-form-title">{t('contact.title')}</h2>
+          <p>{t('contact.description')}</p>
         </header>
 
         <fetcher.Form
@@ -160,7 +160,7 @@ function KontaktForm() {
         >
           <input type="hidden" name="intent" value="kontakt-contact" />
           <div className="kontakt-form__honeypot" aria-hidden="true">
-            <label htmlFor="kontakt-company">Unternehmen</label>
+            <label htmlFor="kontakt-company">{t('common.company')}</label>
             <input
               id="kontakt-company"
               name="company"
@@ -172,7 +172,7 @@ function KontaktForm() {
 
           <div className="kontakt-form__grid">
             <div className="kontakt-form__field">
-              <label htmlFor="kontakt-full-name">Vor- und Nachname</label>
+              <label htmlFor="kontakt-full-name">{t('contact.fullName')}</label>
               <input
                 id="kontakt-full-name"
                 name="fullName"
@@ -199,7 +199,7 @@ function KontaktForm() {
             </div>
 
             <div className="kontakt-form__field">
-              <label htmlFor="kontakt-email">E-Mail-Adresse</label>
+              <label htmlFor="kontakt-email">{t('contact.emailAddress')}</label>
               <input
                 id="kontakt-email"
                 name="email"
@@ -223,7 +223,7 @@ function KontaktForm() {
             </div>
 
             <div className="kontakt-form__field">
-              <label htmlFor="kontakt-phone">Telefonnummer</label>
+              <label htmlFor="kontakt-phone">{t('contact.phoneNumber')}</label>
               <input
                 id="kontakt-phone"
                 name="phone"
@@ -247,7 +247,7 @@ function KontaktForm() {
             </div>
 
             <div className="kontakt-form__field kontakt-form__field--wide">
-              <label htmlFor="kontakt-message">Ihre Nachricht</label>
+              <label htmlFor="kontakt-message">{t('contact.message')}</label>
               <textarea
                 id="kontakt-message"
                 name="message"
@@ -291,7 +291,7 @@ function KontaktForm() {
               ) : null}
             </div>
             <button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Wird gesendet...' : 'Nachricht senden'}
+              {isSubmitting ? t('contact.sending') : t('contact.send')}
             </button>
           </div>
         </fetcher.Form>

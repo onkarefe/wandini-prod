@@ -3,6 +3,7 @@ import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {CartLineItem} from '~/components/CartLineItem';
 import {Link} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -12,6 +13,7 @@ export type CustomCartProps = {
 };
 
 export function CustomCart({layout, cart: originalCart}: CustomCartProps) {
+  const {t} = useTranslation();
   const cart = useOptimisticCart(originalCart);
   const hasLines = Boolean(cart?.lines?.nodes?.length);
   const withDiscount = Boolean(
@@ -22,7 +24,7 @@ export function CustomCart({layout, cart: originalCart}: CustomCartProps) {
   return (
     <div className={className}>
       <CartEmpty hidden={hasLines} />
-      <div className="cart-details" aria-label="Warenkorbartikel">
+      <div className="cart-details" aria-label={t('cart.items')}>
         <ul>
           {(cart?.lines?.nodes ?? []).map((line) => (
             <CartLineItem key={line.id} line={line} layout={layout} />
@@ -34,14 +36,15 @@ export function CustomCart({layout, cart: originalCart}: CustomCartProps) {
 }
 
 function CartEmpty({hidden = false}: {hidden: boolean}) {
+  const {t} = useTranslation();
   const {close} = useAside();
 
   return (
     <div className="custom-cart-empty" hidden={hidden}>
-      <h2>Ihr Warenkorb ist leer</h2>
-      <p>Entdecken Sie unsere Fototapeten und finden Sie Ihr Lieblingsmotiv.</p>
+      <h2>{t('cart.emptyTitle')}</h2>
+      <p>{t('cart.emptyDescription')}</p>
       <Link to="/collections" onClick={close} prefetch="viewport">
-        Produkte entdecken
+        {t('cart.discoverProducts')}
       </Link>
     </div>
   );

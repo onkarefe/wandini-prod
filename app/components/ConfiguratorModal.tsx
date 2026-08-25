@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Configurator} from './Configurator';
 import {ConfigratorScene2} from './ConfigratorScene2';
+import {useTranslation} from '~/i18n/useTranslation';
 
 type CropRect = {
   x: number;
@@ -16,6 +17,7 @@ type SelectedQualitySummary = {
 
 export type ConfiguratorMaterialOption = {
   id: string;
+  identity: string;
   title: string;
   calculatedPrice: string;
   properties: string[];
@@ -31,14 +33,12 @@ export type ConfiguratorMaterialOption = {
 
 type ConfiguratorStep = 'crop' | 'materials' | 'preview';
 
-const CONFIGURATOR_STEPS: Array<{
-  key: ConfiguratorStep;
-  label: string;
-}> = [
-  {key: 'crop', label: 'Ausschnitt'},
-  {key: 'materials', label: 'Material'},
-  {key: 'preview', label: 'Vorschau'},
-];
+const CONFIGURATOR_STEPS: ConfiguratorStep[] = ['crop', 'materials', 'preview'];
+const CONFIGURATOR_STEP_LABELS = {
+  crop: 'configurator.step.crop',
+  materials: 'configurator.step.material',
+  preview: 'configurator.step.preview',
+} as const;
 
 type ConfiguratorMaterialVisual = {
   featured?: boolean;
@@ -58,24 +58,24 @@ const MATERIAL_VISUALS = {
   airtex: {},
 } satisfies Record<string, ConfiguratorMaterialVisual>;
 
-function resolveMaterialVisual(
-  title: string,
+export function resolveMaterialVisual(
+  identity: string,
 ): ConfiguratorMaterialVisual | null {
-  const normalizedTitle = title.trim().toLocaleLowerCase('de-DE');
+  const normalizedIdentity = identity.trim().toLowerCase();
 
-  if (normalizedTitle.includes('premium vinyl')) {
+  if (normalizedIdentity.includes('premium-vinyl')) {
     return MATERIAL_VISUALS.premiumVinyl;
   }
-  if (normalizedTitle.includes('selbstkleb')) {
+  if (normalizedIdentity.includes('selbstkleb')) {
     return MATERIAL_VISUALS.selfAdhesive;
   }
-  if (normalizedTitle.includes('airtex')) {
+  if (normalizedIdentity.includes('airtex')) {
     return MATERIAL_VISUALS.airtex;
   }
-  if (normalizedTitle.includes('premium')) {
+  if (normalizedIdentity.includes('premium')) {
     return MATERIAL_VISUALS.premium;
   }
-  if (normalizedTitle.includes('standard')) {
+  if (normalizedIdentity.includes('standard')) {
     return MATERIAL_VISUALS.standard;
   }
 
@@ -91,19 +91,23 @@ type ConfiguratorFlowHeaderProps = {
 };
 
 function ConfiguratorStepGuide({step}: {step: ConfiguratorStep}) {
+  const {t} = useTranslation();
   const currentStepIndex = CONFIGURATOR_STEPS.findIndex(
-    (item) => item.key === step,
+    (item) => item === step,
   );
   const currentStepNumber = currentStepIndex + 1;
 
   return (
     <nav
       className="configuratorStepGuide"
-      aria-label="Fortschritt der Konfiguration"
+      aria-label={t('configurator.progress')}
     >
       <div className="configuratorStepGuideMeta">
         <strong>
-          Schritt {currentStepNumber} von {CONFIGURATOR_STEPS.length}
+          {t('configurator.step', {
+            current: currentStepNumber,
+            total: CONFIGURATOR_STEPS.length,
+          })}
         </strong>
       </div>
 
@@ -116,7 +120,7 @@ function ConfiguratorStepGuide({step}: {step: ConfiguratorStep}) {
 
             return (
               <li
-                key={item.key}
+                key={item}
                 className={`${isActive ? 'is-active' : ''}${
                   isComplete ? ' is-complete' : ''
                 }`}
@@ -125,7 +129,7 @@ function ConfiguratorStepGuide({step}: {step: ConfiguratorStep}) {
                 <span className="configuratorStepNumber" aria-hidden="true">
                   {isComplete ? '✓' : stepNumber}
                 </span>
-                <span>{item.label}</span>
+                <span>{t(CONFIGURATOR_STEP_LABELS[item])}</span>
               </li>
             );
           })}
@@ -191,6 +195,7 @@ export function ConfiguratorModal({
   selectedQualitySummary,
   confirmButton,
 }: ConfiguratorModalProps) {
+  const {t} = useTranslation();
   const [step, setStep] = useState<ConfiguratorStep>('crop');
   const [selectingMaterialId, setSelectingMaterialId] = useState<string | null>(
     null,
@@ -332,15 +337,13 @@ export function ConfiguratorModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={`configurator-${step}-title`}
-        aria-describedby={
-          step === 'crop' ? undefined : `configurator-${step}-description`
-        }
+        aria-describedby={`configurator-${step}-description`}
       >
         <button
           type="button"
           className="configuratorModalIconButton configuratorModalCloseButton"
           onClick={handleClose}
-          aria-label="Schließen"
+          aria-label={t('common.close')}
         >
           X
         </button>
@@ -350,7 +353,7 @@ export function ConfiguratorModal({
             type="button"
             className="configuratorModalIconButton configuratorModalBackButton"
             onClick={handleBack}
-            aria-label="Zurück"
+            aria-label={t('common.back')}
           >
             &lt;
           </button>
@@ -360,23 +363,17 @@ export function ConfiguratorModal({
           step={step}
           title={
             step === 'crop'
-              ? 'Bildausschnitt auswählen'
+              ? t('configurator.cropTitle')
               : step === 'materials'
-                ? 'Tapete auswählen'
-                : 'Vorschau & Bestellübersicht'
+                ? t('configurator.materialTitle')
+                : t('configurator.previewTitle')
           }
           description={
-            step === 'crop' ? null : step === 'materials' ? (
-              <>
-                Wähle die passende Druckqualität für deine Wandfläche von{' '}
-                {widthCm} × {heightCm} cm.
-              </>
-            ) : (
-              <>
-                Prüfe die Aufteilung deines Motivs in einzelne Bahnen und
-                bestätige anschließend deine Bestellung.
-              </>
-            )
+            step === 'crop'
+              ? t('configurator.cropDescription')
+              : step === 'materials'
+                ? t('configurator.materialDescription')
+                : t('configurator.previewDescription')
           }
           titleRef={stepTitleRef}
         />
@@ -400,7 +397,7 @@ export function ConfiguratorModal({
                 disabled={!crop}
                 onClick={() => setStep('materials')}
               >
-                <span>Weiter zur Materialauswahl</span>
+                <span>{t('configurator.continueToMaterial')}</span>
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="m9 18 6-6-6-6" />
                 </svg>
@@ -421,7 +418,7 @@ export function ConfiguratorModal({
                     const isSelecting = selectingMaterialId === material.id;
                     const isSelectionPending = selectingMaterialId !== null;
                     const materialVisual = resolveMaterialVisual(
-                      material.title,
+                      material.identity,
                     );
 
                     return (
@@ -443,7 +440,9 @@ export function ConfiguratorModal({
                               src={material.image.url}
                               alt={
                                 material.image.altText ||
-                                `Materialoberfläche ${material.title}`
+                                t('configurator.surfaceAlt', {
+                                  title: material.title,
+                                })
                               }
                               decoding="async"
                               draggable={false}
@@ -492,7 +491,7 @@ export function ConfiguratorModal({
 
                           <div className="configuratorMaterialTotal">
                             <div>
-                              <span>Preis</span>
+                              <span>{t('configurator.price')}</span>
                             </div>
                             <strong>{material.calculatedPrice}</strong>
                           </div>
@@ -507,10 +506,10 @@ export function ConfiguratorModal({
                           >
                             <span>
                               {isSelecting
-                                ? 'Wird ausgewählt…'
+                                ? t('configurator.selecting')
                                 : material.selected
-                                  ? 'Ausgewählt · Weiter'
-                                  : 'Material auswählen'}
+                                  ? t('configurator.selectedContinue')
+                                  : t('configurator.selectMaterial')}
                             </span>
                             {!isSelecting && (
                               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -552,7 +551,7 @@ export function ConfiguratorModal({
               <div className="configuratorPreviewFooterAction">
                 {confirmButton ?? (
                   <button type="button" className="configuratorPreviewButton">
-                    Bestätigen &amp; in den Warenkorb
+                    {t('product.confirmAddToCart')}
                   </button>
                 )}
               </div>

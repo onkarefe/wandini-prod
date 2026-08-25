@@ -5,6 +5,7 @@ import {
   type ReactNode,
 } from 'react';
 import '~/styles/ProductDetailTabs.css';
+import {useTranslation} from '~/i18n/useTranslation';
 
 export interface ProductDetailTabsProps {
   tabTitles?: string[];
@@ -17,6 +18,7 @@ export function ProductDetailTabs({
   tabContents = [],
   headerNotice,
 }: ProductDetailTabsProps) {
+  const {t} = useTranslation();
   const [activeTab, setActiveTab] = useState(0);
   const tabsId = useId().replace(/:/g, '');
   const tabCount = Math.min(tabTitles.length, tabContents.length);
@@ -56,7 +58,7 @@ export function ProductDetailTabs({
         <div
           className="custom-tabs-list"
           role="tablist"
-          aria-label="Produktinformationen"
+          aria-label={t('product.information')}
         >
           {tabTitles.slice(0, tabCount).map((title, index) => (
             <button

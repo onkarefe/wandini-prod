@@ -1,6 +1,7 @@
 import {useEffect, useRef} from 'react';
 import { type FetcherWithComponents } from 'react-router';
 import { CartForm, type OptimisticCartLineInput } from '@shopify/hydrogen';
+import {usePrefixPathWithLocale} from '~/lib/i18n-router';
 
 export function AddToCartButton({
   analytics,
@@ -17,8 +18,14 @@ export function AddToCartButton({
   onClick?: () => void;
   onSuccess?: () => void;
 }) {
+  const cartPath = usePrefixPathWithLocale('/cart');
+
   return (
-    <CartForm route="/cart" inputs={{ lines }} action={CartForm.ACTIONS.LinesAdd}>
+    <CartForm
+      route={cartPath}
+      inputs={{lines}}
+      action={CartForm.ACTIONS.LinesAdd}
+    >
       {(fetcher: FetcherWithComponents<any>) => (
         <AddToCartSubmitButton fetcher={fetcher} onSuccess={onSuccess}>
           <input

@@ -15,7 +15,13 @@ import {
   type CartUpsellProduct,
 } from '~/components/CartUpsellCard';
 import {CartSummary as CustomCartSummary} from '~/components/CustomCartSummary';
-import {getLocaleFromRequest, prefixPathWithLocale} from '~/lib/locale';
+import {
+  getLocaleFromI18n,
+  getLocaleFromRequest,
+  prefixPathWithLocale,
+} from '~/lib/locale';
+import {createTranslator} from '~/i18n';
+import {useTranslation} from '~/i18n/useTranslation';
 import {
   DynamicPricingError,
   getCartPricingEvaluation,
@@ -58,9 +64,9 @@ function getSafeRedirectPath(redirectParam: FormDataEntryValue | null) {
   }
 }
 
-export const meta: Route.MetaFunction = () => {
+export const meta: Route.MetaFunction = ({data: routeData}) => {
   return [
-    {title: 'Warenkorb | Wandini'},
+    {title: createTranslator(routeData?.selectedLocale)('cart.metaTitle')},
     {name: 'robots', content: 'noindex,follow'},
   ];
 };
@@ -69,6 +75,7 @@ export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
 
 export async function action({request, context}: Route.ActionArgs) {
   const {cart} = context;
+  const t = createTranslator(getLocaleFromRequest(request));
 
   const formData = await request.formData();
 
@@ -78,7 +85,7 @@ export async function action({request, context}: Route.ActionArgs) {
     return data(
       {
         cart: null,
-        errors: [{message: 'No action provided'}],
+        errors: [{message: t('cart.invalidAction')}],
         warnings: [],
         analytics: {
           cartId: null,
@@ -111,7 +118,7 @@ export async function action({request, context}: Route.ActionArgs) {
           {
             cart: null,
             errors: [
-              {message: 'The selected product configuration is invalid.'},
+              {message: t('cart.invalidConfiguration')},
             ],
             warnings: [],
             analytics: {cartId: null},
@@ -141,7 +148,7 @@ export async function action({request, context}: Route.ActionArgs) {
         return data(
           {
             cart: null,
-            errors: [{message: 'The selected cart update is invalid.'}],
+            errors: [{message: t('cart.invalidUpdate')}],
             warnings: [],
             analytics: {cartId: null},
           },
@@ -196,7 +203,7 @@ export async function action({request, context}: Route.ActionArgs) {
       return data(
         {
           cart: null,
-          errors: [{message: `${action} cart action is not defined`}],
+          errors: [{message: t('cart.invalidAction')}],
           warnings: [],
           analytics: {
             cartId: null,
@@ -299,10 +306,12 @@ export async function loader({context}: Route.LoaderArgs) {
     cartUpsellProducts,
     pricingQuote,
     checkoutMode,
+    selectedLocale: getLocaleFromI18n(context.storefront.i18n),
   };
 }
 
 export default function Cart() {
+  const {t} = useTranslation();
   const {cart, cartUpsellProducts, pricingQuote, checkoutMode} =
     useLoaderData<typeof loader>();
   const location = useLocation();
@@ -314,18 +323,16 @@ export default function Cart() {
   return (
     <div className="cartMainContainer">
       <header className="cart-page-header">
-        <h1>Warenkorb</h1>
-        <p>Überprüfen Sie Ihre Auswahl und schließen Sie Ihre Bestellung ab.</p>
+        <h1>{t('cart.pageTitle')}</h1>
+        <p>{t('cart.pageIntro')}</p>
       </header>
       {new URLSearchParams(location.search).get('checkout') === 'disabled' ? (
         <p className="order-summary__error" role="alert">
-          Der Checkout für konfigurierte Tapeten ist derzeit deaktiviert. Bitte
-          versuchen Sie es später erneut.
+          {t('cart.checkoutDisabled')}
         </p>
       ) : new URLSearchParams(location.search).get('checkout') === 'error' ? (
         <p className="order-summary__error" role="alert">
-          Der Checkout konnte nicht vorbereitet werden. Bitte prüfen Sie Ihre
-          Konfiguration und versuchen Sie es erneut.
+          {t('cart.checkoutError')}
         </p>
       ) : null}
       <div className="cartMainRow">

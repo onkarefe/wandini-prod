@@ -24,7 +24,6 @@ import {
 } from '~/lib/collectionParams';
 import {buildSimilarProductsPath} from '~/lib/similar-products';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
-import {WISHLIST_LOAD_UNAVAILABLE_MESSAGE} from '~/lib/wishlist';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {redirectToLocalePath} from '~/lib/locale';
 import {getRobotsDirective} from '~/lib/seo';
@@ -401,6 +400,7 @@ function loadDeferredData() {
 }
 
 export default function Collection() {
+  const {t} = useTranslation();
   const data = useLoaderData<typeof loader>();
   const {
     collection,
@@ -424,7 +424,7 @@ export default function Collection() {
     <div className="collection">
       {isLoggedIn && wishlistStatus === 'unavailable' ? (
         <p className="wishlist-page-feedback" role="status">
-          {WISHLIST_LOAD_UNAVAILABLE_MESSAGE}
+          {t('wishlist.loadUnavailable')}
         </p>
       ) : null}
       {collectionPageJsonLd ? (

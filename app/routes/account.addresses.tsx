@@ -20,6 +20,10 @@ import {
 } from '~/graphql/customer-account/CustomerAddressMutations';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
 import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
+import {createTranslator, type Translator} from '~/i18n';
+import {useTranslation} from '~/i18n/useTranslation';
+import {getLocaleFromRequest} from '~/lib/locale';
+import {getLocaleRegionName} from '~/lib/locale-format';
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -30,9 +34,9 @@ export type ActionResponse = {
   updatedAddress?: AddressFragment;
 };
 
-export const meta: Route.MetaFunction = () => {
+export const meta: Route.MetaFunction = ({data: routeData}) => {
   return [
-    {title: 'Adressen'},
+    {title: createTranslator(routeData?.selectedLocale)('account.addresses')},
     {name: 'robots', content: PRIVATE_ROBOTS_DIRECTIVE},
   ];
 };
@@ -97,21 +101,17 @@ function getCountryName(countryCode?: string | null) {
   return EUROPEAN_COUNTRY_NAMES.get(countryCode ?? '') ?? countryCode ?? '';
 }
 
-const ADDRESS_ERROR_MESSAGES = {
-  generic:
-    'Die Adressanfrage konnte derzeit nicht verarbeitet werden. Bitte versuchen Sie es erneut.',
-  create:
-    'Die Adresse konnte derzeit nicht angelegt werden. Bitte versuchen Sie es erneut.',
-  update:
-    'Die Adresse konnte derzeit nicht aktualisiert werden. Bitte versuchen Sie es erneut.',
-  delete:
-    'Die Adresse konnte derzeit nicht gelöscht werden. Bitte versuchen Sie es erneut.',
-  unauthorized:
-    'Bitte melden Sie sich erneut an, um Ihre Adressen zu verwalten.',
-  invalidRequest:
-    'Die Adressanfrage konnte nicht verarbeitet werden. Bitte laden Sie die Seite neu und versuchen Sie es erneut.',
-  methodNotAllowed: 'Diese Adressanfrage ist nicht zulässig.',
-} as const;
+function getAddressErrorMessages(t: Translator) {
+  return {
+    generic: t('account.addressGenericError'),
+    create: t('account.addressCreateError'),
+    update: t('account.addressUpdateError'),
+    delete: t('account.addressDeleteError'),
+    unauthorized: t('account.addressUnauthorized'),
+    invalidRequest: t('account.addressInvalid'),
+    methodNotAllowed: t('account.addressMethodError'),
+  };
+}
 
 function getAddressErrorMessage(_error: unknown, fallback: string) {
   return fallback;
@@ -135,7 +135,7 @@ function addressErrorResponse(
   );
 }
 
-export async function loader({context}: Route.LoaderArgs) {
+export async function loader({context, request}: Route.LoaderArgs) {
   const {customerAccount} = context;
   const {data: queryData, errors} = await customerAccount.query(
     CUSTOMER_DETAILS_QUERY,
@@ -147,14 +147,23 @@ export async function loader({context}: Route.LoaderArgs) {
   );
 
   if (errors?.length || !queryData?.customer) {
-    throw new Response('Kundenadressen nicht gefunden', {status: 404});
+    throw new Response(
+      createTranslator(getLocaleFromRequest(request))('account.notFound'),
+      {status: 404},
+    );
   }
 
-  return {customer: queryData.customer};
+  return {
+    customer: queryData.customer,
+    selectedLocale: getLocaleFromRequest(request),
+  };
 }
 
 export async function action({request, context}: Route.ActionArgs) {
   const {customerAccount} = context;
+  const messages = getAddressErrorMessages(
+    createTranslator(getLocaleFromRequest(request)),
+  );
 
   try {
     const form = await request.formData();
@@ -166,7 +175,7 @@ export async function action({request, context}: Route.ActionArgs) {
       return addressErrorResponse(
         NEW_ADDRESS_ID,
         null,
-        ADDRESS_ERROR_MESSAGES.invalidRequest,
+        messages.invalidRequest,
       );
     }
 
@@ -176,7 +185,7 @@ export async function action({request, context}: Route.ActionArgs) {
       return addressErrorResponse(
         addressId,
         null,
-        ADDRESS_ERROR_MESSAGES.unauthorized,
+        messages.unauthorized,
         401,
       );
     }
@@ -255,7 +264,7 @@ export async function action({request, context}: Route.ActionArgs) {
           return addressErrorResponse(
             addressId,
             error,
-            ADDRESS_ERROR_MESSAGES.create,
+            messages.create,
           );
         }
       }
@@ -299,7 +308,7 @@ export async function action({request, context}: Route.ActionArgs) {
           return addressErrorResponse(
             addressId,
             error,
-            ADDRESS_ERROR_MESSAGES.update,
+            messages.update,
           );
         }
       }
@@ -334,7 +343,7 @@ export async function action({request, context}: Route.ActionArgs) {
           return addressErrorResponse(
             addressId,
             error,
-            ADDRESS_ERROR_MESSAGES.delete,
+            messages.delete,
           );
         }
       }
@@ -343,7 +352,7 @@ export async function action({request, context}: Route.ActionArgs) {
         return addressErrorResponse(
           addressId,
           null,
-          ADDRESS_ERROR_MESSAGES.methodNotAllowed,
+          messages.methodNotAllowed,
           405,
         );
       }
@@ -352,12 +361,13 @@ export async function action({request, context}: Route.ActionArgs) {
     return addressErrorResponse(
       NEW_ADDRESS_ID,
       error,
-      ADDRESS_ERROR_MESSAGES.generic,
+      messages.generic,
     );
   }
 }
 
 export default function Addresses() {
+  const {t} = useTranslation();
   const {customer} = useLoaderData<typeof loader>();
   const {defaultAddress, addresses} = customer;
   const action = useActionData<ActionResponse>();
@@ -373,10 +383,12 @@ export default function Addresses() {
     <div className="account-page account-addresses">
       <header className="account-page__header">
         <div>
-          <p className="account-page__eyebrow">Lieferinformationen</p>
-          <h2 className="account-page__title">Adressen</h2>
+          <p className="account-page__eyebrow">
+            {t('account.addressEyebrow')}
+          </p>
+          <h2 className="account-page__title">{t('account.addresses')}</h2>
           <p className="account-page__description">
-            Verwalten Sie Ihre Lieferadressen für eine schnellere Bestellung.
+            {t('account.addressDescription')}
           </p>
         </div>
         <button
@@ -386,7 +398,7 @@ export default function Addresses() {
           aria-expanded={isCreateOpen}
           onClick={() => setIsCreateOpen((current) => !current)}
         >
-          {isCreateOpen ? 'Formular schließen' : 'Neue Adresse'}
+          {isCreateOpen ? t('account.closeForm') : t('account.newAddress')}
         </button>
       </header>
 
@@ -401,11 +413,8 @@ export default function Addresses() {
             />
           ) : isCreateOpen ? null : (
             <div className="account-empty-state">
-              <h3>Noch keine Adresse</h3>
-              <p>
-                Fügen Sie eine Lieferadresse hinzu, damit sie bei Ihrer nächsten
-                Bestellung verfügbar ist.
-              </p>
+              <h3>{t('account.noAddressTitle')}</h3>
+              <p>{t('account.noAddressDescription')}</p>
             </div>
           )}
         </div>
@@ -415,6 +424,7 @@ export default function Addresses() {
 }
 
 function NewAddressForm() {
+  const {t} = useTranslation();
   const newAddress = {
     address1: '',
     address2: '',
@@ -445,8 +455,8 @@ function NewAddressForm() {
             type="submit"
           >
             {stateForMethod('POST') !== 'idle'
-              ? 'Wird angelegt...'
-              : 'Adresse anlegen'}
+              ? t('account.creatingAddress')
+              : t('account.createAddress')}
           </button>
         </div>
       )}
@@ -458,6 +468,7 @@ function ExistingAddresses({
   addresses,
   defaultAddress,
 }: Pick<CustomerFragment, 'addresses' | 'defaultAddress'>) {
+  const {t} = useTranslation();
   return (
     <div className="account-addresses__list">
       {addresses.nodes.map((address) => (
@@ -478,8 +489,8 @@ function ExistingAddresses({
                 type="submit"
               >
                 {stateForMethod('PUT') !== 'idle'
-                  ? 'Wird gespeichert...'
-                  : 'Speichern'}
+                  ? t('account.saving')
+                  : t('account.save')}
               </button>
               <button
                 className="account-button account-button--secondary"
@@ -487,7 +498,7 @@ function ExistingAddresses({
                 type="button"
                 onClick={closeEditor}
               >
-                Abbrechen
+                {t('account.cancel')}
               </button>
               <button
                 className="account-button account-button--danger"
@@ -497,7 +508,7 @@ function ExistingAddresses({
                 onClick={(event) => {
                   if (
                     !window.confirm(
-                      'Möchten Sie diese Adresse wirklich löschen?',
+                      t('account.deleteAddressConfirm'),
                     )
                   ) {
                     event.preventDefault();
@@ -505,8 +516,8 @@ function ExistingAddresses({
                 }}
               >
                 {stateForMethod('DELETE') !== 'idle'
-                  ? 'Wird gelöscht...'
-                  : 'Löschen'}
+                  ? t('account.deleting')
+                  : t('account.delete')}
               </button>
             </div>
           )}
@@ -534,6 +545,7 @@ export function AddressForm({
     closeEditor: () => void;
   }) => React.ReactNode;
 }) {
+  const {locale, t} = useTranslation();
   const {state, formMethod, formData} = useNavigation();
   const action = useActionData<ActionResponse>();
   const error = action?.error?.[addressId];
@@ -582,21 +594,21 @@ export function AddressForm({
     <Form id={addressId} className={formClassName} aria-busy={isPending}>
       <fieldset className="account-addresses__fieldset" disabled={isPending}>
         <legend className="account-sr-only">
-          {isNewAddress ? 'Neue Adresse' : 'Gespeicherte Adresse'}
+          {isNewAddress ? t('account.newAddress') : t('account.savedAddress')}
         </legend>
         <div className={cardClassName}>
           <div className="account-addresses__card-head">
             <div className="account-addresses__card-intro">
               <h3 className="account-addresses__legend">
                 {isNewAddress
-                  ? 'Neue Adresse'
+                  ? t('account.newAddress')
                   : isEditing
-                    ? 'Adresse bearbeiten'
-                    : fullName || 'Gespeicherte Adresse'}
+                    ? t('account.editAddress')
+                    : fullName || t('account.savedAddress')}
               </h3>
               {isDefaultAddress ? (
                 <span className="account-addresses__status">
-                  Standardadresse
+                  {t('account.defaultAddress')}
                 </span>
               ) : null}
             </div>
@@ -617,7 +629,12 @@ export function AddressForm({
                 ) : null}
                 {address?.zoneCode ? <span>{address.zoneCode}</span> : null}
                 {address?.territoryCode ? (
-                  <span>{getCountryName(String(address.territoryCode))}</span>
+                  <span>
+                    {getLocaleRegionName(
+                      String(address.territoryCode),
+                      locale,
+                    )}
+                  </span>
                 ) : null}
                 {address?.phoneNumber ? (
                   <span>{address.phoneNumber}</span>
@@ -629,7 +646,7 @@ export function AddressForm({
                   type="button"
                   onClick={() => setIsEditing(true)}
                 >
-                  Bearbeiten
+                  {t('account.edit')}
                 </button>
                 <button
                   className="account-button account-button--text-danger"
@@ -639,7 +656,7 @@ export function AddressForm({
                   onClick={(event) => {
                     if (
                       !window.confirm(
-                        'Möchten Sie diese Adresse wirklich löschen?',
+                        t('account.deleteAddressConfirm'),
                       )
                     ) {
                       event.preventDefault();
@@ -647,8 +664,8 @@ export function AddressForm({
                   }}
                 >
                   {stateForMethod('DELETE') !== 'idle'
-                    ? 'Wird gelöscht...'
-                    : 'Löschen'}
+                    ? t('account.deleting')
+                    : t('account.delete')}
                 </button>
               </div>
             </>
@@ -660,16 +677,16 @@ export function AddressForm({
                     className="account-addresses__label"
                     htmlFor={`${idPrefix}-firstName`}
                   >
-                    Vorname*
+                    {t('account.firstName')}*
                   </label>
                   <input
                     className="account-addresses__input"
-                    aria-label="Vorname"
+                    aria-label={t('account.firstName')}
                     autoComplete="given-name"
                     defaultValue={address?.firstName ?? ''}
                     id={`${idPrefix}-firstName`}
                     name="firstName"
-                    placeholder="Vorname"
+                    placeholder={t('account.firstName')}
                     required
                     type="text"
                   />
@@ -679,16 +696,16 @@ export function AddressForm({
                     className="account-addresses__label"
                     htmlFor={`${idPrefix}-lastName`}
                   >
-                    Nachname*
+                    {t('account.lastName')}*
                   </label>
                   <input
                     className="account-addresses__input"
-                    aria-label="Nachname"
+                    aria-label={t('account.lastName')}
                     autoComplete="family-name"
                     defaultValue={address?.lastName ?? ''}
                     id={`${idPrefix}-lastName`}
                     name="lastName"
-                    placeholder="Nachname"
+                    placeholder={t('account.lastName')}
                     required
                     type="text"
                   />
@@ -698,16 +715,16 @@ export function AddressForm({
                     className="account-addresses__label"
                     htmlFor={`${idPrefix}-company`}
                   >
-                    Unternehmen
+                    {t('account.company')}
                   </label>
                   <input
                     className="account-addresses__input"
-                    aria-label="Unternehmen"
+                    aria-label={t('account.company')}
                     autoComplete="organization"
                     defaultValue={address?.company ?? ''}
                     id={`${idPrefix}-company`}
                     name="company"
-                    placeholder="Unternehmen"
+                    placeholder={t('account.company')}
                     type="text"
                   />
                 </div>
@@ -716,16 +733,16 @@ export function AddressForm({
                     className="account-addresses__label"
                     htmlFor={`${idPrefix}-address1`}
                   >
-                    Straße und Hausnummer*
+                    {t('account.street')}*
                   </label>
                   <input
                     className="account-addresses__input"
-                    aria-label="Straße und Hausnummer"
+                    aria-label={t('account.street')}
                     autoComplete="address-line1"
                     defaultValue={address?.address1 ?? ''}
                     id={`${idPrefix}-address1`}
                     name="address1"
-                    placeholder="Straße und Hausnummer*"
+                    placeholder={`${t('account.street')}*`}
                     required
                     type="text"
                   />
@@ -735,16 +752,16 @@ export function AddressForm({
                     className="account-addresses__label"
                     htmlFor={`${idPrefix}-address2`}
                   >
-                    Adresszusatz
+                    {t('account.address2')}
                   </label>
                   <input
                     className="account-addresses__input"
-                    aria-label="Adresszusatz"
+                    aria-label={t('account.address2')}
                     autoComplete="address-line2"
                     defaultValue={address?.address2 ?? ''}
                     id={`${idPrefix}-address2`}
                     name="address2"
-                    placeholder="Adresszusatz"
+                    placeholder={t('account.address2')}
                     type="text"
                   />
                 </div>
@@ -753,16 +770,16 @@ export function AddressForm({
                     className="account-addresses__label"
                     htmlFor={`${idPrefix}-zip`}
                   >
-                    Postleitzahl*
+                    {t('account.postalCode')}*
                   </label>
                   <input
                     className="account-addresses__input"
-                    aria-label="Postleitzahl"
+                    aria-label={t('account.postalCode')}
                     autoComplete="postal-code"
                     defaultValue={address?.zip ?? ''}
                     id={`${idPrefix}-zip`}
                     name="zip"
-                    placeholder="Postleitzahl"
+                    placeholder={t('account.postalCode')}
                     required
                     type="text"
                   />
@@ -772,16 +789,16 @@ export function AddressForm({
                     className="account-addresses__label"
                     htmlFor={`${idPrefix}-city`}
                   >
-                    Ort*
+                    {t('account.city')}*
                   </label>
                   <input
                     className="account-addresses__input"
-                    aria-label="Ort"
+                    aria-label={t('account.city')}
                     autoComplete="address-level2"
                     defaultValue={address?.city ?? ''}
                     id={`${idPrefix}-city`}
                     name="city"
-                    placeholder="Ort"
+                    placeholder={t('account.city')}
                     required
                     type="text"
                   />
@@ -791,26 +808,26 @@ export function AddressForm({
                     className="account-addresses__label"
                     htmlFor={`${idPrefix}-territoryCode`}
                   >
-                    Land*
+                    {t('account.country')}*
                   </label>
                   <select
                     className="account-addresses__input"
-                    aria-label="Land"
+                    aria-label={t('account.country')}
                     autoComplete="country"
                     defaultValue={selectedCountryCode}
                     id={`${idPrefix}-territoryCode`}
                     name="territoryCode"
                     required
                   >
-                    <option value="">Land auswählen</option>
+                    <option value="">{t('account.selectCountry')}</option>
                     {!hasEuropeanCountry && selectedCountryCode ? (
                       <option value={selectedCountryCode}>
                         {selectedCountryCode}
                       </option>
                     ) : null}
-                    {EUROPEAN_COUNTRIES.map(([code, name]) => (
+                    {EUROPEAN_COUNTRIES.map(([code]) => (
                       <option key={code} value={code}>
-                        {name}
+                        {getLocaleRegionName(code, locale)}
                       </option>
                     ))}
                   </select>
@@ -820,24 +837,25 @@ export function AddressForm({
                     className="account-addresses__label"
                     htmlFor={`${idPrefix}-zoneCode`}
                   >
-                    Bundesland / Region <span>(optional)</span>
+                    {t('account.region')}{' '}
+                    <span>({t('common.optional')})</span>
                   </label>
                   <input
                     className="account-addresses__input"
-                    aria-label="Bundesland oder Region"
+                    aria-label={t('account.region')}
                     aria-describedby={`${idPrefix}-zoneCode-help`}
                     autoComplete="address-level1"
                     defaultValue={address?.zoneCode ?? ''}
                     id={`${idPrefix}-zoneCode`}
                     name="zoneCode"
-                    placeholder="z. B. Provinz- oder Regionscode"
+                    placeholder={t('account.regionPlaceholder')}
                     type="text"
                   />
                   <small
                     className="account-addresses__help"
                     id={`${idPrefix}-zoneCode-help`}
                   >
-                    Nur ausfüllen, wenn das gewählte Land eine Region verlangt.
+                    {t('account.regionHelp')}
                   </small>
                 </div>
                 <div className="account-addresses__field">
@@ -845,18 +863,18 @@ export function AddressForm({
                     className="account-addresses__label"
                     htmlFor={`${idPrefix}-phoneNumber`}
                   >
-                    Telefon
+                    {t('account.phone')}
                   </label>
                   <input
                     className="account-addresses__input"
-                    aria-label="Telefonnummer"
+                    aria-label={t('account.phoneNumber')}
                     autoComplete="tel"
                     defaultValue={address?.phoneNumber ?? ''}
                     id={`${idPrefix}-phoneNumber`}
                     name="phoneNumber"
                     placeholder="+491701234567"
                     pattern="^\+[1-9]\d{6,14}$"
-                    title="Bitte geben Sie die Telefonnummer im internationalen Format ein, zum Beispiel +491701234567."
+                    title={t('account.phoneFormat')}
                     type="tel"
                   />
                 </div>
@@ -882,7 +900,7 @@ export function AddressForm({
                   className="account-addresses__checkbox-label"
                   htmlFor={`${idPrefix}-defaultAddress`}
                 >
-                  Als Standardadresse festlegen
+                  {t('account.setDefaultAddress')}
                 </label>
               </div>
               {error ? (
@@ -903,7 +921,7 @@ export function AddressForm({
             tabIndex={-1}
             type="submit"
           >
-            Automatisch speichern
+            {t('account.automaticSave')}
           </button>
         </div>
       </fieldset>

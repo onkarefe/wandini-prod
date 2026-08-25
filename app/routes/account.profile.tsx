@@ -10,42 +10,40 @@ import {
 } from 'react-router';
 import type {Route} from './+types/account.profile';
 import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
+import {createTranslator} from '~/i18n';
+import {useTranslation} from '~/i18n/useTranslation';
+import {getLocaleFromRequest} from '~/lib/locale';
 
 export type ActionResponse = {
   error: string | null;
   customer: CustomerFragment | null;
 };
 
-export const meta: Route.MetaFunction = () => {
+export const meta: Route.MetaFunction = ({data: routeData}) => {
   return [
-    {title: 'Profil'},
+    {title: createTranslator(routeData?.selectedLocale)('account.profile')},
     {name: 'robots', content: PRIVATE_ROBOTS_DIRECTIVE},
   ];
 };
-
-const PROFILE_ERROR_MESSAGES = {
-  update:
-    'Ihr Profil konnte derzeit nicht aktualisiert werden. Bitte versuchen Sie es erneut.',
-  methodNotAllowed: 'Diese Anfrage für das Profil ist nicht zulässig.',
-} as const;
 
 function getProfileErrorMessage(_error: unknown, fallback: string) {
   return fallback;
 }
 
-export async function loader({context}: Route.LoaderArgs) {
+export async function loader({context, request}: Route.LoaderArgs) {
   context.customerAccount.handleAuthStatus();
 
-  return {};
+  return {selectedLocale: getLocaleFromRequest(request)};
 }
 
 export async function action({request, context}: Route.ActionArgs) {
   const {customerAccount} = context;
+  const t = createTranslator(getLocaleFromRequest(request));
 
   if (request.method !== 'PUT') {
     return data<ActionResponse>(
       {
-        error: PROFILE_ERROR_MESSAGES.methodNotAllowed,
+        error: t('account.profileMethodError'),
         customer: null,
       },
       {status: 405},
@@ -98,7 +96,7 @@ export async function action({request, context}: Route.ActionArgs) {
   } catch (error: unknown) {
     return data<ActionResponse>(
       {
-        error: getProfileErrorMessage(error, PROFILE_ERROR_MESSAGES.update),
+        error: getProfileErrorMessage(error, t('account.profileUpdateError')),
         customer: null,
       },
       {status: 400},
@@ -107,6 +105,7 @@ export async function action({request, context}: Route.ActionArgs) {
 }
 
 export default function AccountProfile() {
+  const {t} = useTranslation();
   const account = useOutletContext<{customer: CustomerFragment}>();
   const {state, formMethod} = useNavigation();
   const action = useActionData<ActionResponse>();
@@ -117,11 +116,12 @@ export default function AccountProfile() {
     <div className="account-page account-profile">
       <header className="account-page__header">
         <div>
-          <p className="account-page__eyebrow">Persönliche Angaben</p>
-          <h2 className="account-page__title">Profil</h2>
+          <p className="account-page__eyebrow">
+            {t('account.profileEyebrow')}
+          </p>
+          <h2 className="account-page__title">{t('account.profile')}</h2>
           <p className="account-page__description">
-            Halten Sie Ihren Namen für Bestellungen und die persönliche
-            Ansprache aktuell.
+            {t('account.profileDescription')}
           </p>
         </div>
       </header>
@@ -136,10 +136,12 @@ export default function AccountProfile() {
             className="account-profile__fieldset"
             disabled={isSubmitting}
           >
-            <legend className="account-sr-only">Persönliche Angaben</legend>
+            <legend className="account-sr-only">
+              {t('account.personalDetails')}
+            </legend>
             <div className="account-profile__field">
               <label className="account-profile__label" htmlFor="firstName">
-                Vorname
+                {t('account.firstName')}
               </label>
               <input
                 className="account-profile__input"
@@ -147,15 +149,15 @@ export default function AccountProfile() {
                 name="firstName"
                 type="text"
                 autoComplete="given-name"
-                placeholder="Vorname"
-                aria-label="Vorname"
+                placeholder={t('account.firstName')}
+                aria-label={t('account.firstName')}
                 defaultValue={customer.firstName ?? ''}
                 minLength={2}
               />
             </div>
             <div className="account-profile__field">
               <label className="account-profile__label" htmlFor="lastName">
-                Nachname
+                {t('account.lastName')}
               </label>
               <input
                 className="account-profile__input"
@@ -163,8 +165,8 @@ export default function AccountProfile() {
                 name="lastName"
                 type="text"
                 autoComplete="family-name"
-                placeholder="Nachname"
-                aria-label="Nachname"
+                placeholder={t('account.lastName')}
+                aria-label={t('account.lastName')}
                 defaultValue={customer.lastName ?? ''}
                 minLength={2}
               />
@@ -177,7 +179,7 @@ export default function AccountProfile() {
               </p>
             ) : action?.customer ? (
               <p className="account-message account-message--success">
-                Ihre Angaben wurden gespeichert.
+                {t('account.saved')}
               </p>
             ) : null}
           </div>
@@ -187,7 +189,7 @@ export default function AccountProfile() {
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Wird gespeichert...' : 'Änderungen speichern'}
+              {isSubmitting ? t('account.saving') : t('account.saveChanges')}
             </button>
           </div>
         </Form>

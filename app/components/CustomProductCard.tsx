@@ -2,10 +2,9 @@ import React, {useEffect, useState} from 'react';
 import {useTranslation} from '~/i18n/useTranslation';
 import {useFetcher, useLocation, useNavigate} from 'react-router';
 import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
-import {
-  WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
-  type WishlistActionData,
-} from '~/lib/wishlist';
+import type {WishlistActionData} from '~/lib/wishlist';
+import {formatLocaleCurrency} from '~/lib/locale-format';
+import type {SelectedLocale} from '~/lib/locale';
 import '../styles/customProductCard.css';
 import '../styles/wishlistFeedback.css';
 
@@ -58,18 +57,19 @@ function SimilarMotifsIcon() {
   );
 }
 
-function formatPriceLabel(price?: ProductPrice): string | null {
+function formatPriceLabel(
+  price: ProductPrice | undefined,
+  locale: SelectedLocale,
+): string | null {
   if (!price) return null;
 
   const amount = Number(price.amount);
 
   try {
-    return new Intl.NumberFormat('de-DE', {
-      style: 'currency',
-      currency: price.currencyCode,
+    return formatLocaleCurrency(amount, price.currencyCode, locale, {
       minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
       maximumFractionDigits: 2,
-    }).format(amount);
+    });
   } catch {
     return `${price.amount} ${price.currencyCode}`;
   }
@@ -89,7 +89,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   isWishlisted = false,
   onWishlistChange,
 }) => {
-  const {t} = useTranslation();
+  const {locale, t} = useTranslation();
   const primaryImage = images[0] ?? null;
   const listingImage = images[1] ?? primaryImage;
   const hasHoverImage = Boolean(
@@ -107,7 +107,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   );
   const [wishlisted, setWishlisted] = useState(isWishlisted);
   const [wishlistError, setWishlistError] = useState<string | null>(null);
-  const priceLabel = formatPriceLabel(minPrice);
+  const priceLabel = formatPriceLabel(minPrice, locale);
 
   useEffect(() => {
     setWishlisted(isWishlisted);
@@ -124,7 +124,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
 
     if (!fetcher.data.ok) {
       if (!fetcher.data.loginUrl) {
-        setWishlistError(WISHLIST_UPDATE_UNAVAILABLE_MESSAGE);
+        setWishlistError(t('wishlist.updateUnavailable'));
       }
       return;
     }
@@ -136,7 +136,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
     setWishlistError(null);
     setWishlisted(fetcher.data.wishlisted);
     onWishlistChange?.(fetcher.data.wishlisted);
-  }, [fetcher.data, onWishlistChange]);
+  }, [fetcher.data, onWishlistChange, t]);
 
   const handleWishlistClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();

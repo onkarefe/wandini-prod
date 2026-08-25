@@ -5,6 +5,7 @@ import type {Route} from './+types/products.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {getRobotsDirective} from '~/lib/seo';
 import {getSimilarMotifsPreview} from '~/lib/similar-products-preview';
+import {useTranslation} from '~/i18n/useTranslation';
 import {
   hasExplicitProductOptionSelection,
   resolveInitialWallpaperVariant,
@@ -358,6 +359,7 @@ function isZubehorProduct(product: {
 }
 
 export default function Product() {
+  const {t} = useTranslation();
   const {product, canonicalUrl, similarMotifsPreview} =
     useLoaderData<typeof loader>();
   const productJsonLd = buildProductJsonLd(product, canonicalUrl);
@@ -385,7 +387,7 @@ export default function Product() {
             className="container"
             style={{minHeight: '50vh'}}
             aria-busy="true"
-            aria-label="Produkt wird geladen"
+            aria-label={t('product.loading')}
           />
         }
       >

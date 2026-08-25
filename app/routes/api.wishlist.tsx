@@ -6,10 +6,7 @@ import {
   WishlistServiceError,
   type WishlistOperation,
 } from '~/lib/wishlist-errors.server';
-import {
-  WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
-  type WishlistActionData,
-} from '~/lib/wishlist';
+import type {WishlistActionData} from '~/lib/wishlist';
 import {toggleProductInCustomerWishlist} from '~/lib/wishlist.server';
 
 function getLoginUrl(request: Request) {
@@ -48,7 +45,7 @@ function unavailableResponse(requestId: string, status = 503) {
   return Response.json(
     {
       ok: false,
-      message: WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
+      errorCode: 'UPDATE_UNAVAILABLE',
     } satisfies WishlistActionData,
     {
       status,
@@ -76,7 +73,7 @@ export async function action({request, context}: Route.ActionArgs) {
       {
         ok: false,
         loginUrl: getLoginUrl(request),
-        message: 'Login required.',
+        errorCode: 'LOGIN_REQUIRED',
       },
       {status: 401},
     );

@@ -9,8 +9,11 @@ import {
 import type {Route} from './+types/account';
 import {CUSTOMER_SUMMARY_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
 import accountMainStyles from '~/styles/accountMain.css?url';
-import {NavLink} from '~/lib/i18n-router';
+import {NavLink, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
+import {useTranslation} from '~/i18n/useTranslation';
+import {createTranslator} from '~/i18n';
+import {getLocaleFromRequest} from '~/lib/locale';
 
 export function links() {
   return [{rel: 'stylesheet', href: accountMainStyles}];
@@ -34,7 +37,8 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
   return false;
 };
 
-export async function loader({context}: Route.LoaderArgs) {
+export async function loader({context, request}: Route.LoaderArgs) {
+  const t = createTranslator(getLocaleFromRequest(request));
   const {customerAccount} = context;
   const {data, errors} = await customerAccount.query(CUSTOMER_SUMMARY_QUERY, {
     variables: {
@@ -43,7 +47,7 @@ export async function loader({context}: Route.LoaderArgs) {
   });
 
   if (errors?.length || !data?.customer) {
-    throw new Response('Kundenkonto nicht gefunden', {status: 404});
+    throw new Response(t('account.notFound'), {status: 404});
   }
 
   return remixData(
@@ -58,24 +62,22 @@ export async function loader({context}: Route.LoaderArgs) {
 }
 
 export default function AccountLayout() {
+  const {t} = useTranslation();
   const {customer} = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const isNavigating = navigation.state !== 'idle';
 
   const heading = customer?.firstName
-    ? `Guten Tag, ${customer.firstName}`
-    : 'Guten Tag';
+    ? t('account.greetingName', {name: customer.firstName})
+    : t('account.greeting');
 
   return (
     <div className="account-shell">
       <div className="container mx-auto account-shell__container">
         <header className="account-shell__header">
-          <p className="account-shell__eyebrow">Mein Konto</p>
+          <p className="account-shell__eyebrow">{t('account.eyebrow')}</p>
           <h1 className="account-shell__title">{heading}</h1>
-          <p className="account-shell__intro">
-            Verwalten Sie Ihre Bestellungen und persönlichen Angaben an einem
-            Ort.
-          </p>
+          <p className="account-shell__intro">{t('account.intro')}</p>
         </header>
         <div className="account-shell__layout">
           <AccountMenu />
@@ -93,6 +95,7 @@ export default function AccountLayout() {
 }
 
 function AccountMenu() {
+  const {t} = useTranslation();
   function getTabClassName({
     isActive,
     isPending,
@@ -111,18 +114,18 @@ function AccountMenu() {
 
   return (
     <div className="account-navigation">
-      <nav className="account-tabs" aria-label="Kontobereiche">
+      <nav className="account-tabs" aria-label={t('account.sections')}>
         <NavLink to="/account/orders" className={getTabClassName}>
-          Bestellungen
+          {t('account.orders')}
         </NavLink>
         <NavLink to="/account/profile" className={getTabClassName}>
-          Profil
+          {t('account.profile')}
         </NavLink>
         <NavLink to="/account/favorites" className={getTabClassName}>
-          Favoriten
+          {t('wishlist.title')}
         </NavLink>
         <NavLink to="/account/addresses" className={getTabClassName}>
-          Adressen
+          {t('account.addresses')}
         </NavLink>
       </nav>
       <Logout />
@@ -131,19 +134,21 @@ function AccountMenu() {
 }
 
 function Logout() {
+  const {t} = useTranslation();
+  const logoutPath = usePrefixPathWithLocale('/account/logout');
   const navigation = useNavigation();
   const isLoggingOut =
     navigation.state !== 'idle' &&
     navigation.formAction?.endsWith('/account/logout');
 
   return (
-    <Form className="account-logout" method="POST" action="/account/logout">
+    <Form className="account-logout" method="POST" action={logoutPath}>
       <button
         className="account-tabs__link account-tabs__link--button"
         type="submit"
         disabled={isLoggingOut}
       >
-        {isLoggingOut ? 'Wird abgemeldet...' : 'Abmelden'}
+        {isLoggingOut ? t('account.loggingOut') : t('account.logout')}
       </button>
     </Form>
   );

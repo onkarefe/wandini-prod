@@ -1,6 +1,8 @@
 import {Form, redirect, useLoaderData, useLocation} from 'react-router';
 import type {Route} from './+types/cart.$lines';
-import {redirectToLocalePath} from '~/lib/locale';
+import {getLocaleFromRequest, redirectToLocalePath} from '~/lib/locale';
+import {createTranslator} from '~/i18n';
+import {useTranslation} from '~/i18n/useTranslation';
 import {Link} from '~/lib/i18n-router';
 import {
   DynamicPricingError,
@@ -56,12 +58,13 @@ function parseCartLines(lines: string) {
  * ```
  */
 export async function loader({request, context, params}: Route.LoaderArgs) {
+  const t = createTranslator(getLocaleFromRequest(request));
   const {lines} = params;
   if (!lines) return redirectToLocalePath(request, '/cart');
 
   const linesMap = parseCartLines(lines);
   if (!linesMap) {
-    throw new Response('Invalid cart link.', {status: 400});
+    throw new Response(t('cart.invalidLink'), {status: 400});
   }
 
   const url = new URL(request.url);
@@ -75,6 +78,7 @@ export async function loader({request, context, params}: Route.LoaderArgs) {
 }
 
 export async function action({request, context, params}: Route.ActionArgs) {
+  const t = createTranslator(getLocaleFromRequest(request));
   const {cart} = context;
   const {lines} = params;
 
@@ -84,7 +88,7 @@ export async function action({request, context, params}: Route.ActionArgs) {
 
   const linesMap = parseCartLines(lines);
   if (!linesMap) {
-    throw new Response('Invalid cart link.', {status: 400});
+    throw new Response(t('cart.invalidLink'), {status: 400});
   }
 
   const url = new URL(request.url);
@@ -99,7 +103,7 @@ export async function action({request, context, params}: Route.ActionArgs) {
       code:
         error instanceof DynamicPricingError ? error.code : 'UNEXPECTED_ERROR',
     });
-    throw new Response('This cart link contains an invalid product configuration.', {
+    throw new Response(t('cart.invalidConfiguration'), {
       status: 422,
     });
   }
@@ -113,7 +117,7 @@ export async function action({request, context, params}: Route.ActionArgs) {
   const cartResult = result.cart;
 
   if (result.errors?.length || !cartResult) {
-    throw new Response('Link may be expired. Try checking the URL.', {
+    throw new Response(t('cart.expiredLink'), {
       status: 410,
     });
   }
@@ -130,6 +134,7 @@ export async function action({request, context, params}: Route.ActionArgs) {
 }
 
 export default function Component() {
+  const {t} = useTranslation();
   const {discountCode, lineCount} = useLoaderData<typeof loader>();
   const location = useLocation();
 
@@ -153,22 +158,21 @@ export default function Component() {
         }}
       >
         <h1 style={{fontSize: '1.5rem', marginBottom: '0.75rem'}}>
-          Continue to checkout?
+          {t('cart.continueCheckoutTitle')}
         </h1>
         <p style={{marginBottom: '1rem'}}>
-          This link will create a cart with {lineCount} item
-          {lineCount === 1 ? '' : 's'} and send you to checkout.
+          {t('cart.permalinkDescription', {count: lineCount})}
         </p>
         {discountCode ? (
           <p style={{marginBottom: '1rem'}}>
-            Discount code to apply: <strong>{discountCode}</strong>
+            {t('cart.discountToApply', {code: discountCode})}
           </p>
         ) : null}
         <Form method="post" action={`${location.pathname}${location.search}`}>
-          <button type="submit">Continue to checkout</button>
+          <button type="submit">{t('cart.checkout')}</button>
         </Form>
         <p style={{marginTop: '1rem'}}>
-          <Link to="/cart">Cancel and go to cart</Link>
+          <Link to="/cart">{t('cart.cancelToCart')}</Link>
         </p>
       </div>
     </main>

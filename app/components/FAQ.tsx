@@ -1,6 +1,7 @@
 import {RichText} from '@shopify/hydrogen';
 import {useEffect, useId, useRef, useState, type KeyboardEvent} from 'react';
 import {useFetcher} from 'react-router';
+import {useTranslation} from '~/i18n/useTranslation';
 import '../styles/FAQ.css';
 
 export type FAQItem = {
@@ -50,6 +51,7 @@ function ChevronIcon() {
 }
 
 export default function FAQ({title, categories, copy}: FAQProps) {
+  const {t} = useTranslation();
   const firstCategoryId = categories[0]?.id ?? '';
   const [activeCategoryId, setActiveCategoryId] = useState(firstCategoryId);
   const tabGroupId = useId().replaceAll(':', '');
@@ -174,7 +176,7 @@ export default function FAQ({title, categories, copy}: FAQProps) {
           >
             <input type="hidden" name="intent" value="faq-contact" />
             <div className="faq-contact__honeypot" aria-hidden="true">
-              <label htmlFor="faq-company">Unternehmen</label>
+              <label htmlFor="faq-company">{t('common.company')}</label>
               <input
                 id="faq-company"
                 name="company"

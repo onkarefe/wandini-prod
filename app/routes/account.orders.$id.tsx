@@ -6,24 +6,29 @@ import type {
   OrderQuery,
 } from 'customer-accountapi.generated';
 import {CUSTOMER_ORDER_QUERY} from '~/graphql/customer-account/CustomerOrderQuery';
-import {redirectToLocalePath} from '~/lib/locale';
+import {getLocaleFromRequest, redirectToLocalePath} from '~/lib/locale';
 import {Link} from '~/lib/i18n-router';
 import {
-  formatGermanFinancialStatus,
-  formatGermanFulfillmentStatus,
-  formatGermanOrderDate,
+  formatFinancialStatus,
+  formatFulfillmentStatus,
+  formatOrderDate,
 } from '~/lib/order-display';
 import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
+import {createTranslator} from '~/i18n';
+import {useTranslation} from '~/i18n/useTranslation';
 
 export const meta: Route.MetaFunction = ({data}) => {
+  const t = createTranslator(data?.selectedLocale);
   return [
-    {title: `Bestellung ${data?.order?.name ?? ''}`.trim()},
+    {title: t('account.order', {number: data?.order?.name ?? ''}).trim()},
     {name: 'robots', content: PRIVATE_ROBOTS_DIRECTIVE},
   ];
 };
 
 export async function loader({params, context, request}: Route.LoaderArgs) {
   const {customerAccount} = context;
+  const selectedLocale = getLocaleFromRequest(request);
+  const t = createTranslator(selectedLocale);
 
   if (!params.id) {
     return redirectToLocalePath(request, '/account/orders');
@@ -34,7 +39,7 @@ export async function loader({params, context, request}: Route.LoaderArgs) {
   try {
     orderId = atob(params.id);
   } catch {
-    throw new Response('Bestellung nicht gefunden', {status: 404});
+    throw new Response(t('account.orderNotFound'), {status: 404});
   }
 
   const {data, errors}: {data: OrderQuery; errors?: Array<{message: string}>} =
@@ -46,7 +51,7 @@ export async function loader({params, context, request}: Route.LoaderArgs) {
     });
 
   if (errors?.length || !data?.order) {
-    throw new Response('Bestellung nicht gefunden', {status: 404});
+    throw new Response(t('account.orderNotFound'), {status: 404});
   }
 
   const {order} = data;
@@ -89,10 +94,12 @@ export async function loader({params, context, request}: Route.LoaderArgs) {
     discountValue,
     discountPercentage,
     fulfillmentStatus,
+    selectedLocale,
   };
 }
 
 export default function OrderRoute() {
+  const {locale, t} = useTranslation();
   const {
     order,
     lineItems,
@@ -100,26 +107,30 @@ export default function OrderRoute() {
     discountPercentage,
     fulfillmentStatus,
   } = useLoaderData<typeof loader>();
-  const financialStatusLabel = formatGermanFinancialStatus(
-    order.financialStatus,
-  );
+  const financialStatusLabel = formatFinancialStatus(order.financialStatus, t);
   const fulfillmentStatusLabel =
-    formatGermanFulfillmentStatus(fulfillmentStatus) ?? 'Nicht verfügbar';
+    formatFulfillmentStatus(fulfillmentStatus, t) ?? t('errors.notAvailable');
 
   return (
     <div className="account-page account-order">
       <Link className="account-order__back" to="/account/orders">
-        <span aria-hidden="true">←</span> Zurück zu den Bestellungen
+        <span aria-hidden="true">←</span> {t('account.backToOrders')}
       </Link>
 
       <header className="account-page__header account-order__header">
         <div>
-          <p className="account-page__eyebrow">Bestelldetails</p>
-          <h2 className="account-page__title">Bestellung {order.name}</h2>
+          <p className="account-page__eyebrow">{t('account.orderDetails')}</p>
+          <h2 className="account-page__title">
+            {t('account.order', {number: order.name})}
+          </h2>
           <p className="account-page__description">
-            Bestellt am {formatGermanOrderDate(order.processedAt)}
+            {t('account.placedOn', {
+              date: formatOrderDate(order.processedAt, locale, t),
+            })}
             {order.confirmationNumber
-              ? ` · Bestätigung ${order.confirmationNumber}`
+              ? ` · ${t('account.confirmationWithNumber', {
+                  number: order.confirmationNumber,
+                })}`
               : ''}
           </p>
         </div>
@@ -129,25 +140,31 @@ export default function OrderRoute() {
           href={order.statusPageUrl}
           rel="noreferrer"
         >
-          Bestellstatus öffnen
+          {t('account.openOrderStatus')}
         </a>
       </header>
 
       <div className="account-order__status-row">
         <div className="account-order__status-item">
-          <span className="account-order__status-label">Zahlung</span>
+          <span className="account-order__status-label">
+            {t('account.payment')}
+          </span>
           <span className="account-orders__badge">
-            {financialStatusLabel ?? 'Nicht verfügbar'}
+            {financialStatusLabel ?? t('errors.notAvailable')}
           </span>
         </div>
         <div className="account-order__status-item">
-          <span className="account-order__status-label">Versand</span>
+          <span className="account-order__status-label">
+            {t('account.fulfillment')}
+          </span>
           <span className="account-orders__badge">
             {fulfillmentStatusLabel}
           </span>
         </div>
         <div className="account-order__status-item account-order__status-item--total">
-          <span className="account-order__status-label">Gesamtsumme</span>
+          <span className="account-order__status-label">
+            {t('account.total')}
+          </span>
           <strong className="account-order__status-total">
             <Money data={order.totalPrice} />
           </strong>
@@ -156,19 +173,17 @@ export default function OrderRoute() {
 
       <section className="account-order__section">
         <div className="account-order__section-head">
-          <h3>Artikel</h3>
-          <span>
-            {lineItems.length} {lineItems.length === 1 ? 'Artikel' : 'Artikel'}
-          </span>
+          <h3>{t('account.items')}</h3>
+          <span>{t('account.itemCount', {count: lineItems.length})}</span>
         </div>
         <div className="account-order__table-wrap">
           <table className="account-order__table">
             <thead>
               <tr>
-                <th scope="col">Produkt</th>
-                <th scope="col">Menge</th>
-                <th scope="col">Einzelpreis</th>
-                <th scope="col">Summe</th>
+                <th scope="col">{t('account.product')}</th>
+                <th scope="col">{t('account.quantity')}</th>
+                <th scope="col">{t('account.unitPrice')}</th>
+                <th scope="col">{t('account.sum')}</th>
               </tr>
             </thead>
             <tbody>
@@ -181,11 +196,15 @@ export default function OrderRoute() {
                 discountPercentage) && (
                 <tr>
                   <th scope="row" colSpan={3}>
-                    Rabatt
+                    {t('account.discount')}
                   </th>
                   <td>
                     {discountPercentage ? (
-                      <span>-{discountPercentage}% Rabatt</span>
+                      <span>
+                        {t('account.discountPercentage', {
+                          percent: discountPercentage,
+                        })}
+                      </span>
                     ) : (
                       discountValue && (
                         <span>
@@ -198,7 +217,7 @@ export default function OrderRoute() {
               )}
               <tr>
                 <th scope="row" colSpan={3}>
-                  Zwischensumme
+                  {t('account.subtotal')}
                 </th>
                 <td>
                   <Money data={order.subtotal!} />
@@ -206,7 +225,7 @@ export default function OrderRoute() {
               </tr>
               <tr>
                 <th scope="row" colSpan={3}>
-                  Steuer
+                  {t('account.tax')}
                 </th>
                 <td>
                   <Money data={order.totalTax!} />
@@ -214,7 +233,7 @@ export default function OrderRoute() {
               </tr>
               <tr className="account-order__grand-total">
                 <th scope="row" colSpan={3}>
-                  Gesamtsumme
+                  {t('account.total')}
                 </th>
                 <td>
                   <Money data={order.totalPrice!} />
@@ -227,7 +246,7 @@ export default function OrderRoute() {
 
       <section className="account-order__section account-order__section--address">
         <div className="account-order__section-head">
-          <h3>Lieferadresse</h3>
+          <h3>{t('account.shippingAddress')}</h3>
         </div>
         <div className="account-order__address-content">
           {order?.shippingAddress ? (
@@ -237,7 +256,7 @@ export default function OrderRoute() {
               ))}
             </address>
           ) : (
-            <p>Keine Lieferadresse hinterlegt</p>
+            <p>{t('account.noShippingAddress')}</p>
           )}
         </div>
       </section>
@@ -282,11 +301,12 @@ function getLineItemDisplayTotal(lineItem: OrderLineItemFullFragment) {
 }
 
 function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
+  const {t} = useTranslation();
   const lineTotal = getLineItemDisplayTotal(lineItem);
 
   return (
     <tr>
-      <td data-label="Produkt">
+      <td data-label={t('account.product')}>
         <div className="account-order__product">
           {lineItem?.image && (
             <div className="account-order__product-image">
@@ -301,11 +321,11 @@ function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
           </div>
         </div>
       </td>
-      <td data-label="Menge">{lineItem.quantity}</td>
-      <td data-label="Einzelpreis">
+      <td data-label={t('account.quantity')}>{lineItem.quantity}</td>
+      <td data-label={t('account.unitPrice')}>
         <Money data={lineItem.price!} />
       </td>
-      <td data-label="Summe">
+      <td data-label={t('account.sum')}>
         {lineTotal ? <Money data={lineTotal} /> : <span>-</span>}
       </td>
     </tr>

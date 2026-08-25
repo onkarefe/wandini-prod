@@ -1,4 +1,5 @@
 import {useEffect, useMemo, useState, type CSSProperties} from 'react';
+import {useTranslation} from '~/i18n/useTranslation';
 
 type CropRect = {
   x: number;
@@ -158,6 +159,7 @@ export function ConfigratorScene2({
   selectedQualitySummary,
   totalPrice,
 }: ConfigratorScene2Props) {
+  const {t} = useTranslation();
   const shouldRender = isOpen || inline;
   const expectedPanelWidths = useMemo(
     () => calculatePanelWidths(widthCm),
@@ -165,7 +167,7 @@ export function ConfigratorScene2({
   );
   const [preview, setPreview] = useState<CroppedPreview | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<'dimensions' | 'preview' | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -180,7 +182,7 @@ export function ConfigratorScene2({
     if (!crop || widthCm <= 0 || heightCm <= 0) {
       setPreview(null);
       setIsLoading(false);
-      setError('Für diese Maße konnte keine Vorschau erstellt werden.');
+      setError('dimensions');
       return;
     }
 
@@ -194,13 +196,13 @@ export function ConfigratorScene2({
         setError(
           nextPreview
             ? null
-            : 'Die Tapetenbahnen konnten nicht erstellt werden.',
+            : 'preview',
         );
       })
       .catch(() => {
         if (cancelled) return;
         setPreview(null);
-        setError('Die Tapetenbahnen konnten nicht erstellt werden.');
+        setError('preview');
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -227,7 +229,7 @@ export function ConfigratorScene2({
           type="button"
           className="wallOrderReview__close"
           onClick={onClose}
-          aria-label="Vorschau schließen"
+          aria-label={t('configurator.previewClose')}
         >
           X
         </button>
@@ -235,17 +237,21 @@ export function ConfigratorScene2({
 
       <section
         className="wallOrderReview__preview"
-        aria-label="Vorschau der Tapetenbahnen"
+        aria-label={t('configurator.panelPreview')}
       >
         {isLoading && (
           <div className="wallOrderReview__status">
-            Tapetenbahnen werden erstellt …
+            {t('configurator.creatingPanels')}
           </div>
         )}
 
         {!isLoading && error && (
           <div className="wallOrderReview__status wallOrderReview__status--error">
-            {error}
+            {t(
+              error === 'dimensions'
+                ? 'configurator.invalidDimensions'
+                : 'configurator.previewFailed',
+            )}
           </div>
         )}
 
@@ -261,7 +267,7 @@ export function ConfigratorScene2({
             >
               <img
                 src={preview.dataUrl}
-                alt="Vorschau der zugeschnittenen Fototapete"
+                alt={t('configurator.wallpaperPreviewAlt')}
               />
               <div className="wallOrderReview__panelGuides" aria-hidden="true">
                 {expectedPanelWidths.map((currentWidth, index) => {
@@ -281,7 +287,7 @@ export function ConfigratorScene2({
                       }}
                     >
                       <span>
-                        Bahn {index + 1}
+                        {t('configurator.panel', {number: index + 1})}
                         <strong>{formatCm(currentWidth)} cm</strong>
                       </span>
                     </div>
@@ -295,47 +301,46 @@ export function ConfigratorScene2({
 
       <section
         className="wallOrderReview__summary"
-        aria-label="Bestellübersicht"
+        aria-label={t('configurator.orderSummary')}
       >
         <div className="wallOrderReview__summaryHeader">
-          <span>Bestellübersicht</span>
-          <h3>Deine Fototapete</h3>
+          <span>{t('configurator.orderSummary')}</span>
+          <h3>{t('configurator.yourWallpaper')}</h3>
         </div>
 
         <div className="wallOrderReview__details">
           <div>
-            <span>Wandmaß</span>
+            <span>{t('configurator.wallDimensions')}</span>
             <strong>
               {formatCm(widthCm)} × {formatCm(heightCm)} cm
             </strong>
           </div>
           <div>
-            <span>Aufteilung</span>
-            <strong>{panelCount} Bahnen</strong>
+            <span>{t('configurator.layout')}</span>
+            <strong>{t('configurator.panels', {count: panelCount})}</strong>
             {panelWidth > 0 && (
-              <small>je ca. {formatCm(panelWidth)} cm breit</small>
+              <small>
+                {t('configurator.panelWidth', {width: formatCm(panelWidth)})}
+              </small>
             )}
           </div>
           <div>
-            <span>Material</span>
+            <span>{t('configurator.material')}</span>
             <strong>{selectedQualitySummary?.title || '–'}</strong>
           </div>
         </div>
 
         {totalPrice && (
           <div className="wallOrderReview__total">
-            <span>Gesamtpreis</span>
+            <span>{t('configurator.totalPrice')}</span>
             <strong>{totalPrice}</strong>
           </div>
         )}
 
         <div className="wallOrderReview__notice" role="note">
           <div>
-            <strong>Montagehinweis</strong>
-            <p>
-              Plane umlaufend 6 cm Beschnittzugabe für eine passgenaue Montage
-              ein.
-            </p>
+            <strong>{t('configurator.installationNoticeTitle')}</strong>
+            <p>{t('configurator.installationNotice')}</p>
           </div>
         </div>
       </section>

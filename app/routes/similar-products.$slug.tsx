@@ -8,7 +8,7 @@ import {
   type SimilarProductsBaseProduct,
 } from '~/lib/similar-products';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
-import {WISHLIST_LOAD_UNAVAILABLE_MESSAGE} from '~/lib/wishlist';
+import {useTranslation} from '~/i18n/useTranslation';
 import '../styles/collections.css';
 import '../styles/wishlistFeedback.css';
 
@@ -156,6 +156,7 @@ export async function action({context, params, request}: Route.ActionArgs) {
 }
 
 export default function SimilarProductsSlugPage() {
+  const {t} = useTranslation();
   const initialData = useLoaderData<typeof loader>();
   const fetcher = useFetcher<LoadMoreResponse>();
   const location = useLocation();
@@ -209,7 +210,7 @@ export default function SimilarProductsSlugPage() {
       {initialData.isLoggedIn &&
       initialData.wishlistStatus === 'unavailable' ? (
         <p className="wishlist-page-feedback" role="status">
-          {WISHLIST_LOAD_UNAVAILABLE_MESSAGE}
+          {t('wishlist.loadUnavailable')}
         </p>
       ) : null}
       <div

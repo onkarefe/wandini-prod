@@ -10,20 +10,24 @@ import {
   logWishlistError,
   WishlistServiceError,
 } from '~/lib/wishlist-errors.server';
-import {WISHLIST_LOAD_UNAVAILABLE_MESSAGE} from '~/lib/wishlist';
 import {getCustomerWishlistProductIds} from '~/lib/wishlist.server';
+import {useTranslation} from '~/i18n/useTranslation';
+import {createTranslator} from '~/i18n';
+import {getLocaleFromRequest} from '~/lib/locale';
 import {PRIVATE_ROBOTS_DIRECTIVE} from '~/lib/seo';
 import '../styles/wishlistFeedback.css';
 
-export const meta: Route.MetaFunction = () => {
+export const meta: Route.MetaFunction = ({data}) => {
+  const t = createTranslator(data?.selectedLocale);
   return [
-    {title: 'Favoriten'},
+    {title: t('wishlist.title')},
     {name: 'robots', content: PRIVATE_ROBOTS_DIRECTIVE},
   ];
 };
 
 export async function loader({context, request}: Route.LoaderArgs) {
   const {customerAccount, storefront} = context;
+  const selectedLocale = getLocaleFromRequest(request);
   const requestId = getWishlistRequestId(request);
   let customerId: string;
 
@@ -46,7 +50,11 @@ export async function loader({context, request}: Route.LoaderArgs) {
     customerId = data.customer.id;
   } catch (error) {
     logWishlistError({error, operation: 'resolve_customer', requestId});
-    return {favorites: [], wishlistStatus: 'unavailable' as const};
+    return {
+      favorites: [],
+      wishlistStatus: 'unavailable' as const,
+      selectedLocale,
+    };
   }
 
   let wishlistProductIds: string[];
@@ -58,11 +66,15 @@ export async function loader({context, request}: Route.LoaderArgs) {
     });
   } catch (error) {
     logWishlistError({error, operation: 'load_favorites', requestId});
-    return {favorites: [], wishlistStatus: 'unavailable' as const};
+    return {
+      favorites: [],
+      wishlistStatus: 'unavailable' as const,
+      selectedLocale,
+    };
   }
 
   if (wishlistProductIds.length === 0) {
-    return {favorites: [], wishlistStatus: 'ready' as const};
+    return {favorites: [], wishlistStatus: 'ready' as const, selectedLocale};
   }
 
   try {
@@ -86,14 +98,19 @@ export async function loader({context, request}: Route.LoaderArgs) {
       return product ? [product] : [];
     });
 
-    return {favorites, wishlistStatus: 'ready' as const};
+    return {favorites, wishlistStatus: 'ready' as const, selectedLocale};
   } catch (error) {
     logWishlistError({error, operation: 'load_favorite_products', requestId});
-    return {favorites: [], wishlistStatus: 'unavailable' as const};
+    return {
+      favorites: [],
+      wishlistStatus: 'unavailable' as const,
+      selectedLocale,
+    };
   }
 }
 
 export default function AccountFavorites() {
+  const {t} = useTranslation();
   const {favorites, wishlistStatus} = useLoaderData<typeof loader>();
   const revalidator = useRevalidator();
   const [favoriteProducts, setFavoriteProducts] = useState(favorites);
@@ -106,16 +123,17 @@ export default function AccountFavorites() {
     <div className="account-page account-favorites">
       <header className="account-page__header">
         <div>
-          <p className="account-page__eyebrow">Ihre Auswahl</p>
-          <h2 className="account-page__title">Favoriten</h2>
+          <p className="account-page__eyebrow">{t('wishlist.eyebrow')}</p>
+          <h2 className="account-page__title">{t('wishlist.title')}</h2>
           <p className="account-page__description">
-            Hier finden Sie alle Produkte, die Sie für später gespeichert haben.
+            {t('wishlist.description')}
           </p>
         </div>
         {wishlistStatus === 'ready' && favoriteProducts.length > 0 ? (
           <span className="account-page__count">
-            {favoriteProducts.length}{' '}
-            {favoriteProducts.length === 1 ? 'Produkt' : 'Produkte'}
+            {favoriteProducts.length === 1
+              ? t('wishlist.productOne')
+              : t('wishlist.productMany', {count: favoriteProducts.length})}
           </span>
         ) : null}
       </header>
@@ -127,7 +145,7 @@ export default function AccountFavorites() {
         {wishlistStatus === 'unavailable' ? (
           <div className="account-favorites__unavailable" role="status">
             <p className="account-message account-message--error">
-              {WISHLIST_LOAD_UNAVAILABLE_MESSAGE}
+              {t('wishlist.loadUnavailable')}
             </p>
             <button
               type="button"
@@ -138,22 +156,19 @@ export default function AccountFavorites() {
               }}
             >
               {revalidator.state === 'idle'
-                ? 'Erneut versuchen'
-                : 'Wird erneut versucht...'}
+                ? t('wishlist.retry')
+                : t('wishlist.retrying')}
             </button>
           </div>
         ) : favoriteProducts.length === 0 ? (
           <div className="account-empty-state">
-            <h3>Noch keine Favoriten</h3>
-            <p>
-              Speichern Sie Produkte über das Herzsymbol, um sie hier schnell
-              wiederzufinden.
-            </p>
+            <h3>{t('wishlist.emptyTitle')}</h3>
+            <p>{t('wishlist.emptyDescription')}</p>
             <Link
               className="account-button account-button--primary"
               to="/collections"
             >
-              Produkte entdecken
+              {t('wishlist.discover')}
             </Link>
           </div>
         ) : (

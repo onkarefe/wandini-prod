@@ -1,59 +1,73 @@
-const FINANCIAL_STATUS_LABELS: Record<string, string> = {
-  AUTHORIZED: 'Autorisiert',
-  EXPIRED: 'Abgelaufen',
-  PAID: 'Bezahlt',
-  PARTIALLY_PAID: 'Teilweise bezahlt',
-  PARTIALLY_REFUNDED: 'Teilweise erstattet',
-  PENDING: 'Ausstehend',
-  REFUNDED: 'Erstattet',
-  VOIDED: 'Storniert',
+import type {Translator} from '~/i18n';
+import type {TranslationKey} from '~/i18n/de';
+import type {SelectedLocale} from '~/lib/locale';
+import {formatLocaleDate} from '~/lib/locale-format';
+
+const FINANCIAL_STATUS_KEYS: Record<string, TranslationKey> = {
+  AUTHORIZED: 'order.financial.AUTHORIZED',
+  EXPIRED: 'order.financial.EXPIRED',
+  PAID: 'order.financial.PAID',
+  PARTIALLY_PAID: 'order.financial.PARTIALLY_PAID',
+  PARTIALLY_REFUNDED: 'order.financial.PARTIALLY_REFUNDED',
+  PENDING: 'order.financial.PENDING',
+  REFUNDED: 'order.financial.REFUNDED',
+  VOIDED: 'order.financial.VOIDED',
 };
 
-const FULFILLMENT_STATUS_LABELS: Record<string, string> = {
-  ACCEPTED: 'Angenommen',
-  CANCELLED: 'Storniert',
-  ERROR: 'Fehlgeschlagen',
-  FAILURE: 'Fehlgeschlagen',
-  FULFILLED: 'Versendet',
-  IN_PROGRESS: 'In Bearbeitung',
-  ON_HOLD: 'Zurückgestellt',
-  OPEN: 'Offen',
-  PARTIALLY_FULFILLED: 'Teilweise versendet',
-  PENDING: 'Ausstehend',
-  RESTOCKED: 'Wiedereingelagert',
-  SCHEDULED: 'Geplant',
-  SUBMITTED: 'Eingereicht',
-  SUCCESS: 'Versendet',
-  UNFULFILLED: 'Noch nicht versendet',
+const FULFILLMENT_STATUS_KEYS: Record<string, TranslationKey> = {
+  ACCEPTED: 'order.fulfillment.ACCEPTED',
+  CANCELLED: 'order.fulfillment.CANCELLED',
+  ERROR: 'order.fulfillment.ERROR',
+  FAILURE: 'order.fulfillment.FAILURE',
+  FULFILLED: 'order.fulfillment.FULFILLED',
+  IN_PROGRESS: 'order.fulfillment.IN_PROGRESS',
+  ON_HOLD: 'order.fulfillment.ON_HOLD',
+  OPEN: 'order.fulfillment.OPEN',
+  PARTIALLY_FULFILLED: 'order.fulfillment.PARTIALLY_FULFILLED',
+  PENDING: 'order.fulfillment.PENDING',
+  RESTOCKED: 'order.fulfillment.RESTOCKED',
+  SCHEDULED: 'order.fulfillment.SCHEDULED',
+  SUBMITTED: 'order.fulfillment.SUBMITTED',
+  UNFULFILLED: 'order.fulfillment.UNFULFILLED',
 };
 
-function getGermanStatusLabel(
-  status: string | null | undefined,
-  labels: Record<string, string>,
+function formatStatus(
+  value: string | null | undefined,
+  keys: Record<string, TranslationKey>,
+  t: Translator,
 ) {
-  if (!status) return null;
-  return labels[status.toUpperCase()] ?? 'Unbekannt';
+  if (!value) return null;
+  const normalized = value.trim().toUpperCase();
+  const key = keys[normalized];
+  return key ? t(key, undefined as never) : value;
 }
 
-export function formatGermanFinancialStatus(status?: string | null) {
-  return getGermanStatusLabel(status, FINANCIAL_STATUS_LABELS);
+export function formatFinancialStatus(
+  value: string | null | undefined,
+  t: Translator,
+) {
+  return formatStatus(value, FINANCIAL_STATUS_KEYS, t);
 }
 
-export function formatGermanFulfillmentStatus(status?: string | null) {
-  return getGermanStatusLabel(status, FULFILLMENT_STATUS_LABELS);
+export function formatFulfillmentStatus(
+  value: string | null | undefined,
+  t: Translator,
+) {
+  return formatStatus(value, FULFILLMENT_STATUS_KEYS, t);
 }
 
-export function formatGermanOrderDate(
+export function formatOrderDate(
   value: string | Date | null | undefined,
+  locale: SelectedLocale,
+  t: Translator,
 ) {
-  if (!value) return 'Datum nicht verfügbar';
+  if (!value) return t('order.dateUnavailable');
 
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Datum nicht verfügbar';
-
-  return new Intl.DateTimeFormat('de-DE', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  }).format(date);
+  return (
+    formatLocaleDate(value, locale, {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    }) ?? t('order.dateUnavailable')
+  );
 }

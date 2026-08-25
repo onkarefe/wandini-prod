@@ -8,6 +8,7 @@ import '../styles/configurator.css';
 import sceneSmall from '~/assets/scenes/small.svg';
 import sceneMedium from '~/assets/scenes/medium.svg';
 import sceneLarge from '~/assets/scenes/large.svg';
+import {useTranslation} from '~/i18n/useTranslation';
 
 type CropRect = {
   x: number;
@@ -380,6 +381,7 @@ export function ConfigratorScene({
   heightCm,
   crop,
 }: ConfigratorSceneProps) {
+  const {t} = useTranslation();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const roomRef = useRef<HTMLDivElement | null>(null);
   const frontWallRef = useRef<HTMLDivElement | null>(null);
@@ -507,14 +509,14 @@ export function ConfigratorScene({
       className={`configuratorSceneDialog${inline ? ' configuratorSceneDialog--inline' : ''}`}
       role={inline ? undefined : 'dialog'}
       aria-modal={inline ? undefined : true}
-      aria-label={inline ? undefined : 'Produktvorschau im Raum'}
+      aria-label={inline ? undefined : t('configurator.roomPreview')}
     >
       {showCloseButton && (
         <button
           type="button"
           className="configuratorSceneCloseButton"
           onClick={onClose}
-          aria-label="Vorschau schließen"
+          aria-label={t('configurator.previewClose')}
         >
           X
         </button>
@@ -548,7 +550,7 @@ export function ConfigratorScene({
           onClick={onConfirm}
           disabled={!!confirmDisabled}
         >
-          Bestätigen &amp; in den Warenkorb
+          {t('product.confirmAddToCart')}
         </button>
       ) : null}
     </div>
@@ -564,7 +566,7 @@ export function ConfigratorScene({
         type="button"
         className="configuratorSceneBackdrop"
         onClick={onClose}
-        aria-label="Vorschau schließen"
+        aria-label={t('configurator.previewClose')}
       />
       {dialogContent}
     </div>

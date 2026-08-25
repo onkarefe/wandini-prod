@@ -9,10 +9,9 @@ import {useTranslation} from '~/i18n/useTranslation';
 import useEmblaCarousel from 'embla-carousel-react';
 import {useFetcher, useLocation, useNavigate} from 'react-router';
 import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
-import {
-  WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
-  type WishlistActionData,
-} from '~/lib/wishlist';
+import type {WishlistActionData} from '~/lib/wishlist';
+import {formatLocaleCurrency, formatLocaleNumber} from '~/lib/locale-format';
+import type {SelectedLocale} from '~/lib/locale';
 import '../styles/wishlistFeedback.css';
 
 type ProductPrice = {
@@ -58,24 +57,30 @@ function SimilarMotifsIcon() {
   );
 }
 
-function formatPriceLabel(price?: ProductPrice): string | null {
+function formatPriceLabel(
+  price: ProductPrice | undefined,
+  locale: SelectedLocale,
+): string | null {
   if (!price) return null;
 
   const amount = Number(price.amount);
   const fallbackAmount = Number.isFinite(amount)
-    ? new Intl.NumberFormat('en-US', {
+    ? formatLocaleNumber(amount, locale, {
         minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
         maximumFractionDigits: 2,
-      }).format(amount)
+      })
     : price.amount;
 
   try {
-    const formattedAmount = new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: price.currencyCode,
+    const formattedAmount = formatLocaleCurrency(
+      Number.isFinite(amount) ? amount : Number(price.amount),
+      price.currencyCode,
+      locale,
+      {
       minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
       maximumFractionDigits: 2,
-    }).format(Number.isFinite(amount) ? amount : Number(price.amount));
+      },
+    );
 
     return `${formattedAmount}/m²`;
   } catch {
@@ -96,7 +101,7 @@ export default function BestsellerProductCard({
   similarProductsSourceTitle,
   similarProductsSourceImageUrl,
 }: BestsellerProductCardProps) {
-  const {t} = useTranslation();
+  const {locale, t} = useTranslation();
   const displayImages =
     images.length > 1
       ? [images[1], images[0], ...images.slice(2, 3)]
@@ -118,7 +123,7 @@ export default function BestsellerProductCard({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [wishlisted, setWishlisted] = useState(isWishlisted);
   const [wishlistError, setWishlistError] = useState<string | null>(null);
-  const priceLabel = formatPriceLabel(minPrice);
+  const priceLabel = formatPriceLabel(minPrice, locale);
   const hasMultipleImages = displayImages.length > 1;
   const hasHoverMotif = images.length > 1;
 
@@ -155,7 +160,7 @@ export default function BestsellerProductCard({
 
     if (!fetcher.data.ok) {
       if (!fetcher.data.loginUrl) {
-        setWishlistError(WISHLIST_UPDATE_UNAVAILABLE_MESSAGE);
+        setWishlistError(t('wishlist.updateUnavailable'));
       }
       return;
     }
@@ -166,7 +171,7 @@ export default function BestsellerProductCard({
 
     setWishlistError(null);
     setWishlisted(fetcher.data.wishlisted);
-  }, [fetcher.data]);
+  }, [fetcher.data, t]);
 
   const handleWishlistClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
