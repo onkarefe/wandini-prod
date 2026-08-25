@@ -122,7 +122,9 @@
     border: 1px solid #c7c7cc;
     border-radius: 16px;
     background: #fff;
-    transition: border-color 160ms ease, box-shadow 160ms ease;
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease;
   }
 
   .dhx-searchForm:focus-within {
@@ -179,7 +181,9 @@
     font: inherit;
     font-size: 13px;
     font-weight: 650;
-    transition: background-color 150ms ease, color 150ms ease;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
   }
 
   .dhx-searchForm > button:active {
@@ -199,6 +203,41 @@
     background: var(--dhx-fill);
   }
 
+  .dhx-desktopLanguageSwitcher {
+    display: none;
+  }
+
+  .dhx-mobileLanguageSwitcher {
+    display: flex;
+    width: max-content;
+    gap: 4px;
+    margin: 0 0 14px;
+    padding: 4px;
+    border-radius: 12px;
+    background: var(--dhx-fill);
+  }
+
+  .dhx-mobileLanguageSwitcher a,
+  .dhx-desktopLanguageSwitcher a {
+    display: inline-grid;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 7px;
+    place-items: center;
+    border-radius: 9px;
+    color: var(--dhx-secondary);
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+  }
+
+  .language-switcher a.is-active {
+    background: #fff;
+    color: var(--dhx-text);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 10%);
+  }
+
   .dhx-account,
   .dhx-saved,
   .dhx-cart,
@@ -214,7 +253,9 @@
     background: transparent;
     color: var(--dhx-text);
     text-decoration: none;
-    transition: background-color 150ms ease, transform 150ms ease;
+    transition:
+      background-color 150ms ease,
+      transform 150ms ease;
   }
 
   .dhx-menuToggle {
@@ -264,7 +305,9 @@
   .dhx-menuIcon path {
     transform-box: fill-box;
     transform-origin: center;
-    transition: transform 180ms ease, opacity 140ms ease;
+    transition:
+      transform 180ms ease,
+      opacity 140ms ease;
   }
 
   .dhx-menuIcon.is-open .dhx-menuIconTop {
@@ -849,6 +892,46 @@
     border-radius: 16px;
     background: var(--dhx-fill);
     justify-self: end;
+  }
+
+  .dhx-desktopLanguageSwitcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    margin-right: 2px;
+  }
+
+  .dhx-desktopLanguageSwitcher a {
+    display: inline-grid;
+    min-width: 30px;
+    height: 38px;
+    padding: 0 5px;
+    place-items: center;
+    border-radius: 12px;
+    color: var(--dhx-secondary);
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .dhx-desktopLanguageSwitcher a:hover {
+    background: #fff;
+    color: var(--dhx-text);
+  }
+
+  .dhx-desktopLanguageSwitcher a.is-active {
+    background: #fff;
+    color: var(--dhx-text);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 10%);
+  }
+
+  .dhx-mobileLanguageSwitcher {
+    display: none;
   }
 
   .dhx-menuToggle,

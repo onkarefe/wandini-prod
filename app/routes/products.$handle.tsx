@@ -6,6 +6,7 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {getRobotsDirective} from '~/lib/seo';
 import {getSimilarMotifsPreview} from '~/lib/similar-products-preview';
 import {useTranslation} from '~/i18n/useTranslation';
+import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {
   hasExplicitProductOptionSelection,
   resolveInitialWallpaperVariant,
@@ -308,9 +309,16 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
         product.selectedOrFirstAvailableVariant,
         hasExplicitVariantSelection,
       );
+  const languageSwitchLinks = await resolveResourceLanguageSwitchLinks({
+    storefront,
+    request,
+    resourceId: product.id,
+    resourceType: 'Product',
+  });
 
   return {
     canonicalUrl: `${url.origin}${url.pathname}`,
+    languageSwitchLinks,
     product: {
       ...product,
       selectedOrFirstAvailableVariant: initialVariant,

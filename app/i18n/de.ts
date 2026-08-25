@@ -18,6 +18,7 @@ export const de = {
   'navigation.primary': 'Hauptnavigation',
   'navigation.mobile': 'Mobile Hauptnavigation',
   'navigation.quickActions': 'Schnellzugriff',
+  'navigation.language': 'Sprache',
   'navigation.account': 'Mein Konto',
   'navigation.favorites': 'Favoriten',
   'navigation.cart': 'Warenkorb',

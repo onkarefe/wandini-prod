@@ -7,6 +7,7 @@ import {Link} from '~/lib/i18n-router';
 import {getRobotsDirective} from '~/lib/seo';
 import {useTranslation} from '~/i18n/useTranslation';
 import {formatLocaleDate} from '~/lib/locale-format';
+import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 
 const BLOCKED_HTML_TAGS = [
   'script',
@@ -25,15 +26,18 @@ const BLOCKED_HTML_TAGS = [
 ] as const;
 
 function sanitizeInlineStyles(html: string) {
-  return html.replace(/\sstyle\s*=\s*(["'])(.*?)\1/gi, (_match, quote, rawStyle) => {
-    const sanitizedStyle = String(rawStyle)
-      .replace(/expression\s*\([^)]*\)/gi, '')
-      .replace(/url\s*\(\s*(['"]?)\s*javascript:[^)]+\1\s*\)/gi, '')
-      .replace(/-moz-binding\s*:[^;]+;?/gi, '')
-      .trim();
+  return html.replace(
+    /\sstyle\s*=\s*(["'])(.*?)\1/gi,
+    (_match, quote, rawStyle) => {
+      const sanitizedStyle = String(rawStyle)
+        .replace(/expression\s*\([^)]*\)/gi, '')
+        .replace(/url\s*\(\s*(['"]?)\s*javascript:[^)]+\1\s*\)/gi, '')
+        .replace(/-moz-binding\s*:[^;]+;?/gi, '')
+        .trim();
 
-    return sanitizedStyle ? ` style=${quote}${sanitizedStyle}${quote}` : '';
-  });
+      return sanitizedStyle ? ` style=${quote}${sanitizedStyle}${quote}` : '';
+    },
+  );
 }
 
 function sanitizeBlogArticleHtml(html: string | null | undefined) {
@@ -108,7 +112,10 @@ function normalizeMetaText(value?: string | null) {
     return '';
   }
 
-  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function truncateMetaDescription(value: string) {
@@ -185,10 +192,7 @@ function getArticleBlogUrl(canonicalUrl: string, blogHandle?: string | null) {
   return `${url.origin}${localePrefix}/blogs/${handle}`;
 }
 
-function buildArticleJsonLd(
-  article: ArticleMetaInput,
-  canonicalUrl: string,
-) {
+function buildArticleJsonLd(article: ArticleMetaInput, canonicalUrl: string) {
   const headline = normalizeMetaText(article.title);
 
   if (!headline) {
@@ -280,7 +284,9 @@ export const meta: Route.MetaFunction = ({data, params}) => {
     },
     {property: 'og:type', content: 'article'},
     {property: 'og:title', content: title},
-    ...(description ? [{property: 'og:description', content: description}] : []),
+    ...(description
+      ? [{property: 'og:description', content: description}]
+      : []),
     {property: 'og:url', content: canonicalUrl},
     ...(imageUrl ? [{property: 'og:image', content: imageUrl}] : []),
     {
@@ -288,7 +294,9 @@ export const meta: Route.MetaFunction = ({data, params}) => {
       content: imageUrl ? 'summary_large_image' : 'summary',
     },
     {name: 'twitter:title', content: title},
-    ...(description ? [{name: 'twitter:description', content: description}] : []),
+    ...(description
+      ? [{name: 'twitter:description', content: description}]
+      : []),
     ...(imageUrl ? [{name: 'twitter:image', content: imageUrl}] : []),
   ];
 };
@@ -341,9 +349,16 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   const relatedArticles =
     blog.articles?.nodes?.filter((item) => item.handle !== articleHandle) ?? [];
   const url = new URL(request.url);
+  const languageSwitchLinks = await resolveResourceLanguageSwitchLinks({
+    storefront: context.storefront,
+    request,
+    resourceId: article.id,
+    resourceType: 'Article',
+  });
 
   return {
     canonicalUrl: `${url.origin}${url.pathname}`,
+    languageSwitchLinks,
     article: {
       ...article,
       contentHtml: sanitizeBlogArticleHtml(article.contentHtml),
@@ -410,16 +425,20 @@ export default function Article() {
 
         <div className="blog-detail-shell">
           <div className="blog-detail-main">
-          {image ? (
-            <div className="blog-detail-hero-media">
-              <Image data={image} sizes="(min-width: 1200px) 60vw, 100vw" loading="eager" />
-            </div>
-          ) : null}
+            {image ? (
+              <div className="blog-detail-hero-media">
+                <Image
+                  data={image}
+                  sizes="(min-width: 1200px) 60vw, 100vw"
+                  loading="eager"
+                />
+              </div>
+            ) : null}
 
-          <div
-            dangerouslySetInnerHTML={{__html: contentHtml}}
-            className="blog-detail-body"
-          />
+            <div
+              dangerouslySetInnerHTML={{__html: contentHtml}}
+              className="blog-detail-body"
+            />
           </div>
 
           <div className="blog-detail-sidebar">
@@ -433,9 +452,9 @@ export default function Article() {
                     relatedArticle.publishedAt,
                     locale,
                     {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
                     },
                   );
 
@@ -451,7 +470,10 @@ export default function Article() {
                         {relatedArticle.image ? (
                           <div className="blog-detail-related-card__media">
                             <Image
-                              alt={relatedArticle.image.altText || relatedArticle.title}
+                              alt={
+                                relatedArticle.image.altText ||
+                                relatedArticle.title
+                              }
                               data={relatedArticle.image}
                               sizes="120px"
                             />
@@ -495,6 +517,7 @@ const ARTICLE_QUERY = `#graphql
       title
       handle
       articleByHandle(handle: $articleHandle) {
+        id
         handle
         title
         contentHtml

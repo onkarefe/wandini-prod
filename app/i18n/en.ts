@@ -22,6 +22,7 @@ export const en = {
   'navigation.primary': 'Primary navigation',
   'navigation.mobile': 'Mobile primary navigation',
   'navigation.quickActions': 'Quick actions',
+  'navigation.language': 'Language',
   'navigation.account': 'My account',
   'navigation.favorites': 'Favorites',
   'navigation.cart': 'Cart',

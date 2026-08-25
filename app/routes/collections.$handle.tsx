@@ -25,6 +25,7 @@ import {
 import {buildSimilarProductsPath} from '~/lib/similar-products';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {redirectToLocalePath} from '~/lib/locale';
 import {getRobotsDirective} from '~/lib/seo';
 import {useTranslation} from '~/i18n/useTranslation';
@@ -384,10 +385,17 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   }
 
   redirectIfHandleIsLocalized(request, {handle, data: collection});
+  const languageSwitchLinks = await resolveResourceLanguageSwitchLinks({
+    storefront,
+    request,
+    resourceId: collection.id,
+    resourceType: 'Collection',
+  });
 
   return {
     collection,
     canonicalUrl,
+    languageSwitchLinks,
     isNoisyCollectionUrl,
     isLoggedIn,
     wishlistProductIds,
@@ -456,9 +464,7 @@ export default function Collection() {
             </div>
           }
         >
-          <BestsellerCollectionLayout
-            collection={collection}
-          />
+          <BestsellerCollectionLayout collection={collection} />
         </Suspense>
       ) : isZubehorCollection(collection) ? (
         <Suspense

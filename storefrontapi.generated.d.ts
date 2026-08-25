@@ -500,6 +500,62 @@ export type FooterQuery = {
   >;
 };
 
+export type LanguageSwitchResourceQueryVariables = StorefrontAPI.Exact<{
+  id: StorefrontAPI.Scalars['ID']['input'];
+  country: StorefrontAPI.CountryCode;
+  language: StorefrontAPI.LanguageCode;
+}>;
+
+export type LanguageSwitchResourceQuery = {
+  node?: StorefrontAPI.Maybe<
+    | {
+        __typename:
+          | 'AppliedGiftCard'
+          | 'Cart'
+          | 'CartLine'
+          | 'Comment'
+          | 'Company'
+          | 'CompanyContact'
+          | 'CompanyLocation'
+          | 'ComponentizableCartLine'
+          | 'ExternalVideo'
+          | 'GenericFile'
+          | 'Location'
+          | 'MailingAddress'
+          | 'Market'
+          | 'MediaImage'
+          | 'MediaPresentation'
+          | 'Menu'
+          | 'MenuItem'
+          | 'Metafield'
+          | 'Metaobject'
+          | 'Model3d';
+      }
+    | {
+        __typename:
+          | 'Order'
+          | 'ProductOption'
+          | 'ProductOptionValue'
+          | 'ProductVariant'
+          | 'Shop'
+          | 'ShopPayInstallmentsFinancingPlan'
+          | 'ShopPayInstallmentsFinancingPlanTerm'
+          | 'ShopPayInstallmentsProductVariantPricing'
+          | 'ShopPolicy'
+          | 'TaxonomyCategory'
+          | 'UrlRedirect'
+          | 'Video';
+      }
+    | ({__typename: 'Article'} & Pick<StorefrontAPI.Article, 'handle'> & {
+          blog: Pick<StorefrontAPI.Blog, 'handle'>;
+        })
+    | ({__typename: 'Blog'} & Pick<StorefrontAPI.Blog, 'handle'>)
+    | ({__typename: 'Collection'} & Pick<StorefrontAPI.Collection, 'handle'>)
+    | ({__typename: 'Page'} & Pick<StorefrontAPI.Page, 'handle'>)
+    | ({__typename: 'Product'} & Pick<StorefrontAPI.Product, 'handle'>)
+  >;
+};
+
 export type SimilarMotifsPreviewProductFragment = Pick<
   StorefrontAPI.Product,
   'id' | 'handle' | 'title'
@@ -1002,7 +1058,7 @@ export type ArticleQuery = {
       articleByHandle?: StorefrontAPI.Maybe<
         Pick<
           StorefrontAPI.Article,
-          'handle' | 'title' | 'contentHtml' | 'publishedAt'
+          'id' | 'handle' | 'title' | 'contentHtml' | 'publishedAt'
         > & {
           author?: StorefrontAPI.Maybe<
             Pick<StorefrontAPI.ArticleAuthor, 'name'>
@@ -1053,7 +1109,7 @@ export type BlogQueryVariables = StorefrontAPI.Exact<{
 
 export type BlogQuery = {
   blog?: StorefrontAPI.Maybe<
-    Pick<StorefrontAPI.Blog, 'title' | 'handle'> & {
+    Pick<StorefrontAPI.Blog, 'id' | 'title' | 'handle'> & {
       seo?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.Seo, 'title' | 'description'>
       >;
@@ -2461,6 +2517,10 @@ interface GeneratedQueryTypes {
     return: FooterQuery;
     variables: FooterQueryVariables;
   };
+  '#graphql\n  query LanguageSwitchResource(\n    $id: ID!\n    $country: CountryCode!\n    $language: LanguageCode!\n  ) @inContext(country: $country, language: $language) {\n    node(id: $id) {\n      __typename\n      ... on Product {\n        handle\n      }\n      ... on Collection {\n        handle\n      }\n      ... on Page {\n        handle\n      }\n      ... on Blog {\n        handle\n      }\n      ... on Article {\n        handle\n        blog {\n          handle\n        }\n      }\n    }\n  }\n': {
+    return: LanguageSwitchResourceQuery;
+    variables: LanguageSwitchResourceQueryVariables;
+  };
   '#graphql\n  #graphql\n  fragment SimilarMotifsPreviewProduct on Product {\n    id\n    handle\n    title\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    images(first: 1) {\n      nodes {\n        url\n        altText\n        width\n        height\n      }\n    }\n  }\n\n  query SimilarMotifsPreview(\n    $country: CountryCode\n    $language: LanguageCode\n    $categoryHandle: String!\n    $mainMotif: String!\n    $mainTheme: String!\n    $candidateLimit: Int!\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $categoryHandle) {\n      sameMotif: products(\n        first: $candidateLimit\n        filters: [\n          {\n            productMetafield: {\n              namespace: "custom"\n              key: "main_motif"\n              value: $mainMotif\n            }\n          }\n        ]\n      ) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n      sameTheme: products(\n        first: $candidateLimit\n        filters: [\n          {\n            productMetafield: {\n              namespace: "custom"\n              key: "main_theme"\n              value: $mainTheme\n            }\n          }\n        ]\n      ) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n      fallback: products(first: $candidateLimit) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n    }\n  }\n': {
     return: SimilarMotifsPreviewQuery;
     variables: SimilarMotifsPreviewQueryVariables;
@@ -2517,11 +2577,11 @@ interface GeneratedQueryTypes {
     return: RecommendedProductsQuery;
     variables: RecommendedProductsQueryVariables;
   };
-  '#graphql\n  query Article(\n    $articleHandle: String!\n    $blogHandle: String!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    blog(handle: $blogHandle) {\n      title\n      handle\n      articleByHandle(handle: $articleHandle) {\n        handle\n        title\n        contentHtml\n        publishedAt\n        author: authorV2 {\n          name\n        }\n        image {\n          id\n          altText\n          url\n          width\n          height\n        }\n        seo {\n          description\n          title\n        }\n      }\n      articles(first: 12) {\n        nodes {\n          id\n          handle\n          title\n          excerpt\n          publishedAt\n          image {\n            id\n            altText\n            url\n            width\n            height\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query Article(\n    $articleHandle: String!\n    $blogHandle: String!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    blog(handle: $blogHandle) {\n      title\n      handle\n      articleByHandle(handle: $articleHandle) {\n        id\n        handle\n        title\n        contentHtml\n        publishedAt\n        author: authorV2 {\n          name\n        }\n        image {\n          id\n          altText\n          url\n          width\n          height\n        }\n        seo {\n          description\n          title\n        }\n      }\n      articles(first: 12) {\n        nodes {\n          id\n          handle\n          title\n          excerpt\n          publishedAt\n          image {\n            id\n            altText\n            url\n            width\n            height\n          }\n        }\n      }\n    }\n  }\n': {
     return: ArticleQuery;
     variables: ArticleQueryVariables;
   };
-  '#graphql\n  query Blog(\n    $blogHandle: String!\n    $country: CountryCode\n    $first: Int\n    $language: LanguageCode\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    blog(handle: $blogHandle) {\n      title\n      handle\n      seo {\n        title\n        description\n      }\n      articles(\n        first: $first,\n        last: $last,\n        before: $startCursor,\n        after: $endCursor\n      ) {\n        nodes {\n          ...ArticleItem\n        }\n        pageInfo {\n          hasPreviousPage\n          hasNextPage\n          hasNextPage\n          endCursor\n          startCursor\n        }\n\n      }\n    }\n  }\n  fragment ArticleItem on Article {\n    author: authorV2 {\n      name\n    }\n    contentHtml\n    excerpt\n    handle\n    id\n    image {\n      id\n      altText\n      url\n      width\n      height\n    }\n    publishedAt\n    title\n    blog {\n      handle\n    }\n  }\n': {
+  '#graphql\n  query Blog(\n    $blogHandle: String!\n    $country: CountryCode\n    $first: Int\n    $language: LanguageCode\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    blog(handle: $blogHandle) {\n      id\n      title\n      handle\n      seo {\n        title\n        description\n      }\n      articles(\n        first: $first,\n        last: $last,\n        before: $startCursor,\n        after: $endCursor\n      ) {\n        nodes {\n          ...ArticleItem\n        }\n        pageInfo {\n          hasPreviousPage\n          hasNextPage\n          hasNextPage\n          endCursor\n          startCursor\n        }\n\n      }\n    }\n  }\n  fragment ArticleItem on Article {\n    author: authorV2 {\n      name\n    }\n    contentHtml\n    excerpt\n    handle\n    id\n    image {\n      id\n      altText\n      url\n      width\n      height\n    }\n    publishedAt\n    title\n    blog {\n      handle\n    }\n  }\n': {
     return: BlogQuery;
     variables: BlogQueryVariables;
   };

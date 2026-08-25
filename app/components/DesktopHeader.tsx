@@ -22,6 +22,7 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
+import {LanguageSwitcher} from '~/components/LanguageSwitcher';
 import {Link, NavLink, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
 
@@ -189,7 +190,8 @@ export function DesktopHeader({
           collectionHandle(item._href),
           handleLike(item.title ?? ''),
         ].filter(Boolean) as string[];
-        const mega = keys.map((key) => megaMenus.get(key)).find(Boolean) ?? null;
+        const mega =
+          keys.map((key) => megaMenus.get(key)).find(Boolean) ?? null;
 
         return {
           item,
@@ -391,6 +393,10 @@ function MobileNavigation({
         className="container mx-auto dhx-container dhx-mobileNavigation"
         aria-label={t('navigation.mobile')}
       >
+        <LanguageSwitcher
+          className="dhx-mobileLanguageSwitcher"
+          onNavigate={onNavigate}
+        />
         {items.map(({item, key, mega}) => {
           const isOpen = openKey === key;
           const submenuId = 'dhx-mobile-submenu-' + handleLike(key);
@@ -470,10 +476,7 @@ function MobileMegaMenu({
         );
 
         return (
-          <section
-            className="dhx-mobileColumn"
-            key={column.id || columnTitle}
-          >
+          <section className="dhx-mobileColumn" key={column.id || columnTitle}>
             {columnTitle ? <h3>{columnTitle}</h3> : null}
             <ul>
               {columnItems.map((columnItem) => {
@@ -576,15 +579,15 @@ function DesktopSearch({
               id="desktop-command-search"
               list={datalistId}
               name="q"
-               onChange={(event) => {
-                 onEngage();
-                 setIsOpen(Boolean(event.currentTarget.value.trim()));
-                 fetchResults(event);
-               }}
-               onFocus={(event) => {
-                 onEngage();
-                 setIsOpen(Boolean(event.currentTarget.value.trim()));
-                 fetchResults(event);
+              onChange={(event) => {
+                onEngage();
+                setIsOpen(Boolean(event.currentTarget.value.trim()));
+                fetchResults(event);
+              }}
+              onFocus={(event) => {
+                onEngage();
+                setIsOpen(Boolean(event.currentTarget.value.trim()));
+                fetchResults(event);
               }}
               placeholder={t('search.placeholder')}
               ref={inputRef}
@@ -648,9 +651,7 @@ function DesktopSearch({
                     onClick={closeSearch}
                     to={searchUrl}
                   >
-                    <span>
-                      {t('search.allResults', {term: term.current})}
-                    </span>
+                    <span>{t('search.allResults', {term: term.current})}</span>
                     <ArrowIcon />
                   </Link>
                 </div>
@@ -680,6 +681,7 @@ function DesktopActions({
 
   return (
     <nav className="dhx-actions" aria-label={t('navigation.quickActions')}>
+      <LanguageSwitcher className="dhx-desktopLanguageSwitcher" />
       <NavLink
         className="dhx-account"
         to="/account"

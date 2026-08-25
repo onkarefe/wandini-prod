@@ -9,6 +9,7 @@ import blogHandleStyles from '~/styles/blogHandle.css?url';
 import {Link} from '~/lib/i18n-router';
 import {getRobotsDirective} from '~/lib/seo';
 import {formatLocaleDate} from '~/lib/locale-format';
+import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 
 export function links() {
   return [{rel: 'stylesheet', href: blogHandleStyles}];
@@ -33,7 +34,10 @@ function normalizeMetaText(value?: string | null) {
     return '';
   }
 
-  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function getBlogMetaTitle(blog?: BlogMetaInput | null) {
@@ -78,11 +82,15 @@ export const meta: Route.MetaFunction = ({data, params}) => {
     },
     {property: 'og:type', content: 'website'},
     {property: 'og:title', content: title},
-    ...(description ? [{property: 'og:description', content: description}] : []),
+    ...(description
+      ? [{property: 'og:description', content: description}]
+      : []),
     {property: 'og:url', content: canonicalUrl},
     {name: 'twitter:card', content: 'summary'},
     {name: 'twitter:title', content: title},
-    ...(description ? [{name: 'twitter:description', content: description}] : []),
+    ...(description
+      ? [{name: 'twitter:description', content: description}]
+      : []),
   ];
 };
 
@@ -125,8 +133,18 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
 
   redirectIfHandleIsLocalized(request, {handle: params.blogHandle, data: blog});
   const url = new URL(request.url);
+  const languageSwitchLinks = await resolveResourceLanguageSwitchLinks({
+    storefront: context.storefront,
+    request,
+    resourceId: blog.id,
+    resourceType: 'Blog',
+  });
 
-  return {blog, canonicalUrl: `${url.origin}${url.pathname}`};
+  return {
+    blog,
+    canonicalUrl: `${url.origin}${url.pathname}`,
+    languageSwitchLinks,
+  };
 }
 
 /**
@@ -163,9 +181,7 @@ export default function Blog() {
       >
         <div className="container mx-auto">
           <div className="blog-handle-feed__header">
-            <p className="blog-handle-feed__eyebrow">
-              {t('blog.allArticles')}
-            </p>
+            <p className="blog-handle-feed__eyebrow">{t('blog.allArticles')}</p>
           </div>
           <PaginatedResourceSection<ArticleItemFragment>
             connection={articles}
@@ -243,6 +259,7 @@ const BLOGS_QUERY = `#graphql
     $endCursor: String
   ) @inContext(country: $country, language: $language) {
     blog(handle: $blogHandle) {
+      id
       title
       handle
       seo {

@@ -8,6 +8,7 @@ import type {FAQCategory, FAQCopy} from '~/components/FAQ';
 import type {KontaktPageData} from '~/components/kontakt';
 import {createTranslator} from '~/i18n';
 import {getLocaleFromRequest} from '~/lib/locale';
+import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {
   parseCustomerReviewsHeroMetaobject,
   parseCustomerReviewsMetaobject,
@@ -752,9 +753,16 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   const customerReviewsHeroMetaobject = page.erfahrungenHero?.reference ?? null;
   const customerReviewsStepsMetaobject =
     page.erfahrungenSteps?.reference ?? null;
+  const languageSwitchLinks = await resolveResourceLanguageSwitchLinks({
+    storefront: context.storefront,
+    request,
+    resourceId: page.id,
+    resourceType: 'Page',
+  });
 
   return {
     canonicalUrl: `${url.origin}${url.pathname}`,
+    languageSwitchLinks,
     faqCategories: parseFAQMetaobjects(faqMetaobjects),
     faqCopy: getFAQCopy(request),
     kontakt: parseKontaktPageDetails(kontaktMetaobjects),
