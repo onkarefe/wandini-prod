@@ -5,8 +5,10 @@ import {
   type FocusEvent,
   type MouseEvent,
 } from 'react';
+import {useTranslation} from '~/i18n/useTranslation';
 import useEmblaCarousel from 'embla-carousel-react';
-import {Link, useFetcher, useLocation, useNavigate} from 'react-router';
+import {useFetcher, useLocation, useNavigate} from 'react-router';
+import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {
   WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
   type WishlistActionData,
@@ -94,6 +96,7 @@ export default function BestsellerProductCard({
   similarProductsSourceTitle,
   similarProductsSourceImageUrl,
 }: BestsellerProductCardProps) {
+  const {t} = useTranslation();
   const displayImages =
     images.length > 1
       ? [images[1], images[0], ...images.slice(2, 3)]
@@ -101,6 +104,13 @@ export default function BestsellerProductCard({
   const fetcher = useFetcher<WishlistActionData>();
   const location = useLocation();
   const navigate = useNavigate();
+  const loginPath = usePrefixPathWithLocale('/account/login');
+  const fetcherLoginUrl = usePrefixPathWithLocale(
+    fetcher.data?.loginUrl ?? '',
+  );
+  const localizedSimilarProductsUrl = usePrefixPathWithLocale(
+    similarProductsUrl ?? '',
+  );
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: displayImages.length > 1,
     align: 'start',
@@ -135,10 +145,10 @@ export default function BestsellerProductCard({
   }, [isWishlisted, productId]);
 
   useEffect(() => {
-    if (fetcher.data?.loginUrl) {
-      window.location.href = fetcher.data.loginUrl;
+    if (fetcherLoginUrl) {
+      window.location.href = fetcherLoginUrl;
     }
-  }, [fetcher.data]);
+  }, [fetcherLoginUrl]);
 
   useEffect(() => {
     if (!fetcher.data) return;
@@ -165,7 +175,7 @@ export default function BestsellerProductCard({
 
     if (!isLoggedIn) {
       const returnTo = `${location.pathname}${location.search}${location.hash}`;
-      window.location.href = `/account/login?return_to=${encodeURIComponent(returnTo)}`;
+      window.location.href = `${loginPath}?return_to=${encodeURIComponent(returnTo)}`;
       return;
     }
 
@@ -181,11 +191,11 @@ export default function BestsellerProductCard({
 
   const isWishlistPending = fetcher.state !== 'idle';
   const wishlistLabel = wishlisted
-    ? 'Aus Favoriten entfernen'
+    ? t('productCard.removeFavorite')
     : isWishlistPending
-      ? 'Favoriten werden aktualisiert'
-      : 'Zu Favoriten hinzufügen';
-  const similarMotifsLabel = 'Ähnliche Motive anzeigen';
+      ? t('productCard.updatingFavorite')
+      : t('productCard.addFavorite');
+  const similarMotifsLabel = t('productCard.similarMotifs');
 
   const showMotifImage = () => {
     if (hasHoverMotif) emblaApi?.scrollTo(1);
@@ -240,7 +250,7 @@ export default function BestsellerProductCard({
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                void navigate(similarProductsUrl, {
+                void navigate(localizedSimilarProductsUrl, {
                   state: {
                     sourceProductTitle: similarProductsSourceTitle ?? title,
                     sourceProductImageUrl:
@@ -268,7 +278,7 @@ export default function BestsellerProductCard({
                   <Link
                     to={productUrl}
                     className="bestseller-card__image-link"
-                    aria-label={`${title} ansehen`}
+                    aria-label={t('productCard.view', {title})}
                   >
                     <img
                       src={image.url}
@@ -285,7 +295,7 @@ export default function BestsellerProductCard({
                 <Link
                   to={productUrl}
                   className="bestseller-card__image-link bestseller-card__image-placeholder"
-                  aria-label={`${title} ansehen`}
+                  aria-label={t('productCard.view', {title})}
                 />
               </div>
             )}
@@ -293,12 +303,17 @@ export default function BestsellerProductCard({
         </div>
 
         {hasMultipleImages ? (
-          <div className="bestseller-card__dots" aria-label="Produktbilder">
+          <div
+            className="bestseller-card__dots"
+            aria-label={t('productCard.images')}
+          >
             {displayImages.map((image, imageIndex) => (
               <button
                 key={`${image.url}-dot`}
                 type="button"
-                aria-label={`Zu Bild ${imageIndex + 1} wechseln`}
+                aria-label={t('productCard.goToImage', {
+                  number: imageIndex + 1,
+                })}
                 aria-current={imageIndex === selectedIndex ? 'true' : undefined}
                 className={`bestseller-card__dot ${
                   imageIndex === selectedIndex ? 'is-active' : ''

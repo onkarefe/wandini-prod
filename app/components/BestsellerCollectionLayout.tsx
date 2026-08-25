@@ -1,6 +1,7 @@
 import type {CustomCollectionQuery} from 'storefrontapi.generated';
 import {BestsellerCard} from '~/components/AllProdutsNew';
 import {Link} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 import '../styles/bestseller-collection.css';
 
 type CollectionData = NonNullable<CustomCollectionQuery['collection']>;
@@ -65,6 +66,7 @@ function ProductSlot({
 export default function BestsellerCollectionLayout({
   collection,
 }: BestsellerCollectionLayoutProps) {
+  const {t} = useTranslation();
   const products = collection.products.nodes;
 
   const renderSlot = (product: CollectionProduct, slotClassName: string) => (
@@ -111,14 +113,15 @@ export default function BestsellerCollectionLayout({
 
       <div
         className="bestseller-collection__lookbook container mx-auto"
-        aria-label={`${collection.title} Produkte`}
+        aria-label={t('collection.productsLabel', {title: collection.title})}
       >
         {blocks.map(({pattern, products: blockProducts, productOffset}) => (
           <section
             className={`bestseller-collection__block ${pattern.className} bestseller-collection__block--count-${blockProducts.length}`}
-            aria-label={`Bestseller ${productOffset + 1} bis ${
-              productOffset + blockProducts.length
-            }`}
+            aria-label={t('collection.bestSellingRange', {
+              start: productOffset + 1,
+              end: productOffset + blockProducts.length,
+            })}
             key={blockProducts[0].id}
           >
             {blockProducts.map((product, index) =>
@@ -133,7 +136,7 @@ export default function BestsellerCollectionLayout({
           className="bestseller-collection__cta-button"
           to="/collections/fototapeten"
         >
-          <span>Alle Fototapeten entdecken</span>
+          <span>{t('collection.discoverAllWallpapers')}</span>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5 12h14m-5-5 5 5-5 5" />
           </svg>

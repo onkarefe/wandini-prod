@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
+import {useTranslation} from '~/i18n/useTranslation';
 import {Link} from '~/lib/i18n-router';
 
 type CollectionSwiperItem = {
@@ -47,8 +48,10 @@ function CollectionCardContent({item}: {item: CollectionSwiperItem}) {
 
 export default function AllProduts({
   items,
-  sectionTitle = 'All Products',
+  sectionTitle,
 }: AllProdutsProps) {
+  const {t} = useTranslation();
+  const resolvedSectionTitle = sectionTitle ?? t('collection.allProducts');
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     loop: items.length > 3,
@@ -105,15 +108,15 @@ export default function AllProduts({
       onMouseLeave={() => setIsMouseOver(false)}
     >
       <div className="seperator">
-        <h3>{sectionTitle}</h3>
+        <h3>{resolvedSectionTitle}</h3>
       </div>
 
       <div
         className="all-products-list"
         ref={emblaRef}
         role="region"
-        aria-roledescription="carousel"
-        aria-label={sectionTitle}
+        aria-roledescription={t('common.carousel')}
+        aria-label={resolvedSectionTitle}
       >
         <div className="all-products-track">
           {items.map((item, index) => (
@@ -121,7 +124,7 @@ export default function AllProduts({
               className="all-products-slide"
               key={item.id || index}
               role="group"
-              aria-roledescription="slide"
+              aria-roledescription={t('common.slide')}
               aria-label={`${index + 1} / ${items.length}`}
             >
               {item.link ? (
@@ -161,7 +164,10 @@ export default function AllProduts({
       </div>
 
       {scrollSnaps.length > 1 ? (
-        <div className="allProductsDots" aria-label="Collection slides">
+        <div
+          className="allProductsDots"
+          aria-label={t('collection.slides')}
+        >
           {scrollSnaps.map((_, index) => (
             <button
               key={`all-products-dot-${index}`}
@@ -169,7 +175,7 @@ export default function AllProduts({
               className={`allProductsDot${
                 index === selectedIndex ? ' allProductsDot--active' : ''
               }`}
-              aria-label={`Go to collection slide ${index + 1}`}
+              aria-label={t('collection.goToSlide', {number: index + 1})}
               aria-current={index === selectedIndex ? 'true' : undefined}
               onClick={() => emblaApi?.scrollTo(index)}
             />

@@ -3,6 +3,7 @@ import type { Route } from './+types/blogs._index';
 import { Image, getPaginationVariables } from '@shopify/hydrogen';
 import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
 import type { BlogsQuery } from 'storefrontapi.generated';
+import {useTranslation} from '~/i18n/useTranslation';
 import blogMainStyles from '~/styles/blogMain.css?url';
 import {Link} from '~/lib/i18n-router';
 import {getRobotsDirective} from '~/lib/seo';
@@ -173,6 +174,7 @@ function loadDeferredData({ context }: Route.LoaderArgs) {
 }
 
 export default function Blogs() {
+  const {t} = useTranslation();
   const { blogs, blogListingContent } = useLoaderData<typeof loader>();
   const heroFields = getBlogListingFields(blogListingContent);
 
@@ -193,7 +195,7 @@ export default function Blogs() {
         </div>
       </section>
 
-      <section className="blogs-grid-section" aria-label="Blog listesi">
+      <section className="blogs-grid-section" aria-label={t('blog.list')}>
         <div className="container mx-auto">
           <PaginatedResourceSection<BlogNode> connection={blogs}>
             {({ node: blog, index }) => (
@@ -217,13 +219,15 @@ export default function Blogs() {
                   </div>
                 ) : null}
                 <div className="blog-card__content">
-                  <p className="blog-card__eyebrow">Blog</p>
+                  <p className="blog-card__eyebrow">{t('blog.blog')}</p>
                   <h2 className="blog-card__title">{blog.title}</h2>
                   <p className="blog-card__excerpt">
                     {blog.blogCategoryDescription?.value || blog.seo?.description || ''}
                   </p>
                   <div className="blog-card__footer">
-                    <span className="blog-card__link">Explore articles</span>
+                    <span className="blog-card__link">
+                      {t('blog.exploreArticles')}
+                    </span>
                   </div>
                 </div>
               </Link>

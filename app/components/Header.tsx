@@ -22,7 +22,8 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
-import {Link, NavLink} from '~/lib/i18n-router';
+import {Link, NavLink, usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 
 type FieldRecord = {
   key?: string | null;
@@ -128,6 +129,7 @@ export function Header({
 }
 
 function HeaderSearch() {
+  const {t} = useTranslation();
   const queriesDatalistId = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -198,14 +200,14 @@ function HeaderSearch() {
         onKeyDown={handleResultsKeyDown}
         onSearchSubmit={closeResults}
         role="search"
-        aria-label="Produktsuche"
+        aria-label={t('search.label')}
       >
         {({fetchResults, inputRef}) => (
           <>
             <button
               className="h-desktopSearchSubmit"
               type="submit"
-              aria-label="Suche starten"
+              aria-label={t('search.submitLabel')}
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="10.8" cy="10.8" r="6.4" />
@@ -214,7 +216,7 @@ function HeaderSearch() {
             </button>
 
             <label className="h-visuallyHidden" htmlFor="header-search-query">
-              Produkte suchen
+              {t('search.inputLabel')}
             </label>
             <input
               autoComplete="off"
@@ -234,7 +236,7 @@ function HeaderSearch() {
                 setIsOpen(Boolean(event.currentTarget.value.trim()));
                 fetchResults(event);
               }}
-              placeholder="Produkte suchen ..."
+              placeholder={t('search.placeholder')}
               ref={inputRef}
               role="combobox"
               type="search"
@@ -261,7 +263,7 @@ function HeaderSearch() {
               className="h-desktopSearchResults"
               id="header-search-results"
               aria-live="polite"
-              aria-label="Suchvorschläge"
+              aria-label={t('search.suggestions')}
             >
               <SearchResultsPredictive.Queries
                 queries={queries}
@@ -271,7 +273,7 @@ function HeaderSearch() {
               {state !== 'idle' ? (
                 <div className="h-desktopSearchLoading" role="status">
                   <span aria-hidden="true" />
-                  Wird gesucht …
+                  {t('search.searching')}
                 </div>
               ) : total ? (
                 <div className="h-desktopSearchResultsList">
@@ -296,7 +298,7 @@ function HeaderSearch() {
                     to={searchUrl}
                   >
                     <span>
-                      Alle Ergebnisse für <q>{term.current}</q>
+                      {t('search.allResults', {term: term.current})}
                     </span>
                     <svg viewBox="0 0 20 20" aria-hidden="true">
                       <path d="M4 10h11M11 6l4 4-4 4" />
@@ -315,16 +317,18 @@ function HeaderSearch() {
 }
 
 function HeaderLogo({shop}: {shop: HeaderQuery['shop'] | null}) {
+  const {t} = useTranslation();
+
   return (
-    <NavLink to="/" className="h-logoLink wh-logo" aria-label="Zur Startseite">
+    <NavLink to="/" className="h-logoLink wh-logo" aria-label={t('common.home')}>
       {shop?.brand?.logo?.image?.url ? (
         <img
           src={shop.brand.logo.image.url}
-          alt={shop?.name || 'Logo'}
+          alt={shop?.name || t('common.logo')}
           className="h-logoImg"
         />
       ) : (
-        <span className="h-logoText">{shop?.name || 'Store'}</span>
+        <span className="h-logoText">{shop?.name || t('common.store')}</span>
       )}
     </NavLink>
   );
@@ -335,19 +339,21 @@ function DesktopHeaderActions({
 }: {
   cart: Promise<CartApiQueryFragment | null>;
 }) {
+  const {t} = useTranslation();
+
   return (
-    <nav className="wh-actions" aria-label="Schnellzugriff">
+    <nav className="wh-actions" aria-label={t('navigation.quickActions')}>
       <NavLink
         to="/account/favorites"
         className="wh-actionButton"
-        aria-label="Favoriten"
+        aria-label={t('navigation.favorites')}
       >
         <span className="wh-actionIcon" aria-hidden="true">
           <svg viewBox="0 0 24 24">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 20.75l7.78-7.3 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z" />
           </svg>
         </span>
-        <span className="wh-actionLabel">Favoriten</span>
+        <span className="wh-actionLabel">{t('navigation.favorites')}</span>
       </NavLink>
       <CartToggle cart={cart} showLabel />
     </nav>
@@ -361,6 +367,7 @@ export function HeaderMenu({
   header: HeaderQuery;
   publicStoreDomain: string;
 }) {
+  const {t} = useTranslation();
   const shop = header?.shop ?? null;
   const menu = header?.menu ?? null;
   const megaNodes = header.megaMenus.nodes;
@@ -497,7 +504,7 @@ export function HeaderMenu({
 
   return (
     <div className="h-menuRoot">
-      <nav className="h-navDesktop" aria-label="Primary navigation">
+      <nav className="h-navDesktop" aria-label={t('navigation.primary')}>
         {navItems.map((item) => {
           const href: string = item?._href || '/';
           const mega = resolveMegaForItem(item);
@@ -527,7 +534,7 @@ export function HeaderMenu({
                 }
                 aria-expanded={hasMega ? openId === String(key) : undefined}
               >
-                <span>{item?.title || 'Link'}</span>
+                <span>{item?.title || t('navigation.link')}</span>
                 {hasMega ? (
                   <svg
                     className="h-navChevron"
@@ -552,7 +559,7 @@ export function HeaderMenu({
           type="button"
           className="h-mobileToggleBtn"
           onClick={() => setMobileOpen(true)}
-          aria-label="Open menu"
+          aria-label={t('navigation.openMenu')}
           aria-expanded={mobileOpen}
         >
           ☰
@@ -564,13 +571,13 @@ export function HeaderMenu({
           className="h-mobileOverlay"
           role="dialog"
           aria-modal="true"
-          aria-label="Mobile menu"
+          aria-label={t('navigation.mobileMenu')}
         >
           <button
             type="button"
             className="h-mobileOverlayBackdrop"
             onClick={closeMobile}
-            aria-label="Close menu"
+            aria-label={t('navigation.closeMenu')}
           />
 
           <div className="h-mobilePanel">
@@ -578,34 +585,36 @@ export function HeaderMenu({
               <NavLink
                 to="/"
                 className="h-logoLink"
-                aria-label="Go to homepage"
+                aria-label={t('common.home')}
                 onClick={closeMobile}
               >
                 {shop?.brand?.logo?.image?.url ? (
                   <img
                     src={shop.brand.logo.image.url}
-                    alt={shop?.name || 'Logo'}
+                    alt={shop?.name || t('common.logo')}
                     className="h-logoImg"
                   />
                 ) : (
-                  <span className="h-logoText">{shop?.name || 'Store'}</span>
+                  <span className="h-logoText">
+                    {shop?.name || t('common.store')}
+                  </span>
                 )}
               </NavLink>
               <button
                 type="button"
                 className="h-mobileCloseBtn"
                 onClick={closeMobile}
-                aria-label="Close menu"
+                aria-label={t('navigation.closeMenu')}
               >
                 ✕
               </button>
             </div>
 
-            <nav className="h-mobileNav" aria-label="Mobile navigation">
+            <nav className="h-mobileNav" aria-label={t('navigation.mobile')}>
               <ul className="h-mobileNavList">
                 {navItems.map((item) => {
                   const href: string = item?._href || '/';
-                  const label = item?.title || 'Link';
+                  const label = item?.title || t('navigation.link');
                   const key = String(item?.id || label || href);
 
                   const mega = resolveMegaForItem(item);
@@ -650,7 +659,9 @@ export function HeaderMenu({
                           aria-expanded={isOpen}
                           aria-controls={`h-mobile-sub-${key}`}
                           aria-label={
-                            isOpen ? `Collapse ${label}` : `Expand ${label}`
+                            isOpen
+                              ? t('navigation.collapseSubmenu', {label})
+                              : t('navigation.expandSubmenu', {label})
                           }
                         >
                           <span
@@ -862,9 +873,15 @@ function HeaderCtas({
   isLoggedIn: Promise<boolean>;
   cart: Promise<CartApiQueryFragment | null>;
 }) {
+  const {t} = useTranslation();
+
   return (
-    <nav className="h-ctas" aria-label="Header actions">
-      <NavLink to="/account" className="h-userbox" aria-label="Account">
+    <nav className="h-ctas" aria-label={t('navigation.quickActions')}>
+      <NavLink
+        to="/account"
+        className="h-userbox"
+        aria-label={t('navigation.account')}
+      >
         <Suspense fallback={null}>
           <Await resolve={isLoggedIn} errorElement={null}>
             {() => (
@@ -889,13 +906,14 @@ function HeaderCtas({
 
 function SearchToggle() {
   const {open} = useAside();
+  const {t} = useTranslation();
 
   return (
     <button
       type="button"
       className="h-searchbox"
       onClick={() => open('search')}
-      aria-label="Suchen"
+      aria-label={t('search.submit')}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -939,13 +957,15 @@ function CartBadge({
   showLabel?: boolean;
 }) {
   const {open} = useAside();
+  const {t} = useTranslation();
   const {publish, shop, cart, prevCart} = useAnalytics();
+  const cartPath = usePrefixPathWithLocale('/cart');
 
   return (
     <a
-      href="/cart"
+      href={cartPath}
       className="h-cartBox"
-      aria-label="Warenkorb"
+      aria-label={t('navigation.cart')}
       onClick={(e) => {
         e.preventDefault();
         open('cart');
@@ -980,7 +1000,9 @@ function CartBadge({
           <span className="h-cartCount">{count}</span>
         ) : null}
       </span>
-      {showLabel ? <span className="wh-actionLabel">Warenkorb</span> : null}
+      {showLabel ? (
+        <span className="wh-actionLabel">{t('navigation.cart')}</span>
+      ) : null}
     </a>
   );
 }

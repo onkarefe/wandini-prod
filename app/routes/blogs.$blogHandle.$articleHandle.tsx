@@ -5,6 +5,7 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogDetailStyles from '~/styles/blogDetail.css?url';
 import {Link} from '~/lib/i18n-router';
 import {getRobotsDirective} from '~/lib/seo';
+import {useTranslation} from '~/i18n/useTranslation';
 
 const BLOCKED_HTML_TAGS = [
   'script',
@@ -362,6 +363,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 }
 
 export default function Article() {
+  const {t} = useTranslation();
   const {article, relatedArticles, blogHandle, blogTitle, canonicalUrl} =
     useLoaderData<typeof loader>();
   const {title, image, contentHtml, author} = article;
@@ -421,7 +423,9 @@ export default function Article() {
 
           <div className="blog-detail-sidebar">
             <div className="blog-detail-sidebar__inner">
-              <p className="blog-detail-sidebar__eyebrow">More In This Category</p>
+              <p className="blog-detail-sidebar__eyebrow">
+                {t('blog.moreInCategory')}
+              </p>
               <div className="blog-detail-sidebar__list">
                 {relatedArticles.map((relatedArticle) => {
                   const relatedDate = new Intl.DateTimeFormat('en-US', {

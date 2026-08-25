@@ -2,6 +2,7 @@ import {Image} from '@shopify/hydrogen';
 import useEmblaCarousel from 'embla-carousel-react';
 import {useCallback, useEffect, useState} from 'react';
 import {Link} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 import type {
   SimilarMotifsPreviewData,
   SimilarMotifsPreviewProduct,
@@ -84,6 +85,8 @@ function SimilarProductCard({product}: {product: SimilarMotifsPreviewProduct}) {
 }
 
 function ExploreAllCard({data}: {data: SimilarMotifsPreviewData}) {
+  const {t} = useTranslation();
+
   return (
     <article className="similar-motifs-explore-card">
       <Link
@@ -93,17 +96,17 @@ function ExploreAllCard({data}: {data: SimilarMotifsPreviewData}) {
           sourceProductImageUrl: data.sourceProductImageUrl,
         }}
         className="similar-motifs-explore-card__link"
-        aria-label="Alle ähnlichen Motive entdecken"
+        aria-label={t('similarMotifs.exploreAll')}
       >
         <span className="similar-motifs-explore-card__icon">
           <MotifsIcon />
         </span>
         <span className="similar-motifs-explore-card__eyebrow">
-          Ähnliche Motive
+          {t('similarMotifs.title')}
         </span>
-        <h3>Alle ähnlichen Motive entdecken</h3>
+        <h3>{t('similarMotifs.exploreAll')}</h3>
         <span className="similar-motifs-explore-card__action">
-          Jetzt entdecken
+          {t('similarMotifs.discoverNow')}
           <ArrowIcon direction="right" />
         </span>
       </Link>
@@ -116,6 +119,7 @@ export default function SimilarMotifsCarousel({
 }: {
   data: SimilarMotifsPreviewData;
 }) {
+  const {t} = useTranslation();
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     containScroll: 'trimSnaps',
@@ -151,14 +155,14 @@ export default function SimilarMotifsCarousel({
       aria-labelledby="similar-motifs-heading"
     >
       <div className="similar-motifs-section__header">
-        <h2 id="similar-motifs-heading">Ähnliche Motive</h2>
+        <h2 id="similar-motifs-heading">{t('similarMotifs.title')}</h2>
 
         <div className="similar-motifs-section__controls">
           <button
             type="button"
             onClick={() => emblaApi?.scrollPrev()}
             disabled={!canScrollPrev}
-            aria-label="Vorherige Motive anzeigen"
+            aria-label={t('similarMotifs.previous')}
           >
             <ArrowIcon direction="left" />
           </button>
@@ -166,7 +170,7 @@ export default function SimilarMotifsCarousel({
             type="button"
             onClick={() => emblaApi?.scrollNext()}
             disabled={!canScrollNext}
-            aria-label="Weitere Motive anzeigen"
+            aria-label={t('similarMotifs.next')}
           >
             <ArrowIcon direction="right" />
           </button>
@@ -180,8 +184,8 @@ export default function SimilarMotifsCarousel({
           className="similar-motifs-carousel"
           ref={emblaRef}
           role="region"
-          aria-roledescription="Karussell"
-          aria-label="Ähnliche Motive"
+          aria-roledescription={t('common.carousel')}
+          aria-label={t('similarMotifs.title')}
         >
           <div className="similar-motifs-carousel__track">
             {data.products.map((product, index) => (
@@ -189,8 +193,11 @@ export default function SimilarMotifsCarousel({
                 className="similar-motifs-carousel__slide"
                 key={product.id}
                 role="group"
-                aria-roledescription="Folie"
-                aria-label={`${index + 1} von ${data.products.length}`}
+                aria-roledescription={t('common.slide')}
+                aria-label={t('similarMotifs.position', {
+                  number: index + 1,
+                  total: data.products.length,
+                })}
               >
                 <SimilarProductCard product={product} />
               </div>

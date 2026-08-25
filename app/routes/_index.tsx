@@ -20,6 +20,9 @@ import UberUnsHomepage from '~/components/UberUnsHomepage';
 import CustomerRevs from '~/components/CustomerRevs';
 import homepageStyles from '~/styles/homepage.css?url';
 import {getRobotsDirective} from '~/lib/seo';
+import {createTranslator} from '~/i18n';
+import {useTranslation} from '~/i18n/useTranslation';
+import {getLocaleFromI18n} from '~/lib/locale';
 
 const HOMEPAGE_META_BRAND = 'Wandini';
 const HOMEPAGE_META_DESCRIPTION_MAX_LENGTH = 160;
@@ -289,6 +292,7 @@ function normalizeReferenceImage(
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({ context, request }: Route.LoaderArgs) {
+  const t = createTranslator(getLocaleFromI18n(context.storefront.i18n));
   const [
     { collections },
     heroRes,
@@ -387,7 +391,8 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const bestsellerCollection = bestsellerRes?.collection ?? null;
   const bestsellerProducts: BestsellerProduct[] =
     bestsellerCollection?.products.nodes ?? [];
-  const bestsellerSectionTitle = bestsellerCollection?.title ?? 'Bestseller';
+  const bestsellerSectionTitle =
+    bestsellerCollection?.title ?? t('home.bestSelling');
 
   const customGridNode = customGridRes?.metaobjects?.nodes?.[0];
   const customGridFields = Array.isArray(customGridNode?.fields)
@@ -689,10 +694,12 @@ function RecommendedProducts({
 }: {
   products: Promise<RecommendedProductsQuery | null>;
 }) {
+  const {t} = useTranslation();
+
   return (
     <div className="recommended-products">
-      <h2>Recommended Products</h2>
-      <Suspense fallback={<div>Loading...</div>}>
+      <h2>{t('home.recommendedProducts')}</h2>
+      <Suspense fallback={<div>{t('common.loading')}</div>}>
         <Await resolve={products}>
           {(response) => (
             <div className="recommended-products-grid">

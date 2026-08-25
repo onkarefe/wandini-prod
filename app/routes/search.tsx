@@ -1,6 +1,9 @@
 import {Analytics, Pagination, getPaginationVariables} from '@shopify/hydrogen';
 import {useLoaderData, useNavigation} from 'react-router';
 import type {PredictiveSearchQuery} from 'storefrontapi.generated';
+import {useTranslation} from '~/i18n/useTranslation';
+import {createTranslator} from '~/i18n';
+import {getLocaleFromI18n} from '~/lib/locale';
 import noSearchResultsIcon from '~/assets/Icons/nosrIcon.png';
 import SearchProductCard from '~/components/SearchPageProductCard';
 import {SearchForm} from '~/components/SearchForm';
@@ -25,15 +28,14 @@ const DEFAULT_PREDICTIVE_SEARCH_LIMIT = 5;
 const MAX_PREDICTIVE_SEARCH_LIMIT = 10;
 const SEARCH_PAGE_SIZE = 12;
 const CONTENT_RESULT_LIMIT = 4;
-const SEARCH_ERROR_MESSAGE =
-  'Die Suche ist momentan nicht verfügbar. Bitte versuchen Sie es erneut.';
+const SEARCH_ERROR_KEY = 'search.unavailable' as const;
 
 export function links() {
   return [{rel: 'stylesheet', href: searchPageStyles}];
 }
 
-export const meta: Route.MetaFunction = () => [
-  {title: 'Suche | Wandini'},
+export const meta: Route.MetaFunction = ({data}) => [
+  {title: createTranslator(data?.selectedLocale)('search.metaTitle')},
   {name: 'robots', content: 'noindex,follow'},
 ];
 
@@ -41,11 +43,14 @@ export async function loader({request, context}: Route.LoaderArgs) {
   const url = new URL(request.url);
   const isPredictive = url.searchParams.has('predictive');
   const term = String(url.searchParams.get('q') || '').trim();
+  const selectedLocale = getLocaleFromI18n(context.storefront.i18n);
 
   try {
-    return isPredictive
+    const searchData = isPredictive
       ? await predictiveSearch({request, context})
       : await regularSearch({request, context});
+
+    return {...searchData, selectedLocale};
   } catch (error) {
     console.error(error);
 
@@ -53,21 +58,24 @@ export async function loader({request, context}: Route.LoaderArgs) {
       return {
         type: 'predictive' as const,
         term,
-        error: SEARCH_ERROR_MESSAGE,
+        error: SEARCH_ERROR_KEY,
         result: getEmptyPredictiveSearchResult(),
+        selectedLocale,
       };
     }
 
     return {
       type: 'regular' as const,
       term,
-      error: SEARCH_ERROR_MESSAGE,
+      error: SEARCH_ERROR_KEY,
       result: getEmptyRegularSearchResult(),
+      selectedLocale,
     };
   }
 }
 
 export default function SearchPage() {
+  const {t} = useTranslation();
   const {type, term, result, error} = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const isSearching =
@@ -84,17 +92,15 @@ export default function SearchPage() {
       <div className="search-page__container">
         <header className="search-page__header">
           <p className="search-page__eyebrow">Wandini</p>
-          <h1>Suche</h1>
-          <p className="search-page__lead">
-            Finden Sie schnell das passende Motiv für Ihren Raum.
-          </p>
+          <h1>{t('search.title')}</h1>
+          <p className="search-page__lead">{t('search.pageLead')}</p>
         </header>
 
-        <SearchForm role="search" aria-label="Produktsuche">
+        <SearchForm role="search" aria-label={t('search.label')}>
           {({inputRef}) => (
             <>
               <label className="search-page__label" htmlFor="search-query">
-                Suchbegriff
+                {t('search.termLabel')}
               </label>
               <div className="search-page__field">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -107,12 +113,12 @@ export default function SearchPage() {
                   enterKeyHint="search"
                   id="search-query"
                   name="q"
-                  placeholder="Produkte und Motive durchsuchen"
+                  placeholder={t('search.pagePlaceholder')}
                   ref={inputRef}
                   type="search"
                 />
                 <button disabled={isSearching} type="submit">
-                  {isSearching ? 'Wird gesucht …' : 'Suchen'}
+                  {isSearching ? t('search.searching') : t('search.submit')}
                 </button>
               </div>
             </>
@@ -121,7 +127,7 @@ export default function SearchPage() {
 
         {error ? (
           <p className="search-page__error" role="alert">
-            {error}
+            {t('search.unavailable')}
           </p>
         ) : null}
 
@@ -131,7 +137,7 @@ export default function SearchPage() {
         {!error && term && hasResults ? (
           <div className="search-page__results">
             <div className="search-page__results-heading">
-              <p>Suchergebnisse für</p>
+              <p>{t('search.resultsFor')}</p>
               <h2>{term}</h2>
             </div>
 
@@ -155,6 +161,7 @@ function ProductResults({
   products: SearchProducts;
   term: string;
 }) {
+  const {t} = useTranslation();
   if (!products.nodes.length) return null;
 
   return (
@@ -163,7 +170,7 @@ function ProductResults({
       aria-labelledby="search-products-title"
     >
       <div className="search-section__header">
-        <h2 id="search-products-title">Produkte</h2>
+        <h2 id="search-products-title">{t('search.products')}</h2>
       </div>
 
       <Pagination connection={products}>
@@ -188,12 +195,15 @@ function ProductResults({
               })}
             </div>
 
-            <nav className="search-pagination" aria-label="Ergebnisseiten">
+            <nav
+              className="search-pagination"
+              aria-label={t('search.pagination')}
+            >
               <PreviousLink className="search-pagination__link">
-                {isLoading ? 'Wird geladen …' : 'Zurück'}
+                {isLoading ? t('common.loading') : t('common.previous')}
               </PreviousLink>
               <NextLink className="search-pagination__link">
-                {isLoading ? 'Wird geladen …' : 'Mehr anzeigen'}
+                {isLoading ? t('common.loading') : t('common.next')}
               </NextLink>
             </nav>
           </div>
@@ -212,13 +222,14 @@ function ContentResults({
   articles: SearchArticles;
   term: string;
 }) {
+  const {t} = useTranslation();
   if (!pages.nodes.length && !articles.nodes.length) return null;
 
   return (
     <div className="search-content-results">
       {pages.nodes.length ? (
         <section className="search-content-results__group">
-          <h2>Seiten</h2>
+          <h2>{t('search.pages')}</h2>
           <ul>
             {pages.nodes.map((page) => (
               <li key={page.id}>
@@ -240,7 +251,7 @@ function ContentResults({
 
       {articles.nodes.length ? (
         <section className="search-content-results__group">
-          <h2>Magazin</h2>
+          <h2>{t('search.magazine')}</h2>
           <ul>
             {articles.nodes.map((article) => {
               const blogHandle = article.blog?.handle;
@@ -272,26 +283,27 @@ function ContentResults({
 }
 
 function SearchStart() {
+  const {t} = useTranslation();
+
   return (
     <section className="search-state">
       <SearchIcon />
-      <h2>Was möchten Sie finden?</h2>
-      <p>Geben Sie einen Begriff ein, um unsere Motive zu durchsuchen.</p>
+      <h2>{t('search.startTitle')}</h2>
+      <p>{t('search.startDescription')}</p>
     </section>
   );
 }
 
 function SearchEmpty({term}: {term: string}) {
+  const {t} = useTranslation();
+
   return (
     <section className="search-state" aria-live="polite">
       <SearchIcon />
-      <h2>Keine Ergebnisse gefunden</h2>
-      <p>
-        Für <q>{term}</q> konnten wir keine passenden Ergebnisse finden. Prüfen
-        Sie die Schreibweise oder verwenden Sie einen allgemeineren Begriff.
-      </p>
+      <h2>{t('search.emptyTitle')}</h2>
+      <p>{t('search.noResultsDescription', {term})}</p>
       <Link className="search-state__link" to="/">
-        Zur Startseite
+        {t('common.home')}
       </Link>
     </section>
   );
@@ -472,7 +484,7 @@ async function regularSearch({
   return {
     type: 'regular',
     term,
-    error: errors?.length ? SEARCH_ERROR_MESSAGE : undefined,
+    error: errors?.length ? SEARCH_ERROR_KEY : undefined,
     result: {total, items},
   };
 }

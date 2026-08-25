@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import {useTranslation} from '~/i18n/useTranslation';
 import {useFetcher, useLocation} from 'react-router';
 import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {
@@ -74,6 +75,7 @@ export function ZubehorProductCard({
   isLoggedIn,
   isWishlisted,
 }: ZubehorProductCardProps) {
+  const {t} = useTranslation();
   const fetcher = useFetcher<WishlistActionData>();
   const location = useLocation();
   const loginPath = usePrefixPathWithLocale('/account/login');
@@ -112,10 +114,10 @@ export function ZubehorProductCard({
   }, [fetcher.data]);
 
   const wishlistButtonLabel = isPending
-    ? 'Favoriten werden aktualisiert'
+    ? t('productCard.updatingFavorite')
     : wishlisted
-      ? 'Aus Favoriten entfernen'
-      : 'Zu Favoriten hinzufügen';
+      ? t('productCard.removeFavorite')
+      : t('productCard.addFavorite');
 
   const handleWishlistClick = () => {
     setWishlistError(null);

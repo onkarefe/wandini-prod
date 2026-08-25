@@ -1,5 +1,7 @@
 import React, {useEffect, useState} from 'react';
+import {useTranslation} from '~/i18n/useTranslation';
 import {useFetcher, useLocation, useNavigate} from 'react-router';
+import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {
   WISHLIST_UPDATE_UNAVAILABLE_MESSAGE,
   type WishlistActionData,
@@ -87,6 +89,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   isWishlisted = false,
   onWishlistChange,
 }) => {
+  const {t} = useTranslation();
   const primaryImage = images[0] ?? null;
   const listingImage = images[1] ?? primaryImage;
   const hasHoverImage = Boolean(
@@ -95,6 +98,13 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   const fetcher = useFetcher<WishlistActionData>();
   const location = useLocation();
   const navigate = useNavigate();
+  const loginPath = usePrefixPathWithLocale('/account/login');
+  const fetcherLoginUrl = usePrefixPathWithLocale(
+    fetcher.data?.loginUrl ?? '',
+  );
+  const localizedSimilarProductsUrl = usePrefixPathWithLocale(
+    similarProductsUrl ?? '',
+  );
   const [wishlisted, setWishlisted] = useState(isWishlisted);
   const [wishlistError, setWishlistError] = useState<string | null>(null);
   const priceLabel = formatPriceLabel(minPrice);
@@ -105,9 +115,9 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   }, [isWishlisted, productId]);
 
   useEffect(() => {
-    if (!fetcher.data?.loginUrl) return;
-    window.location.href = fetcher.data.loginUrl;
-  }, [fetcher.data]);
+    if (!fetcherLoginUrl) return;
+    window.location.href = fetcherLoginUrl;
+  }, [fetcherLoginUrl]);
 
   useEffect(() => {
     if (!fetcher.data) return;
@@ -135,7 +145,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
 
     if (!isLoggedIn) {
       const returnTo = `${location.pathname}${location.search}${location.hash}`;
-      window.location.href = `/account/login?return_to=${encodeURIComponent(returnTo)}`;
+      window.location.href = `${loginPath}?return_to=${encodeURIComponent(returnTo)}`;
       return;
     }
 
@@ -150,14 +160,14 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   };
   const isPending = fetcher.state !== 'idle';
   const wishlistButtonLabel = wishlisted
-    ? 'Aus Favoriten entfernen'
+    ? t('productCard.removeFavorite')
     : isPending
-      ? 'Favoriten werden aktualisiert'
-      : 'Zu Favoriten hinzufügen';
-  const similarMotifsButtonLabel = 'Ähnliche Motive anzeigen';
+      ? t('productCard.updatingFavorite')
+      : t('productCard.addFavorite');
+  const similarMotifsButtonLabel = t('productCard.similarMotifs');
 
   return (
-    <a href={productUrl} className="custom-product-card" aria-label={title}>
+    <Link to={productUrl} className="custom-product-card" aria-label={title}>
       <button
         type="button"
         className={`custom-product-card__wishlist ${
@@ -185,8 +195,8 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
             event.preventDefault();
             event.stopPropagation();
 
-            if (similarProductsUrl) {
-              void navigate(similarProductsUrl, {
+            if (localizedSimilarProductsUrl) {
+              void navigate(localizedSimilarProductsUrl, {
                 state: {
                   sourceProductTitle: similarProductsSourceTitle ?? title,
                   sourceProductImageUrl:
@@ -229,7 +239,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
           </p>
         ) : null}
       </div>
-    </a>
+    </Link>
   );
 };
 

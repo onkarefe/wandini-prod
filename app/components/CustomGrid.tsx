@@ -1,5 +1,6 @@
 import type {CSSProperties} from 'react';
 import {Link} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 
 export type CustomGridItem = {
   id: string;
@@ -43,6 +44,7 @@ function CustomGridTile({
   item: CustomGridItem;
   index: number;
 }) {
+  const {t} = useTranslation();
   const tileClassName = TILE_CLASS_NAMES[index] ?? TILE_CLASS_NAMES[0];
   const className = `${tileClassName} cgBoxMain`;
   const style = getTileStyle(item.image?.url);
@@ -65,9 +67,9 @@ function CustomGridTile({
         <button
           type="button"
           className="cg-button"
-          aria-label={`${item.buttonText} coming soon`}
+          aria-label={t('common.comingSoonLabel', {label: item.buttonText})}
           aria-disabled="true"
-          title="Coming soon"
+          title={t('common.comingSoon')}
         >
           {item.buttonText}
         </button>

@@ -22,7 +22,8 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
-import {Link, NavLink} from '~/lib/i18n-router';
+import {Link, NavLink, usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 
 type FieldRecord = {
   key?: string | null;
@@ -129,6 +130,7 @@ export function DesktopHeader({
   cart,
   publicStoreDomain,
 }: DesktopHeaderProps) {
+  const {t} = useTranslation();
   const {shop} = header;
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -288,7 +290,7 @@ export function DesktopHeader({
           <NavLink
             className="dhx-brand"
             to="/"
-            aria-label="Zur Startseite"
+            aria-label={t('common.home')}
             onClick={closeMobileMenu}
           >
             {shop.brand?.logo?.image?.url ? (
@@ -319,7 +321,7 @@ export function DesktopHeader({
 
       <div className="dhx-navigationRail">
         <div className="container mx-auto dhx-container dhx-navigationInner">
-          <nav className="dhx-navigation" aria-label="Hauptnavigation">
+          <nav className="dhx-navigation" aria-label={t('navigation.primary')}>
             {resolvedNavigation.map(({item, key, mega}) => {
               const isOpen = openMenu === key;
 
@@ -340,7 +342,7 @@ export function DesktopHeader({
                     aria-expanded={mega ? isOpen : undefined}
                     onClick={() => setOpenMenu(null)}
                   >
-                    <span>{item.title || 'Link'}</span>
+                    <span>{item.title || t('navigation.link')}</span>
                     {mega ? <DownIcon /> : null}
                   </NavLink>
 
@@ -382,11 +384,12 @@ function MobileNavigation({
   onNavigate: () => void;
   onToggle: (key: string) => void;
 }) {
+  const {t} = useTranslation();
   return (
     <div className="dhx-mobileMenu" id="dhx-mobile-navigation">
       <nav
         className="container mx-auto dhx-container dhx-mobileNavigation"
-        aria-label="Mobile Hauptnavigation"
+        aria-label={t('navigation.mobile')}
       >
         {items.map(({item, key, mega}) => {
           const isOpen = openKey === key;
@@ -402,7 +405,7 @@ function MobileNavigation({
                   to={item._href}
                   onClick={onNavigate}
                 >
-                  {item.title || 'Link'}
+                  {item.title || t('navigation.link')}
                 </NavLink>
 
                 {mega ? (
@@ -411,7 +414,9 @@ function MobileNavigation({
                     type="button"
                     aria-controls={submenuId}
                     aria-expanded={isOpen}
-                    aria-label={(item.title || 'Menu') + ' submenu'}
+                    aria-label={t('navigation.submenu', {
+                      label: item.title || t('navigation.menu'),
+                    })}
                     onClick={() => onToggle(key)}
                   >
                     <DownIcon />
@@ -501,6 +506,7 @@ function DesktopSearch({
   forceClosed: boolean;
   onEngage: () => void;
 }) {
+  const {t} = useTranslation();
   const datalistId = useId();
   const searchRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -552,13 +558,13 @@ function DesktopSearch({
         onKeyDown={enterResults}
         onSearchSubmit={close}
         role="search"
-        aria-label="Produktsuche"
+        aria-label={t('search.label')}
       >
         {({fetchResults, inputRef}) => (
           <>
             <SearchIcon />
             <label className="dhx-srOnly" htmlFor="desktop-command-search">
-              Produkte und Kollektionen suchen
+              {t('search.inputLabel')}
             </label>
             <input
               aria-autocomplete="list"
@@ -580,13 +586,13 @@ function DesktopSearch({
                  setIsOpen(Boolean(event.currentTarget.value.trim()));
                  fetchResults(event);
               }}
-              placeholder="Produkte, Motive oder Farben suchen"
+              placeholder={t('search.placeholder')}
               ref={inputRef}
               role="combobox"
               type="search"
             />
-            <button type="submit" aria-label="Suche starten">
-              Suchen
+            <button type="submit" aria-label={t('search.submitLabel')}>
+              {t('search.submit')}
             </button>
           </>
         )}
@@ -608,7 +614,7 @@ function DesktopSearch({
             <div
               className="dhx-results"
               id="desktop-command-results"
-              aria-label="Suchvorschläge"
+              aria-label={t('search.suggestions')}
               aria-live="polite"
             >
               <SearchResultsPredictive.Queries
@@ -619,7 +625,7 @@ function DesktopSearch({
               {state !== 'idle' ? (
                 <div className="dhx-resultsStatus" role="status">
                   <i aria-hidden="true" />
-                  Suche läuft
+                  {t('search.searching')}
                 </div>
               ) : total ? (
                 <div className="dhx-resultsBody">
@@ -643,7 +649,7 @@ function DesktopSearch({
                     to={searchUrl}
                   >
                     <span>
-                      Alle Treffer für <q>{term.current}</q>
+                      {t('search.allResults', {term: term.current})}
                     </span>
                     <ArrowIcon />
                   </Link>
@@ -670,13 +676,15 @@ function DesktopActions({
   onNavigate: () => void;
   onMenuToggle: () => void;
 }) {
+  const {t} = useTranslation();
+
   return (
-    <nav className="dhx-actions" aria-label="Schnellzugriff">
+    <nav className="dhx-actions" aria-label={t('navigation.quickActions')}>
       <NavLink
         className="dhx-account"
         to="/account"
-        aria-label="Mein Konto"
-        title="Mein Konto"
+        aria-label={t('navigation.account')}
+        title={t('navigation.account')}
         onClick={onNavigate}
       >
         <UserIcon />
@@ -684,8 +692,8 @@ function DesktopActions({
       <NavLink
         className="dhx-saved"
         to="/account/favorites"
-        aria-label="Favoriten"
-        title="Favoriten"
+        aria-label={t('navigation.favorites')}
+        title={t('navigation.favorites')}
         onClick={onNavigate}
       >
         <HeartIcon />
@@ -701,7 +709,9 @@ function DesktopActions({
         type="button"
         aria-controls="dhx-mobile-navigation"
         aria-expanded={isMenuOpen}
-        aria-label={isMenuOpen ? 'Menü schließen' : 'Menü öffnen'}
+        aria-label={
+          isMenuOpen ? t('navigation.closeMenu') : t('navigation.openMenu')
+        }
         onClick={onMenuToggle}
       >
         <MenuIcon isOpen={isMenuOpen} />
@@ -723,15 +733,17 @@ function CartAction({
   count: number | null;
   onOpen: () => void;
 }) {
+  const {t} = useTranslation();
   const {open} = useAside();
   const {publish, shop, cart, prevCart} = useAnalytics();
+  const cartPath = usePrefixPathWithLocale('/cart');
 
   return (
     <a
       className="dhx-cart"
-      href="/cart"
-      aria-label="Warenkorb öffnen"
-      title="Warenkorb"
+      href={cartPath}
+      aria-label={t('navigation.openCart')}
+      title={t('navigation.cart')}
       onClick={(event) => {
         event.preventDefault();
         onOpen();

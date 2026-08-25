@@ -15,6 +15,7 @@ import {
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {Link} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -56,9 +57,11 @@ export function PageLayout({
 }
 
 function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
+  const {t} = useTranslation();
+
   return (
-    <Aside type="cart" heading="WARENKORB">
-      <Suspense fallback={<p>Warenkorb wird geladen …</p>}>
+    <Aside type="cart" heading={t('navigation.cart')}>
+      <Suspense fallback={<p>{t('common.loading')}</p>}>
         <Await resolve={cart}>
           {(resolvedCart) => {
             return <CartMain cart={resolvedCart} layout="aside" />;
@@ -71,9 +74,10 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
 
 function SearchAside() {
   const queriesDatalistId = useId();
+  const {t} = useTranslation();
 
   return (
-    <Aside type="search" heading="SUCHE">
+    <Aside type="search" heading={t('search.title')}>
       <div className="predictive-search">
         <SearchFormPredictive>
           {({fetchResults, inputRef}) => (
@@ -87,12 +91,12 @@ function SearchAside() {
                 name="q"
                 onChange={fetchResults}
                 onFocus={fetchResults}
-                placeholder="Suchen"
+                placeholder={t('search.submit')}
                 ref={inputRef}
                 type="search"
                 list={queriesDatalistId}
               />
-              <button type="submit" aria-label="Suchen">
+              <button type="submit" aria-label={t('search.submit')}>
                 <svg viewBox="0 0 20 20" aria-hidden="true">
                   <path d="M4 10h11M11 6l4 4-4 4" />
                 </svg>
@@ -114,7 +118,7 @@ function SearchAside() {
               return (
                 <div className="predictive-search__loading" role="status">
                   <span aria-hidden="true" />
-                  Wird gesucht …
+                  {t('search.searching')}
                 </div>
               );
             }
@@ -156,7 +160,7 @@ function SearchAside() {
                     to={searchUrl}
                   >
                     <span>
-                      Alle Ergebnisse für <q>{term.current}</q> anzeigen
+                      {t('search.allResultsLong', {term: term.current})}
                     </span>
                     <svg viewBox="0 0 20 20" aria-hidden="true">
                       <path d="M4 10h11M11 6l4 4-4 4" />

@@ -2,6 +2,7 @@ import {useLoaderData} from 'react-router';
 import type {Route} from './+types/blogs.$blogHandle._index';
 import {Image, getPaginationVariables} from '@shopify/hydrogen';
 import type {ArticleItemFragment} from 'storefrontapi.generated';
+import {useTranslation} from '~/i18n/useTranslation';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogHandleStyles from '~/styles/blogHandle.css?url';
@@ -137,6 +138,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 }
 
 export default function Blog() {
+  const {t} = useTranslation();
   const {blog} = useLoaderData<typeof loader>();
   const {articles} = blog;
 
@@ -144,7 +146,9 @@ export default function Blog() {
     <div className="blog-handle-page">
       <div className="blog-handle-hero">
         <div className="container mx-auto">
-          <p className="blog-handle-hero__eyebrow">Category Archive</p>
+          <p className="blog-handle-hero__eyebrow">
+            {t('blog.categoryArchive')}
+          </p>
           <h1 className="blog-handle-hero__title">{blog.title}</h1>
           {blog.seo?.description ? (
             <p className="blog-handle-hero__intro">{blog.seo.description}</p>
@@ -152,10 +156,15 @@ export default function Blog() {
         </div>
       </div>
 
-      <div className="blog-handle-feed" aria-label={`${blog.title} articles`}>
+      <div
+        className="blog-handle-feed"
+        aria-label={t('blog.articlesLabel', {title: blog.title})}
+      >
         <div className="container mx-auto">
           <div className="blog-handle-feed__header">
-            <p className="blog-handle-feed__eyebrow">All Articles</p>
+            <p className="blog-handle-feed__eyebrow">
+              {t('blog.allArticles')}
+            </p>
           </div>
           <PaginatedResourceSection<ArticleItemFragment>
             connection={articles}
@@ -182,6 +191,7 @@ function ArticleItem({
   article: BlogArticle;
   loading?: HTMLImageElement['loading'];
 }) {
+  const {t} = useTranslation();
   const publishedAt = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'long',
@@ -205,14 +215,14 @@ function ArticleItem({
           </div>
         )}
         <div className="blog-article__content">
-          <p className="blog-article__eyebrow">Article</p>
+          <p className="blog-article__eyebrow">{t('blog.article')}</p>
           <h2 className="blog-article__title">{article.title}</h2>
           {article.excerpt ? (
             <p className="blog-article__excerpt">{article.excerpt}</p>
           ) : null}
           <div className="blog-article__footer">
             <small className="blog-article__date">{publishedAt}</small>
-            <span className="blog-article__cta">Read article</span>
+            <span className="blog-article__cta">{t('blog.readArticle')}</span>
           </div>
         </div>
       </Link>

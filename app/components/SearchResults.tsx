@@ -2,6 +2,7 @@ import {Link} from '~/lib/i18n-router';
 import {Image, Money, Pagination} from '@shopify/hydrogen';
 import {urlWithTrackingParams, type RegularSearchReturn} from '~/lib/search';
 import nosrIcon from '~/assets/Icons/nosrIcon.png';
+import {useTranslation} from '~/i18n/useTranslation';
 
 type SearchItems = RegularSearchReturn['result']['items'];
 type PartialSearchResult<ItemType extends keyof SearchItems> = Pick<
@@ -35,13 +36,14 @@ function SearchResultsArticles({
   term,
   articles,
 }: PartialSearchResult<'articles'>) {
+  const {t} = useTranslation();
   if (!articles?.nodes.length) {
     return null;
   }
 
   return (
     <div className="search-result">
-      <h2>Magazin</h2>
+      <h2>{t('search.magazine')}</h2>
       <div>
         {articles.nodes.map((article) => {
           const blogHandle = article.blog?.handle;
@@ -75,13 +77,14 @@ function SearchResultsArticles({
 }
 
 function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
+  const {t} = useTranslation();
   if (!pages?.nodes.length) {
     return null;
   }
 
   return (
     <div className="search-result">
-      <h2>Seiten</h2>
+      <h2>{t('search.pages')}</h2>
       <div>
         {pages.nodes.map((page) => {
           const pageUrl = urlWithTrackingParams({
@@ -108,13 +111,14 @@ function SearchResultsProducts({
   term,
   products,
 }: PartialSearchResult<'products'>) {
+  const {t} = useTranslation();
   if (!products?.nodes.length) {
     return null;
   }
 
   return (
     <div className="search-result">
-      <h2>Produkte</h2>
+      <h2>{t('search.products')}</h2>
       <Pagination connection={products}>
         {({nodes, isLoading, NextLink, PreviousLink}) => {
           const itemsMarkup = nodes.map((product) => {
@@ -146,7 +150,11 @@ function SearchResultsProducts({
             <div>
               <div>
                 <PreviousLink>
-                  {isLoading ? 'Wird geladen …' : <span>Zurück</span>}
+                  {isLoading ? (
+                    t('common.loading')
+                  ) : (
+                    <span>{t('common.previous')}</span>
+                  )}
                 </PreviousLink>
               </div>
               <div>
@@ -155,7 +163,11 @@ function SearchResultsProducts({
               </div>
               <div>
                 <NextLink>
-                  {isLoading ? 'Wird geladen …' : <span>Mehr anzeigen</span>}
+                  {isLoading ? (
+                    t('common.loading')
+                  ) : (
+                    <span>{t('common.next')}</span>
+                  )}
                 </NextLink>
               </div>
             </div>
@@ -168,20 +180,22 @@ function SearchResultsProducts({
 }
 
 function SearchResultsEmpty() {
+  const {t} = useTranslation();
+
   return (
     <div className="noSR-mainbox">
       <img src={nosrIcon} alt="" aria-hidden="true" className="noSR-icon" />
 
-      <h2 className="noSR-title">Keine Ergebnisse gefunden</h2>
+      <h2 className="noSR-title">{t('search.emptyTitle')}</h2>
 
       <p className="noSR-desc">
-        Verwenden Sie einen allgemeineren Suchbegriff.
+        {t('search.emptyDescription')}
         <br />
-        Benötigen Sie Hilfe? Unser Kundenservice unterstützt Sie gerne.
+        {t('search.emptyHelp')}
       </p>
 
       <Link to="/" className="noSR-button">
-        Zur Startseite
+        {t('common.home')}
       </Link>
     </div>
   );

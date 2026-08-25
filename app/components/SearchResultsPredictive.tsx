@@ -9,6 +9,7 @@ import {
   urlWithTrackingParams,
 } from '~/lib/search';
 import {useAside} from './Aside';
+import {useTranslation} from '~/i18n/useTranslation';
 
 const PREDICTIVE_SEARCH_INPUT_SELECTOR =
   '[data-predictive-search-input="true"]';
@@ -89,11 +90,12 @@ function SearchResultsPredictiveProducts({
   products,
   closeSearch,
 }: PartialPredictiveSearchResult<'products'>) {
+  const {t} = useTranslation();
   if (!products.length) return null;
 
   return (
     <section className="predictive-search-result">
-      <h2>Produkte</h2>
+      <h2>{t('search.products')}</h2>
       <ul>
         {products.map((product) => {
           const productUrl = urlWithTrackingParams({
@@ -133,11 +135,12 @@ function SearchResultsPredictiveCollections({
   collections,
   closeSearch,
 }: PartialPredictiveSearchResult<'collections'>) {
+  const {t} = useTranslation();
   if (!collections.length) return null;
 
   return (
     <section className="predictive-search-result">
-      <h2>Kollektionen</h2>
+      <h2>{t('search.collections')}</h2>
       <ul>
         {collections.map((collection) => {
           const collectionUrl = urlWithTrackingParams({
@@ -171,11 +174,12 @@ function SearchResultsPredictivePages({
   pages,
   closeSearch,
 }: PartialPredictiveSearchResult<'pages'>) {
+  const {t} = useTranslation();
   if (!pages.length) return null;
 
   return (
     <section className="predictive-search-result predictive-search-result--links">
-      <h2>Seiten</h2>
+      <h2>{t('search.pages')}</h2>
       <ul>
         {pages.map((page) => (
           <li className="predictive-search-result-item" key={page.id}>
@@ -204,11 +208,12 @@ function SearchResultsPredictiveArticles({
   articles,
   closeSearch,
 }: PartialPredictiveSearchResult<'articles'>) {
+  const {t} = useTranslation();
   if (!articles.length) return null;
 
   return (
     <section className="predictive-search-result">
-      <h2>Magazin</h2>
+      <h2>{t('search.magazine')}</h2>
       <ul>
         {articles.map((article) => {
           const articleUrl = urlWithTrackingParams({
@@ -261,14 +266,13 @@ function SearchResultsPredictiveEmpty({
 }: {
   term: React.MutableRefObject<string>;
 }) {
+  const {t} = useTranslation();
   if (!term.current) return null;
 
   return (
     <div className="predictive-search__empty" role="status">
       <img src={noSearchResultsIcon} alt="" aria-hidden="true" />
-      <p>
-        Keine Ergebnisse für <q>{term.current}</q> gefunden.
-      </p>
+      <p>{t('search.empty', {term: term.current})}</p>
     </div>
   );
 }

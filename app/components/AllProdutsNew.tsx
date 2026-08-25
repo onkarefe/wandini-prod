@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
+import {useTranslation} from '~/i18n/useTranslation';
 import {Link} from '~/lib/i18n-router';
 
 type ProductImage = {
@@ -99,8 +100,10 @@ export function BestsellerCard({product}: {product: BestsellerProduct}) {
 
 export default function AllProdutsNew({
   products,
-  sectionTitle = 'Bestseller',
+  sectionTitle,
 }: AllProdutsNewProps) {
+  const {t} = useTranslation();
+  const resolvedSectionTitle = sectionTitle ?? t('home.bestSelling');
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     loop: products.length > 3,
@@ -158,15 +161,15 @@ export default function AllProdutsNew({
       onMouseLeave={() => setIsMouseOver(false)}
     >
       <div className="seperator">
-        <h3 id="bestseller-products-title">{sectionTitle}</h3>
+        <h3 id="bestseller-products-title">{resolvedSectionTitle}</h3>
       </div>
 
       <div
         className="all-products-list"
         ref={emblaRef}
         role="region"
-        aria-roledescription="carousel"
-        aria-label={sectionTitle}
+        aria-roledescription={t('common.carousel')}
+        aria-label={resolvedSectionTitle}
       >
         <div className="all-products-track">
           {products.map((product, index) => (
@@ -174,7 +177,7 @@ export default function AllProdutsNew({
               className="all-products-slide"
               key={product.id}
               role="group"
-              aria-roledescription="slide"
+              aria-roledescription={t('common.slide')}
               aria-label={`${index + 1} / ${products.length}`}
             >
               <BestsellerCard product={product} />
@@ -184,7 +187,10 @@ export default function AllProdutsNew({
       </div>
 
       {scrollSnaps.length > 1 ? (
-        <div className="allProductsDots" aria-label="Bestseller slides">
+        <div
+          className="allProductsDots"
+          aria-label={t('home.bestSellingSlides')}
+        >
           {scrollSnaps.map((snap, index) => (
             <button
               key={`bestseller-products-dot-${snap}`}
@@ -192,7 +198,7 @@ export default function AllProdutsNew({
               className={`allProductsDot${
                 index === selectedIndex ? ' allProductsDot--active' : ''
               }`}
-              aria-label={`Bestseller slide ${index + 1}`}
+              aria-label={t('home.bestSellingSlide', {number: index + 1})}
               aria-current={index === selectedIndex ? 'true' : undefined}
               onClick={() => emblaApi?.scrollTo(index)}
             />

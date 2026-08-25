@@ -1,3 +1,5 @@
+import type {TranslationKey} from '~/i18n';
+
 export const DEFAULT_COLLECTION_SORT = 'BEST_SELLING' as const;
 
 export const STOREFRONT_COLLECTION_SORT_KEYS = [
@@ -17,14 +19,14 @@ export type StorefrontCollectionSortKey =
 export type CollectionSortValue = StorefrontCollectionSortKey;
 
 export const COLLECTION_SORT_OPTIONS = [
-  {label: 'Bestseller', value: 'BEST_SELLING'},
-  {label: 'Neueste', value: 'CREATED'},
-  {label: 'Preis: niedrig bis hoch', value: 'PRICE'},
-  {label: 'A bis Z', value: 'TITLE'},
-  {label: 'Relevanz', value: 'RELEVANCE'},
-  {label: 'Standard', value: 'COLLECTION_DEFAULT'},
+  {labelKey: 'collection.sort.bestSelling', value: 'BEST_SELLING'},
+  {labelKey: 'collection.sort.newest', value: 'CREATED'},
+  {labelKey: 'collection.sort.priceLowHigh', value: 'PRICE'},
+  {labelKey: 'collection.sort.alphabetical', value: 'TITLE'},
+  {labelKey: 'collection.sort.relevance', value: 'RELEVANCE'},
+  {labelKey: 'collection.sort.default', value: 'COLLECTION_DEFAULT'},
 ] as const satisfies ReadonlyArray<{
-  label: string;
+  labelKey: TranslationKey;
   value: CollectionSortValue;
 }>;
 

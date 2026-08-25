@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
+import {useTranslation} from '~/i18n/useTranslation';
 
 type CustomerReview = {
   id: string;
@@ -100,10 +101,14 @@ function StarIcon({state}: {state: StarState}) {
 }
 
 function CustomerReviewStars({rating}: {rating: number}) {
+  const {t} = useTranslation();
   const starStates = getStarStates(rating);
 
   return (
-    <div className="customerReviewStars" aria-label={`${rating} von 5 Sternen`}>
+    <div
+      className="customerReviewStars"
+      aria-label={t('reviews.rating', {rating})}
+    >
       {starStates.map(({position, state}) => (
         <StarIcon key={position} state={state} />
       ))}
@@ -115,6 +120,7 @@ export default function CustomerRevs({
   reviews = [],
   sectionTitle,
 }: CustomerRevsProps) {
+  const {t} = useTranslation();
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     loop: reviews.length > 3,
@@ -178,7 +184,7 @@ export default function CustomerRevs({
           </span>
           <span>
             {reviews.length}{' '}
-            {reviews.length === 1 ? 'Bewertung' : 'Bewertungen'}
+            {reviews.length === 1 ? t('reviews.one') : t('reviews.many')}
           </span>
         </p>
       </div>
@@ -233,7 +239,10 @@ export default function CustomerRevs({
       </div>
 
       {scrollSnaps.length > 1 ? (
-        <div className="customerReviewsDots" aria-label="Kundenbewertungen">
+        <div
+          className="customerReviewsDots"
+          aria-label={t('reviews.list')}
+        >
           {scrollSnaps.map((scrollSnap, index) => (
             <button
               key={`customer-review-dot-${scrollSnap}`}
@@ -241,7 +250,7 @@ export default function CustomerRevs({
               className={`customerReviewsDot${
                 index === selectedIndex ? ' customerReviewsDot--active' : ''
               }`}
-              aria-label={`Bewertung ${index + 1} anzeigen`}
+              aria-label={t('reviews.show', {number: index + 1})}
               onClick={() => emblaApi?.scrollTo(index)}
             />
           ))}

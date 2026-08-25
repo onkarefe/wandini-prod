@@ -175,6 +175,52 @@ describe('locale-aware navigation paths', () => {
   });
 });
 
+describe('checkpoint 3 shared navigation regressions', () => {
+  it.each([
+    [
+      'German product',
+      '/products/8-3',
+      GERMAN_LOCALE,
+      '/products/8-3',
+    ],
+    [
+      'English localized product',
+      '/products/koi-wall-mural-with-lotus-flowers',
+      ENGLISH_LOCALE,
+      '/en/products/koi-wall-mural-with-lotus-flowers',
+    ],
+    [
+      'already-prefixed English product',
+      '/en/products/koi-wall-mural-with-lotus-flowers',
+      ENGLISH_LOCALE,
+      '/en/products/koi-wall-mural-with-lotus-flowers',
+    ],
+    [
+      'English similar motifs',
+      '/similar-products/koi-lotus',
+      ENGLISH_LOCALE,
+      '/en/similar-products/koi-lotus',
+    ],
+    [
+      'English account login',
+      '/account/login?return_to=%2Fen%2Fproducts%2Fkoi%3Fvariant%3D1%23details',
+      ENGLISH_LOCALE,
+      '/en/account/login?return_to=%2Fen%2Fproducts%2Fkoi%3Fvariant%3D1%23details',
+    ],
+    ['German cart', '/cart', GERMAN_LOCALE, '/cart'],
+    ['English cart', '/cart', ENGLISH_LOCALE, '/en/cart'],
+  ])('keeps the %s destination locale-safe', (_name, path, locale, expected) => {
+    expect(prefixPathWithLocale(path, locale)).toBe(expected);
+  });
+
+  it.each([
+    ['external URL', 'https://example.com/products/koi'],
+    ['wishlist resource', '/api/wishlist'],
+  ])('does not localize the %s', (_name, path) => {
+    expect(prefixPathWithLocale(path, ENGLISH_LOCALE)).toBe(path);
+  });
+});
+
 describe('locale change detection', () => {
   it('detects both German to English and English to German navigation', () => {
     expect(

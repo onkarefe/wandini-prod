@@ -28,6 +28,7 @@ import {WISHLIST_LOAD_UNAVAILABLE_MESSAGE} from '~/lib/wishlist';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {redirectToLocalePath} from '~/lib/locale';
 import {getRobotsDirective} from '~/lib/seo';
+import {useTranslation} from '~/i18n/useTranslation';
 import type {Route} from './+types/collections.$handle';
 import '../styles/collections.css';
 import '../styles/wishlistFeedback.css';
@@ -502,6 +503,7 @@ function DefaultCollectionLayout({
   isLoggedIn: boolean;
   wishlistProductIds: string[];
 }) {
+  const {t} = useTranslation();
   const navigate = useNavigate();
   const navigation = useNavigation();
   const location = useLocation();
@@ -561,7 +563,7 @@ function DefaultCollectionLayout({
         ) : null}
 
         <div className="sort-Main">
-          <label htmlFor="sort-select">Sortieren:</label>
+          <label htmlFor="sort-select">{t('collection.sortLabel')}</label>
           <select
             id="sort-select"
             value={selectedSort}
@@ -569,7 +571,7 @@ function DefaultCollectionLayout({
           >
             {COLLECTION_SORT_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {t(option.labelKey)}
               </option>
             ))}
           </select>
@@ -585,8 +587,8 @@ function DefaultCollectionLayout({
           <PaginatedResourceSection<CollectionProduct>
             connection={collection.products}
             resourcesClassName="custom-products-grid container mx-auto"
-            previousLabel="Vorherige Produkte laden"
-            nextLabel="Weitere Produkte laden +"
+            previousLabel={t('collection.previousProducts')}
+            nextLabel={t('collection.nextProducts')}
           >
             {({node: product}) => {
               const productWithSimilarFields =

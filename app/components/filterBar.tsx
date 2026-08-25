@@ -7,6 +7,8 @@ import {
   replaceCollectionFilterParams,
 } from '~/lib/collectionParams';
 import '../styles/filter.css';
+import type {Translator} from '~/i18n';
+import {useTranslation} from '~/i18n/useTranslation';
 
 type CollectionFilters = NonNullable<
   NonNullable<CustomCollectionQuery['collection']>['products']['filters']
@@ -33,15 +35,20 @@ function flattenSelectedFilters(selectedFilters: SelectedFilters): string[] {
   return Object.values(selectedFilters).flatMap((values) => values);
 }
 
-function getActiveFilterLabel(count: number): string {
-  return count === 1 ? '1 Filter aktiv' : `${count} Filter aktiv`;
+function getActiveFilterLabel(count: number, t: Translator): string {
+  return count === 1
+    ? t('filters.activeOne')
+    : t('filters.activeMany', {count});
 }
 
-function getOptionCountLabel(count: number): string {
-  return count === 1 ? '1 Option' : `${count} Optionen`;
+function getOptionCountLabel(count: number, t: Translator): string {
+  return count === 1
+    ? t('filters.optionOne')
+    : t('filters.optionMany', {count});
 }
 
 export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
+  const {t} = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const drawerId = useId();
@@ -308,8 +315,8 @@ export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
         aria-controls={drawerId}
         aria-label={
           activeFilterCount > 0
-            ? `${getActiveFilterLabel(activeFilterCount)}; Filter öffnen`
-            : 'Filter öffnen'
+            ? t('filters.openWithCount', {count: activeFilterCount})
+            : t('filters.open')
         }
       >
         <span className="filters-trigger__icon" aria-hidden="true">
@@ -317,7 +324,7 @@ export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
             <path d="M4 7h10M18 7h2M10 17h10M4 17h2M14 4v6M10 14v6" />
           </svg>
         </span>
-        <span className="filters-trigger__label">Filter</span>
+        <span className="filters-trigger__label">{t('filters.title')}</span>
         {activeFilterCount > 0 ? (
           <span className="filters-trigger__count" aria-hidden="true">
             {activeFilterCount}
@@ -347,14 +354,14 @@ export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
             <header className="filters-drawer__header">
               <div className="filters-drawer__heading">
                 <h2 id={drawerTitleId} className="filters-drawer__title">
-                  Filter
+                  {t('filters.title')}
                 </h2>
                 <p className="filters-drawer__status" aria-live="polite">
                   {isUpdating
-                    ? 'Produkte werden aktualisiert'
+                    ? t('filters.updating')
                     : activeFilterCount > 0
-                      ? getActiveFilterLabel(activeFilterCount)
-                      : 'Auswahl verfeinern'}
+                      ? getActiveFilterLabel(activeFilterCount, t)
+                      : t('filters.refine')}
                 </p>
               </div>
 
@@ -362,7 +369,7 @@ export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
                 type="button"
                 className="filters-drawer__close"
                 onClick={closeDrawer}
-                aria-label="Filter schließen"
+                aria-label={t('filters.close')}
               >
                 <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
                   <path d="m5 5 10 10M15 5 5 15" />
@@ -372,16 +379,21 @@ export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
 
             <div className="filters-drawer__body">
               {activeFilters.length > 0 ? (
-                <section className="filters-active" aria-label="Aktive Filter">
+                <section
+                  className="filters-active"
+                  aria-label={t('filters.active')}
+                >
                   <div className="filters-active__header">
-                    <h3 className="filters-active__title">Aktive Filter</h3>
+                    <h3 className="filters-active__title">
+                      {t('filters.active')}
+                    </h3>
                     <button
                       type="button"
                       className="filters-active__clear"
                       onClick={handleClearFilters}
                       disabled={isUpdating}
                     >
-                      Alle löschen
+                      {t('filters.clearAll')}
                     </button>
                   </div>
 
@@ -395,7 +407,7 @@ export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
                           handleRemoveFilter(filter.filterId, filter.input)
                         }
                         disabled={isUpdating}
-                        aria-label={`Filter ${filter.label} entfernen`}
+                        aria-label={t('filters.remove', {label: filter.label})}
                       >
                         <span>{filter.label}</span>
                         <svg viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -431,8 +443,8 @@ export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
                           </span>
                           <span className="filter-group__meta">
                             {selectedCount > 0
-                              ? `${selectedCount} ausgewählt`
-                              : getOptionCountLabel(filter.values.length)}
+                              ? t('filters.selected', {count: selectedCount})
+                              : getOptionCountLabel(filter.values.length, t)}
                           </span>
                         </span>
                         <span

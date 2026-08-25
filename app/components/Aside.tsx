@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
 } from 'react';
+import {useTranslation} from '~/i18n/useTranslation';
 
 type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
@@ -32,6 +33,7 @@ export function Aside({
   type: AsideType;
   heading: React.ReactNode;
 }) {
+  const {t} = useTranslation();
   const {type: activeType, close} = useAside();
   const expanded = type === activeType;
 
@@ -65,7 +67,7 @@ export function Aside({
           <button
             className="close reset"
             onClick={close}
-            aria-label="Schließen"
+            aria-label={t('common.close')}
           >
             &times;
           </button>

@@ -3,6 +3,7 @@ import {Await} from 'react-router';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
 import wandiniWhiteLogo from '~/assets/logos/wanWhite.png';
 import {NavLink} from '~/lib/i18n-router';
+import {useTranslation} from '~/i18n/useTranslation';
 
 interface FooterProps {
   footer: Promise<FooterQuery | null>;
@@ -51,19 +52,20 @@ export function Footer({
   header,
   publicStoreDomain,
 }: FooterProps) {
+  const {t} = useTranslation();
+
   return (
     <Suspense>
       <Await resolve={footerPromise}>
         {(footer) => (
           <footer className='custom-footer'>
             <div className='footer-subsBox'>
-              <div className='footerSubsTitle'>Newsletter abonnieren</div>
+              <div className='footerSubsTitle'>
+                {t('footer.newsletterTitle')}
+              </div>
 
               <div className='footerSubsSubtitle'>
-                Abonnieren Sie unseren Newsletter und erhalten Sie als Erste
-                aktuelle Neuigkeiten, Angebote und Informationen zu unseren
-                Produkten. Bleiben Sie über die neuesten Trends auf dem
-                Laufenden.
+                {t('footer.newsletterDescription')}
               </div>
 
               <div className='footerInputBox'>
@@ -77,10 +79,12 @@ export function Footer({
                 </svg>
                 <input
                   type='email'
-                  placeholder='E-Mail-Adresse eingeben'
+                  placeholder={t('footer.emailPlaceholder')}
                   className='footerEmailInput'
                 />
-                <button className='footerSubscribeButton'>Abonnieren</button>
+                <button className='footerSubscribeButton'>
+                  {t('footer.subscribe')}
+                </button>
               </div>
             </div>
 
@@ -97,7 +101,10 @@ export function Footer({
 
                   {/* ----- FOOTER MENÜ BÖLÜMLERİ ----- */}
                   {footer?.menu && (
-                    <nav className='footer-sections' aria-label='Footer'>
+                    <nav
+                      className='footer-sections'
+                      aria-label={t('footer.navigation')}
+                    >
                       {footer.menu.items.map((section) => (
                         <div className='footer-section' key={section.id}>
                           <div className='footer-section-title'>
@@ -133,9 +140,7 @@ export function Footer({
                 </div>
 
                 <div className='footerSubBanner'>
-                  <span>
-                    Copyright © 2026 – Wandini. Alle Rechte vorbehalten.
-                  </span>
+                  <span>{t('footer.copyright')}</span>
                 </div>
               </div>
             </div>

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Pagination } from '@shopify/hydrogen';
+import {useTranslation} from '~/i18n/useTranslation';
 
 /**
  * <PaginatedResourceSection > is a component that encapsulate how the previous and next behaviors throughout your application.
@@ -8,8 +9,8 @@ export function PaginatedResourceSection<NodesType>({
   connection,
   children,
   resourcesClassName,
-  previousLabel = 'Load previous',
-  nextLabel = 'Load more +',
+  previousLabel,
+  nextLabel,
 }: {
   connection: React.ComponentProps<typeof Pagination<NodesType>>['connection'];
   children: React.FunctionComponent<{ node: NodesType; index: number }>;
@@ -17,6 +18,10 @@ export function PaginatedResourceSection<NodesType>({
   previousLabel?: string;
   nextLabel?: string;
 }) {
+  const {t} = useTranslation();
+  const resolvedPreviousLabel = previousLabel ?? t('common.loadPrevious');
+  const resolvedNextLabel = nextLabel ?? t('common.loadMore');
+
   return (
     <Pagination connection={connection}>
       {({ nodes, PreviousLink, NextLink }) => {
@@ -27,7 +32,9 @@ export function PaginatedResourceSection<NodesType>({
         return (
             <div>
               <PreviousLink>
-                <span className="collectionReloadButton">{previousLabel}</span>
+                <span className="collectionReloadButton">
+                  {resolvedPreviousLabel}
+                </span>
               </PreviousLink>
               {resourcesClassName ? (
                 <div className={resourcesClassName}>{resourcesMarkup}</div>
@@ -35,7 +42,9 @@ export function PaginatedResourceSection<NodesType>({
                 resourcesMarkup
               )}
               <NextLink>
-                <span className="collectionReloadButton">{nextLabel}</span>
+                <span className="collectionReloadButton">
+                  {resolvedNextLabel}
+                </span>
               </NextLink>
             </div>
           );

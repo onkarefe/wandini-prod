@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useTranslation} from '~/i18n/useTranslation';
 
 export type UspImage = {
   url: string;
@@ -24,11 +25,12 @@ function cx(...classes: Array<string | false | null | undefined>) {
 }
 
 export default function UspBar({items, className}: UspBarProps) {
+  const {t} = useTranslation();
   if (!items?.length) return null;
 
   return (
     <section
-      aria-label="Wandini benefits"
+      aria-label={t('home.benefits')}
       className={cx('uspbar !p-0', className)}
     >
       <div className="container mx-auto uspbar__container">
