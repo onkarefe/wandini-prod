@@ -1,28 +1,35 @@
 import {redirect} from 'react-router';
 
 export type SelectedLocale = {
-  language: 'EN' | 'DE';
-  country: 'US' | 'DE';
-  locale: 'EN-US' | 'DE-DE';
-  pathPrefix: '' | '/de-de';
-  htmlLang: 'en' | 'de';
-};
-
-export const DEFAULT_LOCALE: SelectedLocale = {
-  language: 'EN',
-  country: 'US',
-  locale: 'EN-US',
-  pathPrefix: '',
-  htmlLang: 'en',
+  language: 'DE' | 'EN';
+  country: 'DE';
+  pathPrefix: '' | '/en';
+  htmlLang: 'de' | 'en';
 };
 
 export const GERMAN_LOCALE: SelectedLocale = {
   language: 'DE',
   country: 'DE',
-  locale: 'DE-DE',
-  pathPrefix: '/de-de',
+  pathPrefix: '',
   htmlLang: 'de',
 };
+
+export const ENGLISH_LOCALE: SelectedLocale = {
+  language: 'EN',
+  country: 'DE',
+  pathPrefix: '/en',
+  htmlLang: 'en',
+};
+
+export const DEFAULT_LOCALE = GERMAN_LOCALE;
+
+const LOCALE_SEGMENTS = {
+  de: GERMAN_LOCALE,
+  'de-de': GERMAN_LOCALE,
+  en: ENGLISH_LOCALE,
+  'en-us': ENGLISH_LOCALE,
+  'en-en': ENGLISH_LOCALE,
+} as const;
 
 function normalizeLocaleSegment(value?: string | null) {
   return value?.trim().toLowerCase() ?? '';
@@ -33,109 +40,141 @@ function getFirstPathSegment(pathname: string) {
   return normalizeLocaleSegment(firstSegment);
 }
 
+function getLocaleFromSegment(segment?: string | null) {
+  const normalizedSegment = normalizeLocaleSegment(segment);
+  return (
+    LOCALE_SEGMENTS[normalizedSegment as keyof typeof LOCALE_SEGMENTS] ?? null
+  );
+}
+
 export function getCanonicalLocaleSegment(locale?: string | null) {
-  const normalizedLocale = normalizeLocaleSegment(locale);
-
-  if (normalizedLocale === 'de' || normalizedLocale === 'de-de') {
-    return 'de-de';
-  }
-
-  return null;
+  return getLocaleFromSegment(locale)?.pathPrefix.slice(1) ?? null;
 }
 
 export function getLocaleFromI18n(i18n: {
   language?: string | null;
   country?: string | null;
 }) {
-  if (
-    normalizeLocaleSegment(i18n.language) === 'de' &&
-    normalizeLocaleSegment(i18n.country) === 'de'
-  ) {
-    return GERMAN_LOCALE;
-  }
+  return normalizeLocaleSegment(i18n.language) === 'en'
+    ? ENGLISH_LOCALE
+    : GERMAN_LOCALE;
+}
 
-  return DEFAULT_LOCALE;
+export function getLocaleFromPathname(pathname: string) {
+  return getLocaleFromSegment(getFirstPathSegment(pathname)) ?? DEFAULT_LOCALE;
 }
 
 export function getLocaleFromRequest(request: Request) {
-  const url = new URL(request.url);
-  const localeSegment = getFirstPathSegment(url.pathname);
-
-  if (getCanonicalLocaleSegment(localeSegment) === 'de-de') {
-    return GERMAN_LOCALE;
-  }
-
-  return DEFAULT_LOCALE;
+  return getLocaleFromPathname(new URL(request.url).pathname);
 }
 
 export function getLocaleFromParam(locale?: string | null) {
-  const canonicalLocale = getCanonicalLocaleSegment(locale);
-
   if (!locale) {
     return DEFAULT_LOCALE;
   }
 
-  if (canonicalLocale === 'de-de') {
-    return GERMAN_LOCALE;
-  }
-
-  return null;
+  return getLocaleFromSegment(locale);
 }
 
 export function getCanonicalLocalePathname(pathname: string) {
-  const segments = pathname.split('/').filter(Boolean);
+  const localeMatch = pathname.match(/^\/([^/]+)(\/.*)?$/);
 
-  if (segments.length === 0) {
+  if (!localeMatch) {
     return pathname;
   }
 
-  const canonicalLocale = getCanonicalLocaleSegment(segments[0]);
+  const locale = getLocaleFromSegment(localeMatch[1]);
 
-  if (!canonicalLocale || segments[0] === canonicalLocale) {
+  if (!locale) {
     return pathname;
   }
 
-  segments[0] = canonicalLocale;
-  return `/${segments.join('/')}`;
+  const remainingPathname = localeMatch[2] ?? '';
+
+  if (locale.pathPrefix === '') {
+    return remainingPathname || '/';
+  }
+
+  return `${locale.pathPrefix}${remainingPathname}`;
 }
 
 function isExternalPath(path: string) {
   return /^[a-z][a-z\d+\-.]*:/i.test(path) || path.startsWith('//');
 }
 
-function isResourcePath(path: string) {
+export function isResourcePathname(pathname: string) {
   return (
-    path === '/robots.txt' ||
-    path === '/sitemap.xml' ||
-    path.startsWith('/api/') ||
-    path.startsWith('/sitemap/')
+    pathname === '/api' ||
+    pathname.startsWith('/api/') ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/sitemap-similar-products.xml' ||
+    pathname.startsWith('/sitemap/')
   );
+}
+
+function stripLocaleSegments(pathname: string) {
+  let unlocalizedPathname = pathname;
+
+  while (true) {
+    const localeMatch = unlocalizedPathname.match(/^\/([^/]+)(?=\/|$)/);
+
+    if (!localeMatch || !getLocaleFromSegment(localeMatch[1])) {
+      break;
+    }
+
+    unlocalizedPathname =
+      unlocalizedPathname.slice(localeMatch[0].length) || '/';
+  }
+
+  return unlocalizedPathname;
+}
+
+function splitPathSuffix(path: string) {
+  const suffixIndex = path.search(/[?#]/);
+
+  if (suffixIndex === -1) {
+    return {pathname: path, suffix: ''};
+  }
+
+  return {
+    pathname: path.slice(0, suffixIndex),
+    suffix: path.slice(suffixIndex),
+  };
 }
 
 export function prefixPathWithLocale(
   path: string,
   locale: SelectedLocale = DEFAULT_LOCALE,
 ) {
-  if (
-    !path ||
-    !path.startsWith('/') ||
-    locale.pathPrefix === '' ||
-    isExternalPath(path) ||
-    isResourcePath(path)
-  ) {
+  if (!path || isExternalPath(path) || !path.startsWith('/')) {
     return path;
   }
 
-  if (
-    path === locale.pathPrefix ||
-    path.startsWith(`${locale.pathPrefix}/`) ||
-    path.startsWith(`${locale.pathPrefix}?`) ||
-    path.startsWith(`${locale.pathPrefix}#`)
-  ) {
-    return path;
+  const {pathname, suffix} = splitPathSuffix(path);
+  const unlocalizedPathname = stripLocaleSegments(pathname);
+
+  if (isResourcePathname(unlocalizedPathname)) {
+    return `${unlocalizedPathname}${suffix}`;
   }
 
-  return path === '/' ? locale.pathPrefix : `${locale.pathPrefix}${path}`;
+  if (locale.pathPrefix === '') {
+    return `${unlocalizedPathname}${suffix}`;
+  }
+
+  const localizedPathname =
+    unlocalizedPathname === '/'
+      ? locale.pathPrefix
+      : `${locale.pathPrefix}${unlocalizedPathname}`;
+
+  return `${localizedPathname}${suffix}`;
+}
+
+export function didLocaleChange(currentUrl: URL, nextUrl: URL) {
+  return (
+    getLocaleFromPathname(currentUrl.pathname).language !==
+    getLocaleFromPathname(nextUrl.pathname).language
+  );
 }
 
 export function redirectToLocalePath(
@@ -143,5 +182,8 @@ export function redirectToLocalePath(
   path: string,
   init?: number | ResponseInit,
 ) {
-  return redirect(prefixPathWithLocale(path, getLocaleFromRequest(request)), init);
+  return redirect(
+    prefixPathWithLocale(path, getLocaleFromRequest(request)),
+    init,
+  );
 }

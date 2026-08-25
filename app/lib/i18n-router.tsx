@@ -16,7 +16,7 @@ function useSelectedLocale() {
   return data?.selectedLocale ?? DEFAULT_LOCALE;
 }
 
-function localizeTo(to: To, locale: SelectedLocale): To {
+export function localizeTo(to: To, locale: SelectedLocale): To {
   if (typeof to === 'string') {
     return prefixPathWithLocale(to, locale);
   }

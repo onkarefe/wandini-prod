@@ -21,7 +21,7 @@ import tailwindCss from './styles/tailwind.css?url';
 import navStyles from '~/styles/nav.css?url';
 import desktopHeaderStyles from '~/styles/desktop-header.css?url';
 import {PageLayout} from './components/PageLayout';
-import {getLocaleFromI18n} from '~/lib/locale';
+import {didLocaleChange, getLocaleFromI18n} from '~/lib/locale';
 import {SEO_DISABLED_ROBOTS_DIRECTIVE, SEO_ENABLED} from '~/lib/seo';
 
 export type RootLoader = typeof loader;
@@ -39,6 +39,9 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
 
   // revalidate when manually revalidating via useRevalidator
   if (currentUrl.toString() === nextUrl.toString()) return true;
+
+  // Locale-dependent root data must be refreshed when the URL language changes.
+  if (didLocaleChange(currentUrl, nextUrl)) return true;
 
   // Defaulting to no revalidation for root loader data to improve performance.
   // When using this feature, you risk your UI getting out of sync with your server.
@@ -161,7 +164,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
   const data = useRouteLoaderData<RootLoader>('root');
-  const lang = data?.selectedLocale?.htmlLang ?? 'en';
+  const lang = data?.selectedLocale?.htmlLang ?? 'de';
 
   return (
     <html lang={lang}>
