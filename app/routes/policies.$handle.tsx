@@ -89,7 +89,6 @@ export async function loader({params, context}: Route.LoaderArgs) {
       termsOfService: false,
       refundPolicy: false,
       [policyName]: true,
-      language: context.storefront.i18n?.language,
     },
   });
 

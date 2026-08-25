@@ -223,13 +223,14 @@ function ArticleItem({
 // NOTE: https://shopify.dev/docs/api/storefront/latest/objects/blog
 const BLOGS_QUERY = `#graphql
   query Blog(
-    $language: LanguageCode
     $blogHandle: String!
+    $country: CountryCode
     $first: Int
+    $language: LanguageCode
     $last: Int
     $startCursor: String
     $endCursor: String
-  ) @inContext(language: $language) {
+  ) @inContext(country: $country, language: $language) {
     blog(handle: $blogHandle) {
       title
       handle

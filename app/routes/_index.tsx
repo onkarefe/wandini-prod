@@ -712,7 +712,8 @@ function RecommendedProducts({
 
 // --- HERO METAOBJECT QUERY ---
 const HERO_QUERY = `#graphql
-  query HeroSections {
+  query HeroSections($country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language) {
     metaobjects(type: "hero_div", first: 10) {
       nodes {
         id
@@ -739,7 +740,8 @@ const HERO_QUERY = `#graphql
 
 // usp query
 const USPBAR_QUERY = `#graphql
-  query UspBarMetaobjects {
+  query UspBarMetaobjects($country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language) {
     metaobjects(type: "uspbar", first: 5) {
       nodes {
         id
@@ -762,7 +764,11 @@ const USPBAR_QUERY = `#graphql
 ` as const;
 
 const USPBAR_ICONS_QUERY = `#graphql
-  query UspBarIcons($ids: [ID!]!) {
+  query UspBarIcons(
+    $country: CountryCode
+    $ids: [ID!]!
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
     nodes(ids: $ids) {
       ... on MediaImage {
         id
@@ -773,7 +779,10 @@ const USPBAR_ICONS_QUERY = `#graphql
 ` as const;
 
 const BESTSELLER_PRODUCTS_QUERY = `#graphql
-  query BestsellerProductsHomepage {
+  query BestsellerProductsHomepage(
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
     collection(handle: "bestseller") {
       id
       title
@@ -804,7 +813,8 @@ const BESTSELLER_PRODUCTS_QUERY = `#graphql
 ` as const;
 
 const CUSTOM_GRID_QUERY = `#graphql
-  query CustomGridMetaobjects {
+  query CustomGridMetaobjects($country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language) {
     metaobjects(type: "custom_grid", first: 1) {
       nodes {
         id
@@ -862,7 +872,8 @@ const CUSTOM_GRID_QUERY = `#graphql
 ` as const;
 
 const STEP_BY_STEP_QUERY = `#graphql
-  query StepByStepMetaobject {
+  query StepByStepMetaobject($country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language) {
     metaobjects(type: "step_by_step", first: 1) {
       nodes {
         id
@@ -921,7 +932,10 @@ const STEP_BY_STEP_QUERY = `#graphql
 ` as const;
 
 const UBER_UNS_QUERY = `#graphql
-  query UberUnsHomepageMetaobject {
+  query UberUnsHomepageMetaobject(
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
     metaobjects(type: "uber_uns", first: 1) {
       nodes {
         id
@@ -953,7 +967,10 @@ const UBER_UNS_QUERY = `#graphql
 ` as const;
 
 const CUSTOMER_REVIEWS_QUERY = `#graphql
-  query CustomerReviewsMetaobject {
+  query CustomerReviewsMetaobject(
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
     metaobjects(type: "customer_reviews", first: 1) {
       nodes {
         id

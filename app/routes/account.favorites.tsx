@@ -71,8 +71,6 @@ export async function loader({context, request}: Route.LoaderArgs) {
       {
         variables: {
           ids: wishlistProductIds,
-          country: storefront.i18n.country,
-          language: storefront.i18n.language,
         },
       },
     );
