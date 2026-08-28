@@ -1,5 +1,7 @@
 import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
 import {describe, expect, it} from 'vitest';
 import {Breadcrumbs} from '~/components/ProductBreadcrumb';
 import {buildArticleStructuredData} from './article-schema';
@@ -80,6 +82,21 @@ describe('store and remaining content schemas', () => {
     expect(serialized).not.toContain('sameAs');
     expect(serialized).not.toContain('hasShippingService');
     expect(serialized).not.toContain('hasMerchantReturnPolicy');
+  });
+
+  it('links ContactPage details to the shared OnlineStore identity', () => {
+    const source = readFileSync(
+      fileURLToPath(new URL('../routes/pages.$handle.tsx', import.meta.url)),
+      'utf8',
+    );
+    const contactSchema = source.slice(
+      source.indexOf('function buildKontaktJsonLd'),
+      source.indexOf('function buildFAQJsonLd'),
+    );
+
+    expect(contactSchema).toContain("'@type': 'OnlineStore'");
+    expect(contactSchema).toContain("'@id': getOnlineStoreId(canonicalUrl)");
+    expect(contactSchema).not.toContain("'@type': 'Organization'");
   });
 
   it('uses real Article dates, author, image, and shared publisher identity', () => {

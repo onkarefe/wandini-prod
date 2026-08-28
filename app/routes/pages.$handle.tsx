@@ -15,6 +15,7 @@ import {createTranslator} from '~/i18n';
 import {getLocaleFromRequest} from '~/lib/locale';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
+import {getOnlineStoreId} from '~/lib/store-schema';
 import {
   parseCustomerReviewsHeroMetaobject,
   parseCustomerReviewsMetaobject,
@@ -406,7 +407,8 @@ function buildKontaktJsonLd(
     ...(hasContactData
       ? {
           mainEntity: {
-            '@type': 'Organization',
+            '@type': 'OnlineStore',
+            '@id': getOnlineStoreId(canonicalUrl),
             name: PAGE_META_BRAND,
             ...(data.address ? {address: data.address} : {}),
             ...(data.mail ? {email: data.mail} : {}),
