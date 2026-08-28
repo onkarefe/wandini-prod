@@ -4,6 +4,10 @@ import {
   SEO_DISABLED_ROBOTS_DIRECTIVE,
   SEO_ENABLED,
 } from '~/lib/seo';
+import {
+  buildCanonicalRequestUrl,
+  isProductionSeoRequest,
+} from '~/lib/canonical-origin';
 
 const SITEMAP_TYPES = [
   'products',
@@ -15,9 +19,15 @@ const SITEMAP_TYPES = [
 
 export async function loader({
   request,
-  context: {storefront},
+  context: {storefront, env},
 }: Route.LoaderArgs) {
-  if (!SEO_ENABLED) {
+  const isProductionRequest = isProductionSeoRequest({
+    requestUrl: request.url,
+    configuredOrigin: env.PUBLIC_CANONICAL_ORIGIN,
+    seoEnabled: SEO_ENABLED,
+  });
+
+  if (!isProductionRequest) {
     return new Response('Sitemap is disabled while SEO is closed.', {
       status: 404,
       headers: {
@@ -28,9 +38,14 @@ export async function loader({
     });
   }
 
+  const canonicalRequest = new Request(
+    buildCanonicalRequestUrl(request.url, env.PUBLIC_CANONICAL_ORIGIN),
+    request,
+  );
+
   const response = await getSitemapIndex({
     storefront,
-    request,
+    request: canonicalRequest,
     types: [...SITEMAP_TYPES],
   });
 

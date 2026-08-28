@@ -9,7 +9,8 @@ import {
 } from '~/lib/similar-products';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {useTranslation} from '~/i18n/useTranslation';
-import {getRobotsDirective} from '~/lib/seo';
+import {buildCanonicalUrl, getRobotsDirective} from '~/lib/seo';
+import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import '../styles/collections.css';
 import '../styles/wishlistFeedback.css';
 
@@ -107,11 +108,14 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
     }),
   ]);
 
-  const url = new URL(request.url);
-
   return {
     ...pageData,
-    canonicalUrl: `${url.origin}${url.pathname}`,
+    canonicalUrl: buildCanonicalUrl(
+      buildCanonicalRequestUrl(
+        request.url,
+        context.env.PUBLIC_CANONICAL_ORIGIN,
+      ),
+    ),
     isLoggedIn: wishlistState.isLoggedIn,
     wishlistProductIds: wishlistState.wishlistProductIds,
     wishlistStatus: wishlistState.wishlistStatus,

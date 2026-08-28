@@ -6,9 +6,20 @@ import {
   SEO_DISABLED_ROBOTS_DIRECTIVE,
   SEO_ENABLED,
 } from '~/lib/seo';
+import {isProductionSeoRequest} from '~/lib/canonical-origin';
 
-function applySearchEnginePolicy(response: Response) {
-  if (!SEO_ENABLED) {
+function applySearchEnginePolicy(
+  response: Response,
+  request: Request,
+  env: Env,
+) {
+  if (
+    !isProductionSeoRequest({
+      requestUrl: request.url,
+      configuredOrigin: env.PUBLIC_CANONICAL_ORIGIN,
+      seoEnabled: SEO_ENABLED,
+    })
+  ) {
     response.headers.set('X-Robots-Tag', SEO_DISABLED_ROBOTS_DIRECTIVE);
   }
 
@@ -63,14 +74,16 @@ export default {
           storefront: hydrogenContext.storefront,
         });
 
-        return applySearchEnginePolicy(redirectResponse);
+        return applySearchEnginePolicy(redirectResponse, request, env);
       }
 
-      return applySearchEnginePolicy(response);
+      return applySearchEnginePolicy(response, request, env);
     } catch (error) {
       console.error(error);
       return applySearchEnginePolicy(
         new Response('An unexpected error occurred', {status: 500}),
+        request,
+        env,
       );
     }
   },

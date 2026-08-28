@@ -14,6 +14,7 @@ import type {KontaktPageData} from '~/components/kontakt';
 import {createTranslator} from '~/i18n';
 import {getLocaleFromRequest} from '~/lib/locale';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
+import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import {
   parseCustomerReviewsHeroMetaobject,
   parseCustomerReviewsMetaobject,
@@ -697,7 +698,12 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   });
 
   return {
-    canonicalUrl: buildCanonicalUrl(request.url),
+    canonicalUrl: buildCanonicalUrl(
+      buildCanonicalRequestUrl(
+        request.url,
+        context.env.PUBLIC_CANONICAL_ORIGIN,
+      ),
+    ),
     languageSwitchLinks,
     faqCategories: parseFAQMetaobjects(faqMetaobjects),
     faqCopy: getFAQCopy(request),

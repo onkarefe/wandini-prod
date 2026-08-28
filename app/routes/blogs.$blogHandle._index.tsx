@@ -14,6 +14,7 @@ import {
 } from '~/lib/seo';
 import {formatLocaleDate} from '~/lib/locale-format';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
+import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 
 export function links() {
   return [{rel: 'stylesheet', href: blogHandleStyles}];
@@ -86,7 +87,12 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
     resourceId: blog.id,
     resourceType: 'Blog',
   });
-  const paginationSeo = resolvePaginationSeoPolicy(request.url);
+  const paginationSeo = resolvePaginationSeoPolicy(
+    buildCanonicalRequestUrl(
+      request.url,
+      context.env.PUBLIC_CANONICAL_ORIGIN,
+    ),
+  );
 
   return {
     blog,

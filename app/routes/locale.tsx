@@ -4,13 +4,21 @@ import {
   getCanonicalLocalePathname,
   getLocaleFromParam,
 } from '~/lib/locale';
+import {buildSeoRedirectLocation} from '~/lib/redirect';
 
 export async function loader({request, params}: Route.LoaderArgs) {
   const url = new URL(request.url);
-  const canonicalPathname = getCanonicalLocalePathname(url.pathname);
+  const localeCanonicalPathname = getCanonicalLocalePathname(url.pathname);
+  const canonicalPathname =
+    localeCanonicalPathname === '/collections/all'
+      ? '/collections'
+      : localeCanonicalPathname === '/en/collections/all'
+        ? '/en/collections'
+        : localeCanonicalPathname;
 
   if (canonicalPathname !== url.pathname) {
-    throw redirect(`${canonicalPathname}${url.search}${url.hash}`, 301);
+    url.pathname = canonicalPathname;
+    throw redirect(buildSeoRedirectLocation(url), 301);
   }
 
   if (params.locale && !getLocaleFromParam(params.locale)) {

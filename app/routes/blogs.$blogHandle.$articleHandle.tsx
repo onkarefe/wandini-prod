@@ -15,6 +15,7 @@ import {
 import {useTranslation} from '~/i18n/useTranslation';
 import {formatLocaleDate} from '~/lib/locale-format';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
+import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 
 const BLOCKED_HTML_TAGS = [
   'script',
@@ -288,7 +289,12 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   });
 
   return {
-    canonicalUrl: buildCanonicalUrl(request.url),
+    canonicalUrl: buildCanonicalUrl(
+      buildCanonicalRequestUrl(
+        request.url,
+        context.env.PUBLIC_CANONICAL_ORIGIN,
+      ),
+    ),
     languageSwitchLinks,
     article: {
       ...article,

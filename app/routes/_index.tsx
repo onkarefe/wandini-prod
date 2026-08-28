@@ -28,6 +28,7 @@ import {
 import {createTranslator} from '~/i18n';
 import {useTranslation} from '~/i18n/useTranslation';
 import {getLocaleFromI18n} from '~/lib/locale';
+import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 
 const HOMEPAGE_META_BRAND = 'Wandini';
 
@@ -521,7 +522,12 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     );
 
   return {
-    canonicalUrl: buildCanonicalUrl(request.url),
+    canonicalUrl: buildCanonicalUrl(
+      buildCanonicalRequestUrl(
+        request.url,
+        context.env.PUBLIC_CANONICAL_ORIGIN,
+      ),
+    ),
     hero,
     featuredCollection: collections.nodes[0],
     uspItems,

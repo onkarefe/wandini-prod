@@ -14,6 +14,7 @@ import {
 import {getSimilarMotifsPreview} from '~/lib/similar-products-preview';
 import {useTranslation} from '~/i18n/useTranslation';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
+import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import {
   hasExplicitProductOptionSelection,
   resolveInitialWallpaperVariant,
@@ -269,7 +270,12 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   });
 
   return {
-    canonicalUrl: buildCanonicalUrl(request.url),
+    canonicalUrl: buildCanonicalUrl(
+      buildCanonicalRequestUrl(
+        request.url,
+        context.env.PUBLIC_CANONICAL_ORIGIN,
+      ),
+    ),
     languageSwitchLinks,
     product: {
       ...product,

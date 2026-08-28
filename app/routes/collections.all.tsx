@@ -14,7 +14,7 @@ export const meta: Route.MetaFunction = () => {
 export async function loader(args: Route.LoaderArgs) {
   // Route is intentionally disabled for now; keep the implementation below
   // so it can be re-enabled by removing this redirect.
-  throw redirectToLocalePath(args.request, '/collections');
+  throw redirectToLocalePath(args.request, '/collections', 301);
 
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);

@@ -13,7 +13,8 @@ describe('pagination SEO route wiring', () => {
   ])('uses the pagination canonical contract in %s', (routePath) => {
     const source = readRoute(routePath);
 
-    expect(source).toContain('resolvePaginationSeoPolicy(request.url)');
+    expect(source).toContain('resolvePaginationSeoPolicy(');
+    expect(source).toContain('buildCanonicalRequestUrl(');
     expect(source).toContain("robots: data?.listingRobots ?? 'index,follow'");
     expect(source).toContain('preservePagination: true');
   });
@@ -21,7 +22,8 @@ describe('pagination SEO route wiring', () => {
   it('uses the collection filter-versus-pagination policy', () => {
     const source = readRoute('../routes/collections.$handle.tsx');
 
-    expect(source).toContain('resolveCollectionSeoPolicy(url)');
+    expect(source).toContain('resolveCollectionSeoPolicy(');
+    expect(source).toContain('buildCanonicalRequestUrl(');
     expect(source).toContain("robots: data?.collectionRobots ?? 'index,follow'");
     expect(source).toContain('preservePagination: true');
   });

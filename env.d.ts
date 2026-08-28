@@ -8,6 +8,7 @@ import '@total-typescript/ts-reset';
 
 declare global {
   interface Env {
+    PUBLIC_CANONICAL_ORIGIN?: string;
     SHOPIFY_SHOP?: string;
     SHOPIFY_CLIENT_ID?: string;
     SHOPIFY_CLIENT_SECRET?: string;

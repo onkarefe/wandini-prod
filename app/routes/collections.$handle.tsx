@@ -25,6 +25,7 @@ import {
 import {buildSimilarProductsPath} from '~/lib/similar-products';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {resolveCollectionSeoPolicy} from '~/lib/collection-seo';
+import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {redirectToLocalePath} from '~/lib/locale';
@@ -255,7 +256,9 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     canonicalUrl,
     isFacetedCollectionUrl,
     robots: collectionRobots,
-  } = resolveCollectionSeoPolicy(url);
+  } = resolveCollectionSeoPolicy(
+    buildCanonicalRequestUrl(url, context.env.PUBLIC_CANONICAL_ORIGIN),
+  );
   const selectedSort = getSelectedCollectionSort(url.searchParams.get('sort'));
   const {reverse, sortKey} = getCollectionSortVariables(selectedSort);
   const filters = parseCollectionFilters(url.searchParams);

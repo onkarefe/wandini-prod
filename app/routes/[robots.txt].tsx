@@ -1,127 +1,71 @@
 import type {Route} from './+types/[robots.txt]';
-import {parseGid} from '@shopify/hydrogen';
 import {
   SEO_DISABLED_ROBOTS_DIRECTIVE,
   SEO_ENABLED,
 } from '~/lib/seo';
+import {
+  isProductionSeoRequest,
+  normalizeCanonicalOrigin,
+} from '~/lib/canonical-origin';
+
+const DISABLED_ROBOTS_BODY = 'User-agent: *\nDisallow: /\n';
+
+const ENABLED_DISALLOW_PATHS = [
+  '/admin',
+  '/cart',
+  '/en/cart',
+  '/account',
+  '/en/account',
+  '/checkout',
+  '/en/checkout',
+  '/checkouts/',
+  '/orders',
+  '/api/',
+] as const;
+
+export function buildRobotsTxt({
+  seoEnabled,
+  canonicalOrigin,
+}: {
+  seoEnabled: boolean;
+  canonicalOrigin?: string | null;
+}) {
+  const normalizedOrigin = normalizeCanonicalOrigin(canonicalOrigin);
+
+  if (!seoEnabled || !normalizedOrigin) return DISABLED_ROBOTS_BODY;
+
+  const disallowRules = ENABLED_DISALLOW_PATHS.map(
+    (path) => `Disallow: ${path}`,
+  ).join('\n');
+
+  return `User-agent: *
+${disallowRules}
+
+Sitemap: ${normalizedOrigin}/sitemap.xml
+`;
+}
 
 export async function loader({request, context}: Route.LoaderArgs) {
-  if (!SEO_ENABLED) {
-    return new Response('User-agent: *\nDisallow: /\n', {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-store',
-        'X-Robots-Tag': SEO_DISABLED_ROBOTS_DIRECTIVE,
-      },
-    });
-  }
-
-  const url = new URL(request.url);
-
-  const {shop} = await context.storefront.query(ROBOTS_QUERY);
-
-  const shopId = parseGid(shop.id).id;
-  const body = robotsTxtData({url: url.origin, shopId});
+  const isProductionRequest = isProductionSeoRequest({
+    requestUrl: request.url,
+    configuredOrigin: context.env.PUBLIC_CANONICAL_ORIGIN,
+    seoEnabled: SEO_ENABLED,
+  });
+  const body = buildRobotsTxt({
+    seoEnabled: isProductionRequest,
+    canonicalOrigin: context.env.PUBLIC_CANONICAL_ORIGIN,
+  });
 
   return new Response(body, {
     status: 200,
     headers: {
-      'Content-Type': 'text/plain',
-
-      'Cache-Control': `max-age=${60 * 60 * 24}`,
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': isProductionRequest
+        ? `max-age=${60 * 60 * 24}`
+        : 'no-store',
+      ...(!isProductionRequest
+        ? {'X-Robots-Tag': SEO_DISABLED_ROBOTS_DIRECTIVE}
+        : {}),
     },
   });
 }
-
-function robotsTxtData({url, shopId}: {shopId?: string; url?: string}) {
-  const sitemapUrl = url ? `${url}/sitemap.xml` : undefined;
-
-  const body = `
-User-agent: *
-${generalDisallowRules({shopId})}
-
-# Google adsbot ignores robots.txt unless specifically named!
-User-agent: adsbot-google
-Disallow: /checkouts/
-Disallow: /checkout
-Disallow: /carts
-Disallow: /orders
-${shopId ? `Disallow: /${shopId}/checkouts` : ''}
-${shopId ? `Disallow: /${shopId}/orders` : ''}
-Disallow: /*?*oseid=*
-Disallow: /*preview_theme_id*
-Disallow: /*preview_script_id*
-
-User-agent: Nutch
-Disallow: /
-
-User-agent: AhrefsBot
-Crawl-delay: 10
-${generalDisallowRules({shopId})}
-
-User-agent: AhrefsSiteAudit
-Crawl-delay: 10
-${generalDisallowRules({shopId})}
-
-User-agent: MJ12bot
-Crawl-Delay: 10
-
-User-agent: Pinterest
-Crawl-delay: 1
- `.trim();
-
-  return sitemapUrl ? `${body}\nSitemap: ${sitemapUrl}` : body;
-}
-
-/**
- * This function generates disallow rules that generally follow what Shopify's
- * Online Store has as defaults for their robots.txt
- */
-function generalDisallowRules({
-  shopId,
-}: {
-  shopId?: string;
-}) {
-  return `Disallow: /admin
-Disallow: /cart
-Disallow: /orders
-Disallow: /checkouts/
-Disallow: /checkout
-${shopId ? `Disallow: /${shopId}/checkouts` : ''}
-${shopId ? `Disallow: /${shopId}/orders` : ''}
-Disallow: /carts
-Disallow: /account
-Disallow: /collections/*sort_by*
-Disallow: /*/collections/*sort_by*
-Disallow: /collections/*+*
-Disallow: /collections/*%2B*
-Disallow: /collections/*%2b*
-Disallow: /*/collections/*+*
-Disallow: /*/collections/*%2B*
-Disallow: /*/collections/*%2b*
-Disallow: */collections/*filter*&*filter*
-Disallow: /blogs/*+*
-Disallow: /blogs/*%2B*
-Disallow: /blogs/*%2b*
-Disallow: /*/blogs/*+*
-Disallow: /*/blogs/*%2B*
-Disallow: /*/blogs/*%2b*
-Disallow: /*?*oseid=*
-Disallow: /*preview_theme_id*
-Disallow: /*preview_script_id*
-Disallow: /*/*?*ls=*&ls=*
-Disallow: /*/*?*ls%3D*%3Fls%3D*
-Disallow: /*/*?*ls%3d*%3fls%3d*
-Disallow: /apple-app-site-association
-Disallow: /.well-known/shopify/monorail`;
-}
-
-const ROBOTS_QUERY = `#graphql
-  query StoreRobots($country: CountryCode, $language: LanguageCode)
-   @inContext(country: $country, language: $language) {
-    shop {
-      id
-    }
-  }
-` as const;

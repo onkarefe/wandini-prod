@@ -6,6 +6,7 @@ import type { BlogsQuery } from 'storefrontapi.generated';
 import {useTranslation} from '~/i18n/useTranslation';
 import blogMainStyles from '~/styles/blogMain.css?url';
 import {Link} from '~/lib/i18n-router';
+import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import {
   buildFixedSeoAlternateUrls,
   buildSeoMetadata,
@@ -103,7 +104,12 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     }),
     // Add other queries here, so that they are loaded in parallel
   ]);
-  const paginationSeo = resolvePaginationSeoPolicy(request.url);
+  const paginationSeo = resolvePaginationSeoPolicy(
+    buildCanonicalRequestUrl(
+      request.url,
+      context.env.PUBLIC_CANONICAL_ORIGIN,
+    ),
+  );
 
   return {
     blogs,
