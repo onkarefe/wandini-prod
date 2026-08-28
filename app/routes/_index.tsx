@@ -29,6 +29,11 @@ import {createTranslator} from '~/i18n';
 import {useTranslation} from '~/i18n/useTranslation';
 import {getLocaleFromI18n} from '~/lib/locale';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
+import {loadShopifySeoPage} from '~/lib/shopify-marketing-seo.server';
+import {
+  getShopifyGlobalSeoSettingsFromMatches,
+  resolveShopifyMarketingSeo,
+} from '~/lib/shopify-marketing-seo';
 
 const HOMEPAGE_META_BRAND = 'Wandini';
 
@@ -118,13 +123,29 @@ function stringifyJsonLd(data: unknown) {
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
-export const meta: Route.MetaFunction = ({data}) => {
+export const meta: Route.MetaFunction = ({data, matches}) => {
+  const marketingSeo = resolveShopifyMarketingSeo({
+    settings: getShopifyGlobalSeoSettingsFromMatches(matches),
+    page: data?.shopifySeoPage,
+    fallbackTitle: data?.hero?.title,
+    fallbackDescription: getHomepageMetaDescription(data?.hero),
+    fallbackImage: getHomepageImageUrl(data?.hero),
+  });
+
   return buildSeoMetadata({
-    title: {fallback: data?.hero?.title},
-    description: {fallback: getHomepageMetaDescription(data?.hero)},
+    title: {explicit: marketingSeo.title},
+    description: marketingSeo.description
+      ? {explicit: marketingSeo.description}
+      : undefined,
     canonicalUrl: data?.canonicalUrl ?? '/',
     alternates: buildFixedSeoAlternateUrls(data?.canonicalUrl ?? '/', '/'),
-    image: getHomepageImageUrl(data?.hero),
+    robots: marketingSeo.noindex ? 'noindex,follow' : 'index,follow',
+    image: marketingSeo.image,
+    openGraph: {
+      title: marketingSeo.openGraphTitle,
+      description: marketingSeo.openGraphDescription,
+      image: marketingSeo.image,
+    },
   });
 };
 
@@ -137,9 +158,12 @@ export async function loader(args: Route.LoaderArgs) {
   const deferredData = loadDeferredData(args);
 
   // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
+  const [criticalData, shopifySeoPage] = await Promise.all([
+    loadCriticalData(args),
+    loadShopifySeoPage(args.context.storefront, 'homepage'),
+  ]);
 
-  return { ...deferredData, ...criticalData };
+  return { ...deferredData, ...criticalData, shopifySeoPage };
 }
 
 function safeJsonArray(input: unknown): string[] {

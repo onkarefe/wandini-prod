@@ -4,6 +4,19 @@ import type {CollectionFragment} from 'storefrontapi.generated';
 import {Link} from '~/lib/i18n-router';
 import collectionMainlistStyles from '~/styles/collection-mainlist.css?url';
 import type {Route} from './+types/collections._index';
+import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
+import {
+  buildCanonicalUrl,
+  buildFixedSeoAlternateUrls,
+  buildSeoMetadata,
+} from '~/lib/seo';
+import {loadShopifySeoPage} from '~/lib/shopify-marketing-seo.server';
+import {
+  getShopifyGlobalSeoSettingsFromMatches,
+  resolveShopifyMarketingSeo,
+} from '~/lib/shopify-marketing-seo';
+import {createTranslator} from '~/i18n';
+import {getLocaleFromI18n} from '~/lib/locale';
 
 type ListedCollection = CollectionFragment & {
   showListing?: {value?: string | null} | null;
@@ -13,16 +26,55 @@ export function links() {
   return [{rel: 'stylesheet', href: collectionMainlistStyles}];
 }
 
-export async function loader({context}: Route.LoaderArgs) {
-  const {collections} = await context.storefront.query(COLLECTIONS_QUERY, {
-    variables: {first: 50},
+export const meta: Route.MetaFunction = ({data, matches}) => {
+  const marketingSeo = resolveShopifyMarketingSeo({
+    settings: getShopifyGlobalSeoSettingsFromMatches(matches),
+    page: data?.shopifySeoPage,
+    fallbackTitle: data?.seoFallbackTitle,
   });
+
+  return buildSeoMetadata({
+    title: {explicit: marketingSeo.title},
+    description: marketingSeo.description
+      ? {explicit: marketingSeo.description}
+      : undefined,
+    canonicalUrl: data?.canonicalUrl ?? '/collections',
+    alternates: buildFixedSeoAlternateUrls(
+      data?.canonicalUrl ?? '/collections',
+      '/collections',
+    ),
+    robots: marketingSeo.noindex ? 'noindex,follow' : 'index,follow',
+    image: marketingSeo.image,
+    openGraph: {
+      title: marketingSeo.openGraphTitle,
+      description: marketingSeo.openGraphDescription,
+      image: marketingSeo.image,
+    },
+  });
+};
+
+export async function loader({context, request}: Route.LoaderArgs) {
+  const [{collections}, shopifySeoPage] = await Promise.all([
+    context.storefront.query(COLLECTIONS_QUERY, {
+      variables: {first: 50},
+    }),
+    loadShopifySeoPage(context.storefront, 'collections'),
+  ]);
+  const t = createTranslator(getLocaleFromI18n(context.storefront.i18n));
 
   return {
     collections: collections.nodes.filter(
       (collection: ListedCollection) =>
         collection.showListing?.value === 'true',
     ),
+    canonicalUrl: buildCanonicalUrl(
+      buildCanonicalRequestUrl(
+        request.url,
+        context.env.PUBLIC_CANONICAL_ORIGIN,
+      ),
+    ),
+    seoFallbackTitle: t('search.collections'),
+    shopifySeoPage,
   };
 }
 

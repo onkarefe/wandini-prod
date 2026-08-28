@@ -12,6 +12,11 @@ import {
   buildSeoMetadata,
   resolvePaginationSeoPolicy,
 } from '~/lib/seo';
+import {loadShopifySeoPage} from '~/lib/shopify-marketing-seo.server';
+import {
+  getShopifyGlobalSeoSettingsFromMatches,
+  resolveShopifyMarketingSeo,
+} from '~/lib/shopify-marketing-seo';
 
 type BlogNode = BlogsQuery['blogs']['nodes'][0] & {
   blogCategoryDescription?: {
@@ -56,24 +61,40 @@ export function links() {
   return [{ rel: 'stylesheet', href: blogMainStyles }];
 }
 
-export const meta: Route.MetaFunction = ({data}) => {
+export const meta: Route.MetaFunction = ({data, matches}) => {
   const fields = getBlogListingFields(data?.blogListingContent);
+  const marketingSeo = resolveShopifyMarketingSeo({
+    settings: getShopifyGlobalSeoSettingsFromMatches(matches),
+    page: data?.shopifySeoPage,
+    fallbackTitle:
+      getBlogListingFieldValue(fields, 'title', 'main_title') || 'Blogs',
+    fallbackDescription: getBlogListingFieldValue(
+      fields,
+      'subtitle',
+      'sub_title',
+    ),
+  });
 
   return buildSeoMetadata({
-    title: {
-      fallback: getBlogListingFieldValue(fields, 'title', 'main_title'),
-      systemFallback: 'Blogs',
-    },
-    description: {
-      fallback: getBlogListingFieldValue(fields, 'subtitle', 'sub_title'),
-    },
+    title: {explicit: marketingSeo.title},
+    description: marketingSeo.description
+      ? {explicit: marketingSeo.description}
+      : undefined,
     canonicalUrl: data?.canonicalUrl ?? '/blogs',
     preservePagination: true,
-    robots: data?.listingRobots ?? 'index,follow',
+    robots: marketingSeo.noindex
+      ? 'noindex,follow'
+      : (data?.listingRobots ?? 'index,follow'),
     alternates: buildFixedSeoAlternateUrls(
       data?.canonicalUrl ?? '/blogs',
       '/blogs',
     ),
+    image: marketingSeo.image,
+    openGraph: {
+      title: marketingSeo.openGraphTitle,
+      description: marketingSeo.openGraphDescription,
+      image: marketingSeo.image,
+    },
   });
 };
 
@@ -82,9 +103,12 @@ export async function loader(args: Route.LoaderArgs) {
   const deferredData = loadDeferredData(args);
 
   // Await the critical data required to render initial state of the page
-  const criticalData = await loadCriticalData(args);
+  const [criticalData, shopifySeoPage] = await Promise.all([
+    loadCriticalData(args),
+    loadShopifySeoPage(args.context.storefront, 'blogs'),
+  ]);
 
-  return { ...deferredData, ...criticalData };
+  return { ...deferredData, ...criticalData, shopifySeoPage };
 }
 
 /**

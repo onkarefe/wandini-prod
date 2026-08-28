@@ -25,6 +25,7 @@ import desktopHeaderStyles from '~/styles/desktop-header.css?url';
 import {PageLayout} from './components/PageLayout';
 import {didLocaleChange, getLocaleFromI18n} from '~/lib/locale';
 import {SEO_DISABLED_ROBOTS_DIRECTIVE, SEO_ENABLED} from '~/lib/seo';
+import {loadShopifyGlobalSeoSettings} from '~/lib/shopify-marketing-seo.server';
 
 export type RootLoader = typeof loader;
 
@@ -122,17 +123,18 @@ export async function loader(args: Route.LoaderArgs) {
 async function loadCriticalData({context}: Route.LoaderArgs) {
   const {storefront} = context;
 
-  const [header] = await Promise.all([
+  const [header, shopifyGlobalSeoSettings] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
       variables: {
         headerMenuHandle: 'main-menu', // Adjust to your header menu handle
       },
     }),
+    loadShopifyGlobalSeoSettings(storefront),
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  return {header};
+  return {header, shopifyGlobalSeoSettings};
 }
 
 /**

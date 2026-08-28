@@ -15,7 +15,10 @@ describe('pagination SEO route wiring', () => {
 
     expect(source).toContain('resolvePaginationSeoPolicy(');
     expect(source).toContain('buildCanonicalRequestUrl(');
-    expect(source).toContain("robots: data?.listingRobots ?? 'index,follow'");
+    expect(source).toContain("data?.listingRobots ?? 'index,follow'");
+    if (routePath === '../routes/blogs._index.tsx') {
+      expect(source).toContain("? 'noindex,follow'");
+    }
     expect(source).toContain('preservePagination: true');
   });
 
