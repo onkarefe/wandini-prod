@@ -5,18 +5,23 @@ import type {Route} from './+types/products.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {
   buildCanonicalUrl,
-  buildLocaleSeoUrl,
   buildResourceSeoAlternateUrls,
   buildSeoMetadata,
-  normalizeSeoText as normalizeMetaText,
   resolveSeoDescription,
 } from '~/lib/seo';
+import {ProductBreadcrumb} from '~/components/ProductBreadcrumb';
+import {
+  buildProductBreadcrumbItems,
+  buildProductBreadcrumbStructuredData,
+  buildProductStructuredData,
+} from '~/lib/product-seo';
 import {getSimilarMotifsPreview} from '~/lib/similar-products-preview';
 import {useTranslation} from '~/i18n/useTranslation';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import {
   hasExplicitProductOptionSelection,
+  isWallpaperMaterialOption,
   resolveInitialWallpaperVariant,
 } from '~/lib/wallpaper-variant-selection';
 
@@ -121,87 +126,6 @@ function getProductMetaImage(product?: ProductMetaInput | null) {
   );
 }
 
-type ProductStructuredDataInput = ProductMetaInput & {
-  selectedOrFirstAvailableVariant?: {
-    availableForSale?: boolean | null;
-    price?: {
-      amount?: string | null;
-      currencyCode?: string | null;
-    } | null;
-    sku?: string | null;
-  } | null;
-};
-
-function getProductImageUrls(product?: ProductMetaInput | null) {
-  return (
-    product?.images?.edges
-      ?.map((edge) => edge?.node?.url)
-      .filter((url): url is string => Boolean(url)) ?? []
-  );
-}
-
-function buildProductJsonLd(
-  product: ProductStructuredDataInput,
-  canonicalUrl: string,
-) {
-  const description = getProductMetaDescription(product);
-  const imageUrls = getProductImageUrls(product);
-  const brand = normalizeMetaText(product.vendor);
-  const sku = normalizeMetaText(product.selectedOrFirstAvailableVariant?.sku);
-  const price = product.selectedOrFirstAvailableVariant?.price?.amount;
-  const priceCurrency =
-    product.selectedOrFirstAvailableVariant?.price?.currencyCode;
-  const offer =
-    price && priceCurrency
-      ? {
-          '@type': 'Offer',
-          url: canonicalUrl,
-          price,
-          priceCurrency,
-          availability: product.selectedOrFirstAvailableVariant
-            ?.availableForSale
-            ? 'https://schema.org/InStock'
-            : 'https://schema.org/OutOfStock',
-          itemCondition: 'https://schema.org/NewCondition',
-        }
-      : null;
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: product.title,
-    ...(description ? {description} : {}),
-    ...(imageUrls.length > 0 ? {image: imageUrls} : {}),
-    ...(brand ? {brand: {'@type': 'Brand', name: brand}} : {}),
-    ...(sku ? {sku} : {}),
-    ...(offer ? {offers: offer} : {}),
-  };
-}
-
-function buildProductBreadcrumbJsonLd(
-  product: ProductStructuredDataInput,
-  canonicalUrl: string,
-) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: buildLocaleSeoUrl(canonicalUrl, '/'),
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: product.title,
-        item: canonicalUrl,
-      },
-    ],
-  };
-}
-
 function stringifyJsonLd(data: unknown) {
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
@@ -262,6 +186,16 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
         product.selectedOrFirstAvailableVariant,
         hasExplicitVariantSelection,
       );
+  const materialOption = product.options.find(isWallpaperMaterialOption);
+  const seoVariants = isZubehorProduct(product)
+    ? initialVariant
+      ? [initialVariant]
+      : []
+    : (materialOption?.optionValues
+        .map((optionValue) => optionValue.firstSelectableVariant)
+        .filter((variant): variant is NonNullable<typeof variant> =>
+          Boolean(variant?.id),
+        ) ?? []);
   const languageSwitchLinks = await resolveResourceLanguageSwitchLinks({
     storefront,
     request,
@@ -277,6 +211,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
       ),
     ),
     languageSwitchLinks,
+    seoVariants,
     product: {
       ...product,
       selectedOrFirstAvailableVariant: initialVariant,
@@ -326,12 +261,21 @@ function isZubehorProduct(product: {
 
 export default function Product() {
   const {t} = useTranslation();
-  const {product, canonicalUrl, similarMotifsPreview} =
+  const {product, canonicalUrl, seoVariants, similarMotifsPreview} =
     useLoaderData<typeof loader>();
-  const productJsonLd = buildProductJsonLd(product, canonicalUrl);
-  const breadcrumbJsonLd = buildProductBreadcrumbJsonLd(product, canonicalUrl);
   const selectedVariant = product.selectedOrFirstAvailableVariant;
   const isZubehor = isZubehorProduct(product);
+  const productJsonLd = buildProductStructuredData(
+    {...product, variants: {nodes: seoVariants}},
+    canonicalUrl,
+    {priceBasis: isZubehor ? 'item' : 'squareMeter'},
+  );
+  const breadcrumbItems = buildProductBreadcrumbItems(
+    product.title,
+    canonicalUrl,
+  );
+  const breadcrumbJsonLd =
+    buildProductBreadcrumbStructuredData(breadcrumbItems);
   const ProductLayout = isZubehor
     ? ZubehorProductLayout
     : WallpaperProductLayout;
@@ -346,6 +290,8 @@ export default function Product() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
       />
+
+      <ProductBreadcrumb items={breadcrumbItems} />
 
       <Suspense
         fallback={
