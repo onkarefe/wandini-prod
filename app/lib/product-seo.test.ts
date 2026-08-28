@@ -31,7 +31,7 @@ type StructuredVariant = {
     name: string;
     value: string;
   }>;
-  offers: StructuredOffer;
+  offers?: StructuredOffer;
 };
 
 type StructuredProductGroup = {
@@ -128,14 +128,8 @@ describe('Product structured data', () => {
   it('emits no structured purchase price for configurable wallpaper', () => {
     const variants = buildGroup().hasVariant;
 
-    expect(variants[0].offers).toEqual({
-      '@type': 'Offer',
-      url: 'https://www.wandini.de/products/forest?Material=Self-adhesive',
-      availability: 'https://schema.org/InStock',
-      itemCondition: 'https://schema.org/NewCondition',
-    });
-    expect(variants[1].offers).not.toHaveProperty('price');
-    expect(variants[0].offers).not.toHaveProperty('priceSpecification');
+    expect(variants[0]).not.toHaveProperty('offers');
+    expect(variants[1]).not.toHaveProperty('offers');
     expect(JSON.stringify(variants)).not.toContain('UnitPriceSpecification');
     expect(JSON.stringify(variants)).not.toContain('39.00');
     expect(JSON.stringify(variants)).not.toContain('59.00');
@@ -153,17 +147,12 @@ describe('Product structured data', () => {
     expect(schemaText).not.toContain('priceOverride');
   });
 
-  it('keeps Shopify availability, actual SKU, and real images', () => {
+  it('keeps actual SKU and real images without emitting wallpaper Offers', () => {
     const schema = buildGroup();
     const [availableVariant, unavailableVariant] = schema.hasVariant;
 
-    expect(availableVariant.offers.availability).toBe(
-      'https://schema.org/InStock',
-    );
-    expect(unavailableVariant.offers.availability).toBe(
-      'https://schema.org/OutOfStock',
-    );
-    expect(availableVariant.offers).not.toHaveProperty('priceCurrency');
+    expect(availableVariant).not.toHaveProperty('offers');
+    expect(unavailableVariant).not.toHaveProperty('offers');
     expect(availableVariant.sku).toBe('FOREST-SA');
     expect(unavailableVariant).not.toHaveProperty('sku');
     expect(schema.image).toEqual([
@@ -191,7 +180,7 @@ describe('Product structured data', () => {
     expect(english.url).toBe(
       'https://www.wandini.de/en/products/forest-wall-mural',
     );
-    expect(english.hasVariant[0].offers.url).toBe(
+    expect(english.hasVariant[0].url).toBe(
       'https://www.wandini.de/en/products/forest-wall-mural?Material=Self-adhesive',
     );
     expect(JSON.stringify([german, english])).not.toMatch(
@@ -222,8 +211,12 @@ describe('Product structured data', () => {
       {classification: CONFIGURED_PRODUCT_CLASSIFICATION.ORDINARY},
     ) as StructuredVariant;
 
-    expect(schema.offers.price).toBe('39.00');
-    expect(schema.offers.priceCurrency).toBe('EUR');
+    expect(schema.offers).toMatchObject({
+      price: '39.00',
+      priceCurrency: 'EUR',
+      availability: 'https://schema.org/InStock',
+      url: 'https://www.wandini.de/products/accessory?Material=Self-adhesive',
+    });
     expect(schema.offers).not.toHaveProperty('priceSpecification');
   });
 });

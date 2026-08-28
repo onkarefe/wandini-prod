@@ -200,6 +200,15 @@ function buildOffer(
   variantUrl: string,
   classification: ConfiguredProductClassification,
 ) {
+  if (classification !== CONFIGURED_PRODUCT_CLASSIFICATION.ORDINARY) {
+    return null;
+  }
+
+  const price = getText(variant.price?.amount);
+  const priceCurrency = getText(variant.price?.currencyCode);
+
+  if (!price || !priceCurrency) return null;
+
   const offer = {
     '@type': 'Offer',
     url: variantUrl,
@@ -209,14 +218,7 @@ function buildOffer(
     itemCondition: 'https://schema.org/NewCondition',
   };
 
-  if (classification !== CONFIGURED_PRODUCT_CLASSIFICATION.ORDINARY) {
-    return offer;
-  }
-
-  const price = getText(variant.price?.amount);
-  const priceCurrency = getText(variant.price?.currencyCode);
-
-  return price && priceCurrency ? {...offer, price, priceCurrency} : null;
+  return {...offer, price, priceCurrency};
 }
 
 function buildVariantProduct({
