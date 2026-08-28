@@ -7,7 +7,11 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogHandleStyles from '~/styles/blogHandle.css?url';
 import {Link} from '~/lib/i18n-router';
-import {buildCanonicalUrl, buildSeoMetadata} from '~/lib/seo';
+import {
+  buildCanonicalUrl,
+  buildResourceSeoAlternateUrls,
+  buildSeoMetadata,
+} from '~/lib/seo';
 import {formatLocaleDate} from '~/lib/locale-format';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 
@@ -29,6 +33,10 @@ export const meta: Route.MetaFunction = ({data, params}) => {
     },
     description: {explicit: blog?.seo?.description},
     canonicalUrl: data?.canonicalUrl ?? `/blogs/${params.blogHandle ?? ''}`,
+    alternates: buildResourceSeoAlternateUrls(
+      data?.canonicalUrl ?? `/blogs/${params.blogHandle ?? ''}`,
+      data?.languageSwitchLinks,
+    ),
   });
 };
 

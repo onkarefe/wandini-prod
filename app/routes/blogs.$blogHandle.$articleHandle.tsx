@@ -6,6 +6,8 @@ import blogDetailStyles from '~/styles/blogDetail.css?url';
 import {Link} from '~/lib/i18n-router';
 import {
   buildCanonicalUrl,
+  buildLocaleSeoUrl,
+  buildResourceSeoAlternateUrls,
   buildSeoMetadata,
   normalizeSeoText as normalizeMetaText,
   resolveSeoDescription,
@@ -120,20 +122,8 @@ function getArticleMetaImage(article?: ArticleMetaInput | null) {
   return article?.image?.url ?? null;
 }
 
-function getArticleLocalePrefix(canonicalUrl: string) {
-  const url = new URL(canonicalUrl);
-  const [firstSegment] = url.pathname.split('/').filter(Boolean);
-
-  return firstSegment && /^[a-z]{2}-[a-z]{2}$/i.test(firstSegment)
-    ? `/${firstSegment.toLowerCase()}`
-    : '';
-}
-
 function getArticleHomeUrl(canonicalUrl: string) {
-  const url = new URL(canonicalUrl);
-  const localePrefix = getArticleLocalePrefix(canonicalUrl);
-
-  return `${url.origin}${localePrefix || '/'}`;
+  return buildLocaleSeoUrl(canonicalUrl, '/');
 }
 
 function getArticleBlogUrl(canonicalUrl: string, blogHandle?: string | null) {
@@ -143,10 +133,7 @@ function getArticleBlogUrl(canonicalUrl: string, blogHandle?: string | null) {
     return null;
   }
 
-  const url = new URL(canonicalUrl);
-  const localePrefix = getArticleLocalePrefix(canonicalUrl);
-
-  return `${url.origin}${localePrefix}/blogs/${handle}`;
+  return buildLocaleSeoUrl(canonicalUrl, `/blogs/${handle}`);
 }
 
 function buildArticleJsonLd(article: ArticleMetaInput, canonicalUrl: string) {
@@ -236,6 +223,11 @@ export const meta: Route.MetaFunction = ({data, params}) => {
     canonicalUrl:
       data?.canonicalUrl ??
       `/blogs/${params.blogHandle ?? ''}/${params.articleHandle ?? ''}`,
+    alternates: buildResourceSeoAlternateUrls(
+      data?.canonicalUrl ??
+        `/blogs/${params.blogHandle ?? ''}/${params.articleHandle ?? ''}`,
+      data?.languageSwitchLinks,
+    ),
     openGraphType: 'article',
     image: getArticleMetaImage(article),
   });

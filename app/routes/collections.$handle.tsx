@@ -29,6 +29,8 @@ import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {redirectToLocalePath} from '~/lib/locale';
 import {
   buildCanonicalUrl,
+  buildLocaleSeoUrl,
+  buildResourceSeoAlternateUrls,
   buildSeoMetadata,
   normalizeSeoText as normalizeMetaText,
   resolveSeoDescription,
@@ -136,15 +138,6 @@ function buildCollectionPageJsonLd(
   };
 }
 
-function getBreadcrumbHomeUrl(canonicalUrl: string) {
-  const url = new URL(canonicalUrl);
-  const [firstSegment] = url.pathname.split('/').filter(Boolean);
-
-  return firstSegment?.toLowerCase() === 'de-de'
-    ? `${url.origin}/de-de`
-    : `${url.origin}/`;
-}
-
 function buildCollectionBreadcrumbJsonLd(
   collection: CollectionMetaInput,
   canonicalUrl: string,
@@ -159,7 +152,7 @@ function buildCollectionBreadcrumbJsonLd(
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: getBreadcrumbHomeUrl(canonicalUrl),
+        item: buildLocaleSeoUrl(canonicalUrl, '/'),
       },
       {
         '@type': 'ListItem',
@@ -169,15 +162,6 @@ function buildCollectionBreadcrumbJsonLd(
       },
     ],
   };
-}
-
-function getCollectionLocalePrefix(canonicalUrl: string) {
-  const url = new URL(canonicalUrl);
-  const [firstSegment] = url.pathname.split('/').filter(Boolean);
-
-  return firstSegment && /^[a-z]{2}-[a-z]{2}$/i.test(firstSegment)
-    ? `/${firstSegment.toLowerCase()}`
-    : '';
 }
 
 function getCollectionProductUrl(
@@ -190,10 +174,7 @@ function getCollectionProductUrl(
     return null;
   }
 
-  const url = new URL(canonicalUrl);
-  const localePrefix = getCollectionLocalePrefix(canonicalUrl);
-
-  return `${url.origin}${localePrefix}/products/${handle}`;
+  return buildLocaleSeoUrl(canonicalUrl, `/products/${handle}`);
 }
 
 function buildCollectionItemListJsonLd(
@@ -249,6 +230,10 @@ export const meta: Route.MetaFunction = ({data, params}) => {
       fallback: collection?.description,
     },
     canonicalUrl: data?.canonicalUrl ?? `/collections/${params.handle ?? ''}`,
+    alternates: buildResourceSeoAlternateUrls(
+      data?.canonicalUrl ?? `/collections/${params.handle ?? ''}`,
+      data?.languageSwitchLinks,
+    ),
     robots: data?.isNoisyCollectionUrl ? 'noindex,follow' : 'index,follow',
     image: getCollectionMetaImage(collection),
   });

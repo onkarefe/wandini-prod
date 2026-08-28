@@ -1,4 +1,10 @@
 import type {MetaDescriptor} from 'react-router';
+import {
+  ENGLISH_LOCALE,
+  GERMAN_LOCALE,
+  getLocaleFromPathname,
+  prefixPathWithLocale,
+} from '~/lib/locale';
 
 /**
  * Global search-engine switch.
@@ -36,10 +42,21 @@ type SocialMetadataOverrides = {
   image?: string | null;
 };
 
+export type SeoAlternateUrls = {
+  deDE: string;
+  enDE: string;
+};
+
+type SeoLanguageSwitchLinks = {
+  DE: string;
+  EN: string;
+};
+
 export type SeoMetadataInput = {
   title: SeoTitleSources;
   description?: SeoDescriptionSources;
   canonicalUrl: string | URL;
+  alternates?: SeoAlternateUrls | null;
   robots?: string;
   openGraphType?: string;
   image?: string | null;
@@ -137,7 +154,11 @@ export function buildCanonicalUrl(input: string | URL) {
 
   try {
     const url = new URL(rawInput, 'https://canonical.invalid');
-    const pathname = url.pathname || '/';
+    const rawPathname = url.pathname || '/';
+    const pathname = prefixPathWithLocale(
+      rawPathname,
+      getLocaleFromPathname(rawPathname),
+    );
 
     if (!isAbsolute) return pathname;
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return '/';
@@ -146,6 +167,82 @@ export function buildCanonicalUrl(input: string | URL) {
   } catch {
     return '/';
   }
+}
+
+function isAbsoluteHttpUrl(value: string) {
+  return /^https?:\/\//i.test(value);
+}
+
+function resolveSeoHref(
+  canonicalInput: string | URL,
+  pathInput: string | URL,
+) {
+  const canonicalUrl = buildCanonicalUrl(canonicalInput);
+  const pathUrl = buildCanonicalUrl(pathInput);
+
+  if (!isAbsoluteHttpUrl(canonicalUrl)) return pathUrl;
+
+  return buildCanonicalUrl(new URL(pathUrl, `${new URL(canonicalUrl).origin}/`));
+}
+
+/** Builds a URL in the locale selected by the canonical resource URL. */
+export function buildLocaleSeoUrl(
+  canonicalInput: string | URL,
+  path: string,
+) {
+  const canonicalUrl = buildCanonicalUrl(canonicalInput);
+  const parsedCanonical = new URL(canonicalUrl, 'https://canonical.invalid');
+  const locale = getLocaleFromPathname(parsedCanonical.pathname);
+  const localizedPath = prefixPathWithLocale(path, locale);
+
+  return isAbsoluteHttpUrl(canonicalUrl)
+    ? `${parsedCanonical.origin}${localizedPath}`
+    : localizedPath;
+}
+
+export function buildFixedSeoAlternateUrls(
+  canonicalInput: string | URL,
+  path: string,
+): SeoAlternateUrls {
+  return {
+    deDE: resolveSeoHref(
+      canonicalInput,
+      prefixPathWithLocale(path, GERMAN_LOCALE),
+    ),
+    enDE: resolveSeoHref(
+      canonicalInput,
+      prefixPathWithLocale(path, ENGLISH_LOCALE),
+    ),
+  };
+}
+
+/**
+ * Converts stable-ID language-switcher results into SEO alternates. A missing
+ * localization resolves to the locale homepage in the switcher; that fallback
+ * is deliberately rejected here because it is not a resource alternate.
+ */
+export function buildResourceSeoAlternateUrls(
+  canonicalInput: string | URL,
+  links?: SeoLanguageSwitchLinks | null,
+): SeoAlternateUrls | null {
+  if (!links) return null;
+
+  const deDE = resolveSeoHref(canonicalInput, links.DE);
+  const enDE = resolveSeoHref(canonicalInput, links.EN);
+  const dePath = new URL(deDE, 'https://canonical.invalid').pathname;
+  const enPath = new URL(enDE, 'https://canonical.invalid').pathname;
+
+  if (
+    dePath === '/' ||
+    dePath === '/en' ||
+    dePath.startsWith('/en/') ||
+    enPath === '/en' ||
+    !enPath.startsWith('/en/')
+  ) {
+    return null;
+  }
+
+  return {deDE, enDE};
 }
 
 export function resolveRobotsDirective(
@@ -163,6 +260,7 @@ export function buildSeoMetadata({
   title: titleSources,
   description: descriptionSources,
   canonicalUrl: canonicalInput,
+  alternates,
   robots = 'index,follow',
   openGraphType = 'website',
   image,
@@ -189,6 +287,28 @@ export function buildSeoMetadata({
     ...(description ? [{name: 'description', content: description}] : []),
     {name: 'robots', content: getRobotsDirective(robots)},
     {tagName: 'link', rel: 'canonical', href: canonicalUrl},
+    ...(alternates
+      ? [
+          {
+            tagName: 'link',
+            rel: 'alternate',
+            hrefLang: 'de-DE',
+            href: buildCanonicalUrl(alternates.deDE),
+          },
+          {
+            tagName: 'link',
+            rel: 'alternate',
+            hrefLang: 'en-DE',
+            href: buildCanonicalUrl(alternates.enDE),
+          },
+          {
+            tagName: 'link',
+            rel: 'alternate',
+            hrefLang: 'x-default',
+            href: buildCanonicalUrl(alternates.deDE),
+          },
+        ]
+      : []),
     {property: 'og:type', content: openGraphType},
     {property: 'og:title', content: openGraphTitle},
     ...(openGraphDescription

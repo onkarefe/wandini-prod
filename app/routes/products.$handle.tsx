@@ -5,6 +5,8 @@ import type {Route} from './+types/products.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {
   buildCanonicalUrl,
+  buildLocaleSeoUrl,
+  buildResourceSeoAlternateUrls,
   buildSeoMetadata,
   normalizeSeoText as normalizeMetaText,
   resolveSeoDescription,
@@ -175,15 +177,6 @@ function buildProductJsonLd(
   };
 }
 
-function getBreadcrumbHomeUrl(canonicalUrl: string) {
-  const url = new URL(canonicalUrl);
-  const [firstSegment] = url.pathname.split('/').filter(Boolean);
-
-  return firstSegment?.toLowerCase() === 'de-de'
-    ? `${url.origin}/de-de`
-    : `${url.origin}/`;
-}
-
 function buildProductBreadcrumbJsonLd(
   product: ProductStructuredDataInput,
   canonicalUrl: string,
@@ -196,7 +189,7 @@ function buildProductBreadcrumbJsonLd(
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: getBreadcrumbHomeUrl(canonicalUrl),
+        item: buildLocaleSeoUrl(canonicalUrl, '/'),
       },
       {
         '@type': 'ListItem',
@@ -227,6 +220,10 @@ export const meta: Route.MetaFunction = ({data}) => {
       fallback: product?.description,
     },
     canonicalUrl: data?.canonicalUrl ?? `/products/${product?.handle ?? ''}`,
+    alternates: buildResourceSeoAlternateUrls(
+      data?.canonicalUrl ?? `/products/${product?.handle ?? ''}`,
+      data?.languageSwitchLinks,
+    ),
     openGraphType: 'product',
     image: getProductMetaImage(product),
   });

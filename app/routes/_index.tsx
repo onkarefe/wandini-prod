@@ -21,6 +21,7 @@ import CustomerRevs from '~/components/CustomerRevs';
 import homepageStyles from '~/styles/homepage.css?url';
 import {
   buildCanonicalUrl,
+  buildFixedSeoAlternateUrls,
   buildSeoMetadata,
   normalizeSeoText as normalizeMetaText,
 } from '~/lib/seo';
@@ -121,6 +122,7 @@ export const meta: Route.MetaFunction = ({data}) => {
     title: {fallback: data?.hero?.title},
     description: {fallback: getHomepageMetaDescription(data?.hero)},
     canonicalUrl: data?.canonicalUrl ?? '/',
+    alternates: buildFixedSeoAlternateUrls(data?.canonicalUrl ?? '/', '/'),
     image: getHomepageImageUrl(data?.hero),
   });
 };

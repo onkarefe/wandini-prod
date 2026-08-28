@@ -6,7 +6,11 @@ import type { BlogsQuery } from 'storefrontapi.generated';
 import {useTranslation} from '~/i18n/useTranslation';
 import blogMainStyles from '~/styles/blogMain.css?url';
 import {Link} from '~/lib/i18n-router';
-import {buildCanonicalUrl, buildSeoMetadata} from '~/lib/seo';
+import {
+  buildCanonicalUrl,
+  buildFixedSeoAlternateUrls,
+  buildSeoMetadata,
+} from '~/lib/seo';
 
 type BlogNode = BlogsQuery['blogs']['nodes'][0] & {
   blogCategoryDescription?: {
@@ -63,6 +67,10 @@ export const meta: Route.MetaFunction = ({data}) => {
       fallback: getBlogListingFieldValue(fields, 'subtitle', 'sub_title'),
     },
     canonicalUrl: data?.canonicalUrl ?? '/blogs',
+    alternates: buildFixedSeoAlternateUrls(
+      data?.canonicalUrl ?? '/blogs',
+      '/blogs',
+    ),
   });
 };
 

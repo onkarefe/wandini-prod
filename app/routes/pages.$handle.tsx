@@ -5,6 +5,7 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import staticPagesStyles from '~/styles/staticPages.css?url';
 import {
   buildCanonicalUrl,
+  buildResourceSeoAlternateUrls,
   buildSeoMetadata,
   normalizeSeoText as normalizeMetaText,
 } from '~/lib/seo';
@@ -476,6 +477,10 @@ export const meta: Route.MetaFunction = ({data, params}) => {
       fallback: contentFallback,
     },
     canonicalUrl: data?.canonicalUrl ?? `/pages/${params.handle ?? ''}`,
+    alternates: buildResourceSeoAlternateUrls(
+      data?.canonicalUrl ?? `/pages/${params.handle ?? ''}`,
+      data?.languageSwitchLinks,
+    ),
   });
 };
 

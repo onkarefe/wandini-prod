@@ -1,6 +1,9 @@
 import {describe, expect, it} from 'vitest';
 import {
   buildCanonicalUrl,
+  buildFixedSeoAlternateUrls,
+  buildLocaleSeoUrl,
+  buildResourceSeoAlternateUrls,
   buildSeoMetadata,
   resolveRobotsDirective,
   resolveSeoDescription,
@@ -59,6 +62,129 @@ describe('Wandini SEO core', () => {
         'https://www.wandini.de/products/mural?utm_source=test&variant=1#details',
       ),
     ).toBe('https://www.wandini.de/products/mural');
+  });
+
+  it.each([
+    [
+      'https://www.wandini.de/products/foo?variant=1',
+      'https://www.wandini.de/products/foo',
+    ],
+    [
+      'https://www.wandini.de/en/products/foo?variant=1',
+      'https://www.wandini.de/en/products/foo',
+    ],
+  ])('keeps the canonical locale contract for %s', (input, expected) => {
+    expect(buildCanonicalUrl(input)).toBe(expected);
+  });
+
+  it('normalizes legacy locale segments out of SEO canonicals', () => {
+    const canonicals = [
+      buildCanonicalUrl('https://www.wandini.de/de-de/products/foo'),
+      buildCanonicalUrl('https://www.wandini.de/en-us/products/foo'),
+      buildCanonicalUrl('https://www.wandini.de/en-en/products/foo'),
+    ];
+
+    expect(canonicals).toEqual([
+      'https://www.wandini.de/products/foo',
+      'https://www.wandini.de/en/products/foo',
+      'https://www.wandini.de/en/products/foo',
+    ]);
+    expect(canonicals.join(' ')).not.toMatch(/\/(?:de-de|en-us|en-en)(?:\/|$)/i);
+  });
+
+  it.each([
+    'https://www.wandini.de/products/deutscher-handle',
+    'https://www.wandini.de/en/products/english-handle',
+  ])('emits reciprocal de-DE, en-DE, and German x-default links', (canonicalUrl) => {
+    const alternates = buildResourceSeoAlternateUrls(canonicalUrl, {
+      DE: '/products/deutscher-handle',
+      EN: '/en/products/english-handle',
+    });
+    const metadata = buildSeoMetadata({
+      title: {fallback: 'Product'},
+      canonicalUrl,
+      alternates,
+    });
+
+    expect(metadata).toEqual(
+      expect.arrayContaining([
+        {
+          tagName: 'link',
+          rel: 'alternate',
+          hrefLang: 'de-DE',
+          href: 'https://www.wandini.de/products/deutscher-handle',
+        },
+        {
+          tagName: 'link',
+          rel: 'alternate',
+          hrefLang: 'en-DE',
+          href: 'https://www.wandini.de/en/products/english-handle',
+        },
+        {
+          tagName: 'link',
+          rel: 'alternate',
+          hrefLang: 'x-default',
+          href: 'https://www.wandini.de/products/deutscher-handle',
+        },
+      ]),
+    );
+  });
+
+  it('does not publish a resource alternate when localization resolution fell back home', () => {
+    expect(
+      buildResourceSeoAlternateUrls(
+        'https://www.wandini.de/products/deutscher-handle',
+        {DE: '/products/deutscher-handle', EN: '/en'},
+      ),
+    ).toBeNull();
+  });
+
+  it('builds deterministic homepage alternates with German x-default', () => {
+    const alternates = buildFixedSeoAlternateUrls(
+      'https://www.wandini.de/en',
+      '/',
+    );
+
+    expect(alternates).toEqual({
+      deDE: 'https://www.wandini.de/',
+      enDE: 'https://www.wandini.de/en',
+    });
+  });
+
+  it('keeps English Product and Collection breadcrumb homes under /en', () => {
+    expect(
+      buildLocaleSeoUrl(
+        'https://www.wandini.de/en/products/english-handle',
+        '/',
+      ),
+    ).toBe('https://www.wandini.de/en');
+    expect(
+      buildLocaleSeoUrl(
+        'https://www.wandini.de/en/collections/wall-murals',
+        '/',
+      ),
+    ).toBe('https://www.wandini.de/en');
+  });
+
+  it('keeps English Collection ItemList product URLs under /en', () => {
+    expect(
+      buildLocaleSeoUrl(
+        'https://www.wandini.de/en/collections/wall-murals',
+        '/products/english-product',
+      ),
+    ).toBe('https://www.wandini.de/en/products/english-product');
+  });
+
+  it('keeps English Article breadcrumb URLs under /en', () => {
+    const canonicalUrl =
+      'https://www.wandini.de/en/blogs/magazine/wallpaper-care';
+
+    expect(buildLocaleSeoUrl(canonicalUrl, '/')).toBe(
+      'https://www.wandini.de/en',
+    );
+    expect(buildLocaleSeoUrl(canonicalUrl, '/blogs/magazine')).toBe(
+      'https://www.wandini.de/en/blogs/magazine',
+    );
   });
 
   it('keeps the global SEO kill switch authoritative', () => {
