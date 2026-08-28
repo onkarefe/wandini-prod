@@ -8,8 +8,8 @@ import blogMainStyles from '~/styles/blogMain.css?url';
 import {Link} from '~/lib/i18n-router';
 import {
   buildFixedSeoAlternateUrls,
-  buildPaginationCanonicalUrl,
   buildSeoMetadata,
+  resolvePaginationSeoPolicy,
 } from '~/lib/seo';
 
 type BlogNode = BlogsQuery['blogs']['nodes'][0] & {
@@ -68,6 +68,7 @@ export const meta: Route.MetaFunction = ({data}) => {
     },
     canonicalUrl: data?.canonicalUrl ?? '/blogs',
     preservePagination: true,
+    robots: data?.listingRobots ?? 'index,follow',
     alternates: buildFixedSeoAlternateUrls(
       data?.canonicalUrl ?? '/blogs',
       '/blogs',
@@ -102,11 +103,13 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     }),
     // Add other queries here, so that they are loaded in parallel
   ]);
+  const paginationSeo = resolvePaginationSeoPolicy(request.url);
 
   return {
     blogs,
     blogListingContent,
-    canonicalUrl: buildPaginationCanonicalUrl(request.url),
+    canonicalUrl: paginationSeo.canonicalUrl,
+    listingRobots: paginationSeo.robots,
   };
 }
 

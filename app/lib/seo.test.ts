@@ -7,6 +7,7 @@ import {
   buildResourceSeoAlternateUrls,
   buildSeoMetadata,
   resolveRobotsDirective,
+  resolvePaginationSeoPolicy,
   resolveSeoDescription,
   resolveSeoTitle,
   SEO_DISABLED_ROBOTS_DIRECTIVE,
@@ -103,16 +104,38 @@ describe('Wandini SEO core', () => {
       'https://www.wandini.de/en/blogs?cursor=page-2&direction=next',
     ],
     [
-      'https://www.wandini.de/blogs/magazin?direction=previous&cursor=page-2',
-      'https://www.wandini.de/blogs/magazin?cursor=page-2&direction=previous',
-    ],
-    [
       'https://www.wandini.de/en/blogs/magazine?direction=next&cursor=page-2',
       'https://www.wandini.de/en/blogs/magazine?cursor=page-2&direction=next',
     ],
   ])('self-canonicalizes listing pagination at %s', (input, expected) => {
     expect(buildPaginationCanonicalUrl(input)).toBe(expected);
   });
+
+  it.each([
+    [
+      'https://www.wandini.de/blogs?direction=next&cursor=page-2',
+      'https://www.wandini.de/blogs?cursor=page-2&direction=next',
+      'index,follow',
+    ],
+    [
+      'https://www.wandini.de/blogs/magazin?direction=previous&cursor=page-2',
+      'https://www.wandini.de/blogs/magazin',
+      'noindex,follow',
+    ],
+    [
+      'https://www.wandini.de/en/blogs/magazine?direction=previous&cursor=page-2',
+      'https://www.wandini.de/en/blogs/magazine',
+      'noindex,follow',
+    ],
+  ])(
+    'resolves the direction-aware pagination policy for %s',
+    (input, canonicalUrl, robots) => {
+      expect(resolvePaginationSeoPolicy(input)).toEqual({
+        canonicalUrl,
+        robots,
+      });
+    },
+  );
 
   it('does not preserve an incomplete or invalid pagination state', () => {
     expect(
@@ -172,6 +195,29 @@ describe('Wandini SEO core', () => {
       enDE:
         'https://www.wandini.de/en/blogs/magazine?cursor=page-2&direction=next',
     });
+  });
+
+  it('does not emit backward cursor URLs through hreflang', () => {
+    const requestUrl =
+      'https://www.wandini.de/en/blogs/magazine?cursor=page-2&direction=previous';
+    const {canonicalUrl} = resolvePaginationSeoPolicy(requestUrl);
+    const fixedAlternates = buildFixedSeoAlternateUrls(canonicalUrl, '/blogs');
+    const resourceAlternates = buildResourceSeoAlternateUrls(canonicalUrl, {
+      DE: '/blogs/magazin?cursor=page-2&direction=previous',
+      EN: '/en/blogs/magazine?cursor=page-2&direction=previous',
+    });
+
+    expect(fixedAlternates).toEqual({
+      deDE: 'https://www.wandini.de/blogs',
+      enDE: 'https://www.wandini.de/en/blogs',
+    });
+    expect(resourceAlternates).toEqual({
+      deDE: 'https://www.wandini.de/blogs/magazin',
+      enDE: 'https://www.wandini.de/en/blogs/magazine',
+    });
+    expect(JSON.stringify({fixedAlternates, resourceAlternates})).not.toContain(
+      'cursor=',
+    );
   });
 
   it.each([

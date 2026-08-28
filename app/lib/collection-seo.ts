@@ -1,4 +1,4 @@
-import {buildCanonicalUrl, buildPaginationCanonicalUrl} from '~/lib/seo';
+import {buildCanonicalUrl, resolvePaginationSeoPolicy} from '~/lib/seo';
 
 const COLLECTION_FACET_PARAMS = ['sort', 'f'] as const;
 
@@ -12,11 +12,16 @@ export function resolveCollectionSeoPolicy(input: string | URL) {
   const url = input instanceof URL ? input : new URL(input);
   const isFacetedCollectionUrl = hasCollectionFacetState(url.searchParams);
 
+  if (!isFacetedCollectionUrl) {
+    return {
+      ...resolvePaginationSeoPolicy(url),
+      isFacetedCollectionUrl,
+    } as const;
+  }
+
   return {
-    canonicalUrl: isFacetedCollectionUrl
-      ? buildCanonicalUrl(url)
-      : buildPaginationCanonicalUrl(url),
+    canonicalUrl: buildCanonicalUrl(url),
     isFacetedCollectionUrl,
-    robots: isFacetedCollectionUrl ? 'noindex,follow' : 'index,follow',
+    robots: 'noindex,follow',
   } as const;
 }

@@ -170,7 +170,7 @@ export function buildCanonicalUrl(input: string | URL) {
   }
 }
 
-function getPaginationCanonicalSearch(input: string | URL) {
+function getPaginationState(input: string | URL) {
   const rawInput = input instanceof URL ? input.toString() : input;
 
   try {
@@ -180,16 +180,24 @@ function getPaginationCanonicalSearch(input: string | URL) {
     const direction = searchParams.get('direction');
 
     if (!cursor || (direction !== 'next' && direction !== 'previous')) {
-      return '';
+      return null;
     }
 
-    return new URLSearchParams({cursor, direction}).toString();
+    return {cursor, direction} as const;
   } catch {
-    return '';
+    return null;
   }
 }
 
-/** Preserves only a valid Hydrogen cursor/direction pagination pair. */
+function getPaginationCanonicalSearch(input: string | URL) {
+  const pagination = getPaginationState(input);
+
+  return pagination?.direction === 'next'
+    ? new URLSearchParams(pagination).toString()
+    : '';
+}
+
+/** Preserves only a valid forward Hydrogen pagination pair. */
 export function buildPaginationCanonicalUrl(input: string | URL) {
   const canonicalUrl = buildCanonicalUrl(input);
   const paginationSearch = getPaginationCanonicalSearch(input);
@@ -197,6 +205,19 @@ export function buildPaginationCanonicalUrl(input: string | URL) {
   return paginationSearch
     ? `${canonicalUrl}?${paginationSearch}`
     : canonicalUrl;
+}
+
+export function resolvePaginationSeoPolicy(input: string | URL) {
+  const pagination = getPaginationState(input);
+  const isBackwardPagination = pagination?.direction === 'previous';
+
+  return {
+    canonicalUrl:
+      pagination?.direction === 'next'
+        ? buildPaginationCanonicalUrl(input)
+        : buildCanonicalUrl(input),
+    robots: isBackwardPagination ? 'noindex,follow' : 'index,follow',
+  } as const;
 }
 
 function isAbsoluteHttpUrl(value: string) {

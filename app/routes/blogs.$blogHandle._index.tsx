@@ -8,9 +8,9 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogHandleStyles from '~/styles/blogHandle.css?url';
 import {Link} from '~/lib/i18n-router';
 import {
-  buildPaginationCanonicalUrl,
   buildResourceSeoAlternateUrls,
   buildSeoMetadata,
+  resolvePaginationSeoPolicy,
 } from '~/lib/seo';
 import {formatLocaleDate} from '~/lib/locale-format';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
@@ -34,6 +34,7 @@ export const meta: Route.MetaFunction = ({data, params}) => {
     description: {explicit: blog?.seo?.description},
     canonicalUrl: data?.canonicalUrl ?? `/blogs/${params.blogHandle ?? ''}`,
     preservePagination: true,
+    robots: data?.listingRobots ?? 'index,follow',
     alternates: buildResourceSeoAlternateUrls(
       data?.canonicalUrl ?? `/blogs/${params.blogHandle ?? ''}`,
       data?.languageSwitchLinks,
@@ -85,10 +86,12 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
     resourceId: blog.id,
     resourceType: 'Blog',
   });
+  const paginationSeo = resolvePaginationSeoPolicy(request.url);
 
   return {
     blog,
-    canonicalUrl: buildPaginationCanonicalUrl(request.url),
+    canonicalUrl: paginationSeo.canonicalUrl,
+    listingRobots: paginationSeo.robots,
     languageSwitchLinks,
   };
 }

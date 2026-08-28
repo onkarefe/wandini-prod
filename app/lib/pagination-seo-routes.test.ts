@@ -13,9 +13,8 @@ describe('pagination SEO route wiring', () => {
   ])('uses the pagination canonical contract in %s', (routePath) => {
     const source = readRoute(routePath);
 
-    expect(source).toContain(
-      'canonicalUrl: buildPaginationCanonicalUrl(request.url)',
-    );
+    expect(source).toContain('resolvePaginationSeoPolicy(request.url)');
+    expect(source).toContain("robots: data?.listingRobots ?? 'index,follow'");
     expect(source).toContain('preservePagination: true');
   });
 
