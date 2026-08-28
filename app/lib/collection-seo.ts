@@ -1,0 +1,22 @@
+import {buildCanonicalUrl, buildPaginationCanonicalUrl} from '~/lib/seo';
+
+const COLLECTION_FACET_PARAMS = ['sort', 'f'] as const;
+
+function hasCollectionFacetState(searchParams: URLSearchParams) {
+  return COLLECTION_FACET_PARAMS.some((key) =>
+    searchParams.getAll(key).some((value) => value.trim().length > 0),
+  );
+}
+
+export function resolveCollectionSeoPolicy(input: string | URL) {
+  const url = input instanceof URL ? input : new URL(input);
+  const isFacetedCollectionUrl = hasCollectionFacetState(url.searchParams);
+
+  return {
+    canonicalUrl: isFacetedCollectionUrl
+      ? buildCanonicalUrl(url)
+      : buildPaginationCanonicalUrl(url),
+    isFacetedCollectionUrl,
+    robots: isFacetedCollectionUrl ? 'noindex,follow' : 'index,follow',
+  } as const;
+}

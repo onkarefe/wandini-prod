@@ -24,11 +24,11 @@ import {
 } from '~/lib/collectionParams';
 import {buildSimilarProductsPath} from '~/lib/similar-products';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
+import {resolveCollectionSeoPolicy} from '~/lib/collection-seo';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {redirectToLocalePath} from '~/lib/locale';
 import {
-  buildCanonicalUrl,
   buildLocaleSeoUrl,
   buildResourceSeoAlternateUrls,
   buildSeoMetadata,
@@ -90,12 +90,6 @@ const BestsellerCollectionLayout = lazy(
 const ZubehorCollectionLayout = lazy(
   () => import('~/components/ZubehorCollectionLayout'),
 );
-
-const NOISY_COLLECTION_PARAMS = ['sort', 'f', 'cursor', 'direction'] as const;
-
-function hasNoisyCollectionParams(searchParams: URLSearchParams) {
-  return NOISY_COLLECTION_PARAMS.some((param) => searchParams.has(param));
-}
 
 function isBestsellerCollection(collection: CollectionData) {
   return (
@@ -230,11 +224,12 @@ export const meta: Route.MetaFunction = ({data, params}) => {
       fallback: collection?.description,
     },
     canonicalUrl: data?.canonicalUrl ?? `/collections/${params.handle ?? ''}`,
+    preservePagination: true,
     alternates: buildResourceSeoAlternateUrls(
       data?.canonicalUrl ?? `/collections/${params.handle ?? ''}`,
       data?.languageSwitchLinks,
     ),
-    robots: data?.isNoisyCollectionUrl ? 'noindex,follow' : 'index,follow',
+    robots: data?.collectionRobots ?? 'index,follow',
     image: getCollectionMetaImage(collection),
   });
 };
@@ -256,8 +251,11 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   const paginationVariables = getPaginationVariables(request, {pageBy: 9});
   const url = new URL(request.url);
-  const canonicalUrl = buildCanonicalUrl(url);
-  const isNoisyCollectionUrl = hasNoisyCollectionParams(url.searchParams);
+  const {
+    canonicalUrl,
+    isFacetedCollectionUrl,
+    robots: collectionRobots,
+  } = resolveCollectionSeoPolicy(url);
   const selectedSort = getSelectedCollectionSort(url.searchParams.get('sort'));
   const {reverse, sortKey} = getCollectionSortVariables(selectedSort);
   const filters = parseCollectionFilters(url.searchParams);
@@ -313,7 +311,8 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     collection,
     canonicalUrl,
     languageSwitchLinks,
-    isNoisyCollectionUrl,
+    isFacetedCollectionUrl,
+    collectionRobots,
     isLoggedIn,
     wishlistProductIds,
     wishlistStatus,
@@ -330,18 +329,18 @@ export default function Collection() {
   const {
     collection,
     canonicalUrl,
-    isNoisyCollectionUrl,
+    isFacetedCollectionUrl,
     isLoggedIn,
     wishlistProductIds,
     wishlistStatus,
   } = data;
-  const collectionPageJsonLd = isNoisyCollectionUrl
+  const collectionPageJsonLd = isFacetedCollectionUrl
     ? null
     : buildCollectionPageJsonLd(collection, canonicalUrl);
-  const breadcrumbJsonLd = isNoisyCollectionUrl
+  const breadcrumbJsonLd = isFacetedCollectionUrl
     ? null
     : buildCollectionBreadcrumbJsonLd(collection, canonicalUrl);
-  const itemListJsonLd = isNoisyCollectionUrl
+  const itemListJsonLd = isFacetedCollectionUrl
     ? null
     : buildCollectionItemListJsonLd(collection.products.nodes, canonicalUrl);
 

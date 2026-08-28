@@ -56,6 +56,7 @@ export type SeoMetadataInput = {
   title: SeoTitleSources;
   description?: SeoDescriptionSources;
   canonicalUrl: string | URL;
+  preservePagination?: boolean;
   alternates?: SeoAlternateUrls | null;
   robots?: string;
   openGraphType?: string;
@@ -169,6 +170,35 @@ export function buildCanonicalUrl(input: string | URL) {
   }
 }
 
+function getPaginationCanonicalSearch(input: string | URL) {
+  const rawInput = input instanceof URL ? input.toString() : input;
+
+  try {
+    const searchParams = new URL(rawInput, 'https://canonical.invalid')
+      .searchParams;
+    const cursor = searchParams.get('cursor')?.trim();
+    const direction = searchParams.get('direction');
+
+    if (!cursor || (direction !== 'next' && direction !== 'previous')) {
+      return '';
+    }
+
+    return new URLSearchParams({cursor, direction}).toString();
+  } catch {
+    return '';
+  }
+}
+
+/** Preserves only a valid Hydrogen cursor/direction pagination pair. */
+export function buildPaginationCanonicalUrl(input: string | URL) {
+  const canonicalUrl = buildCanonicalUrl(input);
+  const paginationSearch = getPaginationCanonicalSearch(input);
+
+  return paginationSearch
+    ? `${canonicalUrl}?${paginationSearch}`
+    : canonicalUrl;
+}
+
 function isAbsoluteHttpUrl(value: string) {
   return /^https?:\/\//i.test(value);
 }
@@ -176,13 +206,19 @@ function isAbsoluteHttpUrl(value: string) {
 function resolveSeoHref(
   canonicalInput: string | URL,
   pathInput: string | URL,
+  preservePagination = false,
 ) {
-  const canonicalUrl = buildCanonicalUrl(canonicalInput);
-  const pathUrl = buildCanonicalUrl(pathInput);
+  const canonicalBuilder = preservePagination
+    ? buildPaginationCanonicalUrl
+    : buildCanonicalUrl;
+  const canonicalUrl = canonicalBuilder(canonicalInput);
+  const pathUrl = canonicalBuilder(pathInput);
 
   if (!isAbsoluteHttpUrl(canonicalUrl)) return pathUrl;
 
-  return buildCanonicalUrl(new URL(pathUrl, `${new URL(canonicalUrl).origin}/`));
+  return canonicalBuilder(
+    new URL(pathUrl, `${new URL(canonicalUrl).origin}/`),
+  );
 }
 
 /** Builds a URL in the locale selected by the canonical resource URL. */
@@ -204,14 +240,21 @@ export function buildFixedSeoAlternateUrls(
   canonicalInput: string | URL,
   path: string,
 ): SeoAlternateUrls {
+  const paginationSearch = getPaginationCanonicalSearch(canonicalInput);
+  const pathWithPagination = paginationSearch
+    ? `${path}?${paginationSearch}`
+    : path;
+
   return {
     deDE: resolveSeoHref(
       canonicalInput,
-      prefixPathWithLocale(path, GERMAN_LOCALE),
+      prefixPathWithLocale(pathWithPagination, GERMAN_LOCALE),
+      Boolean(paginationSearch),
     ),
     enDE: resolveSeoHref(
       canonicalInput,
-      prefixPathWithLocale(path, ENGLISH_LOCALE),
+      prefixPathWithLocale(pathWithPagination, ENGLISH_LOCALE),
+      Boolean(paginationSearch),
     ),
   };
 }
@@ -227,8 +270,11 @@ export function buildResourceSeoAlternateUrls(
 ): SeoAlternateUrls | null {
   if (!links) return null;
 
-  const deDE = resolveSeoHref(canonicalInput, links.DE);
-  const enDE = resolveSeoHref(canonicalInput, links.EN);
+  const preservePagination = Boolean(
+    getPaginationCanonicalSearch(canonicalInput),
+  );
+  const deDE = resolveSeoHref(canonicalInput, links.DE, preservePagination);
+  const enDE = resolveSeoHref(canonicalInput, links.EN, preservePagination);
   const dePath = new URL(deDE, 'https://canonical.invalid').pathname;
   const enPath = new URL(enDE, 'https://canonical.invalid').pathname;
 
@@ -260,6 +306,7 @@ export function buildSeoMetadata({
   title: titleSources,
   description: descriptionSources,
   canonicalUrl: canonicalInput,
+  preservePagination = false,
   alternates,
   robots = 'index,follow',
   openGraphType = 'website',
@@ -271,7 +318,10 @@ export function buildSeoMetadata({
   const description = descriptionSources
     ? resolveSeoDescription(descriptionSources)
     : null;
-  const canonicalUrl = buildCanonicalUrl(canonicalInput);
+  const canonicalBuilder = preservePagination
+    ? buildPaginationCanonicalUrl
+    : buildCanonicalUrl;
+  const canonicalUrl = canonicalBuilder(canonicalInput);
   const defaultImage = getProvidedText(image);
   const openGraphTitle = getProvidedText(openGraph?.title) ?? title;
   const openGraphDescription =
@@ -293,19 +343,19 @@ export function buildSeoMetadata({
             tagName: 'link',
             rel: 'alternate',
             hrefLang: 'de-DE',
-            href: buildCanonicalUrl(alternates.deDE),
+            href: canonicalBuilder(alternates.deDE),
           },
           {
             tagName: 'link',
             rel: 'alternate',
             hrefLang: 'en-DE',
-            href: buildCanonicalUrl(alternates.enDE),
+            href: canonicalBuilder(alternates.enDE),
           },
           {
             tagName: 'link',
             rel: 'alternate',
             hrefLang: 'x-default',
-            href: buildCanonicalUrl(alternates.deDE),
+            href: canonicalBuilder(alternates.deDE),
           },
         ]
       : []),

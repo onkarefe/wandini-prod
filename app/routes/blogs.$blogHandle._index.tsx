@@ -8,7 +8,7 @@ import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogHandleStyles from '~/styles/blogHandle.css?url';
 import {Link} from '~/lib/i18n-router';
 import {
-  buildCanonicalUrl,
+  buildPaginationCanonicalUrl,
   buildResourceSeoAlternateUrls,
   buildSeoMetadata,
 } from '~/lib/seo';
@@ -33,6 +33,7 @@ export const meta: Route.MetaFunction = ({data, params}) => {
     },
     description: {explicit: blog?.seo?.description},
     canonicalUrl: data?.canonicalUrl ?? `/blogs/${params.blogHandle ?? ''}`,
+    preservePagination: true,
     alternates: buildResourceSeoAlternateUrls(
       data?.canonicalUrl ?? `/blogs/${params.blogHandle ?? ''}`,
       data?.languageSwitchLinks,
@@ -87,7 +88,7 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
 
   return {
     blog,
-    canonicalUrl: buildCanonicalUrl(request.url),
+    canonicalUrl: buildPaginationCanonicalUrl(request.url),
     languageSwitchLinks,
   };
 }

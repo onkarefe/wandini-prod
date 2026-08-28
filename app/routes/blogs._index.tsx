@@ -7,8 +7,8 @@ import {useTranslation} from '~/i18n/useTranslation';
 import blogMainStyles from '~/styles/blogMain.css?url';
 import {Link} from '~/lib/i18n-router';
 import {
-  buildCanonicalUrl,
   buildFixedSeoAlternateUrls,
+  buildPaginationCanonicalUrl,
   buildSeoMetadata,
 } from '~/lib/seo';
 
@@ -67,6 +67,7 @@ export const meta: Route.MetaFunction = ({data}) => {
       fallback: getBlogListingFieldValue(fields, 'subtitle', 'sub_title'),
     },
     canonicalUrl: data?.canonicalUrl ?? '/blogs',
+    preservePagination: true,
     alternates: buildFixedSeoAlternateUrls(
       data?.canonicalUrl ?? '/blogs',
       '/blogs',
@@ -105,7 +106,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   return {
     blogs,
     blogListingContent,
-    canonicalUrl: buildCanonicalUrl(request.url),
+    canonicalUrl: buildPaginationCanonicalUrl(request.url),
   };
 }
 
