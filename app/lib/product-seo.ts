@@ -3,9 +3,10 @@ import {
   buildLocaleSeoUrl,
   resolveSeoDescription,
 } from '~/lib/seo';
-
-const SQUARE_METRE_UNIT_CODE = 'MTK';
-const SQUARE_METRE_UNIT_TEXT = 'm²';
+import {
+  CONFIGURED_PRODUCT_CLASSIFICATION,
+  type ConfiguredProductClassification,
+} from '~/lib/configured-product-classification';
 
 type ProductImage = {
   url?: string | null;
@@ -45,8 +46,6 @@ export type ProductStructuredDataInput = {
   } | null;
   selectedOrFirstAvailableVariant?: ProductVariant | null;
 };
-
-export type ProductPriceBasis = 'squareMeter' | 'item';
 
 export type ProductBreadcrumbItem = {
   name: string;
@@ -199,13 +198,8 @@ function getVariantName(productTitle: string, variant: ProductVariant) {
 function buildOffer(
   variant: ProductVariant,
   variantUrl: string,
-  priceBasis: ProductPriceBasis,
+  classification: ConfiguredProductClassification,
 ) {
-  const price = getText(variant.price?.amount);
-  const priceCurrency = getText(variant.price?.currencyCode);
-
-  if (!price || !priceCurrency) return null;
-
   const offer = {
     '@type': 'Offer',
     url: variantUrl,
@@ -215,24 +209,14 @@ function buildOffer(
     itemCondition: 'https://schema.org/NewCondition',
   };
 
-  if (priceBasis === 'item') {
-    return {...offer, price, priceCurrency};
+  if (classification !== CONFIGURED_PRODUCT_CLASSIFICATION.ORDINARY) {
+    return offer;
   }
 
-  return {
-    ...offer,
-    priceSpecification: {
-      '@type': 'UnitPriceSpecification',
-      price,
-      priceCurrency,
-      referenceQuantity: {
-        '@type': 'QuantitativeValue',
-        value: 1,
-        unitCode: SQUARE_METRE_UNIT_CODE,
-        unitText: SQUARE_METRE_UNIT_TEXT,
-      },
-    },
-  };
+  const price = getText(variant.price?.amount);
+  const priceCurrency = getText(variant.price?.currencyCode);
+
+  return price && priceCurrency ? {...offer, price, priceCurrency} : null;
 }
 
 function buildVariantProduct({
@@ -241,7 +225,7 @@ function buildVariantProduct({
   groupId,
   productImageUrls,
   productTitle,
-  priceBasis,
+  classification,
   variant,
 }: {
   canonicalUrl: string;
@@ -249,7 +233,7 @@ function buildVariantProduct({
   groupId?: string;
   productImageUrls: string[];
   productTitle: string;
-  priceBasis: ProductPriceBasis;
+  classification: ConfiguredProductClassification;
   variant: ProductVariant;
 }) {
   const variantId = getText(variant.id)!;
@@ -260,7 +244,7 @@ function buildVariantProduct({
   ];
   const sku = getText(variant.sku);
   const additionalProperty = getAdditionalProperties(variant);
-  const offer = buildOffer(variant, variantUrl, priceBasis);
+  const offer = buildOffer(variant, variantUrl, classification);
 
   return {
     '@type': 'Product',
@@ -280,7 +264,9 @@ function buildVariantProduct({
 export function buildProductStructuredData(
   product: ProductStructuredDataInput,
   canonicalInput: string | URL,
-  {priceBasis = 'squareMeter'}: {priceBasis?: ProductPriceBasis} = {},
+  {
+    classification = CONFIGURED_PRODUCT_CLASSIFICATION.INVALID,
+  }: {classification?: ConfiguredProductClassification} = {},
 ) {
   const canonicalUrl = buildCanonicalUrl(canonicalInput);
   const productTitle = getText(product.title) ?? 'Wandini';
@@ -300,7 +286,7 @@ export function buildProductStructuredData(
       groupId,
       productImageUrls,
       productTitle,
-      priceBasis,
+      classification,
       variant,
     }),
   );

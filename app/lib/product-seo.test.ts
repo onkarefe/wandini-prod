@@ -8,23 +8,13 @@ import {
   buildProductStructuredData,
 } from '~/lib/product-seo';
 import {SEO_ENABLED} from '~/lib/seo';
+import {CONFIGURED_PRODUCT_CLASSIFICATION} from '~/lib/configured-product-classification';
 
 type StructuredOffer = {
   price?: string;
   priceCurrency?: string;
   availability: string;
   url: string;
-  priceSpecification?: {
-    '@type': string;
-    price: string;
-    priceCurrency: string;
-    referenceQuantity: {
-      '@type': string;
-      value: number;
-      unitCode: string;
-      unitText: string;
-    };
-  };
 };
 
 type StructuredVariant = {
@@ -105,6 +95,7 @@ function buildGroup(canonicalUrl = 'https://www.wandini.de/products/forest') {
   return buildProductStructuredData(
     createWallpaperProduct(),
     canonicalUrl,
+    {classification: CONFIGURED_PRODUCT_CLASSIFICATION.CONFIGURED},
   ) as StructuredProductGroup;
 }
 
@@ -134,22 +125,20 @@ describe('Product structured data', () => {
     ).toBe(2);
   });
 
-  it('uses only Shopify variant prices and represents them as one-square-metre unit prices', () => {
+  it('emits no structured purchase price for configurable wallpaper', () => {
     const variants = buildGroup().hasVariant;
 
-    expect(variants[0].offers).not.toHaveProperty('price');
-    expect(variants[0].offers.priceSpecification).toEqual({
-      '@type': 'UnitPriceSpecification',
-      price: '39.00',
-      priceCurrency: 'EUR',
-      referenceQuantity: {
-        '@type': 'QuantitativeValue',
-        value: 1,
-        unitCode: 'MTK',
-        unitText: 'm²',
-      },
+    expect(variants[0].offers).toEqual({
+      '@type': 'Offer',
+      url: 'https://www.wandini.de/products/forest?Material=Self-adhesive',
+      availability: 'https://schema.org/InStock',
+      itemCondition: 'https://schema.org/NewCondition',
     });
-    expect(variants[1].offers.priceSpecification?.price).toBe('59.00');
+    expect(variants[1].offers).not.toHaveProperty('price');
+    expect(variants[0].offers).not.toHaveProperty('priceSpecification');
+    expect(JSON.stringify(variants)).not.toContain('UnitPriceSpecification');
+    expect(JSON.stringify(variants)).not.toContain('39.00');
+    expect(JSON.stringify(variants)).not.toContain('59.00');
     expect(JSON.stringify(variants)).not.toContain('999.00');
     expect(JSON.stringify(variants)).not.toContain('888.00');
     expect(JSON.stringify(variants)).not.toContain('9999.00');
@@ -164,7 +153,7 @@ describe('Product structured data', () => {
     expect(schemaText).not.toContain('priceOverride');
   });
 
-  it('keeps Shopify currency, availability, actual SKU, and real images', () => {
+  it('keeps Shopify availability, actual SKU, and real images', () => {
     const schema = buildGroup();
     const [availableVariant, unavailableVariant] = schema.hasVariant;
 
@@ -174,9 +163,7 @@ describe('Product structured data', () => {
     expect(unavailableVariant.offers.availability).toBe(
       'https://schema.org/OutOfStock',
     );
-    expect(availableVariant.offers.priceSpecification?.priceCurrency).toBe(
-      'EUR',
-    );
+    expect(availableVariant.offers).not.toHaveProperty('priceCurrency');
     expect(availableVariant.sku).toBe('FOREST-SA');
     expect(unavailableVariant).not.toHaveProperty('sku');
     expect(schema.image).toEqual([
@@ -232,7 +219,7 @@ describe('Product structured data', () => {
     const schema = buildProductStructuredData(
       product,
       'https://www.wandini.de/products/accessory',
-      {priceBasis: 'item'},
+      {classification: CONFIGURED_PRODUCT_CLASSIFICATION.ORDINARY},
     ) as StructuredVariant;
 
     expect(schema.offers.price).toBe('39.00');

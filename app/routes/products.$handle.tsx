@@ -19,6 +19,7 @@ import {getSimilarMotifsPreview} from '~/lib/similar-products-preview';
 import {useTranslation} from '~/i18n/useTranslation';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
+import {classifyConfiguredProductMetafields} from '~/lib/configured-product-classification';
 import {
   hasExplicitProductOptionSelection,
   isWallpaperMaterialOption,
@@ -196,6 +197,10 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
         .filter((variant): variant is NonNullable<typeof variant> =>
           Boolean(variant?.id),
         ) ?? []);
+  const productClassification = classifyConfiguredProductMetafields({
+    masterAssetMetafield: product.masterAssetId,
+    printQualityMetafield: initialVariant?.printQuality,
+  });
   const languageSwitchLinks = await resolveResourceLanguageSwitchLinks({
     storefront,
     request,
@@ -211,6 +216,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
       ),
     ),
     languageSwitchLinks,
+    productClassification,
     seoVariants,
     product: {
       ...product,
@@ -261,14 +267,19 @@ function isZubehorProduct(product: {
 
 export default function Product() {
   const {t} = useTranslation();
-  const {product, canonicalUrl, seoVariants, similarMotifsPreview} =
-    useLoaderData<typeof loader>();
+  const {
+    product,
+    canonicalUrl,
+    productClassification,
+    seoVariants,
+    similarMotifsPreview,
+  } = useLoaderData<typeof loader>();
   const selectedVariant = product.selectedOrFirstAvailableVariant;
   const isZubehor = isZubehorProduct(product);
   const productJsonLd = buildProductStructuredData(
     {...product, variants: {nodes: seoVariants}},
     canonicalUrl,
-    {priceBasis: isZubehor ? 'item' : 'squareMeter'},
+    {classification: productClassification},
   );
   const breadcrumbItems = buildProductBreadcrumbItems(
     product.title,
