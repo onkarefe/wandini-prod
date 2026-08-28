@@ -2,6 +2,7 @@ import type {Storefront} from '@shopify/hydrogen';
 import {normalizeCanonicalOrigin} from './canonical-origin';
 
 const SITEMAP_PAGE_SIZE = 250;
+const RESOURCE_IDENTITY_BATCH_SIZE = 50;
 
 export type SitemapResourceType =
   | 'products'
@@ -29,6 +30,36 @@ type SitemapApiPage = {
   } | null;
 };
 
+type SitemapResourceTypename =
+  | 'Product'
+  | 'Collection'
+  | 'Page'
+  | 'Blog';
+
+type SitemapResourceIdentityNode = {
+  __typename: SitemapResourceTypename;
+  id: string;
+  handle: string;
+  updatedAt?: string | null;
+};
+
+type CursorConnection<T> = {
+  nodes: T[];
+  pageInfo: {
+    hasNextPage: boolean;
+    endCursor?: string | null;
+  };
+};
+
+type LocalizedSitemapResourceNodes = {
+  nodes: Array<SitemapResourceIdentityNode | null>;
+};
+
+type SitemapResourceIdentityResponse = Record<
+  string,
+  SitemapResourceIdentityNode | null
+>;
+
 type ArticleSitemapNode = {
   id: string;
   handle: string;
@@ -37,13 +68,7 @@ type ArticleSitemapNode = {
 };
 
 type ArticleConnectionPage = {
-  articles: {
-    nodes: ArticleSitemapNode[];
-    pageInfo: {
-      hasNextPage: boolean;
-      endCursor?: string | null;
-    };
-  };
+  articles: CursorConnection<ArticleSitemapNode>;
 };
 
 type LocalizedArticleNodes = {
@@ -63,6 +88,23 @@ const SITEMAP_TYPE_MAP: Record<SitemapResourceType, string> = {
   collections: 'COLLECTION',
   pages: 'PAGE',
   blogs: 'BLOG',
+};
+
+const SITEMAP_TYPENAME_MAP: Record<
+  SitemapResourceType,
+  SitemapResourceTypename
+> = {
+  products: 'Product',
+  collections: 'Collection',
+  pages: 'Page',
+  blogs: 'Blog',
+};
+
+const SITEMAP_RESOURCE_FIELD_MAP: Record<SitemapResourceType, string> = {
+  products: 'product',
+  collections: 'collection',
+  pages: 'page',
+  blogs: 'blog',
 };
 
 function escapeXml(value: string) {
@@ -138,22 +180,107 @@ ${urls.join('\n')}` : ''}
 </urlset>`;
 }
 
-export function pairLocalizedSitemapItems(
+export function pairLocalizedSitemapNodes(
   type: SitemapResourceType,
-  deItems: SitemapApiItem[],
-  enItems: SitemapApiItem[],
+  deNodes: SitemapResourceIdentityNode[],
+  enNodes: Array<SitemapResourceIdentityNode | null>,
 ): LocalizedSitemapEntry[] {
-  return deItems.map((deItem, index) => {
-    const enItem = enItems[index];
+  const expectedTypename = SITEMAP_TYPENAME_MAP[type];
+  const englishById = new Map(
+    enNodes
+      .filter(
+        (node): node is SitemapResourceIdentityNode =>
+          node?.__typename === expectedTypename,
+      )
+      .map((node) => [node.id, node]),
+  );
 
-    return {
-      dePath: buildResourcePath(type, deItem.handle),
-      enPath: enItem
-        ? `/en${buildResourcePath(type, enItem.handle)}`
-        : null,
-      updatedAt: deItem.updatedAt || enItem?.updatedAt || null,
-    };
-  });
+  return deNodes
+    .filter((node) => node.__typename === expectedTypename)
+    .map((deNode) => {
+      const enNode = englishById.get(deNode.id);
+
+      return {
+        dePath: buildResourcePath(type, deNode.handle),
+        enPath: enNode
+          ? `/en${buildResourcePath(type, enNode.handle)}`
+          : null,
+        updatedAt: deNode.updatedAt?.trim() || null,
+      };
+    });
+}
+
+function buildResourceIdentityQuery(type: SitemapResourceType, size: number) {
+  const variables = Array.from(
+    {length: size},
+    (_, index) => `$handle${index}: String!`,
+  ).join('\n    ');
+  const field = SITEMAP_RESOURCE_FIELD_MAP[type];
+  const selections = Array.from(
+    {length: size},
+    (_, index) => `resource${index}: ${field}(handle: $handle${index}) {
+      __typename
+      id
+      handle
+    }`,
+  ).join('\n    ');
+
+  return `
+  query SitemapResourceIdentities(
+    ${variables}
+    $country: CountryCode!
+    $language: LanguageCode!
+  ) @inContext(country: $country, language: $language) {
+    ${selections}
+  }
+`;
+}
+
+async function loadSitemapResourceIdentityNodes({
+  storefront,
+  type,
+  items,
+}: {
+  storefront: Storefront;
+  type: SitemapResourceType;
+  items: SitemapApiItem[];
+}) {
+  const batches = Array.from(
+    {length: Math.ceil(items.length / RESOURCE_IDENTITY_BATCH_SIZE)},
+    (_, index) =>
+      items.slice(
+        index * RESOURCE_IDENTITY_BATCH_SIZE,
+        (index + 1) * RESOURCE_IDENTITY_BATCH_SIZE,
+      ),
+  );
+  const expectedTypename = SITEMAP_TYPENAME_MAP[type];
+  const batchResults = await Promise.all(
+    batches.map(async (batch) => {
+      const variables = Object.fromEntries(
+        batch.map((item, index) => [`handle${index}`, item.handle]),
+      );
+      const data = await storefront.query<SitemapResourceIdentityResponse>(
+        buildResourceIdentityQuery(type, batch.length),
+        {
+          cache: storefront.CacheLong(),
+          variables: {
+            ...variables,
+            country: 'DE',
+            language: 'DE',
+          },
+        },
+      );
+
+      return batch.flatMap((item, index) => {
+        const node = data[`resource${index}`];
+        if (node?.__typename !== expectedTypename) return [];
+
+        return [{...node, updatedAt: item.updatedAt}];
+      });
+    }),
+  );
+
+  return batchResults.flat();
 }
 
 export async function loadLocalizedResourceSitemapEntries({
@@ -165,26 +292,43 @@ export async function loadLocalizedResourceSitemapEntries({
   type: SitemapResourceType;
   page: number;
 }) {
-  const loadLocale = (language: 'DE' | 'EN') =>
-    storefront.query<SitemapApiPage>(LOCALIZED_SITEMAP_QUERY, {
+  const sitemapData = await storefront.query<SitemapApiPage>(
+    LOCALIZED_SITEMAP_QUERY,
+    {
       cache: storefront.CacheLong(),
       variables: {
         type: SITEMAP_TYPE_MAP[type],
         page,
         country: 'DE',
-        language,
+        language: 'DE',
       },
-    });
-  const [deData, enData] = await Promise.all([
-    loadLocale('DE'),
-    loadLocale('EN'),
-  ]);
-
-  return pairLocalizedSitemapItems(
-    type,
-    deData.sitemap?.resources?.items ?? [],
-    enData.sitemap?.resources?.items ?? [],
+    },
   );
+  const sitemapItems = sitemapData.sitemap?.resources?.items ?? [];
+
+  if (sitemapItems.length === 0) return [];
+
+  const deNodes = await loadSitemapResourceIdentityNodes({
+    storefront,
+    type,
+    items: sitemapItems,
+  });
+
+  if (deNodes.length === 0) return [];
+
+  const englishData = await storefront.query<LocalizedSitemapResourceNodes>(
+    LOCALIZED_RESOURCE_NODES_QUERY,
+    {
+      cache: storefront.CacheLong(),
+      variables: {
+        ids: deNodes.map(({id}) => id),
+        country: 'DE',
+        language: 'EN',
+      },
+    },
+  );
+
+  return pairLocalizedSitemapNodes(type, deNodes, englishData.nodes);
 }
 
 export async function loadCursorConnectionPage<T>({
@@ -213,6 +357,58 @@ export async function loadCursorConnectionPage<T>({
   return [];
 }
 
+export async function countCursorConnectionPages<T>({
+  loadPage,
+}: {
+  loadPage: (after: string | null) => Promise<CursorConnection<T>>;
+}) {
+  let after: string | null = null;
+  let pageCount = 0;
+
+  while (true) {
+    const connection = await loadPage(after);
+    if (connection.nodes.length === 0) return pageCount;
+
+    pageCount += 1;
+
+    if (!connection.pageInfo.hasNextPage) return pageCount;
+    if (!connection.pageInfo.endCursor) {
+      throw new Error('Sitemap pagination is missing an end cursor.');
+    }
+
+    after = connection.pageInfo.endCursor;
+  }
+}
+
+export async function loadArticleSitemapPageCount(storefront: Storefront) {
+  return countCursorConnectionPages({
+    loadPage: async (after) => {
+      const data = await storefront.query<ArticleConnectionPage>(
+        ARTICLE_CONNECTION_QUERY,
+        {
+          cache: storefront.CacheLong(),
+          variables: {
+            first: SITEMAP_PAGE_SIZE,
+            after,
+            country: 'DE',
+            language: 'DE',
+          },
+        },
+      );
+      return data.articles;
+    },
+  });
+}
+
+export function buildArticleSitemapChildPaths(pageCount: number) {
+  if (!Number.isInteger(pageCount) || pageCount < 1) return [];
+
+  return Array.from(
+    {length: pageCount},
+    (_, index) => `/sitemap/articles/${index + 1}.xml`,
+  );
+}
+
 export function resolveSitemapLastmod(
   updatedAt?: string | null,
   publishedAt?: string | null,
@@ -220,10 +416,12 @@ export function resolveSitemapLastmod(
   return updatedAt?.trim() || publishedAt?.trim() || null;
 }
 
-async function loadArticleModificationTimes(
+async function loadSitemapModificationTimes(
   storefront: Storefront,
+  type: string,
   handles: string[],
 ) {
+  // This lookup enriches lastmod only. Cursor connections own child-page boundaries.
   const pendingHandles = new Set(handles);
   const updatedAtByHandle = new Map<string, string>();
   let page = 1;
@@ -231,10 +429,15 @@ async function loadArticleModificationTimes(
 
   while (hasNextPage && pendingHandles.size > 0) {
     const data = await storefront.query<SitemapApiPage>(
-      ARTICLE_MODIFICATION_SITEMAP_QUERY,
+      SITEMAP_MODIFICATION_QUERY,
       {
         cache: storefront.CacheLong(),
-        variables: {page},
+        variables: {
+          type,
+          page,
+          country: 'DE',
+          language: 'DE',
+        },
       },
     );
     const resources = data.sitemap?.resources;
@@ -290,8 +493,9 @@ export async function loadArticleSitemapEntries({
         language: 'EN',
       },
     }),
-    loadArticleModificationTimes(
+    loadSitemapModificationTimes(
       storefront,
+      'ARTICLE',
       germanArticles.map(({handle}) => handle),
     ),
   ]);
@@ -343,6 +547,34 @@ const LOCALIZED_SITEMAP_QUERY = `
   }
 `;
 
+const LOCALIZED_RESOURCE_NODES_QUERY = `
+  query LocalizedSitemapResourceNodes(
+    $ids: [ID!]!
+    $country: CountryCode!
+    $language: LanguageCode!
+  ) @inContext(country: $country, language: $language) {
+    nodes(ids: $ids) {
+      __typename
+      ... on Product {
+        id
+        handle
+      }
+      ... on Collection {
+        id
+        handle
+      }
+      ... on Page {
+        id
+        handle
+      }
+      ... on Blog {
+        id
+        handle
+      }
+    }
+  }
+`;
+
 const ARTICLE_CONNECTION_QUERY = `
   query ArticleSitemapConnection(
     $first: Int!
@@ -386,9 +618,14 @@ const ARTICLE_LOCALIZED_NODES_QUERY = `
   }
 `;
 
-const ARTICLE_MODIFICATION_SITEMAP_QUERY = `
-  query ArticleModificationSitemap($page: Int!) {
-    sitemap(type: ARTICLE) {
+const SITEMAP_MODIFICATION_QUERY = `
+  query SitemapModificationTimes(
+    $type: SitemapType!
+    $page: Int!
+    $country: CountryCode!
+    $language: LanguageCode!
+  ) @inContext(country: $country, language: $language) {
+    sitemap(type: $type) {
       resources(page: $page) {
         hasNextPage
         items {

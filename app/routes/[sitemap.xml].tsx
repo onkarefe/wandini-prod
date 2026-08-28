@@ -8,12 +8,15 @@ import {
   buildCanonicalRequestUrl,
   isProductionSeoRequest,
 } from '~/lib/canonical-origin';
+import {
+  buildArticleSitemapChildPaths,
+  loadArticleSitemapPageCount,
+} from '~/lib/sitemap.server';
 
 const SITEMAP_TYPES = [
   'products',
   'pages',
   'collections',
-  'articles',
   'blogs',
 ] as const;
 
@@ -43,10 +46,13 @@ export async function loader({
     request,
   );
 
+  const articlePageCount = await loadArticleSitemapPageCount(storefront);
+  const articleSitemaps = buildArticleSitemapChildPaths(articlePageCount);
   const response = await getSitemapIndex({
     storefront,
     request: canonicalRequest,
     types: [...SITEMAP_TYPES],
+    customChildSitemaps: articleSitemaps,
   });
 
   response.headers.set('Cache-Control', `max-age=${60 * 60 * 24}`);

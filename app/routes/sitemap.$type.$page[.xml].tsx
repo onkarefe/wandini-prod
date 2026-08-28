@@ -59,6 +59,7 @@ export async function loader({
 
   if (params.type === 'articles') {
     entries = await loadArticleSitemapEntries({storefront, page});
+    if (entries.length === 0) return unavailableSitemapResponse();
   } else if (RESOURCE_TYPES.has(params.type as SitemapResourceType)) {
     entries = await loadLocalizedResourceSitemapEntries({
       storefront,
