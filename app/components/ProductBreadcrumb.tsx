@@ -1,7 +1,7 @@
-import type {ProductBreadcrumbItem} from '~/lib/product-seo';
+import type {BreadcrumbItem} from '~/lib/breadcrumbs';
 import '~/styles/product-breadcrumb.css';
 
-export function ProductBreadcrumb({items}: {items: ProductBreadcrumbItem[]}) {
+export function Breadcrumbs({items}: {items: BreadcrumbItem[]}) {
   if (items.length < 2) return null;
 
   return (
@@ -23,4 +23,8 @@ export function ProductBreadcrumb({items}: {items: ProductBreadcrumbItem[]}) {
       </ol>
     </nav>
   );
+}
+
+export function ProductBreadcrumb({items}: {items: BreadcrumbItem[]}) {
+  return <Breadcrumbs items={items} />;
 }

@@ -4,6 +4,7 @@ import {Image, getPaginationVariables} from '@shopify/hydrogen';
 import type {ArticleItemFragment} from 'storefrontapi.generated';
 import {useTranslation} from '~/i18n/useTranslation';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {Breadcrumbs} from '~/components/ProductBreadcrumb';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogHandleStyles from '~/styles/blogHandle.css?url';
 import {Link} from '~/lib/i18n-router';
@@ -15,6 +16,10 @@ import {
 import {formatLocaleDate} from '~/lib/locale-format';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
+import {
+  buildBreadcrumbStructuredData,
+  buildContentBreadcrumbItems,
+} from '~/lib/breadcrumbs';
 
 export function links() {
   return [{rel: 'stylesheet', href: blogHandleStyles}];
@@ -23,6 +28,10 @@ export function links() {
 type BlogArticle = ArticleItemFragment & {
   excerpt?: string | null;
 };
+
+function stringifyJsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
 
 export const meta: Route.MetaFunction = ({data, params}) => {
   const blog = data?.blog;
@@ -113,11 +122,23 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export default function Blog() {
   const {t} = useTranslation();
-  const {blog} = useLoaderData<typeof loader>();
+  const {blog, canonicalUrl} = useLoaderData<typeof loader>();
   const {articles} = blog;
+  const breadcrumbItems = buildContentBreadcrumbItems({
+    canonicalUrl,
+    currentName: blog.title,
+  });
+  const breadcrumbJsonLd = buildBreadcrumbStructuredData(breadcrumbItems);
 
   return (
     <div className="blog-handle-page">
+      {breadcrumbJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
+        />
+      ) : null}
+      <Breadcrumbs items={breadcrumbItems} />
       <div className="blog-handle-hero">
         <div className="container mx-auto">
           <p className="blog-handle-hero__eyebrow">

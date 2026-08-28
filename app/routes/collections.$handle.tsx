@@ -12,6 +12,7 @@ import type {
   CustomCollectionQueryVariables,
 } from 'storefrontapi.generated';
 import wandiniLogo from '~/assets/logos/wandini_Logo.webp';
+import {Breadcrumbs} from '~/components/ProductBreadcrumb';
 import {CustomProductCard} from '~/components/CustomProductCard';
 import {FilterBar} from '~/components/filterBar';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
@@ -23,6 +24,10 @@ import {
   normalizeCollectionSortParam,
 } from '~/lib/collectionParams';
 import {buildSimilarProductsPath} from '~/lib/similar-products';
+import {
+  buildBreadcrumbStructuredData,
+  buildContentBreadcrumbItems,
+} from '~/lib/breadcrumbs';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {resolveCollectionSeoPolicy} from '~/lib/collection-seo';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
@@ -130,32 +135,6 @@ function buildCollectionPageJsonLd(
     name,
     ...(description ? {description} : {}),
     url: canonicalUrl,
-  };
-}
-
-function buildCollectionBreadcrumbJsonLd(
-  collection: CollectionMetaInput,
-  canonicalUrl: string,
-) {
-  const name = normalizeMetaText(collection.title) || COLLECTION_META_BRAND;
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: buildLocaleSeoUrl(canonicalUrl, '/'),
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name,
-        item: canonicalUrl,
-      },
-    ],
   };
 }
 
@@ -340,9 +319,13 @@ export default function Collection() {
   const collectionPageJsonLd = isFacetedCollectionUrl
     ? null
     : buildCollectionPageJsonLd(collection, canonicalUrl);
-  const breadcrumbJsonLd = isFacetedCollectionUrl
-    ? null
-    : buildCollectionBreadcrumbJsonLd(collection, canonicalUrl);
+  const breadcrumbItems = isFacetedCollectionUrl
+    ? []
+    : buildContentBreadcrumbItems({
+        canonicalUrl,
+        currentName: collection.title,
+      });
+  const breadcrumbJsonLd = buildBreadcrumbStructuredData(breadcrumbItems);
   const itemListJsonLd = isFacetedCollectionUrl
     ? null
     : buildCollectionItemListJsonLd(collection.products.nodes, canonicalUrl);
@@ -374,6 +357,7 @@ export default function Collection() {
           dangerouslySetInnerHTML={{__html: stringifyJsonLd(itemListJsonLd)}}
         />
       ) : null}
+      <Breadcrumbs items={breadcrumbItems} />
 
       {isBestsellerCollection(collection) ? (
         <Suspense

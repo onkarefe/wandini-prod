@@ -1,21 +1,24 @@
 import {useLoaderData} from 'react-router';
 import type {Route} from './+types/blogs.$blogHandle.$articleHandle';
 import {Image} from '@shopify/hydrogen';
+import {Breadcrumbs} from '~/components/ProductBreadcrumb';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogDetailStyles from '~/styles/blogDetail.css?url';
 import {Link} from '~/lib/i18n-router';
 import {
   buildCanonicalUrl,
-  buildLocaleSeoUrl,
   buildResourceSeoAlternateUrls,
   buildSeoMetadata,
-  normalizeSeoText as normalizeMetaText,
-  resolveSeoDescription,
 } from '~/lib/seo';
 import {useTranslation} from '~/i18n/useTranslation';
 import {formatLocaleDate} from '~/lib/locale-format';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
+import {buildArticleStructuredData} from '~/lib/article-schema';
+import {
+  buildBreadcrumbStructuredData,
+  buildContentBreadcrumbItems,
+} from '~/lib/breadcrumbs';
 
 const BLOCKED_HTML_TAGS = [
   'script',
@@ -100,6 +103,7 @@ type ArticleMetaInput = {
   title?: string | null;
   contentHtml?: string | null;
   publishedAt?: string | null;
+  updatedAt?: string | null;
   author?: {
     name?: string | null;
   } | null;
@@ -112,97 +116,8 @@ type ArticleMetaInput = {
   } | null;
 };
 
-function getArticleMetaDescription(article?: ArticleMetaInput | null) {
-  return resolveSeoDescription({
-    explicit: article?.seo?.description,
-    fallback: article?.contentHtml,
-  });
-}
-
 function getArticleMetaImage(article?: ArticleMetaInput | null) {
   return article?.image?.url ?? null;
-}
-
-function getArticleHomeUrl(canonicalUrl: string) {
-  return buildLocaleSeoUrl(canonicalUrl, '/');
-}
-
-function getArticleBlogUrl(canonicalUrl: string, blogHandle?: string | null) {
-  const handle = normalizeMetaText(blogHandle);
-
-  if (!handle) {
-    return null;
-  }
-
-  return buildLocaleSeoUrl(canonicalUrl, `/blogs/${handle}`);
-}
-
-function buildArticleJsonLd(article: ArticleMetaInput, canonicalUrl: string) {
-  const headline = normalizeMetaText(article.title);
-
-  if (!headline) {
-    return null;
-  }
-
-  const description = getArticleMetaDescription(article);
-  const image = getArticleMetaImage(article);
-  const datePublished = normalizeMetaText(article.publishedAt);
-  const authorName = normalizeMetaText(article.author?.name);
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline,
-    ...(description ? {description} : {}),
-    ...(image ? {image} : {}),
-    ...(datePublished ? {datePublished} : {}),
-    ...(authorName ? {author: {'@type': 'Person', name: authorName}} : {}),
-    url: canonicalUrl,
-  };
-}
-
-function buildArticleBreadcrumbJsonLd({
-  article,
-  blogHandle,
-  blogTitle,
-  canonicalUrl,
-}: {
-  article: ArticleMetaInput;
-  blogHandle?: string | null;
-  blogTitle?: string | null;
-  canonicalUrl: string;
-}) {
-  const articleName = normalizeMetaText(article.title);
-  const blogUrl = getArticleBlogUrl(canonicalUrl, blogHandle);
-
-  if (!articleName || !blogUrl) {
-    return null;
-  }
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: getArticleHomeUrl(canonicalUrl),
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: normalizeMetaText(blogTitle) || 'Blog',
-        item: blogUrl,
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: articleName,
-        item: canonicalUrl,
-      },
-    ],
-  };
 }
 
 function stringifyJsonLd(data: unknown) {
@@ -320,13 +235,16 @@ export default function Article() {
   const {article, relatedArticles, blogHandle, blogTitle, canonicalUrl} =
     useLoaderData<typeof loader>();
   const {title, image, contentHtml, author} = article;
-  const articleJsonLd = buildArticleJsonLd(article, canonicalUrl);
-  const breadcrumbJsonLd = buildArticleBreadcrumbJsonLd({
-    article,
-    blogHandle,
-    blogTitle,
+  const articleJsonLd = buildArticleStructuredData(article, canonicalUrl);
+  const breadcrumbItems = buildContentBreadcrumbItems({
     canonicalUrl,
+    currentName: article.title,
+    parent: {
+      name: blogTitle,
+      path: `/blogs/${blogHandle}`,
+    },
   });
+  const breadcrumbJsonLd = buildBreadcrumbStructuredData(breadcrumbItems);
 
   const publishedDate = formatLocaleDate(article.publishedAt, locale, {
     year: 'numeric',
@@ -348,6 +266,7 @@ export default function Article() {
           dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
         />
       ) : null}
+      <Breadcrumbs items={breadcrumbItems} />
       <div className="container mx-auto">
         <div className="blog-detail-header-wrap">
           <div className="blog-detail-header">

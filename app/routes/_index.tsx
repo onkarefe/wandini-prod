@@ -23,7 +23,6 @@ import {
   buildCanonicalUrl,
   buildFixedSeoAlternateUrls,
   buildSeoMetadata,
-  normalizeSeoText as normalizeMetaText,
 } from '~/lib/seo';
 import {createTranslator} from '~/i18n';
 import {useTranslation} from '~/i18n/useTranslation';
@@ -34,8 +33,10 @@ import {
   getShopifyGlobalSeoSettingsFromMatches,
   resolveShopifyMarketingSeo,
 } from '~/lib/shopify-marketing-seo';
-
-const HOMEPAGE_META_BRAND = 'Wandini';
+import {
+  buildOnlineStoreJsonLd,
+  buildWebsiteJsonLd,
+} from '~/lib/store-schema';
 
 type HomepageImageLike = {
   url?: string | null;
@@ -48,18 +49,6 @@ type HomepageHeroInput = {
   buttonText?: string | null;
   buttonAction?: string | null;
   backgroundImage?: HomepageImageLike | string | null;
-};
-
-type HomepageShopInput = {
-  name?: string | null;
-  description?: string | null;
-  brand?: {
-    logo?: {
-      image?: {
-        url?: string | null;
-      } | null;
-    } | null;
-  } | null;
 };
 
 function getHomepageMetaDescription(hero?: HomepageHeroInput | null) {
@@ -76,47 +65,6 @@ function getHomepageImageUrl(hero?: HomepageHeroInput | null) {
   return typeof backgroundImage === 'string' && /^https?:\/\//i.test(backgroundImage)
     ? backgroundImage
     : null;
-}
-
-function getShopName(shop?: HomepageShopInput | null) {
-  return normalizeMetaText(shop?.name) || HOMEPAGE_META_BRAND;
-}
-
-function getShopLogoUrl(shop?: HomepageShopInput | null) {
-  return shop?.brand?.logo?.image?.url ?? null;
-}
-
-function buildWebsiteJsonLd({
-  canonicalUrl,
-  shop,
-}: {
-  canonicalUrl: string;
-  shop?: HomepageShopInput | null;
-}) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: getShopName(shop),
-    url: canonicalUrl,
-  };
-}
-
-function buildOrganizationJsonLd({
-  canonicalUrl,
-  shop,
-}: {
-  canonicalUrl: string;
-  shop?: HomepageShopInput | null;
-}) {
-  const logo = getShopLogoUrl(shop);
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: getShopName(shop),
-    url: canonicalUrl,
-    ...(logo ? {logo} : {}),
-  };
 }
 
 function stringifyJsonLd(data: unknown) {
@@ -592,11 +540,12 @@ export default function Homepage() {
   const shop = rootData?.header?.shop;
   const websiteJsonLd = buildWebsiteJsonLd({
     canonicalUrl: data.canonicalUrl,
-    shop,
+    name: shop?.name,
   });
-  const organizationJsonLd = buildOrganizationJsonLd({
+  const onlineStoreJsonLd = buildOnlineStoreJsonLd({
     canonicalUrl: data.canonicalUrl,
-    shop,
+    name: shop?.name,
+    logo: shop?.brand?.logo?.image?.url,
   });
 
   return (
@@ -607,7 +556,7 @@ export default function Homepage() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{__html: stringifyJsonLd(organizationJsonLd)}}
+        dangerouslySetInnerHTML={{__html: stringifyJsonLd(onlineStoreJsonLd)}}
       />
       <HeroSection
         title={data.hero.title}
