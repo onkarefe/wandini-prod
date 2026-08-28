@@ -7,7 +7,7 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogHandleStyles from '~/styles/blogHandle.css?url';
 import {Link} from '~/lib/i18n-router';
-import {getRobotsDirective} from '~/lib/seo';
+import {buildCanonicalUrl, buildSeoMetadata} from '~/lib/seo';
 import {formatLocaleDate} from '~/lib/locale-format';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 
@@ -19,79 +19,17 @@ type BlogArticle = ArticleItemFragment & {
   excerpt?: string | null;
 };
 
-const BLOG_META_BRAND = 'Wandini';
-
-type BlogMetaInput = {
-  title?: string | null;
-  seo?: {
-    title?: string | null;
-    description?: string | null;
-  } | null;
-};
-
-function normalizeMetaText(value?: string | null) {
-  if (!value) {
-    return '';
-  }
-
-  return value
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function getBlogMetaTitle(blog?: BlogMetaInput | null) {
-  const seoTitle = normalizeMetaText(blog?.seo?.title);
-
-  if (seoTitle) {
-    return seoTitle;
-  }
-
-  const blogTitle = normalizeMetaText(blog?.title);
-
-  if (!blogTitle) {
-    return BLOG_META_BRAND;
-  }
-
-  return blogTitle.toLowerCase().includes(BLOG_META_BRAND.toLowerCase())
-    ? blogTitle
-    : `${blogTitle} | ${BLOG_META_BRAND}`;
-}
-
-function getBlogMetaDescription(blog?: BlogMetaInput | null) {
-  const description = normalizeMetaText(blog?.seo?.description);
-
-  return description || null;
-}
-
 export const meta: Route.MetaFunction = ({data, params}) => {
   const blog = data?.blog;
-  const title = getBlogMetaTitle(blog);
-  const description = getBlogMetaDescription(blog);
-  const canonicalUrl =
-    data?.canonicalUrl ?? `/blogs/${params.blogHandle ?? ''}`;
 
-  return [
-    {title},
-    ...(description ? [{name: 'description', content: description}] : []),
-    {name: 'robots', content: getRobotsDirective()},
-    {
-      tagName: 'link',
-      rel: 'canonical',
-      href: canonicalUrl,
+  return buildSeoMetadata({
+    title: {
+      explicit: blog?.seo?.title,
+      fallback: blog?.title,
     },
-    {property: 'og:type', content: 'website'},
-    {property: 'og:title', content: title},
-    ...(description
-      ? [{property: 'og:description', content: description}]
-      : []),
-    {property: 'og:url', content: canonicalUrl},
-    {name: 'twitter:card', content: 'summary'},
-    {name: 'twitter:title', content: title},
-    ...(description
-      ? [{name: 'twitter:description', content: description}]
-      : []),
-  ];
+    description: {explicit: blog?.seo?.description},
+    canonicalUrl: data?.canonicalUrl ?? `/blogs/${params.blogHandle ?? ''}`,
+  });
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -132,7 +70,6 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   }
 
   redirectIfHandleIsLocalized(request, {handle: params.blogHandle, data: blog});
-  const url = new URL(request.url);
   const languageSwitchLinks = await resolveResourceLanguageSwitchLinks({
     storefront: context.storefront,
     request,
@@ -142,7 +79,7 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
 
   return {
     blog,
-    canonicalUrl: `${url.origin}${url.pathname}`,
+    canonicalUrl: buildCanonicalUrl(request.url),
     languageSwitchLinks,
   };
 }

@@ -27,7 +27,12 @@ import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {redirectToLocalePath} from '~/lib/locale';
-import {getRobotsDirective} from '~/lib/seo';
+import {
+  buildCanonicalUrl,
+  buildSeoMetadata,
+  normalizeSeoText as normalizeMetaText,
+  resolveSeoDescription,
+} from '~/lib/seo';
 import {useTranslation} from '~/i18n/useTranslation';
 import type {Route} from './+types/collections.$handle';
 import '../styles/collections.css';
@@ -73,7 +78,6 @@ type CollectionItemListElement = {
 };
 
 const COLLECTION_META_BRAND = 'Wandini';
-const COLLECTION_META_DESCRIPTION_MAX_LENGTH = 160;
 const BESTSELLER_COLLECTION_PAGE_TYPE = 'bestseller';
 const ZUBEHOR_COLLECTION_PAGE_TYPE = 'zubehor';
 
@@ -105,58 +109,11 @@ function isZubehorCollection(collection: CollectionData) {
   );
 }
 
-function normalizeMetaText(value?: string | null) {
-  if (!value) {
-    return '';
-  }
-
-  return value
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function truncateMetaDescription(value: string) {
-  if (value.length <= COLLECTION_META_DESCRIPTION_MAX_LENGTH) {
-    return value;
-  }
-
-  const clipped = value.slice(0, COLLECTION_META_DESCRIPTION_MAX_LENGTH + 1);
-  const lastSpaceIndex = clipped.lastIndexOf(' ');
-  const truncated =
-    lastSpaceIndex > 80
-      ? clipped.slice(0, lastSpaceIndex)
-      : clipped.slice(0, COLLECTION_META_DESCRIPTION_MAX_LENGTH);
-
-  return `${truncated.trim()}...`;
-}
-
-function getCollectionMetaTitle(collection?: CollectionMetaInput | null) {
-  const seoTitle = normalizeMetaText(collection?.seo?.title);
-
-  if (seoTitle) {
-    return seoTitle;
-  }
-
-  const collectionTitle = normalizeMetaText(collection?.title);
-
-  if (!collectionTitle) {
-    return COLLECTION_META_BRAND;
-  }
-
-  return collectionTitle
-    .toLowerCase()
-    .includes(COLLECTION_META_BRAND.toLowerCase())
-    ? collectionTitle
-    : `${collectionTitle} | ${COLLECTION_META_BRAND}`;
-}
-
 function getCollectionMetaDescription(collection?: CollectionMetaInput | null) {
-  const description =
-    normalizeMetaText(collection?.seo?.description) ||
-    normalizeMetaText(collection?.description);
-
-  return description ? truncateMetaDescription(description) : null;
+  return resolveSeoDescription({
+    explicit: collection?.seo?.description,
+    fallback: collection?.description,
+  });
 }
 
 function getCollectionMetaImage(collection?: CollectionMetaInput | null) {
@@ -167,8 +124,7 @@ function buildCollectionPageJsonLd(
   collection: CollectionMetaInput,
   canonicalUrl: string,
 ) {
-  const name =
-    normalizeMetaText(collection.title) || getCollectionMetaTitle(collection);
+  const name = normalizeMetaText(collection.title) || COLLECTION_META_BRAND;
   const description = getCollectionMetaDescription(collection);
 
   return {
@@ -193,8 +149,7 @@ function buildCollectionBreadcrumbJsonLd(
   collection: CollectionMetaInput,
   canonicalUrl: string,
 ) {
-  const name =
-    normalizeMetaText(collection.title) || getCollectionMetaTitle(collection);
+  const name = normalizeMetaText(collection.title) || COLLECTION_META_BRAND;
 
   return {
     '@context': 'https://schema.org',
@@ -283,43 +238,20 @@ function stringifyJsonLd(data: unknown) {
 
 export const meta: Route.MetaFunction = ({data, params}) => {
   const collection = data?.collection;
-  const title = getCollectionMetaTitle(collection);
-  const description = getCollectionMetaDescription(collection);
-  const imageUrl = getCollectionMetaImage(collection);
-  const canonicalUrl =
-    data?.canonicalUrl ?? `/collections/${params.handle ?? ''}`;
 
-  return [
-    {title},
-    ...(description ? [{name: 'description', content: description}] : []),
-    {
-      name: 'robots',
-      content: getRobotsDirective(
-        data?.isNoisyCollectionUrl ? 'noindex,follow' : 'index,follow',
-      ),
+  return buildSeoMetadata({
+    title: {
+      explicit: collection?.seo?.title,
+      fallback: collection?.title,
     },
-    {
-      tagName: 'link',
-      rel: 'canonical',
-      href: canonicalUrl,
+    description: {
+      explicit: collection?.seo?.description,
+      fallback: collection?.description,
     },
-    {property: 'og:type', content: 'website'},
-    {property: 'og:title', content: title},
-    ...(description
-      ? [{property: 'og:description', content: description}]
-      : []),
-    {property: 'og:url', content: canonicalUrl},
-    ...(imageUrl ? [{property: 'og:image', content: imageUrl}] : []),
-    {
-      name: 'twitter:card',
-      content: imageUrl ? 'summary_large_image' : 'summary',
-    },
-    {name: 'twitter:title', content: title},
-    ...(description
-      ? [{name: 'twitter:description', content: description}]
-      : []),
-    ...(imageUrl ? [{name: 'twitter:image', content: imageUrl}] : []),
-  ];
+    canonicalUrl: data?.canonicalUrl ?? `/collections/${params.handle ?? ''}`,
+    robots: data?.isNoisyCollectionUrl ? 'noindex,follow' : 'index,follow',
+    image: getCollectionMetaImage(collection),
+  });
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -339,7 +271,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   const paginationVariables = getPaginationVariables(request, {pageBy: 9});
   const url = new URL(request.url);
-  const canonicalUrl = `${url.origin}${url.pathname}`;
+  const canonicalUrl = buildCanonicalUrl(url);
   const isNoisyCollectionUrl = hasNoisyCollectionParams(url.searchParams);
   const selectedSort = getSelectedCollectionSort(url.searchParams.get('sort'));
   const {reverse, sortKey} = getCollectionSortVariables(selectedSort);

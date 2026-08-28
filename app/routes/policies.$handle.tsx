@@ -3,6 +3,7 @@ import type {Route} from './+types/policies.$handle';
 import {type Shop} from '@shopify/hydrogen/storefront-api-types';
 import {Link} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
+import {getRobotsDirective} from '~/lib/seo';
 
 const BLOCKED_HTML_TAGS = [
   'script',
@@ -69,7 +70,7 @@ type SelectedPolicies = keyof Pick<
 export const meta: Route.MetaFunction = ({data}) => {
   return [
     {title: data?.policy.title ?? 'Wandini'},
-    {name: 'robots', content: 'noindex,follow'},
+    {name: 'robots', content: getRobotsDirective('noindex,follow')},
   ];
 };
 

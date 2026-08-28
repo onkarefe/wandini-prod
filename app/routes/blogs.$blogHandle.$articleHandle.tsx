@@ -4,7 +4,12 @@ import {Image} from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogDetailStyles from '~/styles/blogDetail.css?url';
 import {Link} from '~/lib/i18n-router';
-import {getRobotsDirective} from '~/lib/seo';
+import {
+  buildCanonicalUrl,
+  buildSeoMetadata,
+  normalizeSeoText as normalizeMetaText,
+  resolveSeoDescription,
+} from '~/lib/seo';
 import {useTranslation} from '~/i18n/useTranslation';
 import {formatLocaleDate} from '~/lib/locale-format';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
@@ -88,9 +93,6 @@ type RelatedArticle = {
   } | null;
 };
 
-const ARTICLE_META_BRAND = 'Wandini';
-const ARTICLE_META_DESCRIPTION_MAX_LENGTH = 160;
-
 type ArticleMetaInput = {
   title?: string | null;
   contentHtml?: string | null;
@@ -107,56 +109,11 @@ type ArticleMetaInput = {
   } | null;
 };
 
-function normalizeMetaText(value?: string | null) {
-  if (!value) {
-    return '';
-  }
-
-  return value
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function truncateMetaDescription(value: string) {
-  if (value.length <= ARTICLE_META_DESCRIPTION_MAX_LENGTH) {
-    return value;
-  }
-
-  const clipped = value.slice(0, ARTICLE_META_DESCRIPTION_MAX_LENGTH + 1);
-  const lastSpaceIndex = clipped.lastIndexOf(' ');
-  const truncated =
-    lastSpaceIndex > 80
-      ? clipped.slice(0, lastSpaceIndex)
-      : clipped.slice(0, ARTICLE_META_DESCRIPTION_MAX_LENGTH);
-
-  return `${truncated.trim()}...`;
-}
-
-function getArticleMetaTitle(article?: ArticleMetaInput | null) {
-  const seoTitle = normalizeMetaText(article?.seo?.title);
-
-  if (seoTitle) {
-    return seoTitle;
-  }
-
-  const articleTitle = normalizeMetaText(article?.title);
-
-  if (!articleTitle) {
-    return ARTICLE_META_BRAND;
-  }
-
-  return articleTitle.toLowerCase().includes(ARTICLE_META_BRAND.toLowerCase())
-    ? articleTitle
-    : `${articleTitle} | ${ARTICLE_META_BRAND}`;
-}
-
 function getArticleMetaDescription(article?: ArticleMetaInput | null) {
-  const description =
-    normalizeMetaText(article?.seo?.description) ||
-    normalizeMetaText(article?.contentHtml);
-
-  return description ? truncateMetaDescription(description) : null;
+  return resolveSeoDescription({
+    explicit: article?.seo?.description,
+    fallback: article?.contentHtml,
+  });
 }
 
 function getArticleMetaImage(article?: ArticleMetaInput | null) {
@@ -266,39 +223,22 @@ function stringifyJsonLd(data: unknown) {
 
 export const meta: Route.MetaFunction = ({data, params}) => {
   const article = data?.article;
-  const title = getArticleMetaTitle(article);
-  const description = getArticleMetaDescription(article);
-  const imageUrl = getArticleMetaImage(article);
-  const canonicalUrl =
-    data?.canonicalUrl ??
-    `/blogs/${params.blogHandle ?? ''}/${params.articleHandle ?? ''}`;
 
-  return [
-    {title},
-    ...(description ? [{name: 'description', content: description}] : []),
-    {name: 'robots', content: getRobotsDirective()},
-    {
-      tagName: 'link',
-      rel: 'canonical',
-      href: canonicalUrl,
+  return buildSeoMetadata({
+    title: {
+      explicit: article?.seo?.title,
+      fallback: article?.title,
     },
-    {property: 'og:type', content: 'article'},
-    {property: 'og:title', content: title},
-    ...(description
-      ? [{property: 'og:description', content: description}]
-      : []),
-    {property: 'og:url', content: canonicalUrl},
-    ...(imageUrl ? [{property: 'og:image', content: imageUrl}] : []),
-    {
-      name: 'twitter:card',
-      content: imageUrl ? 'summary_large_image' : 'summary',
+    description: {
+      explicit: article?.seo?.description,
+      fallback: article?.contentHtml,
     },
-    {name: 'twitter:title', content: title},
-    ...(description
-      ? [{name: 'twitter:description', content: description}]
-      : []),
-    ...(imageUrl ? [{name: 'twitter:image', content: imageUrl}] : []),
-  ];
+    canonicalUrl:
+      data?.canonicalUrl ??
+      `/blogs/${params.blogHandle ?? ''}/${params.articleHandle ?? ''}`,
+    openGraphType: 'article',
+    image: getArticleMetaImage(article),
+  });
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -348,7 +288,6 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   const article = blog.articleByHandle;
   const relatedArticles =
     blog.articles?.nodes?.filter((item) => item.handle !== articleHandle) ?? [];
-  const url = new URL(request.url);
   const languageSwitchLinks = await resolveResourceLanguageSwitchLinks({
     storefront: context.storefront,
     request,
@@ -357,7 +296,7 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   });
 
   return {
-    canonicalUrl: `${url.origin}${url.pathname}`,
+    canonicalUrl: buildCanonicalUrl(request.url),
     languageSwitchLinks,
     article: {
       ...article,

@@ -3,7 +3,12 @@ import {Await, useLoaderData} from 'react-router';
 import {Analytics, getSelectedProductOptions} from '@shopify/hydrogen';
 import type {Route} from './+types/products.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
-import {getRobotsDirective} from '~/lib/seo';
+import {
+  buildCanonicalUrl,
+  buildSeoMetadata,
+  normalizeSeoText as normalizeMetaText,
+  resolveSeoDescription,
+} from '~/lib/seo';
 import {getSimilarMotifsPreview} from '~/lib/similar-products-preview';
 import {useTranslation} from '~/i18n/useTranslation';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
@@ -81,7 +86,6 @@ function sanitizeProductDescriptionHtml(html: string | null | undefined) {
 }
 
 const PRODUCT_META_BRAND = 'Wandini';
-const PRODUCT_META_DESCRIPTION_MAX_LENGTH = 160;
 
 type ProductMetaInput = {
   title?: string | null;
@@ -101,47 +105,11 @@ type ProductMetaInput = {
   } | null;
 };
 
-function normalizeMetaText(value?: string | null) {
-  if (!value) return '';
-  return value
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function truncateMetaDescription(value: string) {
-  if (value.length <= PRODUCT_META_DESCRIPTION_MAX_LENGTH) return value;
-
-  const clipped = value.slice(0, PRODUCT_META_DESCRIPTION_MAX_LENGTH + 1);
-  const lastSpaceIndex = clipped.lastIndexOf(' ');
-  const truncated =
-    lastSpaceIndex > 80
-      ? clipped.slice(0, lastSpaceIndex)
-      : clipped.slice(0, PRODUCT_META_DESCRIPTION_MAX_LENGTH);
-
-  return `${truncated.trim()}...`;
-}
-
-function getProductMetaTitle(product?: ProductMetaInput | null) {
-  const seoTitle = normalizeMetaText(product?.seo?.title);
-  if (seoTitle) return seoTitle;
-
-  const productTitle = normalizeMetaText(product?.title);
-  const brand = normalizeMetaText(product?.vendor) || PRODUCT_META_BRAND;
-
-  if (!productTitle) return brand;
-
-  return productTitle.toLowerCase().includes(brand.toLowerCase())
-    ? productTitle
-    : `${productTitle} | ${brand}`;
-}
-
 function getProductMetaDescription(product?: ProductMetaInput | null) {
-  const description =
-    normalizeMetaText(product?.seo?.description) ||
-    normalizeMetaText(product?.description);
-
-  return description ? truncateMetaDescription(description) : null;
+  return resolveSeoDescription({
+    explicit: product?.seo?.description,
+    fallback: product?.description,
+  });
 }
 
 function getProductMetaImage(product?: ProductMetaInput | null) {
@@ -246,34 +214,22 @@ function stringifyJsonLd(data: unknown) {
 
 export const meta: Route.MetaFunction = ({data}) => {
   const product = data?.product;
-  const title = getProductMetaTitle(product);
-  const description = getProductMetaDescription(product);
-  const imageUrl = getProductMetaImage(product);
-  const canonicalUrl =
-    data?.canonicalUrl ?? `/products/${product?.handle ?? ''}`;
 
-  return [
-    {title},
-    ...(description ? [{name: 'description', content: description}] : []),
-    {name: 'robots', content: getRobotsDirective()},
-    {tagName: 'link', rel: 'canonical', href: canonicalUrl},
-    {property: 'og:type', content: 'product'},
-    {property: 'og:title', content: title},
-    ...(description
-      ? [{property: 'og:description', content: description}]
-      : []),
-    {property: 'og:url', content: canonicalUrl},
-    ...(imageUrl ? [{property: 'og:image', content: imageUrl}] : []),
-    {
-      name: 'twitter:card',
-      content: imageUrl ? 'summary_large_image' : 'summary',
+  return buildSeoMetadata({
+    title: {
+      explicit: product?.seo?.title,
+      fallback: product?.title,
+      systemFallback: product?.vendor || PRODUCT_META_BRAND,
+      brand: product?.vendor || PRODUCT_META_BRAND,
     },
-    {name: 'twitter:title', content: title},
-    ...(description
-      ? [{name: 'twitter:description', content: description}]
-      : []),
-    ...(imageUrl ? [{name: 'twitter:image', content: imageUrl}] : []),
-  ];
+    description: {
+      explicit: product?.seo?.description,
+      fallback: product?.description,
+    },
+    canonicalUrl: data?.canonicalUrl ?? `/products/${product?.handle ?? ''}`,
+    openGraphType: 'product',
+    image: getProductMetaImage(product),
+  });
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -297,7 +253,6 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
-  const url = new URL(request.url);
   const hasExplicitVariantSelection = hasExplicitProductOptionSelection(
     product.options,
     requestedSelectedOptions,
@@ -317,7 +272,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   });
 
   return {
-    canonicalUrl: `${url.origin}${url.pathname}`,
+    canonicalUrl: buildCanonicalUrl(request.url),
     languageSwitchLinks,
     product: {
       ...product,

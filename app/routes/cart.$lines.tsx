@@ -4,6 +4,7 @@ import {getLocaleFromRequest, redirectToLocalePath} from '~/lib/locale';
 import {createTranslator} from '~/i18n';
 import {useTranslation} from '~/i18n/useTranslation';
 import {Link} from '~/lib/i18n-router';
+import {getRobotsDirective} from '~/lib/seo';
 import {
   DynamicPricingError,
   validateCartLineInputsForAdd,
@@ -15,7 +16,7 @@ type CartCheckoutConfirmation = {
 };
 
 export const meta: Route.MetaFunction = () => {
-  return [{name: 'robots', content: 'noindex,follow'}];
+  return [{name: 'robots', content: getRobotsDirective('noindex,follow')}];
 };
 
 function parseCartLines(lines: string) {

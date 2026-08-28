@@ -9,6 +9,7 @@ import {
 } from '~/lib/similar-products';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {useTranslation} from '~/i18n/useTranslation';
+import {getRobotsDirective} from '~/lib/seo';
 import '../styles/collections.css';
 import '../styles/wishlistFeedback.css';
 
@@ -74,7 +75,7 @@ export const meta: Route.MetaFunction = ({data, params}) => {
   return [
     {title},
     {name: 'description', content: description},
-    {name: 'robots', content: 'noindex,follow'},
+    {name: 'robots', content: getRobotsDirective('noindex,follow')},
     {
       tagName: 'link',
       rel: 'canonical',

@@ -8,6 +8,7 @@ import noSearchResultsIcon from '~/assets/Icons/nosrIcon.png';
 import SearchProductCard from '~/components/SearchPageProductCard';
 import {SearchForm} from '~/components/SearchForm';
 import {Link} from '~/lib/i18n-router';
+import {getRobotsDirective} from '~/lib/seo';
 import {
   getEmptyPredictiveSearchResult,
   getEmptyRegularSearchResult,
@@ -36,7 +37,7 @@ export function links() {
 
 export const meta: Route.MetaFunction = ({data}) => [
   {title: createTranslator(data?.selectedLocale)('search.metaTitle')},
-  {name: 'robots', content: 'noindex,follow'},
+  {name: 'robots', content: getRobotsDirective('noindex,follow')},
 ];
 
 export async function loader({request, context}: Route.LoaderArgs) {

@@ -3,7 +3,11 @@ import {lazy, Suspense} from 'react';
 import type {Route} from './+types/pages.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import staticPagesStyles from '~/styles/staticPages.css?url';
-import {getRobotsDirective} from '~/lib/seo';
+import {
+  buildCanonicalUrl,
+  buildSeoMetadata,
+  normalizeSeoText as normalizeMetaText,
+} from '~/lib/seo';
 import type {FAQCategory, FAQCopy} from '~/components/FAQ';
 import type {KontaktPageData} from '~/components/kontakt';
 import {createTranslator} from '~/i18n';
@@ -32,7 +36,6 @@ const BLOCKED_HTML_TAGS = [
   'base',
 ] as const;
 const PAGE_META_BRAND = 'Wandini';
-const PAGE_META_DESCRIPTION_MAX_LENGTH = 160;
 const ERFAHRUNGEN_PAGE_TYPE = 'erfahrungen';
 const FAQ_PAGE_TYPE = 'faq';
 const KONTAKT_PAGE_TYPE = 'kontakt';
@@ -43,15 +46,6 @@ const Kontakt = lazy(() => import('~/components/kontakt'));
 const CustomerReviewsPage = lazy(
   () => import('~/components/customer-reviews-page'),
 );
-
-type PageMetaInput = {
-  title?: string | null;
-  body?: string | null;
-  seo?: {
-    title?: string | null;
-    description?: string | null;
-  } | null;
-};
 
 type PageWithType = {
   pageType?: {value?: string | null} | null;
@@ -82,57 +76,6 @@ function getFAQCopy(request: Request): FAQCopy {
     submitLabel: t('faq.send'),
     submittingLabel: t('contact.sending'),
   };
-}
-
-function normalizeMetaText(value?: string | null) {
-  if (!value) {
-    return '';
-  }
-
-  return value
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function truncateMetaDescription(value: string) {
-  if (value.length <= PAGE_META_DESCRIPTION_MAX_LENGTH) {
-    return value;
-  }
-
-  const clipped = value.slice(0, PAGE_META_DESCRIPTION_MAX_LENGTH + 1);
-  const lastSpaceIndex = clipped.lastIndexOf(' ');
-  const truncated =
-    lastSpaceIndex > 80
-      ? clipped.slice(0, lastSpaceIndex)
-      : clipped.slice(0, PAGE_META_DESCRIPTION_MAX_LENGTH);
-
-  return `${truncated.trim()}...`;
-}
-
-function getPageMetaTitle(page?: PageMetaInput | null) {
-  const seoTitle = normalizeMetaText(page?.seo?.title);
-
-  if (seoTitle) {
-    return seoTitle;
-  }
-
-  const pageTitle = normalizeMetaText(page?.title);
-
-  if (!pageTitle) {
-    return PAGE_META_BRAND;
-  }
-
-  return pageTitle.toLowerCase().includes(PAGE_META_BRAND.toLowerCase())
-    ? pageTitle
-    : `${pageTitle} | ${PAGE_META_BRAND}`;
-}
-
-function getPageMetaDescription(page?: PageMetaInput | null) {
-  const description =
-    normalizeMetaText(page?.seo?.description) || normalizeMetaText(page?.body);
-
-  return description ? truncateMetaDescription(description) : null;
 }
 
 function sanitizeInlineStyles(html: string) {
@@ -423,7 +366,7 @@ function getFAQMetaDescription(
     .filter(Boolean)
     .join(' — ');
 
-  return description ? truncateMetaDescription(description) : null;
+  return description || null;
 }
 
 function getKontaktMetaDescription(
@@ -440,7 +383,7 @@ function getKontaktMetaDescription(
     .filter(Boolean)
     .join(' - ');
 
-  return description ? truncateMetaDescription(description) : null;
+  return description || null;
 }
 
 function buildKontaktJsonLd(
@@ -514,37 +457,26 @@ export function links() {
 
 export const meta: Route.MetaFunction = ({data, params}) => {
   const page = data?.page;
-  const title = getPageMetaTitle(page);
-  const description =
-    getPageMetaDescription(page) ||
-    (isFaqPage(page)
-      ? getFAQMetaDescription(page?.title, data?.faqCategories ?? [])
-      : isKontaktPage(page)
-        ? getKontaktMetaDescription(page?.title, data?.kontakt)
-        : null);
-  const canonicalUrl = data?.canonicalUrl ?? `/pages/${params.handle ?? ''}`;
+  const specializedFallback = isFaqPage(page)
+    ? getFAQMetaDescription(page?.title, data?.faqCategories ?? [])
+    : isKontaktPage(page)
+      ? getKontaktMetaDescription(page?.title, data?.kontakt)
+      : null;
+  const contentFallback = normalizeMetaText(page?.body)
+    ? page?.body
+    : specializedFallback;
 
-  return [
-    {title},
-    ...(description ? [{name: 'description', content: description}] : []),
-    {name: 'robots', content: getRobotsDirective()},
-    {
-      tagName: 'link',
-      rel: 'canonical',
-      href: canonicalUrl,
+  return buildSeoMetadata({
+    title: {
+      explicit: page?.seo?.title,
+      fallback: page?.title,
     },
-    {property: 'og:type', content: 'website'},
-    {property: 'og:title', content: title},
-    ...(description
-      ? [{property: 'og:description', content: description}]
-      : []),
-    {property: 'og:url', content: canonicalUrl},
-    {name: 'twitter:card', content: 'summary'},
-    {name: 'twitter:title', content: title},
-    ...(description
-      ? [{name: 'twitter:description', content: description}]
-      : []),
-  ];
+    description: {
+      explicit: page?.seo?.description,
+      fallback: contentFallback,
+    },
+    canonicalUrl: data?.canonicalUrl ?? `/pages/${params.handle ?? ''}`,
+  });
 };
 
 function readFAQFormValue(formData: FormData, key: string) {
@@ -745,7 +677,6 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
         },
       })
     : null;
-  const url = new URL(request.url);
   const customerReviewsMetaobject =
     page.customerReviews?.reference ??
     page.customerReviews?.references?.nodes?.[0] ??
@@ -761,7 +692,7 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   });
 
   return {
-    canonicalUrl: `${url.origin}${url.pathname}`,
+    canonicalUrl: buildCanonicalUrl(request.url),
     languageSwitchLinks,
     faqCategories: parseFAQMetaobjects(faqMetaobjects),
     faqCopy: getFAQCopy(request),

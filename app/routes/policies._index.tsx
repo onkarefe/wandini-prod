@@ -3,9 +3,10 @@ import type {Route} from './+types/policies._index';
 import type {PoliciesQuery, PolicyItemFragment} from 'storefrontapi.generated';
 import {Link} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
+import {getRobotsDirective} from '~/lib/seo';
 
 export const meta: Route.MetaFunction = () => {
-  return [{name: 'robots', content: 'noindex,follow'}];
+  return [{name: 'robots', content: getRobotsDirective('noindex,follow')}];
 };
 
 export async function loader({context}: Route.LoaderArgs) {

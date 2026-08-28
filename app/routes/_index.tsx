@@ -19,13 +19,16 @@ import CustomOrder from '~/components/CustomOrder';
 import UberUnsHomepage from '~/components/UberUnsHomepage';
 import CustomerRevs from '~/components/CustomerRevs';
 import homepageStyles from '~/styles/homepage.css?url';
-import {getRobotsDirective} from '~/lib/seo';
+import {
+  buildCanonicalUrl,
+  buildSeoMetadata,
+  normalizeSeoText as normalizeMetaText,
+} from '~/lib/seo';
 import {createTranslator} from '~/i18n';
 import {useTranslation} from '~/i18n/useTranslation';
 import {getLocaleFromI18n} from '~/lib/locale';
 
 const HOMEPAGE_META_BRAND = 'Wandini';
-const HOMEPAGE_META_DESCRIPTION_MAX_LENGTH = 160;
 
 type HomepageImageLike = {
   url?: string | null;
@@ -52,48 +55,8 @@ type HomepageShopInput = {
   } | null;
 };
 
-function normalizeMetaText(value?: string | null) {
-  if (!value) {
-    return '';
-  }
-
-  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-}
-
-function truncateMetaDescription(value: string) {
-  if (value.length <= HOMEPAGE_META_DESCRIPTION_MAX_LENGTH) {
-    return value;
-  }
-
-  const clipped = value.slice(0, HOMEPAGE_META_DESCRIPTION_MAX_LENGTH + 1);
-  const lastSpaceIndex = clipped.lastIndexOf(' ');
-  const truncated =
-    lastSpaceIndex > 80
-      ? clipped.slice(0, lastSpaceIndex)
-      : clipped.slice(0, HOMEPAGE_META_DESCRIPTION_MAX_LENGTH);
-
-  return `${truncated.trim()}...`;
-}
-
-function getHomepageMetaTitle(hero?: HomepageHeroInput | null) {
-  const heroTitle = normalizeMetaText(hero?.title);
-
-  if (!heroTitle) {
-    return HOMEPAGE_META_BRAND;
-  }
-
-  return heroTitle.toLowerCase().includes(HOMEPAGE_META_BRAND.toLowerCase())
-    ? heroTitle
-    : `${heroTitle} | ${HOMEPAGE_META_BRAND}`;
-}
-
 function getHomepageMetaDescription(hero?: HomepageHeroInput | null) {
-  const description = [hero?.st1, hero?.st2]
-    .map((value) => normalizeMetaText(value))
-    .filter(Boolean)
-    .join(' ');
-
-  return description ? truncateMetaDescription(description) : null;
+  return [hero?.st1, hero?.st2].filter(Boolean).join(' ');
 }
 
 function getHomepageImageUrl(hero?: HomepageHeroInput | null) {
@@ -154,33 +117,12 @@ function stringifyJsonLd(data: unknown) {
 }
 
 export const meta: Route.MetaFunction = ({data}) => {
-  const title = getHomepageMetaTitle(data?.hero);
-  const description = getHomepageMetaDescription(data?.hero);
-  const imageUrl = getHomepageImageUrl(data?.hero);
-  const canonicalUrl = data?.canonicalUrl ?? '/';
-
-  return [
-    {title},
-    ...(description ? [{name: 'description', content: description}] : []),
-    {name: 'robots', content: getRobotsDirective()},
-    {
-      tagName: 'link',
-      rel: 'canonical',
-      href: canonicalUrl,
-    },
-    {property: 'og:type', content: 'website'},
-    {property: 'og:title', content: title},
-    ...(description ? [{property: 'og:description', content: description}] : []),
-    {property: 'og:url', content: canonicalUrl},
-    ...(imageUrl ? [{property: 'og:image', content: imageUrl}] : []),
-    {
-      name: 'twitter:card',
-      content: imageUrl ? 'summary_large_image' : 'summary',
-    },
-    {name: 'twitter:title', content: title},
-    ...(description ? [{name: 'twitter:description', content: description}] : []),
-    ...(imageUrl ? [{name: 'twitter:image', content: imageUrl}] : []),
-  ];
+  return buildSeoMetadata({
+    title: {fallback: data?.hero?.title},
+    description: {fallback: getHomepageMetaDescription(data?.hero)},
+    canonicalUrl: data?.canonicalUrl ?? '/',
+    image: getHomepageImageUrl(data?.hero),
+  });
 };
 
 export function links() {
@@ -286,7 +228,6 @@ function normalizeReferenceImage(
   return null;
 }
 
-
 /**
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
@@ -340,7 +281,6 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     buttonAction: heroMap.button_action ?? '',
     backgroundImage: heroMap.background ?? null,
   };
-
 
   const uspNodes = uspRes?.metaobjects?.nodes ?? [];
   const uspNode =
@@ -578,10 +518,8 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
         review.stars,
     );
 
-  const url = new URL(request.url);
-
   return {
-    canonicalUrl: `${url.origin}${url.pathname}`,
+    canonicalUrl: buildCanonicalUrl(request.url),
     hero,
     featuredCollection: collections.nodes[0],
     uspItems,
@@ -596,7 +534,6 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     customerReviewsSectionTitle,
   };
 }
-
 
 /**
  * Load data for rendering content below the fold. This data is deferred and will be
@@ -1024,8 +961,6 @@ const CUSTOMER_REVIEWS_QUERY = `#graphql
     }
   }
 ` as const;
-
-
 
 const FEATURED_COLLECTION_QUERY = `#graphql
   fragment FeaturedCollection on Collection {

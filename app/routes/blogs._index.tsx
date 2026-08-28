@@ -6,7 +6,7 @@ import type { BlogsQuery } from 'storefrontapi.generated';
 import {useTranslation} from '~/i18n/useTranslation';
 import blogMainStyles from '~/styles/blogMain.css?url';
 import {Link} from '~/lib/i18n-router';
-import {getRobotsDirective} from '~/lib/seo';
+import {buildCanonicalUrl, buildSeoMetadata} from '~/lib/seo';
 
 type BlogNode = BlogsQuery['blogs']['nodes'][0] & {
   blogCategoryDescription?: {
@@ -33,32 +33,6 @@ type BlogListingMetaobject = {
   fields?: BlogListingField[] | null;
 };
 
-const BLOGS_META_BRAND = 'Wandini';
-const BLOGS_META_DESCRIPTION_MAX_LENGTH = 160;
-
-function normalizeMetaText(value?: string | null) {
-  if (!value) {
-    return '';
-  }
-
-  return value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-}
-
-function truncateMetaDescription(value: string) {
-  if (value.length <= BLOGS_META_DESCRIPTION_MAX_LENGTH) {
-    return value;
-  }
-
-  const clipped = value.slice(0, BLOGS_META_DESCRIPTION_MAX_LENGTH + 1);
-  const lastSpaceIndex = clipped.lastIndexOf(' ');
-  const truncated =
-    lastSpaceIndex > 80
-      ? clipped.slice(0, lastSpaceIndex)
-      : clipped.slice(0, BLOGS_META_DESCRIPTION_MAX_LENGTH);
-
-  return `${truncated.trim()}...`;
-}
-
 function getBlogListingFields(
   blogListingContent?: BlogsQuery['blogListingContent'] | null,
 ) {
@@ -73,58 +47,23 @@ function getBlogListingFieldValue(
   return fields?.find((field) => keys.includes(field.key))?.value ?? '';
 }
 
-function getBlogsMetaTitle(blogListingContent?: BlogsQuery['blogListingContent'] | null) {
-  const fields = getBlogListingFields(blogListingContent);
-  const title = normalizeMetaText(
-    getBlogListingFieldValue(fields, 'title', 'main_title'),
-  );
-
-  if (!title) {
-    return `Blogs | ${BLOGS_META_BRAND}`;
-  }
-
-  return title.toLowerCase().includes(BLOGS_META_BRAND.toLowerCase())
-    ? title
-    : `${title} | ${BLOGS_META_BRAND}`;
-}
-
-function getBlogsMetaDescription(
-  blogListingContent?: BlogsQuery['blogListingContent'] | null,
-) {
-  const fields = getBlogListingFields(blogListingContent);
-  const description = normalizeMetaText(
-    getBlogListingFieldValue(fields, 'subtitle', 'sub_title'),
-  );
-
-  return description ? truncateMetaDescription(description) : null;
-}
-
 export function links() {
   return [{ rel: 'stylesheet', href: blogMainStyles }];
 }
 
 export const meta: Route.MetaFunction = ({data}) => {
-  const title = getBlogsMetaTitle(data?.blogListingContent);
-  const description = getBlogsMetaDescription(data?.blogListingContent);
-  const canonicalUrl = data?.canonicalUrl ?? '/blogs';
+  const fields = getBlogListingFields(data?.blogListingContent);
 
-  return [
-    {title},
-    ...(description ? [{name: 'description', content: description}] : []),
-    {name: 'robots', content: getRobotsDirective()},
-    {
-      tagName: 'link',
-      rel: 'canonical',
-      href: canonicalUrl,
+  return buildSeoMetadata({
+    title: {
+      fallback: getBlogListingFieldValue(fields, 'title', 'main_title'),
+      systemFallback: 'Blogs',
     },
-    {property: 'og:type', content: 'website'},
-    {property: 'og:title', content: title},
-    ...(description ? [{property: 'og:description', content: description}] : []),
-    {property: 'og:url', content: canonicalUrl},
-    {name: 'twitter:card', content: 'summary'},
-    {name: 'twitter:title', content: title},
-    ...(description ? [{name: 'twitter:description', content: description}] : []),
-  ];
+    description: {
+      fallback: getBlogListingFieldValue(fields, 'subtitle', 'sub_title'),
+    },
+    canonicalUrl: data?.canonicalUrl ?? '/blogs',
+  });
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -155,12 +94,10 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  const url = new URL(request.url);
-
   return {
     blogs,
     blogListingContent,
-    canonicalUrl: `${url.origin}${url.pathname}`,
+    canonicalUrl: buildCanonicalUrl(request.url),
   };
 }
 

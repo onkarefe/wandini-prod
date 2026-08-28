@@ -22,6 +22,7 @@ import {
 } from '~/lib/locale';
 import {createTranslator} from '~/i18n';
 import {useTranslation} from '~/i18n/useTranslation';
+import {getRobotsDirective} from '~/lib/seo';
 import {
   DynamicPricingError,
   getCartPricingEvaluation,
@@ -67,7 +68,7 @@ function getSafeRedirectPath(redirectParam: FormDataEntryValue | null) {
 export const meta: Route.MetaFunction = ({data: routeData}) => {
   return [
     {title: createTranslator(routeData?.selectedLocale)('cart.metaTitle')},
-    {name: 'robots', content: 'noindex,follow'},
+    {name: 'robots', content: getRobotsDirective('noindex,follow')},
   ];
 };
 

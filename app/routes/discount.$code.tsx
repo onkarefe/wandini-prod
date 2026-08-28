@@ -3,11 +3,12 @@ import type {Route} from './+types/discount.$code';
 import {getLocaleFromRequest, prefixPathWithLocale} from '~/lib/locale';
 import {Link} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
+import {getRobotsDirective} from '~/lib/seo';
 
 const INTERNAL_REDIRECT_ORIGIN = 'https://wandini.internal';
 
 export const meta: Route.MetaFunction = () => {
-  return [{name: 'robots', content: 'noindex,follow'}];
+  return [{name: 'robots', content: getRobotsDirective('noindex,follow')}];
 };
 
 function getSafeRedirectPath(redirectParam: string | null) {
