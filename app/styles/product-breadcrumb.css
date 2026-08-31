@@ -1,9 +1,11 @@
 .product-breadcrumb {
-  width: min(100% - 32px, 1320px);
-  margin: 20px auto 0;
   color: #646464;
   font-size: 0.82rem;
   line-height: 1.4;
+}
+
+.breadcrumb-container {
+  padding-top: 20px;
 }
 
 .product-breadcrumb ol {
@@ -52,9 +54,11 @@
 }
 
 @media (max-width: 640px) {
+  .breadcrumb-container {
+    padding-top: 14px;
+  }
+
   .product-breadcrumb {
-    width: min(100% - 24px, 1320px);
-    margin-top: 14px;
     font-size: 0.76rem;
   }
 }

@@ -4,6 +4,7 @@ import {Image} from '@shopify/hydrogen';
 import {Breadcrumbs} from '~/components/ProductBreadcrumb';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogDetailStyles from '~/styles/blogDetail.css?url';
+import breadcrumbStyles from '~/styles/product-breadcrumb.css?url';
 import {Link} from '~/lib/i18n-router';
 import {
   buildCanonicalUrl,
@@ -81,7 +82,10 @@ function sanitizeBlogArticleHtml(html: string | null | undefined) {
 }
 
 export function links() {
-  return [{rel: 'stylesheet', href: blogDetailStyles}];
+  return [
+    {rel: 'stylesheet', href: blogDetailStyles},
+    {rel: 'stylesheet', href: breadcrumbStyles},
+  ];
 }
 
 type RelatedArticle = {
@@ -266,7 +270,9 @@ export default function Article() {
           dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
         />
       ) : null}
-      <Breadcrumbs items={breadcrumbItems} />
+      <div className={'breadcrumb-container container mx-auto'}>
+        <Breadcrumbs items={breadcrumbItems} />
+      </div>
       <div className="container mx-auto">
         <div className="blog-detail-header-wrap">
           <div className="blog-detail-header">

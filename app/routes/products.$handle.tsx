@@ -30,6 +30,7 @@ import productDetailTabsStyles from '~/styles/ProductDetailTabs.css?url';
 import configuratorStyles from '~/styles/configurator.css?url';
 import zubehorProductDetailStyles from '~/styles/zubehor-product-detail.css?url';
 import similarMotifsCarouselStyles from '~/styles/similarMotifsCarousel.css?url';
+import breadcrumbStyles from '~/styles/product-breadcrumb.css?url';
 
 const ZUBEHOR_PRODUCT_LAYOUT = 'zubehor';
 
@@ -143,6 +144,7 @@ export function links() {
     {rel: 'stylesheet', href: configuratorStyles},
     {rel: 'stylesheet', href: zubehorProductDetailStyles},
     {rel: 'stylesheet', href: similarMotifsCarouselStyles},
+    {rel: 'stylesheet', href: breadcrumbStyles},
   ];
 }
 
@@ -317,7 +319,9 @@ export default function Product() {
         dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
       />
 
-      <ProductBreadcrumb items={breadcrumbItems} />
+      <div className="breadcrumb-container container mx-auto">
+        <ProductBreadcrumb items={breadcrumbItems} />
+      </div>
 
       <Suspense
         fallback={

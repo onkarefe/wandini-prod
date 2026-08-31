@@ -1,5 +1,4 @@
 import type {BreadcrumbItem} from '~/lib/breadcrumbs';
-import '~/styles/product-breadcrumb.css';
 
 export function Breadcrumbs({items}: {items: BreadcrumbItem[]}) {
   if (items.length < 2) return null;

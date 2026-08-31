@@ -3,7 +3,22 @@ import type {Route} from './+types/policies.$handle';
 import {type Shop} from '@shopify/hydrogen/storefront-api-types';
 import {Link} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
-import {getRobotsDirective} from '~/lib/seo';
+import {buildCanonicalUrl, getRobotsDirective} from '~/lib/seo';
+import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
+import {Breadcrumbs} from '~/components/ProductBreadcrumb';
+import {
+  buildBreadcrumbStructuredData,
+  buildContentBreadcrumbItems,
+} from '~/lib/breadcrumbs';
+import breadcrumbStyles from '~/styles/product-breadcrumb.css?url';
+
+export function links() {
+  return [{rel: 'stylesheet', href: breadcrumbStyles}];
+}
+
+function stringifyJsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
 
 const BLOCKED_HTML_TAGS = [
   'script',
@@ -22,15 +37,18 @@ const BLOCKED_HTML_TAGS = [
 ] as const;
 
 function sanitizeInlineStyles(html: string) {
-  return html.replace(/\sstyle\s*=\s*(["'])(.*?)\1/gi, (_match, quote, rawStyle) => {
-    const sanitizedStyle = String(rawStyle)
-      .replace(/expression\s*\([^)]*\)/gi, '')
-      .replace(/url\s*\(\s*(['"]?)\s*javascript:[^)]+\1\s*\)/gi, '')
-      .replace(/-moz-binding\s*:[^;]+;?/gi, '')
-      .trim();
+  return html.replace(
+    /\sstyle\s*=\s*(["'])(.*?)\1/gi,
+    (_match, quote, rawStyle) => {
+      const sanitizedStyle = String(rawStyle)
+        .replace(/expression\s*\([^)]*\)/gi, '')
+        .replace(/url\s*\(\s*(['"]?)\s*javascript:[^)]+\1\s*\)/gi, '')
+        .replace(/-moz-binding\s*:[^;]+;?/gi, '')
+        .trim();
 
-    return sanitizedStyle ? ` style=${quote}${sanitizedStyle}${quote}` : '';
-  });
+      return sanitizedStyle ? ` style=${quote}${sanitizedStyle}${quote}` : '';
+    },
+  );
 }
 
 function sanitizePolicyHtml(html: string | null | undefined) {
@@ -74,7 +92,7 @@ export const meta: Route.MetaFunction = ({data}) => {
   ];
 };
 
-export async function loader({params, context}: Route.LoaderArgs) {
+export async function loader({params, context, request}: Route.LoaderArgs) {
   if (!params.handle) {
     throw new Response('No handle was passed in', {status: 404});
   }
@@ -101,6 +119,12 @@ export async function loader({params, context}: Route.LoaderArgs) {
   }
 
   return {
+    canonicalUrl: buildCanonicalUrl(
+      buildCanonicalRequestUrl(
+        request.url,
+        context.env.PUBLIC_CANONICAL_ORIGIN,
+      ),
+    ),
     policy: {
       ...policy,
       body: sanitizePolicyHtml(policy.body),
@@ -110,19 +134,36 @@ export async function loader({params, context}: Route.LoaderArgs) {
 
 export default function Policy() {
   const {t} = useTranslation();
-  const {policy} = useLoaderData<typeof loader>();
+  const {policy, canonicalUrl} = useLoaderData<typeof loader>();
+  const breadcrumbItems = buildContentBreadcrumbItems({
+    canonicalUrl,
+    currentName: policy.title,
+    parent: {name: t('policies.title'), path: '/policies'},
+  });
+  const breadcrumbJsonLd = buildBreadcrumbStructuredData(breadcrumbItems);
 
   return (
-    <div className="policy">
-      <br />
-      <br />
-      <div>
-        <Link to="/policies">← {t('policies.back')}</Link>
+    <>
+      {breadcrumbJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
+        />
+      ) : null}
+      <div className="breadcrumb-container container mx-auto">
+        <Breadcrumbs items={breadcrumbItems} />
       </div>
-      <br />
-      <h1>{policy.title}</h1>
-      <div dangerouslySetInnerHTML={{__html: policy.body}} />
-    </div>
+      <div className="policy">
+        <br />
+        <br />
+        <div>
+          <Link to="/policies">← {t('policies.back')}</Link>
+        </div>
+        <br />
+        <h1>{policy.title}</h1>
+        <div dangerouslySetInnerHTML={{__html: policy.body}} />
+      </div>
+    </>
   );
 }
 

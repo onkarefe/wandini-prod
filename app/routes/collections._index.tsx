@@ -3,6 +3,8 @@ import {useLoaderData} from 'react-router';
 import type {CollectionFragment} from 'storefrontapi.generated';
 import {Link} from '~/lib/i18n-router';
 import collectionMainlistStyles from '~/styles/collection-mainlist.css?url';
+import breadcrumbStyles from '~/styles/product-breadcrumb.css?url';
+import {Breadcrumbs} from '~/components/ProductBreadcrumb';
 import type {Route} from './+types/collections._index';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import {
@@ -17,13 +19,24 @@ import {
 } from '~/lib/shopify-marketing-seo';
 import {createTranslator} from '~/i18n';
 import {getLocaleFromI18n} from '~/lib/locale';
+import {
+  buildBreadcrumbStructuredData,
+  buildContentBreadcrumbItems,
+} from '~/lib/breadcrumbs';
 
 type ListedCollection = CollectionFragment & {
   showListing?: {value?: string | null} | null;
 };
 
 export function links() {
-  return [{rel: 'stylesheet', href: collectionMainlistStyles}];
+  return [
+    {rel: 'stylesheet', href: collectionMainlistStyles},
+    {rel: 'stylesheet', href: breadcrumbStyles},
+  ];
+}
+
+function stringifyJsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
 export const meta: Route.MetaFunction = ({data, matches}) => {
@@ -79,10 +92,25 @@ export async function loader({context, request}: Route.LoaderArgs) {
 }
 
 export default function Collections() {
-  const {collections} = useLoaderData<typeof loader>();
+  const {collections, canonicalUrl, seoFallbackTitle} =
+    useLoaderData<typeof loader>();
+  const breadcrumbItems = buildContentBreadcrumbItems({
+    canonicalUrl,
+    currentName: seoFallbackTitle,
+  });
+  const breadcrumbJsonLd = buildBreadcrumbStructuredData(breadcrumbItems);
 
   return (
     <main className="collection-page">
+      {breadcrumbJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
+        />
+      ) : null}
+      <div className="breadcrumb-container container mx-auto">
+        <Breadcrumbs items={breadcrumbItems} />
+      </div>
       <div className="collection-gallery">
         {collections.map((collection: ListedCollection, index: number) => (
           <CollectionCard
@@ -104,10 +132,7 @@ function CollectionCard({
   index: number;
 }) {
   return (
-    <Link
-      className="collection-card"
-      to={`/collections/${collection.handle}`}
-    >
+    <Link className="collection-card" to={`/collections/${collection.handle}`}>
       <div className="collection-card__media">
         {collection.image ? (
           <Image

@@ -6,6 +6,12 @@ import staticPagesStyles from '~/styles/staticPages.css?url';
 import faqStyles from '~/styles/FAQ.css?url';
 import kontaktStyles from '~/styles/kontakt.css?url';
 import customerReviewsPageStyles from '~/styles/customer-reviews-page.css?url';
+import breadcrumbStyles from '~/styles/product-breadcrumb.css?url';
+import {Breadcrumbs} from '~/components/ProductBreadcrumb';
+import {
+  buildBreadcrumbStructuredData,
+  buildContentBreadcrumbItems,
+} from '~/lib/breadcrumbs';
 import {
   buildCanonicalUrl,
   buildResourceSeoAlternateUrls,
@@ -464,6 +470,7 @@ export function links() {
     {rel: 'stylesheet', href: faqStyles},
     {rel: 'stylesheet', href: kontaktStyles},
     {rel: 'stylesheet', href: customerReviewsPageStyles},
+    {rel: 'stylesheet', href: breadcrumbStyles},
   ];
 }
 
@@ -756,12 +763,31 @@ export default function Page() {
     kontakt,
     page,
   } = useLoaderData<typeof loader>();
+  const breadcrumbItems = buildContentBreadcrumbItems({
+    canonicalUrl,
+    currentName: page.title,
+  });
+  const breadcrumbJsonLd = buildBreadcrumbStructuredData(breadcrumbItems);
+  const breadcrumbContent = (
+    <>
+      {breadcrumbJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
+        />
+      ) : null}
+      <div className="breadcrumb-container container mx-auto">
+        <Breadcrumbs items={breadcrumbItems} />
+      </div>
+    </>
+  );
 
   if (isKontaktPage(page)) {
     const kontaktJsonLd = buildKontaktJsonLd(page.title, canonicalUrl, kontakt);
 
     return (
       <>
+        {breadcrumbContent}
         {kontaktJsonLd ? (
           <script
             type="application/ld+json"
@@ -786,6 +812,7 @@ export default function Page() {
 
     return (
       <>
+        {breadcrumbContent}
         {faqJsonLd ? (
           <script
             type="application/ld+json"
@@ -807,35 +834,41 @@ export default function Page() {
 
   if (isErfahrungenPage(page)) {
     return (
-      <Suspense
-        fallback={
-          <main className="static-page" aria-busy="true">
-            <div className="static-page__article container mx-auto" />
-          </main>
-        }
-      >
-        <CustomerReviewsPage
-          hero={customerReviewsHero}
-          reviews={customerReviews}
-          reviewsSectionTitle={customerReviewsSectionTitle}
-          steps={customerReviewsSteps}
-        />
-      </Suspense>
+      <>
+        {breadcrumbContent}
+        <Suspense
+          fallback={
+            <main className="static-page" aria-busy="true">
+              <div className="static-page__article container mx-auto" />
+            </main>
+          }
+        >
+          <CustomerReviewsPage
+            hero={customerReviewsHero}
+            reviews={customerReviews}
+            reviewsSectionTitle={customerReviewsSectionTitle}
+            steps={customerReviewsSteps}
+          />
+        </Suspense>
+      </>
     );
   }
 
   return (
-    <main className="static-page">
-      <article className="static-page__article container mx-auto">
-        <header className="static-page__header">
-          <h1 className="static-page__title">{page.title}</h1>
-        </header>
-        <div
-          className="static-page__content"
-          dangerouslySetInnerHTML={{__html: page.body}}
-        />
-      </article>
-    </main>
+    <>
+      {breadcrumbContent}
+      <main className="static-page">
+        <article className="static-page__article container mx-auto">
+          <header className="static-page__header">
+            <h1 className="static-page__title">{page.title}</h1>
+          </header>
+          <div
+            className="static-page__content"
+            dangerouslySetInnerHTML={{__html: page.body}}
+          />
+        </article>
+      </main>
+    </>
   );
 }
 

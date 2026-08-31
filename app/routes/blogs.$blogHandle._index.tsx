@@ -7,6 +7,7 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {Breadcrumbs} from '~/components/ProductBreadcrumb';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import blogHandleStyles from '~/styles/blogHandle.css?url';
+import breadcrumbStyles from '~/styles/product-breadcrumb.css?url';
 import {Link} from '~/lib/i18n-router';
 import {
   buildResourceSeoAlternateUrls,
@@ -22,7 +23,10 @@ import {
 } from '~/lib/breadcrumbs';
 
 export function links() {
-  return [{rel: 'stylesheet', href: blogHandleStyles}];
+  return [
+    {rel: 'stylesheet', href: blogHandleStyles},
+    {rel: 'stylesheet', href: breadcrumbStyles},
+  ];
 }
 
 type BlogArticle = ArticleItemFragment & {
@@ -97,10 +101,7 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
     resourceType: 'Blog',
   });
   const paginationSeo = resolvePaginationSeoPolicy(
-    buildCanonicalRequestUrl(
-      request.url,
-      context.env.PUBLIC_CANONICAL_ORIGIN,
-    ),
+    buildCanonicalRequestUrl(request.url, context.env.PUBLIC_CANONICAL_ORIGIN),
   );
 
   return {
@@ -138,7 +139,9 @@ export default function Blog() {
           dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
         />
       ) : null}
-      <Breadcrumbs items={breadcrumbItems} />
+      <div className={'breadcrumb-container container mx-auto'}>
+        <Breadcrumbs items={breadcrumbItems} />
+      </div>
       <div className="blog-handle-hero">
         <div className="container mx-auto">
           <p className="blog-handle-hero__eyebrow">

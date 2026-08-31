@@ -45,6 +45,7 @@ import {useTranslation} from '~/i18n/useTranslation';
 import type {Route} from './+types/collections.$handle';
 import bestsellerCollectionStyles from '~/styles/bestseller-collection.css?url';
 import zubehorCollectionStyles from '~/styles/zubehor-collection.css?url';
+import breadcrumbStyles from '~/styles/product-breadcrumb.css?url';
 import '../styles/collections.css';
 import '../styles/wishlistFeedback.css';
 
@@ -197,6 +198,7 @@ export function links() {
   return [
     {rel: 'stylesheet', href: bestsellerCollectionStyles},
     {rel: 'stylesheet', href: zubehorCollectionStyles},
+    {rel: 'stylesheet', href: breadcrumbStyles},
   ];
 }
 
@@ -366,7 +368,9 @@ export default function Collection() {
           dangerouslySetInnerHTML={{__html: stringifyJsonLd(itemListJsonLd)}}
         />
       ) : null}
-      <Breadcrumbs items={breadcrumbItems} />
+      <div className={'breadcrumb-container container mx-auto'}>
+        <Breadcrumbs items={breadcrumbItems} />
+      </div>
 
       {isBestsellerCollection(collection) ? (
         <Suspense

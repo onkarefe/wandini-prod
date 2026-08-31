@@ -1,10 +1,12 @@
 import {useLoaderData} from 'react-router';
-import type { Route } from './+types/blogs._index';
-import { Image, getPaginationVariables } from '@shopify/hydrogen';
-import { PaginatedResourceSection } from '~/components/PaginatedResourceSection';
-import type { BlogsQuery } from 'storefrontapi.generated';
+import type {Route} from './+types/blogs._index';
+import {Image, getPaginationVariables} from '@shopify/hydrogen';
+import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import type {BlogsQuery} from 'storefrontapi.generated';
 import {useTranslation} from '~/i18n/useTranslation';
 import blogMainStyles from '~/styles/blogMain.css?url';
+import breadcrumbStyles from '~/styles/product-breadcrumb.css?url';
+import {Breadcrumbs} from '~/components/ProductBreadcrumb';
 import {Link} from '~/lib/i18n-router';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import {
@@ -17,6 +19,10 @@ import {
   getShopifyGlobalSeoSettingsFromMatches,
   resolveShopifyMarketingSeo,
 } from '~/lib/shopify-marketing-seo';
+import {
+  buildBreadcrumbStructuredData,
+  buildContentBreadcrumbItems,
+} from '~/lib/breadcrumbs';
 
 type BlogNode = BlogsQuery['blogs']['nodes'][0] & {
   blogCategoryDescription?: {
@@ -58,7 +64,14 @@ function getBlogListingFieldValue(
 }
 
 export function links() {
-  return [{ rel: 'stylesheet', href: blogMainStyles }];
+  return [
+    {rel: 'stylesheet', href: blogMainStyles},
+    {rel: 'stylesheet', href: breadcrumbStyles},
+  ];
+}
+
+function stringifyJsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
 export const meta: Route.MetaFunction = ({data, matches}) => {
@@ -108,19 +121,19 @@ export async function loader(args: Route.LoaderArgs) {
     loadShopifySeoPage(args.context.storefront, 'blogs'),
   ]);
 
-  return { ...deferredData, ...criticalData, shopifySeoPage };
+  return {...deferredData, ...criticalData, shopifySeoPage};
 }
 
 /**
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
-async function loadCriticalData({ context, request }: Route.LoaderArgs) {
+async function loadCriticalData({context, request}: Route.LoaderArgs) {
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 10,
   });
 
-  const [{ blogs, blogListingContent }] = await Promise.all([
+  const [{blogs, blogListingContent}] = await Promise.all([
     context.storefront.query(BLOGS_QUERY, {
       variables: {
         ...paginationVariables,
@@ -129,10 +142,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     // Add other queries here, so that they are loaded in parallel
   ]);
   const paginationSeo = resolvePaginationSeoPolicy(
-    buildCanonicalRequestUrl(
-      request.url,
-      context.env.PUBLIC_CANONICAL_ORIGIN,
-    ),
+    buildCanonicalRequestUrl(request.url, context.env.PUBLIC_CANONICAL_ORIGIN),
   );
 
   return {
@@ -148,13 +158,14 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
  * fetched after the initial page load. If it's unavailable, the page should still 200.
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
-function loadDeferredData({ context }: Route.LoaderArgs) {
+function loadDeferredData({context}: Route.LoaderArgs) {
   return {};
 }
 
 export default function Blogs() {
   const {t} = useTranslation();
-  const { blogs, blogListingContent } = useLoaderData<typeof loader>();
+  const {blogs, blogListingContent, canonicalUrl} =
+    useLoaderData<typeof loader>();
   const heroFields = getBlogListingFields(blogListingContent);
 
   const getFieldValue = (...keys: string[]) =>
@@ -163,9 +174,23 @@ export default function Blogs() {
   const kicker = getFieldValue('label');
   const title = getFieldValue('title', 'main_title');
   const intro = getFieldValue('subtitle', 'sub_title');
+  const breadcrumbItems = buildContentBreadcrumbItems({
+    canonicalUrl,
+    currentName: t('blog.blog'),
+  });
+  const breadcrumbJsonLd = buildBreadcrumbStructuredData(breadcrumbItems);
 
   return (
     <main className="blogs-page">
+      {breadcrumbJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
+        />
+      ) : null}
+      <div className="breadcrumb-container container mx-auto">
+        <Breadcrumbs items={breadcrumbItems} />
+      </div>
       <section className="blogs-hero">
         <div className="container mx-auto">
           {kicker ? <p className="blogs-kicker">{kicker}</p> : null}
@@ -177,7 +202,7 @@ export default function Blogs() {
       <section className="blogs-grid-section" aria-label={t('blog.list')}>
         <div className="container mx-auto">
           <PaginatedResourceSection<BlogNode> connection={blogs}>
-            {({ node: blog, index }) => (
+            {({node: blog, index}) => (
               <Link
                 className={`blog-card ${index === 0 ? 'blog-card--featured' : ''}`}
                 key={blog.handle}
@@ -193,7 +218,9 @@ export default function Blogs() {
                         blog.title
                       }
                       className="blog-card__image"
-                      sizes={index === 0 ? '100vw' : '(min-width: 960px) 50vw, 100vw'}
+                      sizes={
+                        index === 0 ? '100vw' : '(min-width: 960px) 50vw, 100vw'
+                      }
                     />
                   </div>
                 ) : null}
@@ -201,7 +228,9 @@ export default function Blogs() {
                   <p className="blog-card__eyebrow">{t('blog.blog')}</p>
                   <h2 className="blog-card__title">{blog.title}</h2>
                   <p className="blog-card__excerpt">
-                    {blog.blogCategoryDescription?.value || blog.seo?.description || ''}
+                    {blog.blogCategoryDescription?.value ||
+                      blog.seo?.description ||
+                      ''}
                   </p>
                   <div className="blog-card__footer">
                     <span className="blog-card__link">
