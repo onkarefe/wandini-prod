@@ -40,6 +40,14 @@ function getFirstPathSegment(pathname: string) {
   return normalizeLocaleSegment(firstSegment);
 }
 
+function normalizeReactRouterDataPathname(pathname: string) {
+  if (pathname === '/_root.data') {
+    return '/';
+  }
+
+  return pathname.replace(/\.data$/, '');
+}
+
 function getLocaleFromSegment(segment?: string | null) {
   const normalizedSegment = normalizeLocaleSegment(segment);
   return (
@@ -61,7 +69,11 @@ export function getLocaleFromI18n(i18n: {
 }
 
 export function getLocaleFromPathname(pathname: string) {
-  return getLocaleFromSegment(getFirstPathSegment(pathname)) ?? DEFAULT_LOCALE;
+  const normalizedPathname = normalizeReactRouterDataPathname(pathname);
+  return (
+    getLocaleFromSegment(getFirstPathSegment(normalizedPathname)) ??
+    DEFAULT_LOCALE
+  );
 }
 
 export function getLocaleFromRequest(request: Request) {

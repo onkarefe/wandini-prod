@@ -19,8 +19,12 @@ describe('production locale contract', () => {
   it.each([
     ['/', 'DE', 'DE'],
     ['/products/foo', 'DE', 'DE'],
+    ['/products/foo.data', 'DE', 'DE'],
+    ['/_root.data', 'DE', 'DE'],
     ['/en', 'EN', 'DE'],
+    ['/en.data', 'EN', 'DE'],
     ['/en/products/foo', 'EN', 'DE'],
+    ['/en/products/foo.data', 'EN', 'DE'],
   ])('resolves %s to %s language and %s country', (path, language, country) => {
     const locale = getLocaleFromRequest(
       new Request(`https://www.wandini.shop${path}`),
