@@ -5,7 +5,6 @@ import type {
 } from '~/lib/customer-reviews';
 import {getCustomerReviewRatingValue} from '~/lib/customer-reviews';
 import {useTranslation} from '~/i18n/useTranslation';
-import '../styles/customer-reviews-page.css';
 
 type CustomerReviewsPageProps = {
   hero: CustomerReviewsHero;

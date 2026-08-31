@@ -43,6 +43,8 @@ import {
 } from '~/lib/seo';
 import {useTranslation} from '~/i18n/useTranslation';
 import type {Route} from './+types/collections.$handle';
+import bestsellerCollectionStyles from '~/styles/bestseller-collection.css?url';
+import zubehorCollectionStyles from '~/styles/zubehor-collection.css?url';
 import '../styles/collections.css';
 import '../styles/wishlistFeedback.css';
 
@@ -189,6 +191,13 @@ function buildCollectionItemListJsonLd(
 
 function stringifyJsonLd(data: unknown) {
   return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
+export function links() {
+  return [
+    {rel: 'stylesheet', href: bestsellerCollectionStyles},
+    {rel: 'stylesheet', href: zubehorCollectionStyles},
+  ];
 }
 
 export const meta: Route.MetaFunction = ({data, params}) => {

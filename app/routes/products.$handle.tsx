@@ -25,6 +25,11 @@ import {
   isWallpaperMaterialOption,
   resolveInitialWallpaperVariant,
 } from '~/lib/wallpaper-variant-selection';
+import productDetailStyles from '~/styles/productDetail.css?url';
+import productDetailTabsStyles from '~/styles/ProductDetailTabs.css?url';
+import configuratorStyles from '~/styles/configurator.css?url';
+import zubehorProductDetailStyles from '~/styles/zubehor-product-detail.css?url';
+import similarMotifsCarouselStyles from '~/styles/similarMotifsCarousel.css?url';
 
 const ZUBEHOR_PRODUCT_LAYOUT = 'zubehor';
 
@@ -129,6 +134,16 @@ function getProductMetaImage(product?: ProductMetaInput | null) {
 
 function stringifyJsonLd(data: unknown) {
   return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
+export function links() {
+  return [
+    {rel: 'stylesheet', href: productDetailStyles},
+    {rel: 'stylesheet', href: productDetailTabsStyles},
+    {rel: 'stylesheet', href: configuratorStyles},
+    {rel: 'stylesheet', href: zubehorProductDetailStyles},
+    {rel: 'stylesheet', href: similarMotifsCarouselStyles},
+  ];
 }
 
 export const meta: Route.MetaFunction = ({data}) => {

@@ -2,7 +2,6 @@ import {RichText} from '@shopify/hydrogen';
 import {useEffect, useId, useRef, useState, type KeyboardEvent} from 'react';
 import {useFetcher} from 'react-router';
 import {useTranslation} from '~/i18n/useTranslation';
-import '../styles/FAQ.css';
 
 export type FAQItem = {
   id: string;

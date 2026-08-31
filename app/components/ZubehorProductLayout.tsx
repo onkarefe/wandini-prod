@@ -22,7 +22,6 @@ import {ProductPrice} from '~/components/ProductPrice';
 import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
 import {prefixPathWithLocale, type SelectedLocale} from '~/lib/locale';
-import '../styles/zubehor-product-detail.css';
 
 type ProductImageNode = ProductFragment['images']['edges'][number]['node'];
 

@@ -4,7 +4,6 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from 'react';
-import '~/styles/ProductDetailTabs.css';
 import {useTranslation} from '~/i18n/useTranslation';
 
 export interface ProductDetailTabsProps {

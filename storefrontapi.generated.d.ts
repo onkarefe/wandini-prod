@@ -556,6 +556,40 @@ export type LanguageSwitchResourceQuery = {
   >;
 };
 
+export type MarketingSeoMetaobjectsQueryVariables = StorefrontAPI.Exact<{
+  type: StorefrontAPI.Scalars['String']['input'];
+  first: StorefrontAPI.Scalars['Int']['input'];
+  country: StorefrontAPI.CountryCode;
+  language: StorefrontAPI.LanguageCode;
+}>;
+
+export type MarketingSeoMetaobjectsQuery = {
+  metaobjects: {
+    nodes: Array<{
+      fields: Array<
+        Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'> & {
+          reference?: StorefrontAPI.Maybe<
+            | {
+                __typename:
+                  | 'Collection'
+                  | 'GenericFile'
+                  | 'Metaobject'
+                  | 'Model3d'
+                  | 'Page'
+                  | 'Product'
+                  | 'ProductVariant'
+                  | 'Video';
+              }
+            | ({__typename: 'MediaImage'} & {
+                image?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Image, 'url'>>;
+              })
+          >;
+        }
+      >;
+    }>;
+  };
+};
+
 export type SimilarMotifsPreviewProductFragment = Pick<
   StorefrontAPI.Product,
   'id' | 'handle' | 'title'
@@ -700,13 +734,6 @@ export type SimilarProductsCollectionHandlesQuery = {
     pageInfo: Pick<StorefrontAPI.PageInfo, 'hasNextPage' | 'endCursor'>;
   };
 };
-
-export type StoreRobotsQueryVariables = StorefrontAPI.Exact<{
-  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
-  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
-}>;
-
-export type StoreRobotsQuery = {shop: Pick<StorefrontAPI.Shop, 'id'>};
 
 export type HeroSectionsQueryVariables = StorefrontAPI.Exact<{
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
@@ -2485,25 +2512,6 @@ export type PredictiveSearchQuery = {
   }>;
 };
 
-export type ArticleSitemapQueryVariables = StorefrontAPI.Exact<{
-  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
-  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
-  blogsFirst: StorefrontAPI.Scalars['Int']['input'];
-  articlesFirst: StorefrontAPI.Scalars['Int']['input'];
-}>;
-
-export type ArticleSitemapQuery = {
-  blogs: {
-    nodes: Array<
-      Pick<StorefrontAPI.Blog, 'handle'> & {
-        articles: {
-          nodes: Array<Pick<StorefrontAPI.Article, 'handle' | 'publishedAt'>>;
-        };
-      }
-    >;
-  };
-};
-
 interface GeneratedQueryTypes {
   '#graphql\n  query AccountFavoritesProducts(\n    $ids: [ID!]!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    nodes(ids: $ids) {\n      ... on Product {\n        __typename\n        id\n        handle\n        title\n        priceRange {\n          minVariantPrice {\n            amount\n            currencyCode\n          }\n        }\n        images(first: 3) {\n          nodes {\n            url\n            altText\n          }\n        }\n      }\n    }\n  }\n': {
     return: AccountFavoritesProductsQuery;
@@ -2521,6 +2529,10 @@ interface GeneratedQueryTypes {
     return: LanguageSwitchResourceQuery;
     variables: LanguageSwitchResourceQueryVariables;
   };
+  '#graphql\n  query MarketingSeoMetaobjects(\n    $type: String!\n    $first: Int!\n    $country: CountryCode!\n    $language: LanguageCode!\n  ) @inContext(country: $country, language: $language) {\n    metaobjects(type: $type, first: $first) {\n      nodes {\n        fields {\n          key\n          value\n          reference {\n            __typename\n            ... on MediaImage {\n              image {\n                url\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+    return: MarketingSeoMetaobjectsQuery;
+    variables: MarketingSeoMetaobjectsQueryVariables;
+  };
   '#graphql\n  #graphql\n  fragment SimilarMotifsPreviewProduct on Product {\n    id\n    handle\n    title\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    images(first: 1) {\n      nodes {\n        url\n        altText\n        width\n        height\n      }\n    }\n  }\n\n  query SimilarMotifsPreview(\n    $country: CountryCode\n    $language: LanguageCode\n    $categoryHandle: String!\n    $mainMotif: String!\n    $mainTheme: String!\n    $candidateLimit: Int!\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $categoryHandle) {\n      sameMotif: products(\n        first: $candidateLimit\n        filters: [\n          {\n            productMetafield: {\n              namespace: "custom"\n              key: "main_motif"\n              value: $mainMotif\n            }\n          }\n        ]\n      ) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n      sameTheme: products(\n        first: $candidateLimit\n        filters: [\n          {\n            productMetafield: {\n              namespace: "custom"\n              key: "main_theme"\n              value: $mainTheme\n            }\n          }\n        ]\n      ) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n      fallback: products(first: $candidateLimit) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n    }\n  }\n': {
     return: SimilarMotifsPreviewQuery;
     variables: SimilarMotifsPreviewQueryVariables;
@@ -2532,10 +2544,6 @@ interface GeneratedQueryTypes {
   '#graphql\n  query SimilarProductsCollectionHandles(\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int!\n    $after: String\n  ) @inContext(country: $country, language: $language) {\n    collections(first: $first, after: $after) {\n      nodes {\n        handle\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n': {
     return: SimilarProductsCollectionHandlesQuery;
     variables: SimilarProductsCollectionHandlesQueryVariables;
-  };
-  '#graphql\n  query StoreRobots($country: CountryCode, $language: LanguageCode)\n   @inContext(country: $country, language: $language) {\n    shop {\n      id\n    }\n  }\n': {
-    return: StoreRobotsQuery;
-    variables: StoreRobotsQueryVariables;
   };
   '#graphql\n  query HeroSections($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    metaobjects(type: "hero_div", first: 10) {\n      nodes {\n        id\n        handle\n        fields {\n          key\n          value\n          reference {\n            ... on MediaImage {\n              image { url altText width height }\n            }\n            ... on GenericFile {\n              url\n            }\n            ... on Collection {\n              handle\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: HeroSectionsQuery;
@@ -2636,10 +2644,6 @@ interface GeneratedQueryTypes {
   '#graphql\n  query PredictiveSearch(\n    $country: CountryCode\n    $language: LanguageCode\n    $limit: Int!\n    $limitScope: PredictiveSearchLimitScope!\n    $term: String!\n  ) @inContext(country: $country, language: $language) {\n    predictiveSearch(\n      limit: $limit\n      limitScope: $limitScope\n      query: $term\n      types: [PRODUCT, COLLECTION, PAGE, ARTICLE, QUERY]\n    ) {\n      articles {\n        __typename\n        id\n        title\n        handle\n        blog {\n          handle\n        }\n        image {\n          url\n          altText\n          width\n          height\n        }\n        trackingParameters\n      }\n      collections {\n        __typename\n        id\n        title\n        handle\n        image {\n          url\n          altText\n          width\n          height\n        }\n        trackingParameters\n      }\n      pages {\n        __typename\n        id\n        title\n        handle\n        trackingParameters\n      }\n      products {\n        __typename\n        id\n        title\n        handle\n        trackingParameters\n        selectedOrFirstAvailableVariant(\n          selectedOptions: []\n          ignoreUnknownOptions: true\n          caseInsensitiveMatch: true\n        ) {\n          id\n          image {\n            url\n            altText\n            width\n            height\n          }\n          price {\n            amount\n            currencyCode\n          }\n        }\n      }\n      queries {\n        __typename\n        text\n        styledText\n        trackingParameters\n      }\n    }\n  }\n': {
     return: PredictiveSearchQuery;
     variables: PredictiveSearchQueryVariables;
-  };
-  '#graphql\n  query ArticleSitemap(\n    $country: CountryCode\n    $language: LanguageCode\n    $blogsFirst: Int!\n    $articlesFirst: Int!\n  ) @inContext(country: $country, language: $language) {\n    blogs(first: $blogsFirst) {\n      nodes {\n        handle\n        articles(first: $articlesFirst) {\n          nodes {\n            handle\n            publishedAt\n          }\n        }\n      }\n    }\n  }\n': {
-    return: ArticleSitemapQuery;
-    variables: ArticleSitemapQueryVariables;
   };
 }
 

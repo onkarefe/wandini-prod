@@ -3,6 +3,9 @@ import {lazy, Suspense} from 'react';
 import type {Route} from './+types/pages.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import staticPagesStyles from '~/styles/staticPages.css?url';
+import faqStyles from '~/styles/FAQ.css?url';
+import kontaktStyles from '~/styles/kontakt.css?url';
+import customerReviewsPageStyles from '~/styles/customer-reviews-page.css?url';
 import {
   buildCanonicalUrl,
   buildResourceSeoAlternateUrls,
@@ -456,7 +459,12 @@ function stringifyJsonLd(data: unknown) {
 }
 
 export function links() {
-  return [{rel: 'stylesheet', href: staticPagesStyles}];
+  return [
+    {rel: 'stylesheet', href: staticPagesStyles},
+    {rel: 'stylesheet', href: faqStyles},
+    {rel: 'stylesheet', href: kontaktStyles},
+    {rel: 'stylesheet', href: customerReviewsPageStyles},
+  ];
 }
 
 export const meta: Route.MetaFunction = ({data, params}) => {

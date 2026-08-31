@@ -2,7 +2,6 @@ import type {CustomCollectionQuery} from 'storefrontapi.generated';
 import {BestsellerCard} from '~/components/AllProdutsNew';
 import {Link} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
-import '../styles/bestseller-collection.css';
 
 type CollectionData = NonNullable<CustomCollectionQuery['collection']>;
 type CollectionProduct = CollectionData['products']['nodes'][number];

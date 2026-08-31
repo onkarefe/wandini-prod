@@ -3,7 +3,6 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Image} from '@shopify/hydrogen';
 import type {ProductFragment} from 'storefrontapi.generated';
 import {useTranslation} from '~/i18n/useTranslation';
-import '../styles/productDetail.css';
 
 type ProductImages = ProductFragment['images'];
 type ProductImageNode = NonNullable<ProductImages>['edges'][number]['node'];

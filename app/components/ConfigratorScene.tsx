@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
-import '../styles/configurator.css';
 
 // SVG sahneler
 import sceneSmall from '~/assets/scenes/small.svg';

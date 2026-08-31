@@ -4,7 +4,6 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import '../styles/configurator.css';
 
 type AxisLock = 'x' | 'y';
 

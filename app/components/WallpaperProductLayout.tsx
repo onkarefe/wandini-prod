@@ -33,7 +33,6 @@ import {
   formatLocaleNumber,
 } from '~/lib/locale-format';
 import {isWallpaperMaterialOption} from '~/lib/wallpaper-variant-selection';
-import '~/styles/productDetail.css';
 
 type CropRect = {
   x: number;

@@ -9,7 +9,6 @@ import type {
   SimilarMotifsPreviewData,
   SimilarMotifsPreviewProduct,
 } from '~/lib/similar-products-preview';
-import '../styles/similarMotifsCarousel.css';
 
 function ArrowIcon({direction}: {direction: 'left' | 'right'}) {
   return (

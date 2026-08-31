@@ -3,7 +3,6 @@ import type {CustomCollectionQuery} from 'storefrontapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {ZubehorProductCard} from '~/components/ZubehorProductCard';
 import {useTranslation} from '~/i18n/useTranslation';
-import '../styles/zubehor-collection.css';
 
 type CollectionData = NonNullable<CustomCollectionQuery['collection']>;
 type CollectionProduct = CollectionData['products']['nodes'][number];

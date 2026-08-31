@@ -2,7 +2,6 @@ import {useEffect, useRef} from 'react';
 import {useFetcher} from 'react-router';
 import {useTranslation} from '~/i18n/useTranslation';
 import {Link} from '~/lib/i18n-router';
-import '../styles/kontakt.css';
 
 export type KontaktLink = {
   id: string;
