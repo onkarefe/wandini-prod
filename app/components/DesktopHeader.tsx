@@ -133,6 +133,7 @@ export function DesktopHeader({
 }: DesktopHeaderProps) {
   const {t} = useTranslation();
   const {shop} = header;
+  const brandLogo = shop.brand?.logo?.image;
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileOpenKey, setMobileOpenKey] = useState<string | null>(null);
@@ -295,10 +296,12 @@ export function DesktopHeader({
             aria-label={t('common.home')}
             onClick={closeMobileMenu}
           >
-            {shop.brand?.logo?.image?.url ? (
+            {brandLogo?.url ? (
               <img
-                src={shop.brand.logo.image.url}
+                src={brandLogo.url}
                 alt={shop.name || 'Wandini'}
+                width={brandLogo.width ?? undefined}
+                height={brandLogo.height ?? undefined}
               />
             ) : (
               <span>{shop.name || 'Wandini'}</span>

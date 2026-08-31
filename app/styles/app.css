@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Archivo';
+  src: url('/fonts/archivo-latin-wght-normal.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: optional;
+}
+
 :root {
   --aside-width: 400px;
   --cart-aside-summary-height-with-discount: 300px;

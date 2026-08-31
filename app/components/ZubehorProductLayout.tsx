@@ -99,6 +99,16 @@ function getWrappedIndex(index: number, imageCount: number) {
   return (index + imageCount) % imageCount;
 }
 
+function getPreferredImageIndex(
+  images: ProductImageNode[],
+  preferredImageKey?: string,
+) {
+  const preferredIndex = images.findIndex(
+    (image) => getImageKey(image) === preferredImageKey,
+  );
+  return preferredIndex >= 0 ? preferredIndex : 0;
+}
+
 function ZubehorProductGallery({
   images,
   preferredImageKey,
@@ -111,15 +121,14 @@ function ZubehorProductGallery({
   productTitle: string;
 }) {
   const {t} = useTranslation();
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(() =>
+    getPreferredImageIndex(images, preferredImageKey),
+  );
   const touchStartX = useRef<number | null>(null);
   const hasMultipleImages = images.length > 1;
 
   useEffect(() => {
-    const preferredIndex = images.findIndex(
-      (image) => getImageKey(image) === preferredImageKey,
-    );
-    setActiveIndex(preferredIndex >= 0 ? preferredIndex : 0);
+    setActiveIndex(getPreferredImageIndex(images, preferredImageKey));
   }, [images, preferredImageKey, productId]);
 
   if (!images.length) {
@@ -185,7 +194,7 @@ function ZubehorProductGallery({
                 alt={image.altText || productTitle}
                 className="zpd-gallery__image"
                 sizes="(min-width: 1100px) 390px, (min-width: 700px) 440px, calc(100vw - 32px)"
-                loading={index === 0 ? 'eager' : 'lazy'}
+                loading={index === activeIndex ? 'eager' : 'lazy'}
               />
             </div>
           ))}

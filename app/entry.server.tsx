@@ -46,19 +46,15 @@ export default async function handleRequest(
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
 
-    // Google Fonts için style-src whitelist
     styleSrc: [
       "'self'",
       "'unsafe-inline'",
       'https://cdn.shopify.com',
-      'https://fonts.googleapis.com',
       ...localDevSources,
     ],
 
-    // Google Fonts font dosyaları için
     fontSrc: [
       "'self'",
-      'https://fonts.gstatic.com',
       'https://cdn.shopify.com',
       'data:',
     ],

@@ -29,6 +29,8 @@ import {loadShopifyGlobalSeoSettings} from '~/lib/shopify-marketing-seo.server';
 
 export type RootLoader = typeof loader;
 
+const archivoFontHref = '/fonts/archivo-latin-wght-normal.woff2';
+
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
  */
@@ -66,6 +68,13 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
  */
 export function links() {
   return [
+    {
+      rel: 'preload',
+      href: archivoFontHref,
+      as: 'font',
+      type: 'font/woff2',
+      crossOrigin: 'anonymous',
+    },
     {rel: 'stylesheet', href: navStyles},
     {rel: 'stylesheet', href: desktopHeaderStyles},
     {
@@ -75,13 +84,6 @@ export function links() {
     {
       rel: 'preconnect',
       href: 'https://shop.app',
-    },
-    {rel: 'preconnect', href: 'https://fonts.googleapis.com'},
-    {rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: ''},
-
-    {
-      rel: 'stylesheet',
-      href: 'https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap',
     },
     {rel: 'icon', type: 'image/png', href: favicon},
   ];
