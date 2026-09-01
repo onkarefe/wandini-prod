@@ -229,8 +229,10 @@ export const de = {
     'Der Checkout konnte nicht vorbereitet werden. Bitte prüfen Sie Ihre Konfiguration und versuchen Sie es erneut.',
   'cart.checkoutUnavailable':
     'Der Checkout ist für diesen Warenkorb derzeit nicht verfügbar. Bitte prüfen Sie die Produktkonfiguration.',
-  'cart.giftCardCheckoutNotice':
-    'Geschenkkarten müssen im Shopify Checkout erneut eingegeben werden.',
+  'cart.giftCardDraftCheckoutNotice':
+    'Geschenkkarten können nach dem Fortfahren im Shopify Checkout eingelöst werden.',
+  'cart.giftCardDraftReentryNotice':
+    'Im Warenkorb eingegebene Geschenkkarten werden nicht übertragen. Geben Sie den Code nach dem Fortfahren im Shopify Checkout erneut ein.',
   'cart.discountCode': 'Rabattcode',
   'cart.giftCard': 'Geschenkkarte',
   'cart.enterCode': 'Code eingeben',

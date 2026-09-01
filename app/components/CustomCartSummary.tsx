@@ -138,16 +138,17 @@ export function CartSummary({
           discountCodes={cart?.discountCodes}
           validatedCodes={pricingQuote?.discountCodes}
         />
-        <GiftCard cartId={cart?.id} giftCardCodes={cart?.appliedGiftCards} />
+        {checkoutMode === 'native' ? (
+          <GiftCard cartId={cart?.id} giftCardCodes={cart?.appliedGiftCards} />
+        ) : checkoutMode === 'draft' ? (
+          <DraftGiftCardNotice
+            hasAppliedGiftCard={Boolean(cart?.appliedGiftCards?.length)}
+          />
+        ) : null}
       </div>
 
       {checkoutMode === 'draft' ? (
         <>
-          {cart?.appliedGiftCards?.length ? (
-            <p className="order-summary__error">
-              {t('cart.giftCardCheckoutNotice')}
-            </p>
-          ) : null}
           <Form
             method="post"
             action={checkoutPath}
@@ -272,6 +273,29 @@ function DiscountForm({
     >
       {children}
     </CartForm>
+  );
+}
+
+function DraftGiftCardNotice({
+  hasAppliedGiftCard,
+}: {
+  hasAppliedGiftCard: boolean;
+}) {
+  const {t} = useTranslation();
+
+  return (
+    <div className="order-summary__code-group">
+      <p>
+        <strong>{t('cart.giftCard')}</strong>
+      </p>
+      <p>
+        {t(
+          hasAppliedGiftCard
+            ? 'cart.giftCardDraftReentryNotice'
+            : 'cart.giftCardDraftCheckoutNotice',
+        )}
+      </p>
+    </div>
   );
 }
 

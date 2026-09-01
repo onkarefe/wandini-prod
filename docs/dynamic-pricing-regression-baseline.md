@@ -83,6 +83,31 @@ the authoritative material/variant relationship.
 - The configured checkout button retains immediate duplicate-submit
   suppression and retry release after navigation returns idle.
 
+## Gift card contract — REDEMPTION AT SHOPIFY DRAFT CHECKOUT
+
+Automatic Storefront-to-Draft gift-card transfer is not supported by the
+Shopify Admin API contract used here. The 2026-07 `DraftOrderInput` fields
+support discounts and Draft checkout configuration, but contain no gift-card
+code, applied-gift-card, or gift-card payment input.
+
+- **ORDINARY:** The existing Storefront cart gift-card controls remain active.
+  Applied gift cards and their real Storefront amounts are shown because the
+  cart continues to its own native `checkoutUrl`.
+- **CONFIGURED/MIXED:** The Hydrogen cart does not present a Storefront-applied
+  gift-card amount or apply/remove controls as if they affected the Draft.
+  Instead, it tells the customer to redeem the gift card in Shopify Checkout
+  after following the Draft invoice URL. If a card was already entered on the
+  Storefront cart, the UI explicitly says it was not transferred and must be
+  entered again.
+- Gift-card presence, IDs, codes, and claimed values do not change checkout
+  classification, Draft inputs, configured `priceOverride`, discount codes,
+  fingerprints, or reuse. Gift cards are never converted into discounts or
+  copied to Draft custom attributes.
+- Full codes are handled only by the existing client-side Storefront
+  gift-card mutation flow and its cart-scoped session storage. Loaders and
+  Draft preparation receive only Shopify's applied gift-card metadata and
+  never expose, persist, or log full codes.
+
 ## Removed legacy Checkout Guard / HMAC
 
 The old Checkout Guard proof mechanism was removed completely:
@@ -116,6 +141,11 @@ Focused tests cover:
   unavailable variant, Admin price, client price manipulation, and currency;
 - ordinary quantities and absence of ordinary `priceOverride`;
 - discount forwarding/calculation behavior;
+- ordinary native gift-card behavior; configured and mixed Draft
+  classification with gift-card state; and gift-card state being excluded
+  from Draft pricing, discounts, fingerprints, and reuse;
+- DE/EN Draft checkout redemption and re-entry copy, with no Draft-side
+  applied amount or Storefront gift-card controls;
 - fingerprint stability/sensitivity, reuse, reconciliation, canonical
   selection, and no Draft update;
 - configured duplicate-submit protection.
@@ -124,12 +154,10 @@ Focused tests cover:
 
 Repository limitations retained by scope:
 
-1. Gift cards applied to the Storefront cart are not transferred to Draft Order
-   checkout. The configured cart UI displays the existing notice.
-2. Cross-worker reconciliation reduces duplicate Drafts but cannot guarantee
+1. Cross-worker reconciliation reduces duplicate Drafts but cannot guarantee
    exactly-once creation without an external lock. Redundant OPEN Drafts are not
    deleted because OPEN status does not prove that no buyer is using one.
-3. Crop values are structurally and bounds validated, but the server does not
+2. Crop values are structurally and bounds validated, but the server does not
    rerun the orchestrator or derive crop/output aspect consistency from master
    image geometry. The orchestrator contract was intentionally unchanged.
 
@@ -139,5 +167,8 @@ Manual Shopify/release checks:
    runtimes.
 2. Complete the separately owned Shopify sales-channel isolation/publication
    work.
-3. Run live Shopify Draft checkout verification for payment, shipping, tax,
-   Markets, discount, and gift-card policy behavior.
+3. Verify on a live Draft invoice checkout that the Shopify gift-card field is
+   present and successfully redeems a valid card, including partial-balance
+   payment behavior.
+4. Run live Shopify Draft checkout verification for payment, shipping, tax,
+   Markets, and discount behavior.

@@ -227,8 +227,10 @@ export const en = {
     'Checkout could not be prepared. Please review your configuration and try again.',
   'cart.checkoutUnavailable':
     'Checkout is currently unavailable for this cart. Please review the product configuration.',
-  'cart.giftCardCheckoutNotice':
-    'Gift cards must be entered again in Shopify Checkout.',
+  'cart.giftCardDraftCheckoutNotice':
+    'Redeem gift cards in Shopify Checkout after continuing.',
+  'cart.giftCardDraftReentryNotice':
+    "Gift cards entered in this cart aren't transferred. Enter the code again in Shopify Checkout after continuing.",
   'cart.discountCode': 'Discount code',
   'cart.giftCard': 'Gift card',
   'cart.enterCode': 'Enter code',

@@ -846,7 +846,32 @@ describe('Draft Order line preparation', () => {
     expect(prepared.input.allowDiscountCodesInCheckout).toBe(true);
   });
 
-  it('selects Draft Order checkout mode for a configured cart', async () => {
+  it('keeps Storefront gift-card state out of Draft pricing and identity', async () => {
+    const withoutGiftCard = await prepareDraftOrder(cart(), pricingClient());
+    const withGiftCard = cart();
+    withGiftCard.appliedGiftCards = [
+      {
+        id: 'gid://shopify/AppliedGiftCard/1',
+        amountUsed: {amount: '9999.99', currencyCode: 'EUR'},
+        clientClaimedValue: '9999.99',
+      },
+    ] as unknown as DynamicPricingCart['appliedGiftCards'];
+
+    const prepared = await prepareDraftOrder(withGiftCard, pricingClient());
+
+    expect(prepared.fingerprint).toBe(withoutGiftCard.fingerprint);
+    expect(prepared.input).not.toHaveProperty('giftCardCodes');
+    expect(prepared.input).not.toHaveProperty('appliedGiftCards');
+    expect(prepared.input.discountCodes).toEqual(['WAND10']);
+    expect(prepared.input.lineItems[0].priceOverride).toEqual({
+      amount: '144.45',
+      currencyCode: 'EUR',
+    });
+  });
+
+  it('selects Draft Order checkout mode for a mixed cart with a gift card', async () => {
+    const mixedCart = cart();
+    mixedCart.appliedGiftCards = [{id: 'gid://shopify/AppliedGiftCard/1'}];
     const operations = stubAdminApi({
       nodes: [configuredVariant(), accessoryVariant()],
       calculatedDraftOrder: {
@@ -861,7 +886,7 @@ describe('Draft Order line preparation', () => {
     });
 
     await expect(
-      getCartPricingEvaluation(cart(), {
+      getCartPricingEvaluation(mixedCart, {
         PUBLIC_STORE_DOMAIN: 'mode-draft.myshopify.com',
         SHOPIFY_SHOP: 'mode-draft.myshopify.com',
         SHOPIFY_PRICING_CLIENT_ID: 'draft-client',
@@ -879,9 +904,33 @@ describe('Draft Order line preparation', () => {
     expect(operations).toEqual(['variant-pricing', 'draft-order-calculate']);
   });
 
-  it('selects native checkout mode for an ordinary-only cart', async () => {
+  it('keeps a configured-only cart with a gift card on Draft checkout', async () => {
+    const configuredOnly = cart();
+    configuredOnly.lines.nodes = [configuredOnly.lines.nodes[0]];
+    configuredOnly.appliedGiftCards = [{id: 'gid://shopify/AppliedGiftCard/1'}];
+    const operations = stubAdminApi({
+      nodes: [configuredVariant()],
+      calculatedDraftOrder: {
+        subtotalPriceSet: {
+          presentmentMoney: {amount: '144.45', currencyCode: 'EUR'},
+        },
+        totalPriceSet: {
+          presentmentMoney: {amount: '144.45', currencyCode: 'EUR'},
+        },
+        discountCodes: [],
+      },
+    });
+
+    await expect(
+      getCartPricingEvaluation(configuredOnly, checkoutEnv()),
+    ).resolves.toMatchObject({checkoutMode: 'draft'});
+    expect(operations).toEqual(['variant-pricing', 'draft-order-calculate']);
+  });
+
+  it('selects native checkout mode for an ordinary-only cart with a gift card', async () => {
     const ordinaryOnly = cart();
     ordinaryOnly.lines.nodes = [ordinaryOnly.lines.nodes[1]];
+    ordinaryOnly.appliedGiftCards = [{id: 'gid://shopify/AppliedGiftCard/1'}];
     const operations = stubAdminApi({nodes: [accessoryVariant()]});
 
     await expect(
