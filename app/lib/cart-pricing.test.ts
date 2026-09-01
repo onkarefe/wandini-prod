@@ -3,6 +3,7 @@ import {
   calculateCartDisplaySubtotal,
   getCartLineDisplayTotal,
   isConfiguredCartLine,
+  isNativeCheckoutEligibleCart,
   resolveConfiguredCartLine,
   type CartLinePricingLike,
 } from '~/lib/cart-pricing';
@@ -115,5 +116,21 @@ describe('configured cart pricing', () => {
     expect(
       calculateCartDisplaySubtotal([line, ordinaryLine('2', 1, '12.00')]),
     ).toBeNull();
+  });
+
+  it('exposes native checkout only when every line is conclusively ordinary', () => {
+    const ordinary = ordinaryLine('2', 2, '24.00');
+    expect(isNativeCheckoutEligibleCart([ordinary])).toBe(true);
+    expect(isNativeCheckoutEligibleCart([ordinary, configuredLine()])).toBe(
+      false,
+    );
+
+    const partial = configuredLine();
+    partial.merchandise.printQuality = null;
+    expect(isNativeCheckoutEligibleCart([ordinary, partial])).toBe(false);
+
+    const forgedOrdinary = ordinaryLine('3', 1, '12.00');
+    forgedOrdinary.attributes = configuredLine().attributes;
+    expect(isNativeCheckoutEligibleCart([forgedOrdinary])).toBe(false);
   });
 });

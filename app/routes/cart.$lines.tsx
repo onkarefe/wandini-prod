@@ -7,7 +7,9 @@ import {Link} from '~/lib/i18n-router';
 import {getRobotsDirective} from '~/lib/seo';
 import {
   DynamicPricingError,
+  getCartPricingEvaluation,
   validateCartLineInputsForAdd,
+  type DynamicPricingCart,
 } from '~/lib/dynamic-pricing.server';
 
 type CartCheckoutConfirmation = {
@@ -27,7 +29,11 @@ function parseCartLines(lines: string) {
     const variantId = lineDetails[0];
     const quantity = Number.parseInt(lineDetails[1], 10);
 
-    if (!/^\d+$/.test(variantId) || !Number.isSafeInteger(quantity) || quantity < 1) {
+    if (
+      !/^\d+$/.test(variantId) ||
+      !Number.isSafeInteger(quantity) ||
+      quantity < 1
+    ) {
       return null;
     }
 
@@ -126,7 +132,25 @@ export async function action({request, context, params}: Route.ActionArgs) {
   // Update cart id in cookie
   const headers = cart.setCartId(cartResult.id);
 
-  // redirect to checkout
+  try {
+    const evaluation = await getCartPricingEvaluation(
+      cartResult as unknown as DynamicPricingCart,
+      context.env,
+    );
+    if (evaluation.checkoutMode !== 'native') {
+      throw new DynamicPricingError(
+        'INVALID_CART',
+        'A cart permalink may only use native checkout for an ordinary cart.',
+      );
+    }
+  } catch (error) {
+    console.error('Created cart permalink classification failed.', {
+      code:
+        error instanceof DynamicPricingError ? error.code : 'UNEXPECTED_ERROR',
+    });
+    throw new Response(t('cart.invalidConfiguration'), {status: 422});
+  }
+
   if (cartResult.checkoutUrl) {
     return redirect(cartResult.checkoutUrl, {headers});
   } else {

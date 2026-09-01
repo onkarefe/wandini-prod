@@ -14,7 +14,6 @@ declare global {
     SHOPIFY_CLIENT_SECRET?: string;
     SHOPIFY_PRICING_CLIENT_ID?: string;
     SHOPIFY_PRICING_CLIENT_SECRET?: string;
-    SHOPIFY_CHECKOUT_GUARD_SECRET?: string;
     DYNAMIC_PRICING_CHECKOUT_ENABLED?: string;
   }
 }

@@ -1,4 +1,5 @@
 import type {Route} from './+types/api.$version.[graphql.json]';
+import {parse, visit} from 'graphql';
 
 const SHOPIFY_API_VERSION_PATTERN = /^(unstable|\d{4}-\d{2})$/;
 const MAX_GRAPHQL_BODY_BYTES = 128 * 1024;
@@ -20,6 +21,44 @@ function hasTrustedOrigin(request: Request) {
   } catch {
     return false;
   }
+}
+
+function getGraphqlQueries(value: unknown): string[] | null {
+  const operations = Array.isArray(value) ? value : [value];
+  if (!operations.length) return null;
+
+  const queries = operations.map((operation) =>
+    operation &&
+    typeof operation === 'object' &&
+    'query' in operation &&
+    typeof operation.query === 'string'
+      ? operation.query
+      : null,
+  );
+
+  return queries.every((query): query is string => query !== null)
+    ? queries
+    : null;
+}
+
+function containsCheckoutOperation(query: string) {
+  let blocked = false;
+
+  visit(parse(query), {
+    Field(node) {
+      const fieldName = node.name.value;
+      if (
+        fieldName === 'checkoutUrl' ||
+        fieldName.startsWith('checkout') ||
+        fieldName === 'cartPrepareForCompletion' ||
+        fieldName === 'cartSubmitForCompletion'
+      ) {
+        blocked = true;
+      }
+    },
+  });
+
+  return blocked;
 }
 
 export async function action({params, context, request}: Route.ActionArgs) {
@@ -63,7 +102,10 @@ export async function action({params, context, request}: Route.ActionArgs) {
   }
 
   const contentLength = Number(request.headers.get('content-length'));
-  if (Number.isFinite(contentLength) && contentLength > MAX_GRAPHQL_BODY_BYTES) {
+  if (
+    Number.isFinite(contentLength) &&
+    contentLength > MAX_GRAPHQL_BODY_BYTES
+  ) {
     return new Response('Request body is too large', {status: 413});
   }
 
@@ -71,6 +113,24 @@ export async function action({params, context, request}: Route.ActionArgs) {
 
   if (requestBody.byteLength > MAX_GRAPHQL_BODY_BYTES) {
     return new Response('Request body is too large', {status: 413});
+  }
+
+  let queries: string[] | null;
+  try {
+    queries = getGraphqlQueries(
+      JSON.parse(new TextDecoder().decode(requestBody)) as unknown,
+    );
+    if (!queries) {
+      return new Response('Invalid GraphQL request', {status: 400});
+    }
+    if (queries.some(containsCheckoutOperation)) {
+      return new Response(
+        'Checkout operations are not available through this API',
+        {status: 403},
+      );
+    }
+  } catch {
+    return new Response('Invalid GraphQL request', {status: 400});
   }
 
   let response: Response;

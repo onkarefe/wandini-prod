@@ -1,5 +1,4 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {createCheckoutProof} from '~/lib/checkout-proof.server';
 import {
   DynamicPricingError,
   findOrCreateDraftOrder,
@@ -11,8 +10,6 @@ import {
   type AdminClient,
   type DynamicPricingCart,
 } from '~/lib/dynamic-pricing.server';
-
-const CHECKOUT_GUARD_SECRET = 'wandini-checkpoint-4a-fixture-secret-2026';
 
 const payload = JSON.stringify({
   version: 1,
@@ -122,12 +119,8 @@ function pricingClient(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function prepareDraftOrder(
-  cartValue: DynamicPricingCart,
-  client: AdminClient,
-  checkoutGuardSecret: string | undefined = CHECKOUT_GUARD_SECRET,
-) {
-  return prepareDraftOrderForCheckout(cartValue, client, checkoutGuardSecret);
+function prepareDraftOrder(cartValue: DynamicPricingCart, client: AdminClient) {
+  return prepareDraftOrderForCheckout(cartValue, client);
 }
 
 function checkoutEnv(
@@ -138,7 +131,6 @@ function checkoutEnv(
   | 'SHOPIFY_SHOP'
   | 'SHOPIFY_PRICING_CLIENT_ID'
   | 'SHOPIFY_PRICING_CLIENT_SECRET'
-  | 'SHOPIFY_CHECKOUT_GUARD_SECRET'
   | 'DYNAMIC_PRICING_CHECKOUT_ENABLED'
 > {
   return {
@@ -146,7 +138,6 @@ function checkoutEnv(
     SHOPIFY_SHOP: 'checkout-test.myshopify.com',
     SHOPIFY_PRICING_CLIENT_ID: 'checkout-test-client',
     SHOPIFY_PRICING_CLIENT_SECRET: 'secret',
-    SHOPIFY_CHECKOUT_GUARD_SECRET: CHECKOUT_GUARD_SECRET,
     DYNAMIC_PRICING_CHECKOUT_ENABLED: 'true',
     ...overrides,
   };
@@ -234,12 +225,6 @@ describe('Draft Order line preparation', () => {
     expect(prepared.input.discountCodes).toEqual(['WAND10']);
     expect(prepared.input).not.toHaveProperty('sessionToken');
     expect(prepared.input).not.toHaveProperty('visibleToCustomer');
-    const configuredProof = prepared.input.lineItems[0].customAttributes?.find(
-      ({key}) => key === '_wandini_checkout_proof',
-    )?.value;
-    expect(configuredProof).toMatch(
-      /^v1\.[^.]+\.[^.]+\.[^.]+\.1\.14445\.EUR\.[^.]+$/,
-    );
     expect(prepared.input.lineItems[1].customAttributes).toBeUndefined();
   });
 
@@ -256,20 +241,11 @@ describe('Draft Order line preparation', () => {
       pricingClient(),
     );
     expect(retry.fingerprint).toBe(first.fingerprint);
-    expect(
-      retry.input.lineItems[0].customAttributes?.find(
-        ({key}) => key === '_wandini_checkout_proof',
-      )?.value,
-    ).toBe(
-      first.input.lineItems[0].customAttributes?.find(
-        ({key}) => key === '_wandini_checkout_proof',
-      )?.value,
-    );
     expect(changed.fingerprint).not.toBe(first.fingerprint);
     expect(changedBuyerDraft.fingerprint).not.toBe(first.fingerprint);
   });
 
-  it('preserves and hashes the exact original payload while replacing a client proof', async () => {
+  it('preserves and hashes the exact original configurator payload', async () => {
     const exactPayload = `{
   \u0022version\u0022: 1,
   \u0022master_asset_id\u0022: \u0022asset-1\u0022,
@@ -281,24 +257,14 @@ describe('Draft Order line preparation', () => {
       {key: 'configurator_payload', value: exactPayload},
       {key: 'configurator_instance_id', value: 'configuration-1'},
       {key: 'finish', value: 'matte'},
-      {key: '_wandini_checkout_proof', value: 'client-forgery'},
     ];
 
     const prepared = await prepareDraftOrder(configuredCart, pricingClient());
     const attributes = prepared.input.lineItems[0].customAttributes ?? [];
-    const proofAttributes = attributes.filter(
-      ({key}) => key === '_wandini_checkout_proof',
-    );
-    const expected = await createCheckoutProof(
-      {
-        variantId: 'gid://shopify/ProductVariant/1',
-        instanceId: 'configuration-1',
-        payload: exactPayload,
-        quantity: 1,
-        amount: '144.45',
-        currencyCode: 'EUR',
-      },
-      CHECKOUT_GUARD_SECRET,
+    const normalizedPayloadCart = cart();
+    const normalized = await prepareDraftOrder(
+      normalizedPayloadCart,
+      pricingClient(),
     );
 
     expect(attributes).toEqual(
@@ -308,51 +274,8 @@ describe('Draft Order line preparation', () => {
         {key: 'finish', value: 'matte'},
       ]),
     );
-    expect(proofAttributes).toEqual([
-      {key: '_wandini_checkout_proof', value: expected.proof},
-    ]);
-    expect(proofAttributes[0].value).not.toBe('client-forgery');
+    expect(prepared.fingerprint).not.toBe(normalized.fingerprint);
   });
-
-  it('includes the generated proof in fingerprint and reuse identity', async () => {
-    const first = await prepareDraftOrder(
-      cart(),
-      pricingClient(),
-      CHECKOUT_GUARD_SECRET,
-    );
-    const changedSecret = await prepareDraftOrder(
-      cart(),
-      pricingClient(),
-      'wandini-checkpoint-4b-different-fixture-secret',
-    );
-
-    expect(changedSecret.fingerprint).not.toBe(first.fingerprint);
-    expect(
-      changedSecret.input.lineItems[0].customAttributes?.find(
-        ({key}) => key === '_wandini_checkout_proof',
-      )?.value,
-    ).not.toBe(
-      first.input.lineItems[0].customAttributes?.find(
-        ({key}) => key === '_wandini_checkout_proof',
-      )?.value,
-    );
-  });
-
-  it.each([
-    ['missing', undefined],
-    ['empty', ''],
-    ['whitespace', ' '.repeat(32)],
-    ['too short', 'x'.repeat(31)],
-    ['too long', 'x'.repeat(129)],
-    ['malformed', `${'x'.repeat(32)}\n`],
-  ] as Array<[string, string | undefined]>)(
-    'fails closed for a %s checkout proof secret',
-    async (_label, secret) => {
-      await expect(
-        prepareDraftOrderForCheckout(cart(), pricingClient(), secret),
-      ).rejects.toMatchObject({code: 'CONFIGURATION_ERROR'});
-    },
-  );
 
   it('canonicalizes semantically unordered checkout collections', async () => {
     const firstCart = cart();
@@ -502,14 +425,6 @@ describe('Draft Order line preparation', () => {
           )?.value,
       ),
     ).toEqual(['configuration-1', 'configuration-2']);
-    const proofs = prepared.input.lineItems.map(
-      (line) =>
-        line.customAttributes?.find(
-          ({key}) => key === '_wandini_checkout_proof',
-        )?.value,
-    );
-    expect(proofs.every(Boolean)).toBe(true);
-    expect(proofs[0]).not.toBe(proofs[1]);
   });
 
   it('rejects merged/tampered configured quantities', async () => {
@@ -561,13 +476,9 @@ describe('Draft Order line preparation', () => {
 
     const ordinaryOnly = cart();
     ordinaryOnly.lines.nodes = [ordinaryOnly.lines.nodes[1]];
-    ordinaryOnly.lines.nodes[0].attributes = [
-      {key: '_wandini_checkout_proof', value: 'client-forgery'},
-    ];
     const prepared = await prepareDraftOrderForCheckout(
       ordinaryOnly,
       pricingClient(),
-      undefined,
     );
     expect(prepared.configuredLineCount).toBe(0);
     expect(prepared.input.lineItems).toEqual([
@@ -725,6 +636,47 @@ describe('Draft Order line preparation', () => {
     expect(operations).toEqual(['variant-pricing']);
   });
 
+  it('rejects forged ordinary and invalid configured line-add input', async () => {
+    let operations = stubAdminApi({nodes: [accessoryVariant()]});
+    await expect(
+      validateCartLineInputsForAdd(
+        [
+          {
+            merchandiseId: 'gid://shopify/ProductVariant/2',
+            quantity: 1,
+            attributes: [
+              {key: 'configurator_payload', value: payload},
+              {key: 'configurator_instance_id', value: 'forged'},
+            ],
+          },
+        ],
+        checkoutEnv(),
+      ),
+    ).rejects.toMatchObject({code: 'INVALID_CONFIGURATION'});
+    expect(operations).toEqual(['variant-pricing']);
+
+    operations = stubAdminApi({nodes: [configuredVariant()]});
+    await expect(
+      validateCartLineInputsForAdd(
+        [
+          {
+            merchandiseId: 'gid://shopify/ProductVariant/1',
+            quantity: 2,
+            attributes: [
+              {key: 'configurator_payload', value: payload},
+              {
+                key: 'configurator_instance_id',
+                value: 'configuration-new',
+              },
+            ],
+          },
+        ],
+        checkoutEnv(),
+      ),
+    ).rejects.toMatchObject({code: 'INVALID_CONFIGURED_QUANTITY'});
+    expect(operations).toEqual(['variant-pricing']);
+  });
+
   it('does not apply configured instance uniqueness to ordinary lines', async () => {
     const ordinary = cart();
     const first = ordinary.lines.nodes[1];
@@ -755,6 +707,26 @@ describe('Draft Order line preparation', () => {
 
     await expect(
       prepareDraftOrder(malformedIdentity, pricingClient()),
+    ).rejects.toMatchObject({code: 'INVALID_CONFIGURATOR_INSTANCE_ID'});
+  });
+
+  it('rejects duplicate reserved configurator attributes', async () => {
+    const duplicatePayload = cart();
+    duplicatePayload.lines.nodes[0].attributes.push({
+      key: 'configurator_payload',
+      value: secondPayload,
+    });
+    await expect(
+      prepareDraftOrder(duplicatePayload, pricingClient()),
+    ).rejects.toMatchObject({code: 'INVALID_CONFIGURATION'});
+
+    const duplicateIdentity = cart();
+    duplicateIdentity.lines.nodes[0].attributes.push({
+      key: 'configurator_instance_id',
+      value: 'configuration-2',
+    });
+    await expect(
+      prepareDraftOrder(duplicateIdentity, pricingClient()),
     ).rejects.toMatchObject({code: 'INVALID_CONFIGURATOR_INSTANCE_ID'});
   });
 
@@ -813,6 +785,12 @@ describe('Draft Order line preparation', () => {
       ).rejects.toMatchObject({code: 'PRICING_UNAVAILABLE'});
     },
   );
+
+  it('rejects an unavailable configured variant', async () => {
+    await expect(
+      prepareDraftOrder(cart(), pricingClient({availableForSale: false})),
+    ).rejects.toMatchObject({code: 'PRICING_UNAVAILABLE'});
+  });
 
   it('rejects a Storefront cart currency that differs from shop currency', async () => {
     const mismatchedCurrency = cart();
@@ -888,7 +866,6 @@ describe('Draft Order line preparation', () => {
         SHOPIFY_SHOP: 'mode-draft.myshopify.com',
         SHOPIFY_PRICING_CLIENT_ID: 'draft-client',
         SHOPIFY_PRICING_CLIENT_SECRET: 'secret',
-        SHOPIFY_CHECKOUT_GUARD_SECRET: CHECKOUT_GUARD_SECRET,
         DYNAMIC_PRICING_CHECKOUT_ENABLED: 'true',
       }),
     ).resolves.toEqual({

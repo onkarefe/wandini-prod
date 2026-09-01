@@ -27,6 +27,25 @@ const configuredCart = {
   },
 };
 
+const ordinaryCart = {
+  id: 'gid://shopify/Cart/cart-ordinary',
+  checkoutUrl: 'https://checkout.example.com/native',
+  lines: {
+    nodes: [
+      {
+        id: 'line-accessory',
+        quantity: 2,
+        attributes: [],
+        merchandise: {
+          id: 'gid://shopify/ProductVariant/2',
+          product: {masterAssetId: null},
+          printQuality: null,
+        },
+      },
+    ],
+  },
+};
+
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -44,6 +63,22 @@ describe('configured checkout route', () => {
 
     expect(response.status).toBe(302);
     expect(response.headers.get('Location')).toBe('/cart?checkout=disabled');
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('never turns the configured checkout endpoint into a native fallback', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    const response = await checkoutAction({
+      request: new Request('https://example.com/checkout', {method: 'POST'}),
+      context: {
+        cart: {get: vi.fn().mockResolvedValue(ordinaryCart)},
+        env: {},
+      },
+    } as never);
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get('Location')).toBe('/cart?checkout=error');
+    expect(response.headers.get('Location')).not.toBe(ordinaryCart.checkoutUrl);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

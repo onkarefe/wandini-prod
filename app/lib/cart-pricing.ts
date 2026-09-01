@@ -108,8 +108,8 @@ export function getCartLineDisplayTotal(
   if (classification === CONFIGURED_PRODUCT_CLASSIFICATION.INVALID) return null;
 
   return beforeLineDiscounts
-    ? line.cost?.subtotalAmount ?? line.cost?.totalAmount ?? null
-    : line.cost?.totalAmount ?? null;
+    ? (line.cost?.subtotalAmount ?? line.cost?.totalAmount ?? null)
+    : (line.cost?.totalAmount ?? null);
 }
 
 export function calculateCartDisplaySubtotal(
@@ -122,4 +122,16 @@ export function calculateCartDisplaySubtotal(
 
 export function hasConfiguredCartLines(lines: CartLinePricingLike[]) {
   return lines.some(isConfiguredCartLine);
+}
+
+export function isNativeCheckoutEligibleCart(lines: CartLinePricingLike[]) {
+  return (
+    lines.length > 0 &&
+    lines.every(
+      (line) =>
+        getCartLineProductClassification(line) ===
+          CONFIGURED_PRODUCT_CLASSIFICATION.ORDINARY &&
+        !getConfiguratorPayloadAttribute(line),
+    )
+  );
 }

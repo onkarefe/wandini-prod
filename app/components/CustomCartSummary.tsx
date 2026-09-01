@@ -11,6 +11,7 @@ import type {CartLayout} from '~/components/CartMain';
 import {
   calculateCartDisplaySubtotal,
   hasConfiguredCartLines,
+  isNativeCheckoutEligibleCart,
   type CartLinePricingLike,
 } from '~/lib/cart-pricing';
 import type {ConfiguredMoney} from '~/lib/configurator-pricing';
@@ -61,6 +62,7 @@ export function CartSummary({
   const configuredCheckoutPending = checkoutSubmissionClaimed;
   const lines = (cart?.lines?.nodes ?? []) as unknown as CartLinePricingLike[];
   const hasConfiguredLines = hasConfiguredCartLines(lines);
+  const nativeCheckoutEligible = isNativeCheckoutEligibleCart(lines);
   const configuredSubtotal = hasConfiguredLines
     ? calculateCartDisplaySubtotal(lines)
     : null;
@@ -167,7 +169,9 @@ export function CartSummary({
             </button>
           </Form>
         </>
-      ) : checkoutMode === 'native' && cart?.checkoutUrl ? (
+      ) : checkoutMode === 'native' &&
+        nativeCheckoutEligible &&
+        cart?.checkoutUrl ? (
         <a className="order-summary__checkout" href={cart.checkoutUrl}>
           {t('cart.checkout')}
         </a>
