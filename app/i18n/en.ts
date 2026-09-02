@@ -11,6 +11,7 @@ export const en = {
   'common.company': 'Company',
   'common.next': 'Show more',
   'common.home': 'Go to homepage',
+  'breadcrumb.home': 'Home',
   'common.logo': 'Logo',
   'common.store': 'Store',
   'common.carousel': 'Carousel',

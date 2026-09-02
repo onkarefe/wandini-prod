@@ -7,6 +7,7 @@ export const de = {
   'common.company': 'Unternehmen',
   'common.next': 'Mehr anzeigen',
   'common.home': 'Zur Startseite',
+  'breadcrumb.home': 'Startseite',
   'common.logo': 'Logo',
   'common.store': 'Shop',
   'common.carousel': 'Karussell',

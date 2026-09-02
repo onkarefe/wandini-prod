@@ -1,4 +1,6 @@
 import {buildLocaleSeoUrl, buildPaginationCanonicalUrl} from './seo';
+import {createTranslator} from '~/i18n';
+import {getLocaleFromPathname} from './locale';
 
 export type BreadcrumbItem = {
   name: string;
@@ -22,14 +24,14 @@ export function buildContentBreadcrumbItems({
 }: ContentBreadcrumbInput): BreadcrumbItem[] {
   const canonicalUrl = buildPaginationCanonicalUrl(canonicalInput);
   const pathname = new URL(canonicalUrl, 'https://canonical.invalid').pathname;
-  const isEnglish = pathname === '/en' || pathname.startsWith('/en/');
+  const t = createTranslator(getLocaleFromPathname(pathname));
   const name = getText(currentName);
 
   if (!name) return [];
 
   const items: BreadcrumbItem[] = [
     {
-      name: isEnglish ? 'Home' : 'Startseite',
+      name: t('breadcrumb.home'),
       url: buildLocaleSeoUrl(canonicalUrl, '/'),
     },
   ];

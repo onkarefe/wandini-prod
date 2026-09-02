@@ -7,6 +7,8 @@ import {
   CONFIGURED_PRODUCT_CLASSIFICATION,
   type ConfiguredProductClassification,
 } from '~/lib/configured-product-classification';
+import {createTranslator} from '~/i18n';
+import {getLocaleFromPathname} from '~/lib/locale';
 
 type ProductImage = {
   url?: string | null;
@@ -332,11 +334,11 @@ export function buildProductBreadcrumbItems(
 ): ProductBreadcrumbItem[] {
   const canonicalUrl = buildCanonicalUrl(canonicalInput);
   const pathname = new URL(canonicalUrl, 'https://canonical.invalid').pathname;
-  const isEnglish = pathname === '/en' || pathname.startsWith('/en/');
+  const t = createTranslator(getLocaleFromPathname(pathname));
 
   return [
     {
-      name: isEnglish ? 'Home' : 'Startseite',
+      name: t('breadcrumb.home'),
       url: buildLocaleSeoUrl(canonicalUrl, '/'),
     },
     {name: productTitle, url: canonicalUrl},
