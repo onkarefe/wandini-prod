@@ -438,6 +438,9 @@ export const en = {
   'contact.emailAddress': 'Email address',
   'contact.phoneNumber': 'Phone number',
   'contact.mapTitle': 'Google Maps – {address}',
+  'contact.mapConsentRequired':
+    'The map loads only after you consent to analytics and marketing.',
+  'contact.privacySettings': 'Privacy settings',
   'contact.eyebrow': 'Contact',
   'contact.title': 'How can we help?',
   'contact.description':

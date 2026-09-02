@@ -1,7 +1,9 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useFetcher} from 'react-router';
+import {useAnalytics} from '@shopify/hydrogen';
 import {useTranslation} from '~/i18n/useTranslation';
 import {Link} from '~/lib/i18n-router';
+import {allowsThirdPartyTracking} from '~/lib/customer-privacy';
 
 export type KontaktLink = {
   id: string;
@@ -41,6 +43,59 @@ function ArrowIcon() {
 function getTelephoneHref(phone: string) {
   const normalizedPhone = phone.replace(/[^\d+]/g, '');
   return normalizedPhone ? `tel:${normalizedPhone}` : undefined;
+}
+
+function ConsentGatedMap({url, title}: {url: string; title: string}) {
+  const {customerPrivacy, privacyBanner} = useAnalytics();
+  const {t} = useTranslation();
+  const [hasTrackingConsent, setHasTrackingConsent] = useState(false);
+
+  useEffect(() => {
+    const syncConsent = () => {
+      const privacyApi = window.Shopify?.customerPrivacy ?? customerPrivacy;
+      setHasTrackingConsent(allowsThirdPartyTracking(privacyApi));
+    };
+
+    syncConsent();
+    document.addEventListener('visitorConsentCollected', syncConsent);
+    document.addEventListener('shopifyCustomerPrivacyApiLoaded', syncConsent);
+
+    return () => {
+      document.removeEventListener('visitorConsentCollected', syncConsent);
+      document.removeEventListener(
+        'shopifyCustomerPrivacyApiLoaded',
+        syncConsent,
+      );
+    };
+  }, [customerPrivacy]);
+
+  if (hasTrackingConsent) {
+    return (
+      <iframe
+        src={url}
+        title={title}
+        width="600"
+        height="450"
+        loading="lazy"
+        allowFullScreen
+        referrerPolicy="strict-origin-when-cross-origin"
+      />
+    );
+  }
+
+  const showPrivacyPreferences = () => {
+    const banner = window.privacyBanner ?? privacyBanner;
+    banner?.showPreferences();
+  };
+
+  return (
+    <div className="kontakt-details__map-consent">
+      <p>{t('contact.mapConsentRequired')}</p>
+      <button type="button" onClick={showPrivacyPreferences}>
+        {t('contact.privacySettings')}
+      </button>
+    </div>
+  );
 }
 
 export default function Kontakt({title, data}: KontaktProps) {
@@ -113,14 +168,9 @@ export default function Kontakt({title, data}: KontaktProps) {
 
           {data.mapUrl ? (
             <div className="kontakt-details__map">
-              <iframe
-                src={data.mapUrl}
-                title={`Google Maps - ${data.address || title}`}
-                width="600"
-                height="450"
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="strict-origin-when-cross-origin"
+              <ConsentGatedMap
+                url={data.mapUrl}
+                title={t('contact.mapTitle', {address: data.address || title})}
               />
             </div>
           ) : null}

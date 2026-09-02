@@ -447,6 +447,9 @@ export const de = {
   'contact.emailAddress': 'E-Mail-Adresse',
   'contact.phoneNumber': 'Telefonnummer',
   'contact.mapTitle': 'Google Maps – {address}',
+  'contact.mapConsentRequired':
+    'Die Karte wird erst nach Ihrer Zustimmung zu Analyse und Marketing geladen.',
+  'contact.privacySettings': 'Datenschutzeinstellungen',
   'contact.eyebrow': 'Kontakt',
   'contact.title': 'Wie können wir Ihnen helfen?',
   'contact.description':
