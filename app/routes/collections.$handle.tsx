@@ -30,6 +30,12 @@ import {
 } from '~/lib/breadcrumbs';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {resolveCollectionSeoPolicy} from '~/lib/collection-seo';
+import {
+  getCollectionImageCount,
+  resolveRoomCollection,
+  shapeCollectionProductsForRoom,
+  type RoomCode,
+} from '~/lib/room-collection';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
@@ -154,9 +160,10 @@ function getCollectionProductUrl(
   return buildLocaleSeoUrl(canonicalUrl, `/products/${handle}`);
 }
 
-function buildCollectionItemListJsonLd(
+export function buildCollectionItemListJsonLd(
   products: CollectionProduct[],
   canonicalUrl: string,
+  roomCode: RoomCode | null = null,
 ) {
   const itemListElement: CollectionItemListElement[] = [];
 
@@ -168,7 +175,10 @@ function buildCollectionItemListJsonLd(
       return;
     }
 
-    const image = product.images.nodes.find((imageNode) => imageNode.url)?.url;
+    const imageNodes = product.images.nodes;
+    const image = roomCode
+      ? (imageNodes[1]?.url ?? imageNodes[0]?.url)
+      : imageNodes.find((imageNode) => imageNode.url)?.url;
 
     itemListElement.push({
       '@type': 'ListItem',
@@ -252,6 +262,8 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const selectedSort = getSelectedCollectionSort(url.searchParams.get('sort'));
   const {reverse, sortKey} = getCollectionSortVariables(selectedSort);
   const filters = parseCollectionFilters(url.searchParams);
+  const roomCode = resolveRoomCollection(handle);
+  const imageCount = getCollectionImageCount(handle);
   const [data, wishlistState] = await Promise.all([
     storefront.query(CUSTOM_COLLECTION_QUERY, {
       variables: {
@@ -260,6 +272,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
         filters,
         sortKey,
         reverse,
+        imageCount,
       },
     }) as Promise<CustomCollectionQuery>,
     loadCustomerWishlistState({
@@ -284,12 +297,26 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
         filters: [],
         sortKey: 'BEST_SELLING',
         reverse: false,
+        imageCount: getCollectionImageCount(handle),
       },
     })) as CustomCollectionQuery;
 
     collection =
       (bestsellerData.collection as CollectionWithSeo | null | undefined) ??
       collection;
+  }
+
+  if (roomCode) {
+    collection = {
+      ...collection,
+      products: {
+        ...collection.products,
+        nodes: shapeCollectionProductsForRoom(
+          collection.products.nodes,
+          roomCode,
+        ),
+      },
+    };
   }
 
   redirectIfHandleIsLocalized(request, {handle, data: collection});
@@ -306,6 +333,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     languageSwitchLinks,
     isFacetedCollectionUrl,
     collectionRobots,
+    roomCode,
     isLoggedIn,
     wishlistProductIds,
     wishlistStatus,
@@ -326,6 +354,7 @@ export default function Collection() {
     isLoggedIn,
     wishlistProductIds,
     wishlistStatus,
+    roomCode,
   } = data;
   const collectionPageJsonLd = isFacetedCollectionUrl
     ? null
@@ -339,7 +368,11 @@ export default function Collection() {
   const breadcrumbJsonLd = buildBreadcrumbStructuredData(breadcrumbItems);
   const itemListJsonLd = isFacetedCollectionUrl
     ? null
-    : buildCollectionItemListJsonLd(collection.products.nodes, canonicalUrl);
+    : buildCollectionItemListJsonLd(
+        collection.products.nodes,
+        canonicalUrl,
+        roomCode,
+      );
 
   return (
     <div className="collection">
@@ -672,7 +705,7 @@ const CUSTOM_PRODUCT_CARD_FRAGMENT = `#graphql
         currencyCode
       }
     }
-    images(first: 3) {
+    images(first: $imageCount) {
       nodes {
         url
         altText
@@ -694,6 +727,7 @@ const CUSTOM_COLLECTION_QUERY = `#graphql
     $filters: [ProductFilter!]
     $sortKey: ProductCollectionSortKeys
     $reverse: Boolean
+    $imageCount: Int!
   ) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       id
