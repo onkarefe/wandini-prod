@@ -138,6 +138,7 @@ export const de = {
   'product.heightCm': 'Höhe (cm)',
   'product.widthRequired': 'Bitte geben Sie die Breite ein.',
   'product.heightRequired': 'Bitte geben Sie die Höhe ein.',
+  'product.maxWidth': 'Die maximale Breite beträgt {width} cm.',
   'product.maxHeight': 'Die maximale Höhe beträgt {height} cm.',
   'product.selectMaterial': 'Material auswählen',
   'product.configureNow': 'Jetzt konfigurieren',

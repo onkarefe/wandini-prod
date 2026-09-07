@@ -20,6 +20,7 @@ import {
   CONFIGURATOR_INSTANCE_ATTRIBUTE,
   CONFIGURATOR_PAYLOAD_ATTRIBUTE,
   MAX_CONFIGURATOR_HEIGHT_CM,
+  MAX_CONFIGURATOR_WIDTH_CM,
   calculateConfiguredWallpaperPrice,
   calculateConfiguratorAreaM2,
   createConfiguratorPayload,
@@ -204,12 +205,15 @@ export default function WallpaperProductLayout({
   const wallAreaM2 = calculateConfiguratorAreaM2(size.width, size.height);
   const isSizeValid =
     size.width > 0 &&
+    size.width <= MAX_CONFIGURATOR_WIDTH_CM &&
     size.height > 0 &&
     size.height <= MAX_CONFIGURATOR_HEIGHT_CM;
   const widthError =
     showSizeErrors && !(Number.isFinite(size.width) && size.width > 0)
       ? t('product.widthRequired')
-      : undefined;
+      : showSizeErrors && size.width > MAX_CONFIGURATOR_WIDTH_CM
+        ? t('product.maxWidth', {width: MAX_CONFIGURATOR_WIDTH_CM})
+        : undefined;
   const heightError =
     showSizeErrors && !(Number.isFinite(size.height) && size.height > 0)
       ? t('product.heightRequired')

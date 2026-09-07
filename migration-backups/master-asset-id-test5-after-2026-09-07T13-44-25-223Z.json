@@ -1,0 +1,112 @@
+{
+  "generatedAt": "2026-09-07T13:44:25.223Z",
+  "shop": "vurpri-8s.myshopify.com",
+  "apiVersion": "2026-07",
+  "collection": {
+    "id": "gid://shopify/Collection/691599966546",
+    "title": "Fototapeten",
+    "handle": "fototapeten"
+  },
+  "products": [
+    {
+      "productId": "gid://shopify/Product/11015545749842",
+      "handle": "8-3",
+      "title": "Fototapete Koi mit Lotusblüten",
+      "firstImageId": "gid://shopify/ProductImage/72536360386898",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_TIE_KI00055_WEB.png?v=1786376788",
+      "filename": "WND_WLP_TIE_KI00055_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_TIE_KI00055_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505823629650",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_TIE_KI00055_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11015545684306",
+      "handle": "7-3",
+      "title": "Fototapete Leopard im tropischen Blütenparadies",
+      "firstImageId": "gid://shopify/ProductImage/72536305893714",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_TIE_KI00054_WEB.png?v=1786376664",
+      "filename": "WND_WLP_TIE_KI00054_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_TIE_KI00054_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505822384466",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_TIE_KI00054_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11015545553234",
+      "handle": "6-3",
+      "title": "Fototapete Koi in goldenen Wellen",
+      "firstImageId": "gid://shopify/ProductImage/72536294916434",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_TIE_KI00053_WEB.png?v=1786376558",
+      "filename": "WND_WLP_TIE_KI00053_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_TIE_KI00053_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505820647762",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_TIE_KI00053_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11015545389394",
+      "handle": "5-3",
+      "title": "Fototapete Leopardenmuster Beige",
+      "firstImageId": "gid://shopify/ProductImage/72536289182034",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_TIE_KI00052_WEB.png?v=1786376483",
+      "filename": "WND_WLP_TIE_KI00052_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_TIE_KI00052_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505818747218",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_TIE_KI00052_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11015545356626",
+      "handle": "4-3",
+      "title": "Fototapete Jaguar im tropischen Paradies",
+      "firstImageId": "gid://shopify/ProductImage/72536277057874",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_TIE_KI00051_WEB.png?v=1786376342",
+      "filename": "WND_WLP_TIE_KI00051_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_TIE_KI00051_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505818059090",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_TIE_KI00051_PRINT"
+      }
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import {MAX_CONFIGURATOR_HEIGHT_CM} from '~/lib/configurator-pricing';
+import {
+	MAX_CONFIGURATOR_HEIGHT_CM,
+	MAX_CONFIGURATOR_WIDTH_CM,
+} from '~/lib/configurator-pricing';
 import {useTranslation} from '~/i18n/useTranslation';
 
 // Props: Değerler değiştiğinde üst bileşene iletmek için
@@ -57,6 +60,7 @@ export const ProductSize: React.FC<ProductSizeProps> = ({
 						id="product-width"
 						type="number"
 						min={0}
+						max={MAX_CONFIGURATOR_WIDTH_CM}
 						value={width}
 						onFocus={handleWidthFocus}
 						onChange={handleWidthChange}

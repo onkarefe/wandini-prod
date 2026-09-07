@@ -1,6 +1,7 @@
 export const CONFIGURATOR_PAYLOAD_ATTRIBUTE = 'configurator_payload';
 export const CONFIGURATOR_INSTANCE_ATTRIBUTE = 'configurator_instance_id';
 export const CONFIGURATOR_PAYLOAD_VERSION = 1;
+export const MAX_CONFIGURATOR_WIDTH_CM = 562;
 export const MAX_CONFIGURATOR_HEIGHT_CM = 312;
 
 export type ConfiguratorCropRatio = {
@@ -107,6 +108,7 @@ export function validateConfiguratorPayload(
   if (!output || output.unit !== 'mm') return false;
   if (!isPositiveSafeInteger(output.width)) return false;
   if (!isPositiveSafeInteger(output.height)) return false;
+  if (output.width > MAX_CONFIGURATOR_WIDTH_CM * 10) return false;
   if (output.height > MAX_CONFIGURATOR_HEIGHT_CM * 10) return false;
   if (!crop) return false;
 

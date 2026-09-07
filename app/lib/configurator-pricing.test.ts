@@ -62,6 +62,10 @@ describe('configured wallpaper pricing', () => {
     });
     expect(parseConfiguratorPayload(valid)?.output.width).toBe(2000);
     expect(
+      parseConfiguratorPayload(valid.replace('2000', '5620'))?.output.width,
+    ).toBe(5620);
+    expect(parseConfiguratorPayload(valid.replace('2000', '5621'))).toBeNull();
+    expect(
       parseConfiguratorPayload(valid.replace('2500', '3120'))?.output.height,
     ).toBe(3120);
     expect(parseConfiguratorPayload(valid.replace('2500', '3121'))).toBeNull();

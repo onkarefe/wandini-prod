@@ -1,0 +1,2098 @@
+{
+  "generatedAt": "2026-09-07T13:53:02.920Z",
+  "shop": "vurpri-8s.myshopify.com",
+  "apiVersion": "2026-07",
+  "collection": {
+    "id": "gid://shopify/Collection/691599966546",
+    "title": "Fototapeten",
+    "handle": "fototapeten"
+  },
+  "summary": {
+    "collectionTotal": 104,
+    "correctMasterAssetIds": 103,
+    "migratedThisRun": 98,
+    "untouchedBlockedHandle": "0-base"
+  },
+  "products": [
+    {
+      "productId": "gid://shopify/Product/11015545749842",
+      "handle": "8-3",
+      "title": "Fototapete Koi mit Lotusblüten",
+      "firstImageId": "gid://shopify/ProductImage/72536360386898",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_TIE_KI00055_WEB.png?v=1786376788",
+      "filename": "WND_WLP_TIE_KI00055_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_TIE_KI00055_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505823629650",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_TIE_KI00055_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11015546110290",
+      "handle": "0-base",
+      "title": "0 BASE",
+      "firstImageId": null,
+      "firstImageUrl": null,
+      "filename": null,
+      "derived": {
+        "ok": false,
+        "reason": "FIRST_IMAGE_FILENAME_MISSING",
+        "expected": null
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505827955026",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "efes-id"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11015545684306",
+      "handle": "7-3",
+      "title": "Fototapete Leopard im tropischen Blütenparadies",
+      "firstImageId": "gid://shopify/ProductImage/72536305893714",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_TIE_KI00054_WEB.png?v=1786376664",
+      "filename": "WND_WLP_TIE_KI00054_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_TIE_KI00054_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505822384466",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_TIE_KI00054_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11015545553234",
+      "handle": "6-3",
+      "title": "Fototapete Koi in goldenen Wellen",
+      "firstImageId": "gid://shopify/ProductImage/72536294916434",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_TIE_KI00053_WEB.png?v=1786376558",
+      "filename": "WND_WLP_TIE_KI00053_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_TIE_KI00053_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505820647762",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_TIE_KI00053_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11015545389394",
+      "handle": "5-3",
+      "title": "Fototapete Leopardenmuster Beige",
+      "firstImageId": "gid://shopify/ProductImage/72536289182034",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_TIE_KI00052_WEB.png?v=1786376483",
+      "filename": "WND_WLP_TIE_KI00052_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_TIE_KI00052_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505818747218",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_TIE_KI00052_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11015545356626",
+      "handle": "4-3",
+      "title": "Fototapete Jaguar im tropischen Paradies",
+      "firstImageId": "gid://shopify/ProductImage/72536277057874",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_TIE_KI00051_WEB.png?v=1786376342",
+      "filename": "WND_WLP_TIE_KI00051_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_TIE_KI00051_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505818059090",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_TIE_KI00051_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11015545225554",
+      "handle": "3-3",
+      "title": "Fototapete Traumwal über den Wolken",
+      "firstImageId": "gid://shopify/ProductImage/72536233935186",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_TIE_KI00050_WEB.png?v=1786376010",
+      "filename": "WND_WLP_TIE_KI00050_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_TIE_KI00050_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505816355154",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_TIE_KI00050_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11015545094482",
+      "handle": "2-2",
+      "title": "Fototapete Korallenrote Blüten",
+      "firstImageId": "gid://shopify/ProductImage/72536215191890",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00026_WEB.png?v=1786375834",
+      "filename": "WND_WLP_BLU_KI00026_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00026_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71505814454610",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00026_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11004617490770",
+      "handle": "1-3",
+      "title": "Fototapete Tropische Blätter in Pastell",
+      "firstImageId": "gid://shopify/ProductImage/72536188649810",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00025_WEB.png?v=1786375680",
+      "filename": "WND_WLP_BLU_KI00025_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00025_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71340725174610",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00025_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11004617130322",
+      "handle": "8-2",
+      "title": "Fototapete Beiger Marmor",
+      "firstImageId": "gid://shopify/ProductImage/72460744556882",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_MAR_KI00048_WEB.png?v=1785922218",
+      "filename": "WND_WLP_MAR_KI00048_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_MAR_KI00048_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71340718686546",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_MAR_KI00048_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11004616769874",
+      "handle": "7-2",
+      "title": "Fototapete Brauner Marmor mit Goldadern",
+      "firstImageId": "gid://shopify/ProductImage/72460701860178",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_MAR_KI00047_WEB.png?v=1785922122",
+      "filename": "WND_WLP_MAR_KI00047_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_MAR_KI00047_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71340715180370",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_MAR_KI00047_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11004616278354",
+      "handle": "6-2",
+      "title": "Fototapete Schwarzer Marmor mit Goldadern",
+      "firstImageId": "gid://shopify/ProductImage/72460674957650",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_MAR_KI00046_WEB.png?v=1785922045",
+      "filename": "WND_WLP_MAR_KI00046_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_MAR_KI00046_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71340712231250",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_MAR_KI00046_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11004616147282",
+      "handle": "5-2",
+      "title": "Fototapete Schwarze Betonoptik",
+      "firstImageId": "gid://shopify/ProductImage/72460631933266",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_MAR_KI00045_WEB.png?v=1785921917",
+      "filename": "WND_WLP_MAR_KI00045_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_MAR_KI00045_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71340710723922",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_MAR_KI00045_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11004615950674",
+      "handle": "4-2",
+      "title": "Fototapete Weißer Onyx",
+      "firstImageId": "gid://shopify/ProductImage/72460580847954",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_MAR_KI00044_WEB.png?v=1785921804",
+      "filename": "WND_WLP_MAR_KI00044_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_MAR_KI00044_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71340707676498",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_MAR_KI00044_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11004615819602",
+      "handle": "3-2",
+      "title": "Fototapete Weißer Carrara Marmor",
+      "firstImageId": "gid://shopify/ProductImage/72460514885970",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_MAR_KI00043_WEB.png?v=1785921698",
+      "filename": "WND_WLP_MAR_KI00043_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_MAR_KI00043_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71340705743186",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_MAR_KI00043_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11004613787986",
+      "handle": "1-2",
+      "title": "Fototapete Strukturputz Beige",
+      "firstImageId": "gid://shopify/ProductImage/72460464980306",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_MAR_KI00042_WEB.png?v=1785921603",
+      "filename": "WND_WLP_MAR_KI00042_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_MAR_KI00042_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71340688343378",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_MAR_KI00042_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003302936914",
+      "handle": "17",
+      "title": "Fototapete Mintfarbener Marmor mit Gold",
+      "firstImageId": "gid://shopify/ProductImage/72458286629202",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00041_WEB.png?v=1785915012",
+      "filename": "WND_WLP_ABS_KI00041_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00041_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71328017940818",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00041_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003302642002",
+      "handle": "16-1",
+      "title": "Fototapete Weißer Marmor mit Goldadern",
+      "firstImageId": "gid://shopify/ProductImage/72458258940242",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00040_WEB.png?v=1785914910",
+      "filename": "WND_WLP_ABS_KI00040_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00040_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71328015712594",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00040_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003302379858",
+      "handle": "15-1",
+      "title": "Fototapete Türkiser Marmor mit Koralle",
+      "firstImageId": "gid://shopify/ProductImage/72458232955218",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00039_WEB.png?v=1785914840",
+      "filename": "WND_WLP_ABS_KI00039_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00039_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71328014369106",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00039_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003302216018",
+      "handle": "14-1",
+      "title": "Fototapete Blauer Marmor mit Goldadern",
+      "firstImageId": "gid://shopify/ProductImage/72458173940050",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00038_WEB.png?v=1785914679",
+      "filename": "WND_WLP_ABS_KI00038_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00038_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71328013222226",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00038_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003301953874",
+      "handle": "13-1",
+      "title": "Fototapete Heller Marmor in Blau und Gold",
+      "firstImageId": "gid://shopify/ProductImage/72458133799250",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00037_WEB.png?v=1785914573",
+      "filename": "WND_WLP_ABS_KI00037_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00037_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71328011780434",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00037_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003301658962",
+      "handle": "12-1",
+      "title": "Fototapete Smaragdgrüner Marmor mit Gold",
+      "firstImageId": "gid://shopify/ProductImage/72458098180434",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00036_WEB.png?v=1785914476",
+      "filename": "WND_WLP_ABS_KI00036_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00036_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71328009257298",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00036_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003301560658",
+      "handle": "11-1",
+      "title": "Fototapete Marmor in Pink und Blau",
+      "firstImageId": "gid://shopify/ProductImage/72458050699602",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00035_WEB.png?v=1785914321",
+      "filename": "WND_WLP_ABS_KI00035_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00035_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71328007258450",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00035_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003301364050",
+      "handle": "10-1",
+      "title": "Fototapete Salbeigrüner Marmor mit Gold",
+      "firstImageId": "gid://shopify/ProductImage/72458012852562",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00034_WEB.png?v=1785914193",
+      "filename": "WND_WLP_ABS_KI00034_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00034_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71328005095762",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00034_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003301101906",
+      "handle": "9-1",
+      "title": "Fototapete Pastell Marmor in Rosa und Türkis",
+      "firstImageId": "gid://shopify/ProductImage/72457979986258",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00033_WEB.png?v=1785914078",
+      "filename": "WND_WLP_ABS_KI00033_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00033_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71328002769234",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00033_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003301036370",
+      "handle": "8-1",
+      "title": "Fototapete Pastell Marmor in Rosa und Hellblau",
+      "firstImageId": "gid://shopify/ProductImage/72450203025746",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00032_WEB.png?v=1785880778",
+      "filename": "WND_WLP_ABS_KI00032_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00032_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71328001524050",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00032_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003300872530",
+      "handle": "7-1",
+      "title": "Fototapete Aquarell Marmor in Salbeigrün und Gold",
+      "firstImageId": "gid://shopify/ProductImage/72450183790930",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00030_WEB.png?v=1785880601",
+      "filename": "WND_WLP_ABS_KI00030_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00030_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71327999131986",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00030_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003300708690",
+      "handle": "6-1",
+      "title": "Fototapete Rosa Wellen mit goldenen Akzenten",
+      "firstImageId": "gid://shopify/ProductImage/72450162393426",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00029_WEB.png?v=1785880448",
+      "filename": "WND_WLP_ABS_KI00029_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00029_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71327996412242",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00029_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003300577618",
+      "handle": "5-1",
+      "title": "Fototapete Ginkgo Linien in Gold und Aquarell",
+      "firstImageId": "gid://shopify/ProductImage/72450147647826",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00028_WEB.png?v=1785880337",
+      "filename": "WND_WLP_ABS_KI00028_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00028_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71327994315090",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00028_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003300381010",
+      "handle": "4-1",
+      "title": "Fototapete Pastell Marmor mit Türkis und Gold",
+      "firstImageId": "gid://shopify/ProductImage/72450132410706",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00027_WEB.png?v=1785880217",
+      "filename": "WND_WLP_ABS_KI00027_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00027_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71327992807762",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00027_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003300282706",
+      "handle": "3-1",
+      "title": "Fototapete Pastell Marmor mit goldenen Linien",
+      "firstImageId": "gid://shopify/ProductImage/72450100789586",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00031_WEB.png?v=1785880038",
+      "filename": "WND_WLP_ABS_KI00031_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00031_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71327991431506",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00031_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003300086098",
+      "handle": "2-1",
+      "title": "Fototapete Türkise Marmorstruktur mit goldenen Details",
+      "firstImageId": "gid://shopify/ProductImage/72450039972178",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00026_WEB.png?v=1785879731",
+      "filename": "WND_WLP_ABS_KI00026_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00026_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71327989203282",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00026_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11003300053330",
+      "handle": "1-1",
+      "title": "Fototapete Dunkle Marmorstruktur mit goldenen Akzenten",
+      "firstImageId": "gid://shopify/ProductImage/72450009629010",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_ABS_KI00025_WEB.png?v=1785879593",
+      "filename": "WND_WLP_ABS_KI00025_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_ABS_KI00025_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71327987597650",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_ABS_KI00025_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002607894866",
+      "handle": "fototapete-elegante-pfingstrosen-im-abendlicht-kopie",
+      "title": "Fototapete Pfingstrosen mit zarten Blüten im Abendlicht",
+      "firstImageId": "gid://shopify/ProductImage/72445257875794",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00021_WEB.png?v=1785854481",
+      "filename": "WND_WLP_BLU_KI00021_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00021_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71316881768786",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00021_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002557071698",
+      "handle": "16",
+      "title": "Fototapete Elegante Lilien in zarten Rosétönen",
+      "firstImageId": "gid://shopify/ProductImage/72445340352850",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00024_WEB.png?v=1785854896",
+      "filename": "WND_WLP_BLU_KI00024_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00024_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315600671058",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00024_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002556678482",
+      "handle": "15",
+      "title": "Fototapete Pastellblumen auf petrolfarbenem Hintergrund",
+      "firstImageId": "gid://shopify/ProductImage/72445292806482",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00023_WEB.png?v=1785854735",
+      "filename": "WND_WLP_BLU_KI00023_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00023_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315597263186",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00023_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002556219730",
+      "handle": "14",
+      "title": "Fototapete Tropische Blüten mit Monstera-Blättern",
+      "firstImageId": "gid://shopify/ProductImage/72445269377362",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00022_WEB.png?v=1785854565",
+      "filename": "WND_WLP_BLU_KI00022_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00022_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315594182994",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00022_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002555728210",
+      "handle": "13",
+      "title": "Fototapete Elegante Pfingstrosen im Abendlicht",
+      "firstImageId": "gid://shopify/ProductImage/72445233922386",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00020_WEB.png?v=1785854330",
+      "filename": "WND_WLP_BLU_KI00020_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00020_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315590644050",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00020_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002555334994",
+      "handle": "12",
+      "title": "Fototapete Zarte Kirschblüten in Rosé",
+      "firstImageId": "gid://shopify/ProductImage/72445219471698",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00019_WEB.png?v=1785854233",
+      "filename": "WND_WLP_BLU_KI00019_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00019_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315586122066",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00019_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002555236690",
+      "handle": "11",
+      "title": "Fototapete Romantischer Blumenmix in Pastell",
+      "firstImageId": "gid://shopify/ProductImage/72445204300114",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00018_WEB.png?v=1785854119",
+      "filename": "WND_WLP_BLU_KI00018_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00018_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315582681426",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00018_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002555040082",
+      "handle": "10",
+      "title": "Fototapete Sanfte Pfingstrosen in Pastell",
+      "firstImageId": "gid://shopify/ProductImage/72445184868690",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00017_WEB.png?v=1785854017",
+      "filename": "WND_WLP_BLU_KI00017_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00017_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315579437394",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00017_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002554843474",
+      "handle": "9",
+      "title": "Fototapete Zarte Pfingstrosen auf hellem Hintergrund",
+      "firstImageId": "gid://shopify/ProductImage/72445174972754",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00016_WEB.png?v=1785853926",
+      "filename": "WND_WLP_BLU_KI00016_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00016_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315574096210",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00016_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002554777938",
+      "handle": "8",
+      "title": "Fototapete Zarte Pfingstrosen in Rosé",
+      "firstImageId": "gid://shopify/ProductImage/72445158130002",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00015_WEB.png?v=1785853820",
+      "filename": "WND_WLP_BLU_KI00015_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00015_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315567149394",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00015_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002554581330",
+      "handle": "7",
+      "title": "Fototapete Blaue Blüte mit goldenen Akzenten",
+      "firstImageId": "gid://shopify/ProductImage/72445143187794",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00014_WEB.png?v=1785853708",
+      "filename": "WND_WLP_BLU_KI00014_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00014_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315561808210",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00014_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002554384722",
+      "handle": "6",
+      "title": "Fototapete Elegante Blüten in Petrol und Gold",
+      "firstImageId": "gid://shopify/ProductImage/72445128081746",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00013_WEB.png?v=1785853603",
+      "filename": "WND_WLP_BLU_KI00013_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00013_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315554271570",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00013_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002554188114",
+      "handle": "5",
+      "title": "Fototapete Leuchtende Blüten bei Nacht",
+      "firstImageId": "gid://shopify/ProductImage/72445110518098",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00012_WEB.png?v=1785853486",
+      "filename": "WND_WLP_BLU_KI00012_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00012_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315546374482",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00012_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002553991506",
+      "handle": "4",
+      "title": "Fototapete Elegante Dahlien auf schwarzem Hintergrund",
+      "firstImageId": "gid://shopify/ProductImage/72445090201938",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00011_WEB.png?v=1785853363",
+      "filename": "WND_WLP_BLU_KI00011_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00011_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315536740690",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00011_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002553893202",
+      "handle": "3",
+      "title": "Fototapete Zarte Blütenblätter in Pastellfarben",
+      "firstImageId": "gid://shopify/ProductImage/72444981182802",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00010_WEB.png?v=1785852688",
+      "filename": "WND_WLP_BLU_KI00010_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00010_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315530842450",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00010_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002553532754",
+      "handle": "2",
+      "title": "Fototapete Abstrakte Blütenkomposition in Pastellfarben",
+      "firstImageId": "gid://shopify/ProductImage/72444944384338",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_KI00009_WEB.png?v=1785852461",
+      "filename": "WND_WLP_BLU_KI00009_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_KI00009_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315526746450",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_KI00009_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002553106770",
+      "handle": "1",
+      "title": "Fototapete Ausdrucksstarke Blumenkomposition",
+      "firstImageId": "gid://shopify/ProductImage/72444905521490",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_BLU_551800891_WEB.jpg?v=1785852171",
+      "filename": "WND_WLP_BLU_551800891_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_BLU_551800891_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315522978130",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_BLU_551800891_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002538983762",
+      "handle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "title": "Fototapete Türkise Meeresküste aus der Vogelperspektive",
+      "firstImageId": "gid://shopify/ProductImage/72444840509778",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00038_WEB.png?v=1785851683",
+      "filename": "WND_WLP_NAT_KI00038_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00038_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315259523410",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00038_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002538819922",
+      "handle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "title": "Fototapete Tropische Lagune mit Longtail-Booten",
+      "firstImageId": "gid://shopify/ProductImage/72444827795794",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00037_WEB.png?v=1785851572",
+      "filename": "WND_WLP_NAT_KI00037_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00037_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71315254837586",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00037_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002529055058",
+      "handle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "title": "Fototapete Schneeberg über den Wolken",
+      "firstImageId": "gid://shopify/ProductImage/72444811510098",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00036_WEB.png?v=1785851452",
+      "filename": "WND_WLP_NAT_KI00036_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00036_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71314993840466",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00036_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002528923986",
+      "handle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "title": "Fototapete Bergsee mit majestätischem Alpenpanorama",
+      "firstImageId": "gid://shopify/ProductImage/72444786016594",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00035_WEB.png?v=1785851264",
+      "filename": "WND_WLP_NAT_KI00035_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00035_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71314991120722",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00035_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002528858450",
+      "handle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "title": "Fototapete Bergsee mit schneebedeckten Gipfeln",
+      "firstImageId": "gid://shopify/ProductImage/72444769468754",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00034_WEB.png?v=1785851150",
+      "filename": "WND_WLP_NAT_KI00034_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00034_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71314986336594",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00034_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002528760146",
+      "handle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "title": "Fototapete Grüne Berglandschaft mit schneebedeckten Gipfeln",
+      "firstImageId": "gid://shopify/ProductImage/72444740665682",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00033_WEB.png?v=1785850964",
+      "filename": "WND_WLP_NAT_KI00033_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00033_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71314983059794",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00033_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002512015698",
+      "handle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "title": "Fototapete Türkisblauer Traumstrand aus der Vogelperspektive",
+      "firstImageId": "gid://shopify/ProductImage/72444727525714",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00032_WEB.png?v=1785850855",
+      "filename": "WND_WLP_NAT_KI00032_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00032_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71314608357714",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00032_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002511917394",
+      "handle": "base-kopie-kopie-kopie-kopie-kopie-kopie",
+      "title": "Fototapete Tropischer Strand bei Sonnenuntergang",
+      "firstImageId": "gid://shopify/ProductImage/72444704096594",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00031_WEB.png?v=1785850687",
+      "filename": "WND_WLP_NAT_KI00031_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00031_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71314603147602",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00031_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002511720786",
+      "handle": "base-kopie-kopie-kopie-kopie-kopie",
+      "title": "Fototapete Sandweg zum sonnigen Traumstrand",
+      "firstImageId": "gid://shopify/ProductImage/72444682174802",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00030_WEB.png?v=1785850571",
+      "filename": "WND_WLP_NAT_KI00030_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00030_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71314599280978",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00030_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002511491410",
+      "handle": "base-kopie-kopie-kopie-kopie",
+      "title": "Fototapete Tropischer Strand im goldenen Sonnenuntergang",
+      "firstImageId": "gid://shopify/ProductImage/72444663398738",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00029_WEB.png?v=1785850442",
+      "filename": "WND_WLP_NAT_KI00029_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00029_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71314597216594",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00029_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002511425874",
+      "handle": "base-kopie-kopie-kopie",
+      "title": "Fototapete Tropischer Sandstrand mit Palmen und türkisem Meer",
+      "firstImageId": "gid://shopify/ProductImage/72444648030546",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00028_WEB.png?v=1785850326",
+      "filename": "WND_WLP_NAT_KI00028_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00028_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71314595676498",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00028_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002511262034",
+      "handle": "base-kopie-kopie",
+      "title": "Fototapete Goldene Wildblumen im Morgenlicht",
+      "firstImageId": "gid://shopify/ProductImage/72444628435282",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00027_WEB.png?v=1785850189",
+      "filename": "WND_WLP_NAT_KI00027_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00027_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71314592923986",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00027_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11002511098194",
+      "handle": "base-kopie-4",
+      "title": "Fototapete Pastellhimmel im Abendlicht",
+      "firstImageId": "gid://shopify/ProductImage/72444608643410",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_KI00026_WEB.png?v=1785850060",
+      "filename": "WND_WLP_NAT_KI00026_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_KI00026_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71314589155666",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_KI00026_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11000858247506",
+      "handle": "base-kopie-3",
+      "title": "Fototapete Pastellwolken im Sonnenaufgang",
+      "firstImageId": "gid://shopify/ProductImage/72431019819346",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_SKY_Wolken_KI00003_WEB.png?v=1785775005",
+      "filename": "WND_WLP_NAT_SKY_Wolken_KI00003_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_SKY_Wolken_KI00003_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71190259368274",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_SKY_Wolken_KI00003_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11000856084818",
+      "handle": "base-kopie-2",
+      "title": "Fototapete Sonnenuntergang am ruhigen Sandstrand",
+      "firstImageId": "gid://shopify/ProductImage/72431001305426",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_SKY_Sunrise_KI00002_WEB.png?v=1785774836",
+      "filename": "WND_WLP_NAT_SKY_Sunrise_KI00002_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_SKY_Sunrise_KI00002_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71190213689682",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_SKY_Sunrise_KI00002_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11000852185426",
+      "handle": "base-kopie-1",
+      "title": "Fototapete Pastellhimmel mit Lichtreflexen und Wolken",
+      "firstImageId": "gid://shopify/ProductImage/72430978859346",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_SKY_Licht_KI00004_WEB.png?v=1785774615",
+      "filename": "WND_WLP_NAT_SKY_Licht_KI00004_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_SKY_Licht_KI00004_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71190137143634",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_SKY_Licht_KI00004_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11000845795666",
+      "handle": "fototapete-tropischer-pflanzenwald-in-sanften-gruntonen",
+      "title": "Fototapete Tropischer Pflanzenwald in sanften Grüntönen",
+      "firstImageId": "gid://shopify/ProductImage/72430966636882",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_BLU_Tropical_KI00007_WEB.png?v=1785774500",
+      "filename": "WND_WLP_NAT_BLU_Tropical_KI00007_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_BLU_Tropical_KI00007_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71190076588370",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_BLU_Tropical_KI00007_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11000485314898",
+      "handle": "fototapete-tropische-palmenlandschaft-in-sanften-naturtonen",
+      "title": "Fototapete Tropische Palmenlandschaft in sanften Naturtönen",
+      "firstImageId": "gid://shopify/ProductImage/72428514312530",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_BLU_Tropical_KI00006_WEB.png?v=1785761997",
+      "filename": "WND_WLP_NAT_BLU_Tropical_KI00006_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_BLU_Tropical_KI00006_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71185158406482",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_BLU_Tropical_KI00006_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11000474796370",
+      "handle": "fototapete-tropische-dschungelblatter-in-sattem-grun",
+      "title": "Fototapete Tropische Dschungelblätter in sattem Grün",
+      "firstImageId": "gid://shopify/ProductImage/72428442157394",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_BLU_Dschungel_KI00008_WEB.png?v=1785761570",
+      "filename": "WND_WLP_NAT_BLU_Dschungel_KI00008_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_BLU_Dschungel_KI00008_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71184976216402",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_BLU_Dschungel_KI00008_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11000346018130",
+      "handle": "fototapete-meereswellen-aus-der-vogelperspektive-kopie",
+      "title": "Fototapete Ozeanwellen aus der Luft",
+      "firstImageId": "gid://shopify/ProductImage/72428041568594",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_WAS_Wellen_KI00001_WEB.jpg?v=1785759813",
+      "filename": "WND_WLP_NAT_WAS_Wellen_KI00001_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_WAS_Wellen_KI00001_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71183706423634",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_WAS_Wellen_KI00001_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997808824658",
+      "handle": "base-kopie",
+      "title": "Fototapete Tropische Blätter in Naturtönen",
+      "firstImageId": "gid://shopify/ProductImage/72428477251922",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_BLU_Monstera_KI00005_WEB.png?v=1785761723",
+      "filename": "WND_WLP_NAT_BLU_Monstera_KI00005_WEB.png",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_BLU_Monstera_KI00005_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71137246839122",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_BLU_Monstera_KI00005_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997772124498",
+      "handle": "fototapete-meereswellen-aus-der-vogelperspektive",
+      "title": "Fototapete Meereswellen aus der Vogelperspektive",
+      "firstImageId": "gid://shopify/ProductImage/72404271006034",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_WAS_Wellen_1372252180_WEB.jpg?v=1788787467",
+      "filename": "WND_WLP_NAT_WAS_Wellen_1372252180_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_WAS_Wellen_1372252180_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136892059986",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_WAS_Wellen_1372252180_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997765636434",
+      "handle": "fototapete-schimmernde-wasserreflexe-in-pastell-kopie",
+      "title": "Fototapete Türkisblaues Wasser mit Lichtreflexen",
+      "firstImageId": "gid://shopify/ProductImage/72404251541842",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_WAS_Pool_1682927146_WEB.jpg?v=1785676466",
+      "filename": "WND_WLP_NAT_WAS_Pool_1682927146_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_WAS_Pool_1682927146_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136840253778",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_WAS_Pool_1682927146_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997759148370",
+      "handle": "fototapete-schimmernde-wasserreflexe-in-pastell",
+      "title": "Fototapete Schimmernde Wasserreflexe in Pastell",
+      "firstImageId": "gid://shopify/ProductImage/72404238434642",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_WAS_Licht_1996795034_WEB.jpg?v=1785676351",
+      "filename": "WND_WLP_NAT_WAS_Licht_1996795034_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_WAS_Licht_1996795034_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136794476882",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_WAS_Licht_1996795034_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997755543890",
+      "handle": "fototapete-tropischer-wasserfall-mit-exotischen-vogeln",
+      "title": "Fototapete Tropischer Wasserfall mit exotischen Vögeln",
+      "firstImageId": "gid://shopify/ProductImage/72404225786194",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_WAL_Vogel_882341592_WEB.jpg?v=1785676237",
+      "filename": "WND_WLP_NAT_WAL_Vogel_882341592_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_WAL_Vogel_882341592_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136752206162",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_WAL_Vogel_882341592_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997754855762",
+      "handle": "fototapete-eleganter-pfau-im-romantischen-garten",
+      "title": "Fototapete Eleganter Pfau im romantischen Garten",
+      "firstImageId": "gid://shopify/ProductImage/72404212482386",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_WAL_Pfau_889618138_WEB.jpg?v=1785676125",
+      "filename": "WND_WLP_NAT_WAL_Pfau_889618138_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_WAL_Pfau_889618138_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136733692242",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_WAL_Pfau_889618138_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997754134866",
+      "handle": "fototapete-exotischer-vogel-im-tropischen-regenwald",
+      "title": "Fototapete Exotischer Vogel im tropischen Regenwald",
+      "firstImageId": "gid://shopify/ProductImage/72404202357074",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_WAL_Papagei_998498459_WEB.jpg?v=1785676012",
+      "filename": "WND_WLP_NAT_WAL_Papagei_998498459_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_WAL_Papagei_998498459_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136709869906",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_WAL_Papagei_998498459_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997752856914",
+      "handle": "fototapete-nebelwald-mit-tannenpanorama",
+      "title": "Fototapete Nebelwald mit Tannenpanorama",
+      "firstImageId": "gid://shopify/ProductImage/72404182860114",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_WAL_Nebel_635263426_WEB.jpg?v=1785675848",
+      "filename": "WND_WLP_NAT_WAL_Nebel_635263426_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_WAL_Nebel_635263426_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136689783122",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_WAL_Nebel_635263426_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997751873874",
+      "handle": "fototapete-mystischer-nebelwald-in-sattem-grun",
+      "title": "Fototapete Mystischer Nebelwald in sattem Grün",
+      "firstImageId": "gid://shopify/ProductImage/72404169982290",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_WAL_Grun_1455156337_WEB.jpg?v=1785675744",
+      "filename": "WND_WLP_NAT_WAL_Grun_1455156337_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_WAL_Grun_1455156337_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136674185554",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_WAL_Grun_1455156337_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997747155282",
+      "handle": "fototapete-tropischer-fluss-im-uppigen-regenwald",
+      "title": "Fototapete Tropischer Fluss im üppigen Regenwald",
+      "firstImageId": "gid://shopify/ProductImage/72404143669586",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_WAL_Fluss_868807086_WEB.jpg?v=1785675567",
+      "filename": "WND_WLP_NAT_WAL_Fluss_868807086_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_WAL_Fluss_868807086_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136634798418",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_WAL_Fluss_868807086_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997738570066",
+      "handle": "fototapete-mystischer-regenwald-im-morgennebel",
+      "title": "Fototapete Mystischer Regenwald im Morgennebel",
+      "firstImageId": "gid://shopify/ProductImage/72404042744146",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_NAT_WAL_Abend_494926921_WEB.jpg?v=1785674642",
+      "filename": "WND_WLP_NAT_WAL_Abend_494926921_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_NAT_WAL_Abend_494926921_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136467190098",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_NAT_WAL_Abend_494926921_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997730181458",
+      "handle": "fototapete-buntes-marchenschloss-im-pastellstil-fur-madchenzimmer",
+      "title": "Fototapete Buntes Märchenschloss im Pastellstil für Mädchenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403977634130",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_GIR_Prinzessin_937536652_WEB.jpg?v=1785674206",
+      "filename": "WND_WLP_KID_GIR_Prinzessin_937536652_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_GIR_Prinzessin_937536652_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136363970898",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_GIR_Prinzessin_937536652_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997729132882",
+      "handle": "fototapete-zauberschloss-in-den-wolken-mit-rosa-ballons-fur-madchenzimmer",
+      "title": "Fototapete Zauberschloss in den Wolken mit rosa Ballons für Mädchenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403963052370",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_GIR_Prinzessin_908637088_WEB.jpg?v=1785674078",
+      "filename": "WND_WLP_KID_GIR_Prinzessin_908637088_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_GIR_Prinzessin_908637088_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136344211794",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_GIR_Prinzessin_908637088_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997728313682",
+      "handle": "fototapete-meerjungfrauen-im-zauberhaften-unterwasserreich-fur-madchenzimmer",
+      "title": "Fototapete Meerjungfrauen im zauberhaften Unterwasserreich für Mädchenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403950731602",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_GIR_Meerjungfrau_1529462403_WEB.jpg?v=1785673957",
+      "filename": "WND_WLP_KID_GIR_Meerjungfrau_1529462403_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_GIR_Meerjungfrau_1529462403_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136327795026",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_GIR_Meerjungfrau_1529462403_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997727363410",
+      "handle": "fototapete-magisches-einhorn-auf-blumenwiese-fur-madchenzimmer",
+      "title": "Fototapete Magisches Einhorn auf Blumenwiese für Mädchenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403935953234",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_GIR_Einhorn_1677537302_WEB.jpg?v=1785673830",
+      "filename": "WND_WLP_KID_GIR_Einhorn_1677537302_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_GIR_Einhorn_1677537302_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136308429138",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_GIR_Einhorn_1677537302_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997724250450",
+      "handle": "fototapete-magisches-einhorn-mit-herzen-und-regenbogen-fur-madchenzimmer",
+      "title": "Fototapete Magisches Einhorn mit Herzen und Regenbogen für Mädchenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403892896082",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_GIR_Einhorn_789779816_WEB.jpg?v=1785673675",
+      "filename": "WND_WLP_KID_GIR_Einhorn_789779816_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_GIR_Einhorn_789779816_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136286736722",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_GIR_Einhorn_789779816_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997721956690",
+      "handle": "fototapete-magisches-einhorn-mit-regenbogenmahne-fur-madchenzimmer",
+      "title": "Fototapete Magisches Einhorn mit Regenbogenmähne für Mädchenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403878314322",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_GIR_Einhorn_765042731_WEB.jpg?v=1785673535",
+      "filename": "WND_WLP_KID_GIR_Einhorn_765042731_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_GIR_Einhorn_765042731_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136255803730",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_GIR_Einhorn_765042731_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997717401938",
+      "handle": "fototapete-einhorn-uber-den-wolken-mit-regenbogen-fur-madchenzimmer",
+      "title": "Fototapete Einhorn über den Wolken mit Regenbogen für Mädchenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403857998162",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_GIR_Einhorn_765042642_WEB.jpg?v=1785673397",
+      "filename": "WND_WLP_KID_GIR_Einhorn_765042642_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_GIR_Einhorn_765042642_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136225001810",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_GIR_Einhorn_765042642_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997716386130",
+      "handle": "fototapete-abstrakte-bluten-in-pastellfarben",
+      "title": "Fototapete Abstrakte Blüten in Pastellfarben",
+      "firstImageId": "gid://shopify/ProductImage/72403838402898",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_GIR_Blumen_727350246_WEB.jpg?v=1785673267",
+      "filename": "WND_WLP_KID_GIR_Blumen_727350246_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_GIR_Blumen_727350246_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136206881106",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_GIR_Blumen_727350246_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997715272018",
+      "handle": "fototapete-aquarell-lavendelfeld-in-pastell-fur-madchenzimmer",
+      "title": "Fototapete Aquarell Lavendelfeld in Pastell für Mädchenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403827654994",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_GIR_Blumen_684896455_WEB.jpg?v=1785673152",
+      "filename": "WND_WLP_KID_GIR_Blumen_684896455_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_GIR_Blumen_684896455_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136187842898",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_GIR_Blumen_684896455_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997711176018",
+      "handle": "fototapete-koalas-im-tropischen-dschungel-fur-kinderzimmer",
+      "title": "Fototapete Koalas im tropischen Dschungel für Kinderzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403799605586",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BOY_Safari_882375269_WEB.jpg?v=1785672968",
+      "filename": "WND_WLP_KID_BOY_Safari_882375269_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BOY_Safari_882375269_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136153207122",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BOY_Safari_882375269_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997709701458",
+      "handle": "fototapete-piratenschiff-an-tropischem-strand-fur-jungenzimmer",
+      "title": "Fototapete Piratenschiff an tropischem Strand für Jungenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403782795602",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BOY_Pirat_708496709_WEB.jpg?v=1785672830",
+      "filename": "WND_WLP_KID_BOY_Pirat_708496709_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BOY_Pirat_708496709_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136133054802",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BOY_Pirat_708496709_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997708194130",
+      "handle": "fototapete-t-rex-in-dramatischer-berglandschaft-fur-jungenzimmer",
+      "title": "Fototapete T-Rex in dramatischer Berglandschaft für Jungenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403766477138",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BOY_Dinosaurier_1679658581_WEB.jpg?v=1785672703",
+      "filename": "WND_WLP_KID_BOY_Dinosaurier_1679658581_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BOY_Dinosaurier_1679658581_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136111526226",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BOY_Dinosaurier_1679658581_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997706326354",
+      "handle": "fototapete-dinosaurier-in-majestatischer-berglandschaft-fur-jungenzimmer",
+      "title": "Fototapete Dinosaurier in majestätischer Berglandschaft für Jungenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403745210706",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BOY_Dinosaurier_1558183825_WEB.jpg?v=1785672542",
+      "filename": "WND_WLP_KID_BOY_Dinosaurier_1558183825_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BOY_Dinosaurier_1558183825_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136082231634",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BOY_Dinosaurier_1558183825_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997698265426",
+      "handle": "fototapete-aquarell-dinosaurier-in-berglandschaft-fur-jungenzimmer",
+      "title": "Fototapete Aquarell Dinosaurier in Berglandschaft für Jungenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403695305042",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BOY_Dinosaurier_955400323_WEB.jpg?v=1785672371",
+      "filename": "WND_WLP_KID_BOY_Dinosaurier_955400323_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BOY_Dinosaurier_955400323_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136046055762",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BOY_Dinosaurier_955400323_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997696856402",
+      "handle": "fototapete-retro-sportwagen-bei-nacht-in-der-neonstadt",
+      "title": "Fototapete Retro Sportwagen bei Nacht in der Neonstadt",
+      "firstImageId": "gid://shopify/ProductImage/72403680690514",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BOY_Auto_1564749926_WEB.jpg?v=1785672215",
+      "filename": "WND_WLP_KID_BOY_Auto_1564749926_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BOY_Auto_1564749926_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71136010109266",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BOY_Auto_1564749926_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997676343634",
+      "handle": "fototapete-sportwagen-in-action-fur-jungenzimmer",
+      "title": "Fototapete Sportwagen in Action für Jungenzimmer",
+      "firstImageId": "gid://shopify/ProductImage/72403465568594",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BOY_Auto_793561004_WEB.jpg?v=1788787491",
+      "filename": "WND_WLP_KID_BOY_Auto_793561004_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BOY_Auto_793561004_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71135725093202",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BOY_Auto_793561004_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997667332434",
+      "handle": "fototapete-pastell-wolken-mit-mond-und-sternen-fur-kinderzimmer",
+      "title": "Fototapete Pastell Wolken mit Mond und Sternen",
+      "firstImageId": "gid://shopify/ProductImage/72403412713810",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BAB_Wolken_1820198190_WEB.jpg?v=1785670159",
+      "filename": "WND_WLP_KID_BAB_Wolken_1820198190_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BAB_Wolken_1820198190_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71135657066834",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BAB_Wolken_1820198190_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997665005906",
+      "handle": "fototapete-aquarell-waldtiere-mit-rehen-und-hasen-fur-kinderzimmer",
+      "title": "Fototapete Aquarell Waldtiere mit Rehen und Hasen",
+      "firstImageId": "gid://shopify/ProductImage/72403374408018",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BAB_Waldtier_955404608_WEB.jpg?v=1785669888",
+      "filename": "WND_WLP_KID_BAB_Waldtier_955404608_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BAB_Waldtier_955404608_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71135610929490",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BAB_Waldtier_955404608_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997662679378",
+      "handle": "fototapete-aquarell-safari-mit-dschungeltieren-fur-kinderzimmer",
+      "title": "Fototapete Aquarell Safari mit Dschungeltieren",
+      "firstImageId": "gid://shopify/ProductImage/72403338953042",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BAB_Safari_1410339939_WEB.jpg?v=1785669613",
+      "filename": "WND_WLP_KID_BAB_Safari_1410339939_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BAB_Safari_1410339939_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71135569576274",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BAB_Safari_1410339939_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997652750674",
+      "handle": "fototapete-aquarell-heissluftballons-mit-hasen-fur-kinderzimmer",
+      "title": "Fototapete Aquarell Heißluftballons mit Hasen",
+      "firstImageId": "gid://shopify/ProductImage/72403231670610",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BAB_Luftballon_987798087_WEB.jpg?v=1785668693",
+      "filename": "WND_WLP_KID_BAB_Luftballon_987798087_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BAB_Luftballon_987798087_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71135523307858",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BAB_Luftballon_987798087_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997641740626",
+      "handle": "fototapete-aquarell-safari-mit-heissluftballons-fur-kinderzimmer-kopie",
+      "title": "Fototapete Pastell Regenbogen mit Blumenlandschaft",
+      "firstImageId": "gid://shopify/ProductImage/72403266994514",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BAB_Regenbogen_988295070_WEB.jpg?v=1785668951",
+      "filename": "WND_WLP_KID_BAB_Regenbogen_988295070_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BAB_Regenbogen_988295070_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71135411962194",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BAB_Regenbogen_988295070_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10997621752146",
+      "handle": "fototapete-aquarell-safari-mit-heissluftballons-fur-kinderzimmer",
+      "title": "Fototapete Aquarell Safari mit Heißluftballons",
+      "firstImageId": "gid://shopify/ProductImage/72403085230418",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BAB_Luftballon_925460928_WEB.jpg?v=1785667859",
+      "filename": "WND_WLP_KID_BAB_Luftballon_925460928_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BAB_Luftballon_925460928_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71135232295250",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BAB_Luftballon_925460928_PRINT"
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/10992259268946",
+      "handle": "base-product",
+      "title": "Fototapete Retro Sportwagen mit Palmen bei Sonnenuntergang",
+      "firstImageId": "gid://shopify/ProductImage/72403546079570",
+      "firstImageUrl": "https://cdn.shopify.com/s/files/1/1074/6495/0098/files/WND_WLP_KID_BOY_Auto_863810897_WEB.jpg?v=1785671142",
+      "filename": "WND_WLP_KID_BOY_Auto_863810897_WEB.jpg",
+      "derived": {
+        "ok": true,
+        "reason": null,
+        "expected": "WND_WLP_KID_BOY_Auto_863810897_PRINT"
+      },
+      "metafield": {
+        "id": "gid://shopify/Metafield/71066866286930",
+        "namespace": "custom",
+        "key": "master_asset_id",
+        "type": "single_line_text_field",
+        "value": "WND_WLP_KID_BOY_Auto_863810897_PRINT"
+      }
+    }
+  ]
+}

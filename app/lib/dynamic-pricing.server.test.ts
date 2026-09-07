@@ -551,21 +551,6 @@ describe('Draft Order line preparation', () => {
     });
   });
 
-  it('accepts very wide wallpaper because width has no maximum', async () => {
-    const wideWallpaper = cart();
-    wideWallpaper.lines.nodes[0].attributes[0].value = JSON.stringify({
-      ...(JSON.parse(payload) as Record<string, unknown>),
-      output: {unit: 'mm', width: 100_000, height: 2500},
-    });
-
-    const prepared = await prepareDraftOrder(wideWallpaper, pricingClient());
-
-    expect(prepared.input.lineItems[0].priceOverride).toEqual({
-      amount: '7222.50',
-      currencyCode: 'EUR',
-    });
-  });
-
   it('keeps the hardcoded 312 cm maximum height authoritative', async () => {
     const atMaximum = cart();
     atMaximum.lines.nodes[0].attributes[0].value = JSON.stringify({
@@ -580,6 +565,26 @@ describe('Draft Order line preparation', () => {
     aboveMaximum.lines.nodes[0].attributes[0].value = JSON.stringify({
       ...(JSON.parse(payload) as Record<string, unknown>),
       output: {unit: 'mm', width: 2000, height: 3121},
+    });
+    await expect(
+      prepareDraftOrder(aboveMaximum, pricingClient()),
+    ).rejects.toMatchObject({code: 'INVALID_CONFIGURATION'});
+  });
+
+  it('keeps the hardcoded 562 cm maximum width authoritative', async () => {
+    const atMaximum = cart();
+    atMaximum.lines.nodes[0].attributes[0].value = JSON.stringify({
+      ...(JSON.parse(payload) as Record<string, unknown>),
+      output: {unit: 'mm', width: 5620, height: 2500},
+    });
+    await expect(
+      prepareDraftOrder(atMaximum, pricingClient()),
+    ).resolves.toMatchObject({configuredLineCount: 1});
+
+    const aboveMaximum = cart();
+    aboveMaximum.lines.nodes[0].attributes[0].value = JSON.stringify({
+      ...(JSON.parse(payload) as Record<string, unknown>),
+      output: {unit: 'mm', width: 5621, height: 2500},
     });
     await expect(
       prepareDraftOrder(aboveMaximum, pricingClient()),

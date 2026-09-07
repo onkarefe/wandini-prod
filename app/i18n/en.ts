@@ -140,6 +140,7 @@ export const en = {
   'product.heightCm': 'Height (cm)',
   'product.widthRequired': 'Please enter the width.',
   'product.heightRequired': 'Please enter the height.',
+  'product.maxWidth': 'The maximum width is {width} cm.',
   'product.maxHeight': 'The maximum height is {height} cm.',
   'product.selectMaterial': 'Select material',
   'product.configureNow': 'Configure now',

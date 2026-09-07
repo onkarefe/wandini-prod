@@ -13,6 +13,7 @@ import {
   CONFIGURATOR_PAYLOAD_ATTRIBUTE,
   CONFIGURATOR_INSTANCE_ATTRIBUTE,
   MAX_CONFIGURATOR_HEIGHT_CM,
+  MAX_CONFIGURATOR_WIDTH_CM,
   createConfiguratorPayload,
   createConfiguratorInstanceId,
   resolveConfiguratorPricePerM2,
@@ -84,6 +85,7 @@ export function ProductForm({
   // -----------------------------
   const isSizeValid =
     size.width > 0 &&
+    size.width <= MAX_CONFIGURATOR_WIDTH_CM &&
     size.height > 0 &&
     size.height <= MAX_CONFIGURATOR_HEIGHT_CM;
 

@@ -1,0 +1,465 @@
+{
+  "generatedAt": "2026-09-07T12:54:53.101Z",
+  "shop": "vurpri-8s.myshopify.com",
+  "collection": {
+    "id": "gid://shopify/Collection/691599966546",
+    "title": "Fototapeten",
+    "handle": "fototapeten"
+  },
+  "reference": {
+    "id": "gid://shopify/Product/11015545749842",
+    "title": "Fototapete Koi mit Lotusblüten",
+    "handle": "8-3",
+    "options": [
+      {
+        "id": "gid://shopify/ProductOption/13683984138578",
+        "name": "Quality",
+        "values": [
+          "Glatt",
+          "Feinprägung",
+          "Selbstklebend",
+          "Nahtlos"
+        ]
+      }
+    ],
+    "variants": [
+      {
+        "id": "gid://shopify/ProductVariant/54221525221714",
+        "quality": "Glatt",
+        "title": "Glatt",
+        "price": "23.00",
+        "sku": "20-234.1-3",
+        "metafield": {
+          "id": "gid://shopify/Metafield/71505823695186",
+          "type": "metaobject_reference",
+          "value": "gid://shopify/Metaobject/411728183634"
+        }
+      },
+      {
+        "id": "gid://shopify/ProductVariant/54221525254482",
+        "quality": "Feinprägung",
+        "title": "Feinprägung",
+        "price": "34.00",
+        "sku": "20-139.1-3",
+        "metafield": {
+          "id": "gid://shopify/Metafield/71505823727954",
+          "type": "metaobject_reference",
+          "value": "gid://shopify/Metaobject/412147056978"
+        }
+      },
+      {
+        "id": "gid://shopify/ProductVariant/54221525320018",
+        "quality": "Selbstklebend",
+        "title": "Selbstklebend",
+        "price": "39.00",
+        "sku": "20-140.1-3",
+        "metafield": {
+          "id": "gid://shopify/Metafield/71505823793490",
+          "type": "metaobject_reference",
+          "value": "gid://shopify/Metaobject/443387740498"
+        }
+      },
+      {
+        "id": "gid://shopify/ProductVariant/54221525352786",
+        "quality": "Nahtlos",
+        "title": "Nahtlos",
+        "price": "45.00",
+        "sku": "20-331.1-3",
+        "metafield": {
+          "id": "gid://shopify/Metafield/71505823826258",
+          "type": "metaobject_reference",
+          "value": "gid://shopify/Metaobject/443390820690"
+        }
+      }
+    ]
+  },
+  "testHandles": [
+    "0-base",
+    "7-3",
+    "6-3",
+    "5-3",
+    "4-3"
+  ],
+  "products": {
+    "0-base": {
+      "id": "gid://shopify/Product/11015546110290",
+      "title": "0 BASE",
+      "handle": "0-base",
+      "options": [
+        {
+          "id": "gid://shopify/ProductOption/13683984597330",
+          "name": "Quality",
+          "values": [
+            "Standard",
+            "Premium",
+            "Premium Vinyl",
+            "Selbstklebend",
+            "Airtex Exklusiv"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "gid://shopify/ProductVariant/54221526204754",
+          "quality": "Standard",
+          "title": "Standard",
+          "price": "22.96",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505828020562",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/411728183634"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221526237522",
+          "quality": "Premium",
+          "title": "Premium",
+          "price": "28.89",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505828053330",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/412147056978"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221526270290",
+          "quality": "Premium Vinyl",
+          "title": "Premium Vinyl",
+          "price": "33.14",
+          "sku": "",
+          "metafield": null
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221526303058",
+          "quality": "Selbstklebend",
+          "title": "Selbstklebend",
+          "price": "41.65",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505828118866",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/443387740498"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221526335826",
+          "quality": "Airtex Exklusiv",
+          "title": "Airtex Exklusiv",
+          "price": "69.90",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505828151634",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/443390820690"
+          }
+        }
+      ]
+    },
+    "7-3": {
+      "id": "gid://shopify/Product/11015545684306",
+      "title": "Fototapete Leopard im tropischen Blütenparadies",
+      "handle": "7-3",
+      "options": [
+        {
+          "id": "gid://shopify/ProductOption/13683984073042",
+          "name": "Quality",
+          "values": [
+            "Standard",
+            "Premium",
+            "Premium Vinyl",
+            "Selbstklebend",
+            "Airtex Exklusiv"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "gid://shopify/ProductVariant/54221524992338",
+          "quality": "Standard",
+          "title": "Standard",
+          "price": "22.96",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505822450002",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/411728183634"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221525025106",
+          "quality": "Premium",
+          "title": "Premium",
+          "price": "28.89",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505822482770",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/412147056978"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221525057874",
+          "quality": "Premium Vinyl",
+          "title": "Premium Vinyl",
+          "price": "33.14",
+          "sku": "",
+          "metafield": null
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221525090642",
+          "quality": "Selbstklebend",
+          "title": "Selbstklebend",
+          "price": "41.65",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505822548306",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/443387740498"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221525123410",
+          "quality": "Airtex Exklusiv",
+          "title": "Airtex Exklusiv",
+          "price": "69.90",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505822581074",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/443390820690"
+          }
+        }
+      ]
+    },
+    "6-3": {
+      "id": "gid://shopify/Product/11015545553234",
+      "title": "Fototapete Koi in goldenen Wellen",
+      "handle": "6-3",
+      "options": [
+        {
+          "id": "gid://shopify/ProductOption/13683983876434",
+          "name": "Quality",
+          "values": [
+            "Standard",
+            "Premium",
+            "Premium Vinyl",
+            "Selbstklebend",
+            "Airtex Exklusiv"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "gid://shopify/ProductVariant/54221524697426",
+          "quality": "Standard",
+          "title": "Standard",
+          "price": "22.96",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505820713298",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/411728183634"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221524730194",
+          "quality": "Premium",
+          "title": "Premium",
+          "price": "28.89",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505820746066",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/412147056978"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221524762962",
+          "quality": "Premium Vinyl",
+          "title": "Premium Vinyl",
+          "price": "33.14",
+          "sku": "",
+          "metafield": null
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221524795730",
+          "quality": "Selbstklebend",
+          "title": "Selbstklebend",
+          "price": "41.65",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505820811602",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/443387740498"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221524828498",
+          "quality": "Airtex Exklusiv",
+          "title": "Airtex Exklusiv",
+          "price": "69.90",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505820844370",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/443390820690"
+          }
+        }
+      ]
+    },
+    "5-3": {
+      "id": "gid://shopify/Product/11015545389394",
+      "title": "Fototapete Leopardenmuster Beige",
+      "handle": "5-3",
+      "options": [
+        {
+          "id": "gid://shopify/ProductOption/13683983679826",
+          "name": "Quality",
+          "values": [
+            "Standard",
+            "Premium",
+            "Premium Vinyl",
+            "Selbstklebend",
+            "Airtex Exklusiv"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "gid://shopify/ProductVariant/54221524304210",
+          "quality": "Standard",
+          "title": "Standard",
+          "price": "22.96",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505818812754",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/411728183634"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221524336978",
+          "quality": "Premium",
+          "title": "Premium",
+          "price": "28.89",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505818845522",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/412147056978"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221524369746",
+          "quality": "Premium Vinyl",
+          "title": "Premium Vinyl",
+          "price": "33.14",
+          "sku": "",
+          "metafield": null
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221524402514",
+          "quality": "Selbstklebend",
+          "title": "Selbstklebend",
+          "price": "41.65",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505818911058",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/443387740498"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221524435282",
+          "quality": "Airtex Exklusiv",
+          "title": "Airtex Exklusiv",
+          "price": "69.90",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505818943826",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/443390820690"
+          }
+        }
+      ]
+    },
+    "4-3": {
+      "id": "gid://shopify/Product/11015545356626",
+      "title": "Fototapete Jaguar im tropischen Paradies",
+      "handle": "4-3",
+      "options": [
+        {
+          "id": "gid://shopify/ProductOption/13683983647058",
+          "name": "Quality",
+          "values": [
+            "Standard",
+            "Premium",
+            "Premium Vinyl",
+            "Selbstklebend",
+            "Airtex Exklusiv"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "gid://shopify/ProductVariant/54221524140370",
+          "quality": "Standard",
+          "title": "Standard",
+          "price": "22.96",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505818124626",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/411728183634"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221524173138",
+          "quality": "Premium",
+          "title": "Premium",
+          "price": "28.89",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505818157394",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/412147056978"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221524205906",
+          "quality": "Premium Vinyl",
+          "title": "Premium Vinyl",
+          "price": "33.14",
+          "sku": "",
+          "metafield": null
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221524238674",
+          "quality": "Selbstklebend",
+          "title": "Selbstklebend",
+          "price": "41.65",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505818222930",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/443387740498"
+          }
+        },
+        {
+          "id": "gid://shopify/ProductVariant/54221524271442",
+          "quality": "Airtex Exklusiv",
+          "title": "Airtex Exklusiv",
+          "price": "69.90",
+          "sku": "",
+          "metafield": {
+            "id": "gid://shopify/Metafield/71505818255698",
+            "type": "metaobject_reference",
+            "value": "gid://shopify/Metaobject/443390820690"
+          }
+        }
+      ]
+    }
+  }
+}
