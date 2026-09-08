@@ -42,15 +42,33 @@ export async function loader({params, context, request}: Route.LoaderArgs) {
     throw new Response(t('account.orderNotFound'), {status: 404});
   }
 
-  const {data, errors}: {data: OrderQuery; errors?: Array<{message: string}>} =
-    await customerAccount.query(CUSTOMER_ORDER_QUERY, {
+  const {data, errors} = await customerAccount.query<OrderQuery | null>(
+    CUSTOMER_ORDER_QUERY,
+    {
       variables: {
         orderId,
         language: customerAccount.i18n.language,
       },
+    },
+  );
+
+  if (errors?.length) {
+    console.error('Customer Account API GraphQL request failed.', {
+      operation: 'Order',
+      errors: errors.map((error) => {
+        const code = error.extensions?.code;
+
+        return {
+          message: error.message,
+          ...(typeof code === 'string' ? {code} : {}),
+        };
+      }),
     });
 
-  if (errors?.length || !data?.order) {
+    throw new Response('Customer Account API request failed.', {status: 502});
+  }
+
+  if (!data?.order) {
     throw new Response(t('account.orderNotFound'), {status: 404});
   }
 
@@ -268,19 +286,12 @@ export default function OrderRoute() {
   );
 }
 
-type OrderedLineMoney = NonNullable<
-  OrderLineItemFullFragment['totalPriceWithDiscounts']
->;
+type OrderedLineMoney = NonNullable<OrderLineItemFullFragment['totalPrice']>;
 
 function getEffectiveOrderedLineTotal(
   lineItem: OrderLineItemFullFragment,
 ): OrderedLineMoney | null {
-  return (
-    lineItem.totalPriceWithDiscounts ??
-    lineItem.totalPrice ??
-    lineItem.currentTotalPrice ??
-    null
-  );
+  return lineItem.totalPrice ?? lineItem.currentTotalPrice ?? null;
 }
 
 function deriveOrderedUnitPrice(

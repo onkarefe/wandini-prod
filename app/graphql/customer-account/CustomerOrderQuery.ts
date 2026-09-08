@@ -19,16 +19,10 @@ export const CUSTOMER_ORDER_QUERY = `#graphql
     id
     title
     quantity
-    price {
-      ...OrderMoney
-    }
     currentTotalPrice {
       ...OrderMoney
     }
     totalPrice {
-      ...OrderMoney
-    }
-    totalPriceWithDiscounts {
       ...OrderMoney
     }
     discountAllocations {
