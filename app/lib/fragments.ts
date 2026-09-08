@@ -64,6 +64,9 @@ export const CART_QUERY_FRAGMENT = `#graphql
           masterAssetId: metafield(namespace: "custom", key: "master_asset_id") {
             value
           }
+          productLayout: metafield(namespace: "custom", key: "product_layout") {
+            value
+          }
         }
         selectedOptions {
           name
@@ -129,6 +132,9 @@ export const CART_QUERY_FRAGMENT = `#graphql
           id
           vendor
           masterAssetId: metafield(namespace: "custom", key: "master_asset_id") {
+            value
+          }
+          productLayout: metafield(namespace: "custom", key: "product_layout") {
             value
           }
         }

@@ -35,6 +35,8 @@ export function CartLineItem({
   const displayPrice = getCartLineDisplayTotal(
     line as unknown as CartLinePricingLike,
   );
+  const isZubehorProduct =
+    product.productLayout?.value?.trim().toLowerCase() === 'zubehor';
 
   return (
     <li key={id} className={`custom-cart-line custom-cart-line--${layout}`}>
@@ -75,6 +77,9 @@ export function CartLineItem({
             </li>
           ))}
         </ul>
+        {layout === 'page' && isZubehorProduct ? (
+          <CartLineQuantity line={line} />
+        ) : null}
         <CartLineRemove line={line} />
       </div>
     </li>
@@ -123,6 +128,49 @@ export function CartLineItem({
 //     </div>
 //   );
 // }
+
+function CartLineQuantity({line}: {line: CartLine}) {
+  const {t} = useTranslation();
+
+  if (!line || typeof line.quantity === 'undefined') return null;
+
+  const {id: lineId, quantity, isOptimistic} = line;
+  const previousQuantity = Math.max(1, quantity - 1);
+  const nextQuantity = quantity + 1;
+  const updateDisabled = Boolean(isOptimistic);
+
+  return (
+    <div
+      className="custom-cart-line__quantity"
+      role="group"
+      aria-label={t('product.quantity')}
+    >
+      <CartLineUpdateButton lines={[{id: lineId, quantity: previousQuantity}]}>
+        <button
+          type="submit"
+          aria-label={t('product.decreaseQuantity')}
+          disabled={quantity <= 1 || updateDisabled}
+        >
+          <span aria-hidden="true">−</span>
+        </button>
+      </CartLineUpdateButton>
+
+      <span className="custom-cart-line__quantity-value" aria-live="polite">
+        {quantity}
+      </span>
+
+      <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
+        <button
+          type="submit"
+          aria-label={t('product.increaseQuantity')}
+          disabled={updateDisabled}
+        >
+          <span aria-hidden="true">+</span>
+        </button>
+      </CartLineUpdateButton>
+    </div>
+  );
+}
 
 function CartLineRemove({line}: {line: CartLine}) {
   if (!line || typeof line?.quantity === 'undefined') return null;

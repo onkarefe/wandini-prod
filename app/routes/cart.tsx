@@ -322,7 +322,7 @@ export default function Cart() {
     : false;
 
   return (
-    <div className="cartMainContainer">
+    <div className="cartMainContainer container mx-auto">
       <header className="cart-page-header">
         <h1>{t('cart.pageTitle')}</h1>
         <p>{t('cart.pageIntro')}</p>

@@ -207,25 +207,32 @@ afterEach(() => {
 
 describe('Draft Order line preparation', () => {
   it('overrides only configured wallpaper and preserves accessory quantity', async () => {
-    const prepared = await prepareDraftOrder(cart(), pricingClient());
+    const mixedCart = cart();
+    mixedCart.lines.nodes[1].attributes = [{key: 'size', value: 'large'}];
+
+    const prepared = await prepareDraftOrder(mixedCart, pricingClient());
     expect(prepared.input.lineItems).toEqual([
       expect.objectContaining({
         variantId: 'gid://shopify/ProductVariant/1',
         quantity: 1,
         priceOverride: {amount: '144.45', currencyCode: 'EUR'},
         customAttributes: expect.arrayContaining([
-          {key: 'configurator_payload', value: payload},
+          {key: '_configurator_payload', value: payload},
+          {
+            key: '_configurator_instance_id',
+            value: 'configuration-1',
+          },
         ]),
       }),
       {
         variantId: 'gid://shopify/ProductVariant/2',
         quantity: 2,
+        customAttributes: [{key: 'size', value: 'large'}],
       },
     ]);
     expect(prepared.input.discountCodes).toEqual(['WAND10']);
     expect(prepared.input).not.toHaveProperty('sessionToken');
     expect(prepared.input).not.toHaveProperty('visibleToCustomer');
-    expect(prepared.input.lineItems[1].customAttributes).toBeUndefined();
   });
 
   it('produces the same fingerprint for retries and a new one after cart change', async () => {
@@ -267,11 +274,19 @@ describe('Draft Order line preparation', () => {
       pricingClient(),
     );
 
-    expect(attributes).toEqual(
+    expect(attributes).toEqual([
+      {key: '_configurator_payload', value: exactPayload},
+      {key: '_configurator_instance_id', value: 'configuration-1'},
+      {key: 'finish', value: 'matte'},
+    ]);
+    expect(attributes).not.toEqual(
       expect.arrayContaining([
-        {key: 'configurator_payload', value: exactPayload},
-        {key: 'configurator_instance_id', value: 'configuration-1'},
-        {key: 'finish', value: 'matte'},
+        expect.objectContaining({key: 'configurator_payload'}),
+      ]),
+    );
+    expect(attributes).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({key: 'configurator_instance_id'}),
       ]),
     );
     expect(prepared.fingerprint).not.toBe(normalized.fingerprint);
@@ -421,7 +436,7 @@ describe('Draft Order line preparation', () => {
       prepared.input.lineItems.map(
         (line) =>
           line.customAttributes?.find(
-            ({key}) => key === 'configurator_instance_id',
+            ({key}) => key === '_configurator_instance_id',
           )?.value,
       ),
     ).toEqual(['configuration-1', 'configuration-2']);

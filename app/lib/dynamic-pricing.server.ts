@@ -19,7 +19,11 @@ const EXPECTED_CHECKOUT_CURRENCY = 'EUR';
 const CHECKOUT_FINGERPRINT_ATTRIBUTE = 'wandini_checkout_fingerprint';
 const CHECKOUT_CART_ATTRIBUTE = 'wandini_cart_id';
 const CHECKOUT_TAG = 'wandini-dynamic-pricing';
-const CHECKOUT_FINGERPRINT_VERSION = 1;
+const CHECKOUT_FINGERPRINT_VERSION = 2;
+const PRIVATE_CONFIGURATOR_PAYLOAD_ATTRIBUTE =
+  `_${CONFIGURATOR_PAYLOAD_ATTRIBUTE}`;
+const PRIVATE_CONFIGURATOR_INSTANCE_ATTRIBUTE =
+  `_${CONFIGURATOR_INSTANCE_ATTRIBUTE}`;
 
 type DynamicPricingEnv = Pick<
   Env,
@@ -497,7 +501,7 @@ export function mapCartLineToDraftOrderLine(
 
   const customAttributes = line.attributes
     .filter(hasStringValue)
-    .map(({key, value}) => ({key, value}));
+    .map(mapCartAttributeToDraftOrderAttribute);
   const payloadAttribute = line.attributes.find(
     ({key}) => key === CONFIGURATOR_PAYLOAD_ATTRIBUTE,
   );
@@ -966,6 +970,22 @@ function hasStringValue(
   attribute: CartAttribute,
 ): attribute is {key: string; value: string} {
   return Boolean(attribute.key && typeof attribute.value === 'string');
+}
+
+function mapCartAttributeToDraftOrderAttribute({
+  key,
+  value,
+}: {
+  key: string;
+  value: string;
+}) {
+  if (key === CONFIGURATOR_PAYLOAD_ATTRIBUTE) {
+    return {key: PRIVATE_CONFIGURATOR_PAYLOAD_ATTRIBUTE, value};
+  }
+  if (key === CONFIGURATOR_INSTANCE_ATTRIBUTE) {
+    return {key: PRIVATE_CONFIGURATOR_INSTANCE_ATTRIBUTE, value};
+  }
+  return {key, value};
 }
 
 function sortAttributes<T extends {key: string; value: string}>(

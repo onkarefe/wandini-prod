@@ -86,6 +86,9 @@ export type CartLineFragment = Pick<
       masterAssetId?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.Metafield, 'value'>
       >;
+      productLayout?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'value'>
+      >;
     };
     selectedOptions: Array<
       Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
@@ -142,6 +145,9 @@ export type CartLineComponentFragment = Pick<
       'handle' | 'title' | 'id' | 'vendor'
     > & {
       masterAssetId?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'value'>
+      >;
+      productLayout?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.Metafield, 'value'>
       >;
     };
@@ -233,6 +239,9 @@ export type CartApiQueryFragment = Pick<
               masterAssetId?: StorefrontAPI.Maybe<
                 Pick<StorefrontAPI.Metafield, 'value'>
               >;
+              productLayout?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.Metafield, 'value'>
+              >;
             };
             selectedOptions: Array<
               Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
@@ -297,6 +306,9 @@ export type CartApiQueryFragment = Pick<
               'handle' | 'title' | 'id' | 'vendor'
             > & {
               masterAssetId?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.Metafield, 'value'>
+              >;
+              productLayout?: StorefrontAPI.Maybe<
                 Pick<StorefrontAPI.Metafield, 'value'>
               >;
             };
