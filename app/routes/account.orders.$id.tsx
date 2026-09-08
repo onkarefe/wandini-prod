@@ -215,28 +215,32 @@ export default function OrderRoute() {
                   </td>
                 </tr>
               )}
-              <tr>
-                <th scope="row" colSpan={3}>
-                  {t('account.subtotal')}
-                </th>
-                <td>
-                  <Money data={order.subtotal!} />
-                </td>
-              </tr>
-              <tr>
-                <th scope="row" colSpan={3}>
-                  {t('account.tax')}
-                </th>
-                <td>
-                  <Money data={order.totalTax!} />
-                </td>
-              </tr>
+              {order.subtotal ? (
+                <tr>
+                  <th scope="row" colSpan={3}>
+                    {t('account.subtotal')}
+                  </th>
+                  <td>
+                    <Money data={order.subtotal} />
+                  </td>
+                </tr>
+              ) : null}
+              {order.totalTax ? (
+                <tr>
+                  <th scope="row" colSpan={3}>
+                    {t('account.tax')}
+                  </th>
+                  <td>
+                    <Money data={order.totalTax} />
+                  </td>
+                </tr>
+              ) : null}
               <tr className="account-order__grand-total">
                 <th scope="row" colSpan={3}>
                   {t('account.total')}
                 </th>
                 <td>
-                  <Money data={order.totalPrice!} />
+                  <Money data={order.totalPrice} />
                 </td>
               </tr>
             </tfoot>
@@ -264,45 +268,84 @@ export default function OrderRoute() {
   );
 }
 
-function getLineItemDisplayTotal(lineItem: OrderLineItemFullFragment) {
-  if (lineItem.totalPriceWithDiscounts) {
-    return lineItem.totalPriceWithDiscounts;
-  }
+type OrderedLineMoney = NonNullable<
+  OrderLineItemFullFragment['totalPriceWithDiscounts']
+>;
 
-  if (lineItem.totalPrice) {
-    return lineItem.totalPrice;
-  }
+function getEffectiveOrderedLineTotal(
+  lineItem: OrderLineItemFullFragment,
+): OrderedLineMoney | null {
+  return (
+    lineItem.totalPriceWithDiscounts ??
+    lineItem.totalPrice ??
+    lineItem.currentTotalPrice ??
+    null
+  );
+}
 
-  if (lineItem.currentTotalPrice) {
-    return lineItem.currentTotalPrice;
-  }
-
-  if (!lineItem.price) {
+function deriveOrderedUnitPrice(
+  lineTotal: OrderedLineMoney | null,
+  quantity: number,
+): OrderedLineMoney | null {
+  if (!lineTotal || !Number.isSafeInteger(quantity) || quantity <= 0) {
     return null;
   }
 
-  const unitPriceAmount = Number(lineItem.price.amount);
-  const totalDiscountAmount = Number(lineItem.totalDiscount?.amount ?? 0);
+  const amountMatch = /^(\d+)(?:\.(\d+))?$/.exec(lineTotal.amount);
+  if (!amountMatch) return null;
 
-  if (
-    !Number.isFinite(unitPriceAmount) ||
-    !Number.isFinite(totalDiscountAmount)
-  ) {
-    return lineItem.price;
-  }
+  const whole = amountMatch[1];
+  if (!whole) return null;
+
+  const fraction = amountMatch[2] ?? '';
+  const amountNumerator = BigInt(`${whole}${fraction}`);
+  const amountDenominator = 10n ** BigInt(fraction.length);
+  const fractionDigits = getCurrencyFractionDigits(lineTotal.currencyCode);
+  const minorUnitScale = 10n ** BigInt(fractionDigits);
+  const divisor = amountDenominator * BigInt(quantity);
+  const unitMinorUnits =
+    (amountNumerator * minorUnitScale + divisor / 2n) / divisor;
 
   return {
-    amount: Math.max(
-      0,
-      unitPriceAmount * lineItem.quantity - totalDiscountAmount,
-    ).toFixed(2),
-    currencyCode: lineItem.price.currencyCode,
+    amount: formatMinorUnits(unitMinorUnits, fractionDigits),
+    currencyCode: lineTotal.currencyCode,
   };
+}
+
+function getCurrencyFractionDigits(currencyCode: string) {
+  try {
+    const fractionDigits = new Intl.NumberFormat('en', {
+      style: 'currency',
+      currency: currencyCode,
+    }).resolvedOptions().maximumFractionDigits;
+
+    return typeof fractionDigits === 'number' &&
+      Number.isInteger(fractionDigits) &&
+      fractionDigits >= 0 &&
+      fractionDigits <= 4
+      ? fractionDigits
+      : 2;
+  } catch {
+    return 2;
+  }
+}
+
+function formatMinorUnits(minorUnits: bigint, fractionDigits: number) {
+  if (fractionDigits === 0) return minorUnits.toString();
+
+  const scale = 10n ** BigInt(fractionDigits);
+  const whole = minorUnits / scale;
+  const fraction = (minorUnits % scale)
+    .toString()
+    .padStart(fractionDigits, '0');
+
+  return `${whole}.${fraction}`;
 }
 
 function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
   const {t} = useTranslation();
-  const lineTotal = getLineItemDisplayTotal(lineItem);
+  const lineTotal = getEffectiveOrderedLineTotal(lineItem);
+  const unitPrice = deriveOrderedUnitPrice(lineTotal, lineItem.quantity);
 
   return (
     <tr>
@@ -323,7 +366,7 @@ function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
       </td>
       <td data-label={t('account.quantity')}>{lineItem.quantity}</td>
       <td data-label={t('account.unitPrice')}>
-        <Money data={lineItem.price!} />
+        {unitPrice ? <Money data={unitPrice} /> : null}
       </td>
       <td data-label={t('account.sum')}>
         {lineTotal ? <Money data={lineTotal} /> : <span>-</span>}
