@@ -46,8 +46,7 @@ type ConfiguratorMaterialVisual = {
 };
 
 const MATERIAL_VISUALS = {
-  standard: {
-  },
+  standard: {},
   premium: {
     featured: true,
   },
@@ -80,6 +79,10 @@ export function resolveMaterialVisual(
   }
 
   return null;
+}
+
+export function isSeamlessMaterialIdentity(identity: string): boolean {
+  return identity.trim().toLowerCase() === 'airtex-exklusiv';
 }
 
 type ConfiguratorFlowHeaderProps = {
@@ -327,6 +330,9 @@ export function ConfiguratorModal({
 
   const selectedMaterial =
     materialOptions.find((material) => material.selected) ?? null;
+  const isSeamlessMaterial = isSeamlessMaterialIdentity(
+    selectedMaterial?.identity ?? '',
+  );
 
   return (
     <div className="configuratorModalOverlay" role="presentation">
@@ -544,6 +550,7 @@ export function ConfiguratorModal({
                 crop={crop}
                 selectedQualitySummary={selectedQualitySummary}
                 totalPrice={selectedMaterial?.calculatedPrice}
+                isSeamless={isSeamlessMaterial}
               />
             </div>
             <div className="configuratorFlowFooter configuratorPreviewActions">

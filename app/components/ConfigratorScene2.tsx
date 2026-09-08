@@ -24,6 +24,7 @@ type ConfigratorScene2Props = {
   crop: CropRect | null;
   selectedQualitySummary?: SelectedQualitySummary;
   totalPrice?: string;
+  isSeamless?: boolean;
 };
 
 type CroppedPreview = {
@@ -38,7 +39,12 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-function calculatePanelWidths(totalWidthCm: number): number[] {
+export function calculatePreviewPanelWidths(
+  totalWidthCm: number,
+  isSeamless = false,
+): number[] {
+  if (isSeamless) return [];
+
   const safeWidth = Math.max(0, totalWidthCm);
   if (!safeWidth) return [];
 
@@ -158,12 +164,13 @@ export function ConfigratorScene2({
   crop,
   selectedQualitySummary,
   totalPrice,
+  isSeamless = false,
 }: ConfigratorScene2Props) {
   const {t} = useTranslation();
   const shouldRender = isOpen || inline;
   const expectedPanelWidths = useMemo(
-    () => calculatePanelWidths(widthCm),
-    [widthCm],
+    () => calculatePreviewPanelWidths(widthCm, isSeamless),
+    [isSeamless, widthCm],
   );
   const [preview, setPreview] = useState<CroppedPreview | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -193,11 +200,7 @@ export function ConfigratorScene2({
       .then((nextPreview) => {
         if (cancelled) return;
         setPreview(nextPreview);
-        setError(
-          nextPreview
-            ? null
-            : 'preview',
-        );
+        setError(nextPreview ? null : 'preview');
       })
       .catch(() => {
         if (cancelled) return;
@@ -237,11 +240,19 @@ export function ConfigratorScene2({
 
       <section
         className="wallOrderReview__preview"
-        aria-label={t('configurator.panelPreview')}
+        aria-label={
+          isSeamless
+            ? t('configurator.seamlessPreview')
+            : t('configurator.panelPreview')
+        }
       >
         {isLoading && (
           <div className="wallOrderReview__status">
-            {t('configurator.creatingPanels')}
+            {t(
+              isSeamless
+                ? 'configurator.creatingSeamlessPreview'
+                : 'configurator.creatingPanels',
+            )}
           </div>
         )}
 
@@ -255,7 +266,7 @@ export function ConfigratorScene2({
           </div>
         )}
 
-        {!isLoading && !error && preview && panelCount > 0 && (
+        {!isLoading && !error && preview && (isSeamless || panelCount > 0) && (
           <div className="wallOrderReview__scroller">
             <figure
               className="wallOrderReview__artwork"
@@ -270,29 +281,30 @@ export function ConfigratorScene2({
                 alt={t('configurator.wallpaperPreviewAlt')}
               />
               <div className="wallOrderReview__panelGuides" aria-hidden="true">
-                {expectedPanelWidths.map((currentWidth, index) => {
-                  const widthBefore = expectedPanelWidths
-                    .slice(0, index)
-                    .reduce((sum, itemWidth) => sum + itemWidth, 0);
-                  const left = (widthBefore / totalPanelWidth) * 100;
-                  const segmentWidth = (currentWidth / totalPanelWidth) * 100;
+                {!isSeamless &&
+                  expectedPanelWidths.map((currentWidth, index) => {
+                    const widthBefore = expectedPanelWidths
+                      .slice(0, index)
+                      .reduce((sum, itemWidth) => sum + itemWidth, 0);
+                    const left = (widthBefore / totalPanelWidth) * 100;
+                    const segmentWidth = (currentWidth / totalPanelWidth) * 100;
 
-                  return (
-                    <div
-                      key={index}
-                      className="wallOrderReview__panelGuide"
-                      style={{
-                        left: `${left}%`,
-                        width: `${segmentWidth}%`,
-                      }}
-                    >
-                      <span>
-                        {t('configurator.panel', {number: index + 1})}
-                        <strong>{formatCm(currentWidth)} cm</strong>
-                      </span>
-                    </div>
-                  );
-                })}
+                    return (
+                      <div
+                        key={left}
+                        className="wallOrderReview__panelGuide"
+                        style={{
+                          left: `${left}%`,
+                          width: `${segmentWidth}%`,
+                        }}
+                      >
+                        <span>
+                          {t('configurator.panel', {number: index + 1})}
+                          <strong>{formatCm(currentWidth)} cm</strong>
+                        </span>
+                      </div>
+                    );
+                  })}
               </div>
             </figure>
           </div>
@@ -317,8 +329,12 @@ export function ConfigratorScene2({
           </div>
           <div>
             <span>{t('configurator.layout')}</span>
-            <strong>{t('configurator.panels', {count: panelCount})}</strong>
-            {panelWidth > 0 && (
+            <strong>
+              {isSeamless
+                ? t('configurator.seamlessLayout')
+                : t('configurator.panels', {count: panelCount})}
+            </strong>
+            {!isSeamless && panelWidth > 0 && (
               <small>
                 {t('configurator.panelWidth', {width: formatCm(panelWidth)})}
               </small>

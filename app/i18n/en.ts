@@ -188,9 +188,12 @@ export const en = {
   'configurator.previewClose': 'Close preview',
   'configurator.roomPreview': 'Product preview in room',
   'configurator.panelPreview': 'Wallpaper panel preview',
+  'configurator.seamlessPreview': 'Seamless wallpaper preview',
   'configurator.orderSummary': 'Order summary',
   'configurator.wallpaperPreviewAlt': 'Preview of the cropped wall mural',
   'configurator.creatingPanels': 'Creating wallpaper panels …',
+  'configurator.creatingSeamlessPreview':
+    'Creating seamless wallpaper preview …',
   'configurator.invalidDimensions':
     'A preview could not be created for these dimensions.',
   'configurator.previewFailed': 'The wallpaper panels could not be created.',
@@ -200,6 +203,7 @@ export const en = {
   'configurator.layout': 'Layout',
   'configurator.panels': '{count} panels',
   'configurator.panelWidth': 'approx. {width} cm wide each',
+  'configurator.seamlessLayout': 'Seamless · one piece',
   'configurator.material': 'Material',
   'configurator.totalPrice': 'Total price',
   'configurator.installationNoticeTitle': 'Installation note',

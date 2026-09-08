@@ -188,9 +188,12 @@ export const de = {
   'configurator.previewClose': 'Vorschau schließen',
   'configurator.roomPreview': 'Produktvorschau im Raum',
   'configurator.panelPreview': 'Vorschau der Tapetenbahnen',
+  'configurator.seamlessPreview': 'Vorschau der nahtlosen Tapete',
   'configurator.orderSummary': 'Bestellübersicht',
   'configurator.wallpaperPreviewAlt': 'Vorschau der zugeschnittenen Fototapete',
   'configurator.creatingPanels': 'Tapetenbahnen werden erstellt …',
+  'configurator.creatingSeamlessPreview':
+    'Nahtlose Tapetenvorschau wird erstellt …',
   'configurator.invalidDimensions':
     'Für diese Maße konnte keine Vorschau erstellt werden.',
   'configurator.previewFailed':
@@ -201,6 +204,7 @@ export const de = {
   'configurator.layout': 'Aufteilung',
   'configurator.panels': '{count} Bahnen',
   'configurator.panelWidth': 'je ca. {width} cm breit',
+  'configurator.seamlessLayout': 'Nahtlos · einteilig',
   'configurator.material': 'Material',
   'configurator.totalPrice': 'Gesamtpreis',
   'configurator.installationNoticeTitle': 'Montagehinweis',
