@@ -2,6 +2,16 @@ import {Suspense} from 'react';
 import {Await} from 'react-router';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
 import wandiniWhiteLogo from '~/assets/logos/wanWhite.png';
+import amexIcon from '~/assets/Icons/amex.svg';
+import applePayIcon from '~/assets/Icons/applepay.svg';
+import googlePayIcon from '~/assets/Icons/googlepay.svg';
+import klarnaIcon from '~/assets/Icons/klarna.svg';
+import maestroIcon from '~/assets/Icons/maestro.svg';
+import mastercardIcon from '~/assets/Icons/mastercard.svg';
+import paypalIcon from '~/assets/Icons/paypal.svg';
+import shopPayIcon from '~/assets/Icons/shop_pay.svg';
+import unionPayIcon from '~/assets/Icons/unionpay.svg';
+import visaIcon from '~/assets/Icons/visa.svg';
 import {NavLink} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
 
@@ -10,6 +20,19 @@ interface FooterProps {
   header: HeaderQuery;
   publicStoreDomain: string;
 }
+
+const PAYMENT_METHODS = [
+  {name: 'Visa', icon: visaIcon},
+  {name: 'Mastercard', icon: mastercardIcon},
+  {name: 'Maestro', icon: maestroIcon},
+  {name: 'American Express', icon: amexIcon},
+  {name: 'PayPal', icon: paypalIcon},
+  {name: 'Apple Pay', icon: applePayIcon},
+  {name: 'Google Pay', icon: googlePayIcon},
+  {name: 'Klarna', icon: klarnaIcon},
+  {name: 'Shop Pay', icon: shopPayIcon},
+  {name: 'UnionPay', icon: unionPayIcon},
+] as const;
 
 /**
  * Footer linklerini normalize eder.
@@ -141,6 +164,16 @@ export function Footer({
 
                 <div className='footerSubBanner'>
                   <span>{t('footer.copyright')}</span>
+                  <ul
+                    className='footerPaymentMethods'
+                    aria-label='Accepted payment methods'
+                  >
+                    {PAYMENT_METHODS.map((method) => (
+                      <li key={method.name}>
+                        <img src={method.icon} alt={method.name} loading='lazy' />
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </div>

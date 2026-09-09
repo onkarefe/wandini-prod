@@ -927,15 +927,49 @@
 }
 
 .footerSubBanner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
   padding: 20px 0 24px;
   margin: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.28);
 }
 
 .footerSubBanner span {
+  flex: 0 1 auto;
   color: rgba(255, 255, 255, 0.62);
   font-size: 12px;
   line-height: 1.4;
+}
+
+.footerPaymentMethods {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footerPaymentMethods li {
+  display: flex;
+  width: 57px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 3px;
+}
+
+.footerPaymentMethods img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .footer-subsBox {
@@ -1729,9 +1763,24 @@ aside header .close {
   }
 
   .footerSubBanner {
+    flex-direction: column;
+    align-items: flex-start;
     margin: 0;
     padding: 18px 0 20px;
     text-align: left;
+  }
+
+  .footerPaymentMethods {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(5, 46px);
+    gap: 7px;
+    justify-content: flex-start;
+  }
+
+  .footerPaymentMethods li {
+    width: 46px;
+    height: 29px;
   }
 }
 
@@ -1792,7 +1841,21 @@ aside header .close {
   }
 
   .footerSubBanner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
     margin-inline: 0;
+  }
+
+  .footerPaymentMethods {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .footerPaymentMethods li {
+    width: 48px;
+    height: 30px;
   }
 }
 
@@ -1815,6 +1878,15 @@ aside header .close {
     gap: 24px 20px;
     padding-left: 32px;
   }
+
+  .footerPaymentMethods {
+    gap: 5px;
+  }
+
+  .footerPaymentMethods li {
+    width: 48px;
+    height: 30px;
+  }
 }
 
 /* xl only: 1280–1535px */
@@ -1836,5 +1908,15 @@ aside header .close {
 @media (max-width: 359.97px) {
   .footer-main > .container {
     padding-inline: 12px;
+  }
+
+  .footerPaymentMethods {
+    grid-template-columns: repeat(5, 42px);
+    gap: 6px;
+  }
+
+  .footerPaymentMethods li {
+    width: 42px;
+    height: 27px;
   }
 }
