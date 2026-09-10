@@ -107,6 +107,8 @@ export async function fetchSimilarProductsBaseData({
   const products: SimilarProductsBaseProduct[] = [];
   let endCursor: string | null = null;
   let hasNextPage = true;
+  let collectionId: string | null = null;
+  let resolvedCategoryHandle = categoryHandle;
   let collectionTitle: string | null = null;
 
   while (hasNextPage) {
@@ -121,13 +123,19 @@ export async function fetchSimilarProductsBaseData({
     const collection = data.collection;
 
     if (!collection) {
-      throw new Response(`Kollektion ${categoryHandle} wurde nicht gefunden.`, {
-        status: 404,
-      });
+      throw new Response(null, {status: 404});
     }
 
     if (typeof collection.title === 'string') {
       collectionTitle = collection.title;
+    }
+
+    if (typeof collection.id === 'string') {
+      collectionId = collection.id;
+    }
+
+    if (typeof collection.handle === 'string' && collection.handle.length > 0) {
+      resolvedCategoryHandle = collection.handle;
     }
 
     for (const product of collection.products?.nodes ?? []) {
@@ -142,7 +150,8 @@ export async function fetchSimilarProductsBaseData({
   }
 
   return {
-    categoryHandle,
+    categoryHandle: resolvedCategoryHandle,
+    collectionId,
     collectionTitle,
     products,
   };
@@ -162,7 +171,10 @@ async function fetchCollectionHandles(storefront: StorefrontClientLike) {
     });
 
     for (const collection of data.collections?.nodes ?? []) {
-      if (typeof collection.handle === 'string' && collection.handle.length > 0) {
+      if (
+        typeof collection.handle === 'string' &&
+        collection.handle.length > 0
+      ) {
         handles.push(collection.handle);
       }
     }
@@ -177,10 +189,14 @@ async function fetchCollectionHandles(storefront: StorefrontClientLike) {
   return handles.sort((left, right) => right.length - left.length);
 }
 
-function resolveCategoryHandleFromSlug(slug: string, collectionHandles: string[]) {
+function resolveCategoryHandleFromSlug(
+  slug: string,
+  collectionHandles: string[],
+) {
   return (
-    collectionHandles.find((handle) => slug === handle || slug.endsWith(`-${handle}`)) ??
-    null
+    collectionHandles.find(
+      (handle) => slug === handle || slug.endsWith(`-${handle}`),
+    ) ?? null
   );
 }
 
@@ -383,6 +399,13 @@ export function removeDuplicateProductsById(
   });
 }
 
+export function mergeSimilarProductsById(
+  currentProducts: SimilarProductsBaseProduct[],
+  incomingProducts: SimilarProductsBaseProduct[],
+) {
+  return removeDuplicateProductsById([...currentProducts, ...incomingProducts]);
+}
+
 export function getInitialSimilarProductsPage({
   products,
   pageSize = 15,
@@ -427,6 +450,8 @@ function getPaginatedSimilarProducts({
 
 export type SimilarProductsResolvedTarget = {
   slug: string;
+  referenceProductId: string;
+  categoryId: string;
   categoryHandle: string;
   collectionTitle: string | null;
   mainMotif: string;
@@ -442,8 +467,10 @@ type SimilarProductsSeoConfigEntry = {
   lastModified?: string | null;
 };
 
-const SIMILAR_PRODUCTS_SEO_CONFIG: Record<string, SimilarProductsSeoConfigEntry> =
-  {};
+const SIMILAR_PRODUCTS_SEO_CONFIG: Record<
+  string,
+  SimilarProductsSeoConfigEntry
+> = {};
 
 export type SimilarProductsSeoSignals = {
   layer1Count: number;
@@ -495,7 +522,8 @@ export function getSimilarProductsSitemapEntries(origin: string) {
   return Object.entries(SIMILAR_PRODUCTS_SEO_CONFIG)
     .filter(([, entry]) => {
       const hasIntroContent =
-        typeof entry.introContent === 'string' && entry.introContent.trim().length > 0;
+        typeof entry.introContent === 'string' &&
+        entry.introContent.trim().length > 0;
 
       return (
         entry.isWhitelisted === true &&
@@ -507,7 +535,8 @@ export function getSimilarProductsSitemapEntries(origin: string) {
       slug,
       url: `${normalizedOrigin}/similar-products/${slug}`,
       lastModified:
-        typeof entry.lastModified === 'string' && entry.lastModified.trim().length > 0
+        typeof entry.lastModified === 'string' &&
+        entry.lastModified.trim().length > 0
           ? entry.lastModified.trim()
           : null,
     }));
@@ -515,11 +544,13 @@ export function getSimilarProductsSitemapEntries(origin: string) {
 
 function resolveSimilarProductsTarget({
   slug,
+  categoryId,
   categoryHandle,
   collectionTitle,
   products,
 }: {
   slug: string;
+  categoryId: string;
   categoryHandle: string;
   collectionTitle: string | null;
   products: SimilarProductsBaseProduct[];
@@ -542,9 +573,7 @@ function resolveSimilarProductsTarget({
   });
 
   if (matchingProducts.length === 0) {
-    throw new Response(`Ziel für ähnliche Produkte ${slug} wurde nicht gefunden.`, {
-      status: 404,
-    });
+    throw new Response(null, {status: 404});
   }
 
   const primaryProduct = matchingProducts[0];
@@ -552,25 +581,26 @@ function resolveSimilarProductsTarget({
   const mainTheme = getMetafieldTextValue(primaryProduct.mainTheme);
 
   if (!mainMotif || !mainTheme) {
-    throw new Response(`Ziel für ähnliche Produkte ${slug} ist ungültig.`, {
-      status: 404,
-    });
+    throw new Response(null, {status: 404});
   }
 
   const room =
     matchingProducts
       .map((product) => getProductRoom(product))
       .find(
-        (
-          value,
-        ): value is NonNullable<ReturnType<typeof getProductRoom>> =>
+        (value): value is NonNullable<ReturnType<typeof getProductRoom>> =>
           typeof value === 'string' && value.length > 0,
-      ) ??
-    null;
-  const colors = [...new Set(matchingProducts.flatMap((product) => getProductColors(product)))];
+      ) ?? null;
+  const colors = [
+    ...new Set(
+      matchingProducts.flatMap((product) => getProductColors(product)),
+    ),
+  ];
 
   return {
     slug,
+    referenceProductId: primaryProduct.id,
+    categoryId,
     categoryHandle,
     collectionTitle,
     mainMotif,
@@ -621,7 +651,10 @@ function buildLayeredSimilarProducts({
   const seenProductIds = new Set<string>();
   const takeLayerProducts = (layerProducts: SimilarProductsBaseProduct[]) => {
     return layerProducts.filter((product) => {
-      if (excludedProductIds.has(product.id) || seenProductIds.has(product.id)) {
+      if (
+        excludedProductIds.has(product.id) ||
+        seenProductIds.has(product.id)
+      ) {
         return false;
       }
 
@@ -643,7 +676,10 @@ function buildLayeredSimilarProducts({
     ...uniqueLayer4Products,
     ...uniqueLayer5Products,
   ];
-  const seoRelevantProducts = [...uniqueLayer1Products, ...uniqueLayer2Products];
+  const seoRelevantProducts = [
+    ...uniqueLayer1Products,
+    ...uniqueLayer2Products,
+  ];
   const supportProducts = [...uniqueLayer3Products, ...uniqueLayer4Products];
   const fallbackProducts = [...uniqueLayer5Products];
   const seoConfigEntry = getSimilarProductsSeoConfigEntry(target.slug);
@@ -717,18 +753,27 @@ export async function getSimilarProductsPageData({
   const categoryHandle = resolveCategoryHandleFromSlug(slug, collectionHandles);
 
   if (!categoryHandle) {
-    throw new Response(`Kategorie für ${slug} konnte nicht ermittelt werden.`, {
-      status: 404,
-    });
+    throw new Response(null, {status: 404});
   }
 
-  const {collectionTitle, products} = await fetchSimilarProductsBaseData({
+  const {
+    categoryHandle: localizedCategoryHandle,
+    collectionId,
+    collectionTitle,
+    products,
+  } = await fetchSimilarProductsBaseData({
     storefront,
     categoryHandle,
   });
+
+  if (!collectionId) {
+    throw new Response(null, {status: 404});
+  }
+
   const target = resolveSimilarProductsTarget({
     slug,
-    categoryHandle,
+    categoryId: collectionId,
+    categoryHandle: localizedCategoryHandle,
     collectionTitle,
     products,
   });

@@ -92,10 +92,6 @@ function ExploreAllCard({data}: {data: SimilarMotifsPreviewData}) {
     <article className="similar-motifs-explore-card">
       <Link
         to={data.similarProductsPath}
-        state={{
-          sourceProductTitle: data.sourceProductTitle,
-          sourceProductImageUrl: data.sourceProductImageUrl,
-        }}
         className="similar-motifs-explore-card__link"
         aria-label={t('similarMotifs.exploreAll')}
       >

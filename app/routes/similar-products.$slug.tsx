@@ -1,14 +1,19 @@
-import {useFetcher, useLoaderData, useLocation} from 'react-router';
+import {useFetcher, useLoaderData} from 'react-router';
+import type {ShouldRevalidateFunction} from 'react-router';
 import {useEffect, useState} from 'react';
 import type {Route} from './+types/similar-products.$slug';
 import {CustomProductCard} from '~/components/CustomProductCard';
 import {
   buildSimilarProductsPath,
   getSimilarProductsPageData,
+  mergeSimilarProductsById,
   type SimilarProductsBaseProduct,
 } from '~/lib/similar-products';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {useTranslation} from '~/i18n/useTranslation';
+import {createTranslator, type Translator} from '~/i18n';
+import {getLocaleFromI18n} from '~/lib/locale';
+import {resolveSimilarProductsLanguageSwitchLinks} from '~/lib/language-switcher';
 import {buildCanonicalUrl, getRobotsDirective} from '~/lib/seo';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import '../styles/collections.css';
@@ -20,7 +25,10 @@ function buildSimilarCategoryLabel(
   collectionTitle: string | null,
   categoryHandle: string,
 ) {
-  if (typeof collectionTitle === 'string' && collectionTitle.trim().length > 0) {
+  if (
+    typeof collectionTitle === 'string' &&
+    collectionTitle.trim().length > 0
+  ) {
     return collectionTitle.trim();
   }
 
@@ -31,24 +39,33 @@ function buildSimilarCategoryLabel(
     .join(' ');
 }
 
-function buildSeoIdentity(target: {
-  mainTheme: string;
-  mainMotif: string;
-  collectionTitle: string | null;
-  categoryHandle: string;
-}) {
+function buildSeoIdentity(
+  target: {
+    mainTheme: string;
+    mainMotif: string;
+    collectionTitle: string | null;
+    categoryHandle: string;
+  },
+  t: Translator,
+) {
   const categoryLabel = buildSimilarCategoryLabel(
     target.collectionTitle,
     target.categoryHandle,
   );
   const heading = `${target.mainTheme} ${target.mainMotif} ${categoryLabel}`;
-  const description = `Entdecken Sie ${categoryLabel} zum Thema „${target.mainTheme}“ und mit dem Motiv „${target.mainMotif}“ sowie verwandte Designs.`;
-  const subtitle = `Entdecken Sie ${categoryLabel.toLowerCase()} mit ähnlichen Motiven, Themen und Bildstilen.`;
+  const description = t('similarProducts.metaDescription', {
+    category: categoryLabel,
+    theme: target.mainTheme,
+    motif: target.mainMotif,
+  });
+  const subtitle = t('similarProducts.subtitle', {
+    category: categoryLabel.toLowerCase(),
+  });
 
   return {
     categoryLabel,
     heading,
-    title: `${heading} | Wandini`,
+    title: t('similarProducts.metaTitle', {heading}),
     description,
     subtitle,
   };
@@ -56,6 +73,7 @@ function buildSeoIdentity(target: {
 
 type LoadMoreResponse = {
   ok: boolean;
+  message?: string;
   target: Awaited<ReturnType<typeof loader>>['target'];
   items: SimilarProductsBaseProduct[];
   total: number;
@@ -64,14 +82,15 @@ type LoadMoreResponse = {
 };
 
 export const meta: Route.MetaFunction = ({data, params}) => {
-  const canonicalUrl = data?.canonicalUrl ?? `/similar-products/${params.slug ?? ''}`;
-  const seoIdentity = data ? buildSeoIdentity(data.target) : null;
+  const canonicalUrl =
+    data?.canonicalUrl ?? `/similar-products/${params.slug ?? ''}`;
+  const t = createTranslator(data?.selectedLocale);
+  const seoIdentity = data?.seoIdentity;
   const title =
     seoIdentity?.title ??
-    `Ähnliche Produkte | ${params.slug ?? ''} | Wandini`;
+    t('similarProducts.fallbackMetaTitle', {slug: params.slug ?? ''});
   const description =
-    seoIdentity?.description ??
-    'Entdecken Sie verwandte Designs, ausgewählt nach Motiv, Thema und Kategorie.';
+    seoIdentity?.description ?? t('similarProducts.fallbackMetaDescription');
 
   return [
     {title},
@@ -87,9 +106,11 @@ export const meta: Route.MetaFunction = ({data, params}) => {
 
 export async function loader({context, params, request}: Route.LoaderArgs) {
   const slug = params.slug;
+  const selectedLocale = getLocaleFromI18n(context.storefront.i18n);
+  const t = createTranslator(selectedLocale);
 
   if (!slug) {
-    throw new Response('Slug für ähnliche Produkte wurde nicht gefunden.', {
+    throw new Response(t('similarProducts.missingSlug'), {
       status: 404,
     });
   }
@@ -107,9 +128,18 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
       request,
     }),
   ]);
+  const languageSwitchLinks = await resolveSimilarProductsLanguageSwitchLinks({
+    storefront: context.storefront,
+    request,
+    referenceProductId: pageData.target.referenceProductId,
+    categoryId: pageData.target.categoryId,
+  });
 
   return {
     ...pageData,
+    selectedLocale,
+    seoIdentity: buildSeoIdentity(pageData.target, t),
+    languageSwitchLinks,
     canonicalUrl: buildCanonicalUrl(
       buildCanonicalRequestUrl(
         request.url,
@@ -124,12 +154,13 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
 
 export async function action({context, params, request}: Route.ActionArgs) {
   const slug = params.slug;
+  const t = createTranslator(getLocaleFromI18n(context.storefront.i18n));
 
   if (!slug) {
     return Response.json(
       {
         ok: false,
-        message: 'Slug für ähnliche Produkte wurde nicht gefunden.',
+        message: t('similarProducts.missingSlug'),
       },
       {status: 404},
     );
@@ -142,7 +173,7 @@ export async function action({context, params, request}: Route.ActionArgs) {
 
   if (!Number.isFinite(offset) || offset < 0) {
     return Response.json(
-      {ok: false, message: 'Ungültiger Offset-Wert.'},
+      {ok: false, message: t('similarProducts.invalidOffset')},
       {status: 400},
     );
   }
@@ -160,22 +191,32 @@ export async function action({context, params, request}: Route.ActionArgs) {
   });
 }
 
+export const shouldRevalidate: ShouldRevalidateFunction = ({
+  formMethod,
+  formAction,
+  currentUrl,
+  defaultShouldRevalidate,
+}) => {
+  if (
+    formMethod?.toUpperCase() === 'POST' &&
+    formAction &&
+    new URL(formAction, currentUrl).pathname === currentUrl.pathname
+  ) {
+    return false;
+  }
+
+  return defaultShouldRevalidate;
+};
+
 export default function SimilarProductsSlugPage() {
   const {t} = useTranslation();
   const initialData = useLoaderData<typeof loader>();
   const fetcher = useFetcher<LoadMoreResponse>();
-  const location = useLocation();
   const [items, setItems] = useState(initialData.items);
   const [nextOffset, setNextOffset] = useState(initialData.nextOffset);
   const [hasMore, setHasMore] = useState(initialData.hasMore);
   const wishlistProductIdSet = new Set(initialData.wishlistProductIds);
-  const heroState = location.state as
-    | {
-        sourceProductTitle?: string;
-        sourceProductImageUrl?: string | null;
-      }
-    | undefined;
-  const seoIdentity = buildSeoIdentity(initialData.target);
+  const seoIdentity = initialData.seoIdentity;
 
   useEffect(() => {
     setItems(initialData.items);
@@ -195,17 +236,9 @@ export default function SimilarProductsSlugPage() {
       return;
     }
 
-    setItems((currentItems) => {
-      const mergedItems = [
-        ...currentItems,
-        ...response.items.filter(
-          (incomingItem: SimilarProductsBaseProduct) =>
-            !currentItems.some((currentItem) => currentItem.id === incomingItem.id),
-        ),
-      ];
-
-      return mergedItems;
-    });
+    setItems((currentItems) =>
+      mergeSimilarProductsById(currentItems, response.items),
+    );
     setNextOffset(response.nextOffset);
     setHasMore(response.hasMore);
   }, [fetcher.data]);
@@ -218,19 +251,7 @@ export default function SimilarProductsSlugPage() {
           {t('wishlist.loadUnavailable')}
         </p>
       ) : null}
-      <div
-        className="collectionMainHeroDiv"
-        style={
-          heroState?.sourceProductImageUrl
-            ? {
-                backgroundImage: `url('${heroState.sourceProductImageUrl}')`,
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: 'cover',
-              }
-            : {}
-        }
-      >
+      <div className="collectionMainHeroDiv">
         <h1>{seoIdentity.heading}</h1>
         <p>{seoIdentity.subtitle}</p>
       </div>
@@ -243,6 +264,7 @@ export default function SimilarProductsSlugPage() {
 
       <div className="collection-products-shell">
         <div className="custom-products-grid container mx-auto">
+          {items.length === 0 ? <p>{t('similarProducts.empty')}</p> : null}
           {items.map((product) => {
             const mainMotif = product.mainMotif?.value?.trim() ?? '';
             const mainTheme = product.mainTheme?.value?.trim() ?? '';
@@ -269,10 +291,6 @@ export default function SimilarProductsSlugPage() {
                 productUrl={`/products/${product.handle}`}
                 showSimilarMotifsButton={hasSimilarProductsTarget}
                 similarProductsUrl={similarProductsUrl ?? undefined}
-                similarProductsSourceTitle={product.title}
-                similarProductsSourceImageUrl={
-                  product.images?.nodes?.[0]?.url ?? undefined
-                }
                 minPrice={
                   product.priceRange?.minVariantPrice
                     ? {
@@ -290,6 +308,12 @@ export default function SimilarProductsSlugPage() {
         </div>
       </div>
 
+      {fetcher.data?.ok === false && fetcher.data.message ? (
+        <p className="wishlist-page-feedback" role="alert">
+          {fetcher.data.message}
+        </p>
+      ) : null}
+
       {hasMore ? (
         <fetcher.Form method="post">
           <input type="hidden" name="offset" value={String(nextOffset)} />
@@ -298,7 +322,9 @@ export default function SimilarProductsSlugPage() {
             className="collectionReloadButton"
             disabled={fetcher.state !== 'idle'}
           >
-            {fetcher.state !== 'idle' ? 'Wird geladen...' : 'Mehr anzeigen'}
+            {fetcher.state !== 'idle'
+              ? t('similarProducts.loading')
+              : t('similarProducts.loadMore')}
           </button>
         </fetcher.Form>
       ) : null}

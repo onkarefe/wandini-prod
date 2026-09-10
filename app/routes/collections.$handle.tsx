@@ -577,10 +577,6 @@ function DefaultCollectionLayout({
                   productUrl={`/products/${product.handle}`}
                   showSimilarMotifsButton={hasMainMotif && hasMainTheme}
                   similarProductsUrl={similarProductsUrl ?? undefined}
-                  similarProductsSourceTitle={product.title}
-                  similarProductsSourceImageUrl={
-                    product.images.nodes[0]?.url ?? undefined
-                  }
                   minPrice={
                     product.priceRange?.minVariantPrice
                       ? {

@@ -1,0 +1,651 @@
+{
+  "generatedAt": "2026-09-09T16:35:43.567Z",
+  "shop": "vurpri-8s.myshopify.com",
+  "apiVersion": "2026-07",
+  "summary": {
+    "collectionProducts": 104,
+    "allStoreProducts": 111,
+    "writesCompleted": 94,
+    "exactTitleDerivedHandles": 104,
+    "globalEnHandleTranslations": 1,
+    "marketSpecificEnHandleTranslations": 0
+  },
+  "products": [
+    {
+      "id": "gid://shopify/Product/11015545749842",
+      "title": "Fototapete Koi mit Lotusblüten",
+      "handle": "fototapete-koi-mit-lotusblueten",
+      "expectedHandle": "fototapete-koi-mit-lotusblueten"
+    },
+    {
+      "id": "gid://shopify/Product/11004616278354",
+      "title": "Fototapete Schwarzer Marmor mit Goldadern",
+      "handle": "fototapete-schwarzer-marmor-mit-goldadern",
+      "expectedHandle": "fototapete-schwarzer-marmor-mit-goldadern"
+    },
+    {
+      "id": "gid://shopify/Product/11015545225554",
+      "title": "Fototapete Traumwal über den Wolken",
+      "handle": "fototapete-traumwal-ueber-den-wolken",
+      "expectedHandle": "fototapete-traumwal-ueber-den-wolken"
+    },
+    {
+      "id": "gid://shopify/Product/11015545094482",
+      "title": "Fototapete Korallenrote Blüten",
+      "handle": "fototapete-korallenrote-blueten",
+      "expectedHandle": "fototapete-korallenrote-blueten"
+    },
+    {
+      "id": "gid://shopify/Product/11003302379858",
+      "title": "Fototapete Türkiser Marmor mit Koralle",
+      "handle": "fototapete-tuerkiser-marmor-mit-koralle",
+      "expectedHandle": "fototapete-tuerkiser-marmor-mit-koralle"
+    },
+    {
+      "id": "gid://shopify/Product/11003300381010",
+      "title": "Fototapete Pastell Marmor mit Türkis und Gold",
+      "handle": "fototapete-pastell-marmor-mit-tuerkis-und-gold",
+      "expectedHandle": "fototapete-pastell-marmor-mit-tuerkis-und-gold"
+    },
+    {
+      "id": "gid://shopify/Product/11002556678482",
+      "title": "Fototapete Pastellblumen auf petrolfarbenem Hintergrund",
+      "handle": "fototapete-pastellblumen-auf-petrolfarbenem-hintergrund",
+      "expectedHandle": "fototapete-pastellblumen-auf-petrolfarbenem-hintergrund"
+    },
+    {
+      "id": "gid://shopify/Product/11002529055058",
+      "title": "Fototapete Schneeberg über den Wolken",
+      "handle": "fototapete-schneeberg-ueber-den-wolken",
+      "expectedHandle": "fototapete-schneeberg-ueber-den-wolken"
+    },
+    {
+      "id": "gid://shopify/Product/10997724250450",
+      "title": "Fototapete Magisches Einhorn mit Herzen und Regenbogen für Mädchenzimmer",
+      "handle": "fototapete-magisches-einhorn-mit-herzen-und-regenbogen-fuer-maedchenzimmer",
+      "expectedHandle": "fototapete-magisches-einhorn-mit-herzen-und-regenbogen-fuer-maedchenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/11015546110290",
+      "title": "0 BASE",
+      "handle": "0-base",
+      "expectedHandle": "0-base"
+    },
+    {
+      "id": "gid://shopify/Product/11015545684306",
+      "title": "Fototapete Leopard im tropischen Blütenparadies",
+      "handle": "fototapete-leopard-im-tropischen-bluetenparadies",
+      "expectedHandle": "fototapete-leopard-im-tropischen-bluetenparadies"
+    },
+    {
+      "id": "gid://shopify/Product/11015545553234",
+      "title": "Fototapete Koi in goldenen Wellen",
+      "handle": "fototapete-koi-in-goldenen-wellen",
+      "expectedHandle": "fototapete-koi-in-goldenen-wellen"
+    },
+    {
+      "id": "gid://shopify/Product/11015545389394",
+      "title": "Fototapete Leopardenmuster Beige",
+      "handle": "fototapete-leopardenmuster-beige",
+      "expectedHandle": "fototapete-leopardenmuster-beige"
+    },
+    {
+      "id": "gid://shopify/Product/11015545356626",
+      "title": "Fototapete Jaguar im tropischen Paradies",
+      "handle": "fototapete-jaguar-im-tropischen-paradies",
+      "expectedHandle": "fototapete-jaguar-im-tropischen-paradies"
+    },
+    {
+      "id": "gid://shopify/Product/11004617490770",
+      "title": "Fototapete Tropische Blätter in Pastell",
+      "handle": "fototapete-tropische-blaetter-in-pastell",
+      "expectedHandle": "fototapete-tropische-blaetter-in-pastell"
+    },
+    {
+      "id": "gid://shopify/Product/11004617130322",
+      "title": "Fototapete Beiger Marmor",
+      "handle": "fototapete-beiger-marmor",
+      "expectedHandle": "fototapete-beiger-marmor"
+    },
+    {
+      "id": "gid://shopify/Product/11004616769874",
+      "title": "Fototapete Brauner Marmor mit Goldadern",
+      "handle": "fototapete-brauner-marmor-mit-goldadern",
+      "expectedHandle": "fototapete-brauner-marmor-mit-goldadern"
+    },
+    {
+      "id": "gid://shopify/Product/11004616147282",
+      "title": "Fototapete Schwarze Betonoptik",
+      "handle": "fototapete-schwarze-betonoptik",
+      "expectedHandle": "fototapete-schwarze-betonoptik"
+    },
+    {
+      "id": "gid://shopify/Product/11004615950674",
+      "title": "Fototapete Weißer Onyx",
+      "handle": "fototapete-weisser-onyx",
+      "expectedHandle": "fototapete-weisser-onyx"
+    },
+    {
+      "id": "gid://shopify/Product/11004615819602",
+      "title": "Fototapete Weißer Carrara Marmor",
+      "handle": "fototapete-weisser-carrara-marmor",
+      "expectedHandle": "fototapete-weisser-carrara-marmor"
+    },
+    {
+      "id": "gid://shopify/Product/11004613787986",
+      "title": "Fototapete Strukturputz Beige",
+      "handle": "fototapete-strukturputz-beige",
+      "expectedHandle": "fototapete-strukturputz-beige"
+    },
+    {
+      "id": "gid://shopify/Product/11003302936914",
+      "title": "Fototapete Mintfarbener Marmor mit Gold",
+      "handle": "fototapete-mintfarbener-marmor-mit-gold",
+      "expectedHandle": "fototapete-mintfarbener-marmor-mit-gold"
+    },
+    {
+      "id": "gid://shopify/Product/11003302642002",
+      "title": "Fototapete Weißer Marmor mit Goldadern",
+      "handle": "fototapete-weisser-marmor-mit-goldadern",
+      "expectedHandle": "fototapete-weisser-marmor-mit-goldadern"
+    },
+    {
+      "id": "gid://shopify/Product/11003302216018",
+      "title": "Fototapete Blauer Marmor mit Goldadern",
+      "handle": "fototapete-blauer-marmor-mit-goldadern",
+      "expectedHandle": "fototapete-blauer-marmor-mit-goldadern"
+    },
+    {
+      "id": "gid://shopify/Product/11003301953874",
+      "title": "Fototapete Heller Marmor in Blau und Gold",
+      "handle": "fototapete-heller-marmor-in-blau-und-gold",
+      "expectedHandle": "fototapete-heller-marmor-in-blau-und-gold"
+    },
+    {
+      "id": "gid://shopify/Product/11003301658962",
+      "title": "Fototapete Smaragdgrüner Marmor mit Gold",
+      "handle": "fototapete-smaragdgruener-marmor-mit-gold",
+      "expectedHandle": "fototapete-smaragdgruener-marmor-mit-gold"
+    },
+    {
+      "id": "gid://shopify/Product/11003301560658",
+      "title": "Fototapete Marmor in Pink und Blau",
+      "handle": "fototapete-marmor-in-pink-und-blau",
+      "expectedHandle": "fototapete-marmor-in-pink-und-blau"
+    },
+    {
+      "id": "gid://shopify/Product/11003301364050",
+      "title": "Fototapete Salbeigrüner Marmor mit Gold",
+      "handle": "fototapete-salbeigruener-marmor-mit-gold",
+      "expectedHandle": "fototapete-salbeigruener-marmor-mit-gold"
+    },
+    {
+      "id": "gid://shopify/Product/11003301101906",
+      "title": "Fototapete Pastell Marmor in Rosa und Türkis",
+      "handle": "fototapete-pastell-marmor-in-rosa-und-tuerkis",
+      "expectedHandle": "fototapete-pastell-marmor-in-rosa-und-tuerkis"
+    },
+    {
+      "id": "gid://shopify/Product/11003301036370",
+      "title": "Fototapete Pastell Marmor in Rosa und Hellblau",
+      "handle": "fototapete-pastell-marmor-in-rosa-und-hellblau",
+      "expectedHandle": "fototapete-pastell-marmor-in-rosa-und-hellblau"
+    },
+    {
+      "id": "gid://shopify/Product/11003300872530",
+      "title": "Fototapete Aquarell Marmor in Salbeigrün und Gold",
+      "handle": "fototapete-aquarell-marmor-in-salbeigruen-und-gold",
+      "expectedHandle": "fototapete-aquarell-marmor-in-salbeigruen-und-gold"
+    },
+    {
+      "id": "gid://shopify/Product/11003300708690",
+      "title": "Fototapete Rosa Wellen mit goldenen Akzenten",
+      "handle": "fototapete-rosa-wellen-mit-goldenen-akzenten",
+      "expectedHandle": "fototapete-rosa-wellen-mit-goldenen-akzenten"
+    },
+    {
+      "id": "gid://shopify/Product/11003300577618",
+      "title": "Fototapete Ginkgo Linien in Gold und Aquarell",
+      "handle": "fototapete-ginkgo-linien-in-gold-und-aquarell",
+      "expectedHandle": "fototapete-ginkgo-linien-in-gold-und-aquarell"
+    },
+    {
+      "id": "gid://shopify/Product/11003300282706",
+      "title": "Fototapete Pastell Marmor mit goldenen Linien",
+      "handle": "fototapete-pastell-marmor-mit-goldenen-linien",
+      "expectedHandle": "fototapete-pastell-marmor-mit-goldenen-linien"
+    },
+    {
+      "id": "gid://shopify/Product/11003300086098",
+      "title": "Fototapete Türkise Marmorstruktur mit goldenen Details",
+      "handle": "fototapete-tuerkise-marmorstruktur-mit-goldenen-details",
+      "expectedHandle": "fototapete-tuerkise-marmorstruktur-mit-goldenen-details"
+    },
+    {
+      "id": "gid://shopify/Product/11003300053330",
+      "title": "Fototapete Dunkle Marmorstruktur mit goldenen Akzenten",
+      "handle": "fototapete-dunkle-marmorstruktur-mit-goldenen-akzenten",
+      "expectedHandle": "fototapete-dunkle-marmorstruktur-mit-goldenen-akzenten"
+    },
+    {
+      "id": "gid://shopify/Product/11002607894866",
+      "title": "Fototapete Pfingstrosen mit zarten Blüten im Abendlicht",
+      "handle": "fototapete-pfingstrosen-mit-zarten-blueten-im-abendlicht",
+      "expectedHandle": "fototapete-pfingstrosen-mit-zarten-blueten-im-abendlicht"
+    },
+    {
+      "id": "gid://shopify/Product/11002557071698",
+      "title": "Fototapete Elegante Lilien in zarten Rosétönen",
+      "handle": "fototapete-elegante-lilien-in-zarten-rosetoenen",
+      "expectedHandle": "fototapete-elegante-lilien-in-zarten-rosetoenen"
+    },
+    {
+      "id": "gid://shopify/Product/11002556219730",
+      "title": "Fototapete Tropische Blüten mit Monstera-Blättern",
+      "handle": "fototapete-tropische-blueten-mit-monstera-blaettern",
+      "expectedHandle": "fototapete-tropische-blueten-mit-monstera-blaettern"
+    },
+    {
+      "id": "gid://shopify/Product/11002555728210",
+      "title": "Fototapete Elegante Pfingstrosen im Abendlicht",
+      "handle": "fototapete-elegante-pfingstrosen-im-abendlicht",
+      "expectedHandle": "fototapete-elegante-pfingstrosen-im-abendlicht"
+    },
+    {
+      "id": "gid://shopify/Product/11002555334994",
+      "title": "Fototapete Zarte Kirschblüten in Rosé",
+      "handle": "fototapete-zarte-kirschblueten-in-rose",
+      "expectedHandle": "fototapete-zarte-kirschblueten-in-rose"
+    },
+    {
+      "id": "gid://shopify/Product/11002555236690",
+      "title": "Fototapete Romantischer Blumenmix in Pastell",
+      "handle": "fototapete-romantischer-blumenmix-in-pastell",
+      "expectedHandle": "fototapete-romantischer-blumenmix-in-pastell"
+    },
+    {
+      "id": "gid://shopify/Product/11002555040082",
+      "title": "Fototapete Sanfte Pfingstrosen in Pastell",
+      "handle": "fototapete-sanfte-pfingstrosen-in-pastell",
+      "expectedHandle": "fototapete-sanfte-pfingstrosen-in-pastell"
+    },
+    {
+      "id": "gid://shopify/Product/11002554843474",
+      "title": "Fototapete Zarte Pfingstrosen auf hellem Hintergrund",
+      "handle": "fototapete-zarte-pfingstrosen-auf-hellem-hintergrund",
+      "expectedHandle": "fototapete-zarte-pfingstrosen-auf-hellem-hintergrund"
+    },
+    {
+      "id": "gid://shopify/Product/11002554777938",
+      "title": "Fototapete Zarte Pfingstrosen in Rosé",
+      "handle": "fototapete-zarte-pfingstrosen-in-rose",
+      "expectedHandle": "fototapete-zarte-pfingstrosen-in-rose"
+    },
+    {
+      "id": "gid://shopify/Product/11002554581330",
+      "title": "Fototapete Blaue Blüte mit goldenen Akzenten",
+      "handle": "fototapete-blaue-bluete-mit-goldenen-akzenten",
+      "expectedHandle": "fototapete-blaue-bluete-mit-goldenen-akzenten"
+    },
+    {
+      "id": "gid://shopify/Product/11002554384722",
+      "title": "Fototapete Elegante Blüten in Petrol und Gold",
+      "handle": "fototapete-elegante-blueten-in-petrol-und-gold",
+      "expectedHandle": "fototapete-elegante-blueten-in-petrol-und-gold"
+    },
+    {
+      "id": "gid://shopify/Product/11002554188114",
+      "title": "Fototapete Leuchtende Blüten bei Nacht",
+      "handle": "fototapete-leuchtende-blueten-bei-nacht",
+      "expectedHandle": "fototapete-leuchtende-blueten-bei-nacht"
+    },
+    {
+      "id": "gid://shopify/Product/11002553991506",
+      "title": "Fototapete Elegante Dahlien auf schwarzem Hintergrund",
+      "handle": "fototapete-elegante-dahlien-auf-schwarzem-hintergrund",
+      "expectedHandle": "fototapete-elegante-dahlien-auf-schwarzem-hintergrund"
+    },
+    {
+      "id": "gid://shopify/Product/11002553893202",
+      "title": "Fototapete Zarte Blütenblätter in Pastellfarben",
+      "handle": "fototapete-zarte-bluetenblaetter-in-pastellfarben",
+      "expectedHandle": "fototapete-zarte-bluetenblaetter-in-pastellfarben"
+    },
+    {
+      "id": "gid://shopify/Product/11002553532754",
+      "title": "Fototapete Abstrakte Blütenkomposition in Pastellfarben",
+      "handle": "fototapete-abstrakte-bluetenkomposition-in-pastellfarben",
+      "expectedHandle": "fototapete-abstrakte-bluetenkomposition-in-pastellfarben"
+    },
+    {
+      "id": "gid://shopify/Product/11002553106770",
+      "title": "Fototapete Ausdrucksstarke Blumenkomposition",
+      "handle": "fototapete-ausdrucksstarke-blumenkomposition",
+      "expectedHandle": "fototapete-ausdrucksstarke-blumenkomposition"
+    },
+    {
+      "id": "gid://shopify/Product/11002538983762",
+      "title": "Fototapete Türkise Meeresküste aus der Vogelperspektive",
+      "handle": "fototapete-tuerkise-meereskueste-aus-der-vogelperspektive",
+      "expectedHandle": "fototapete-tuerkise-meereskueste-aus-der-vogelperspektive"
+    },
+    {
+      "id": "gid://shopify/Product/11002538819922",
+      "title": "Fototapete Tropische Lagune mit Longtail-Booten",
+      "handle": "fototapete-tropische-lagune-mit-longtail-booten",
+      "expectedHandle": "fototapete-tropische-lagune-mit-longtail-booten"
+    },
+    {
+      "id": "gid://shopify/Product/11002528923986",
+      "title": "Fototapete Bergsee mit majestätischem Alpenpanorama",
+      "handle": "fototapete-bergsee-mit-majestaetischem-alpenpanorama",
+      "expectedHandle": "fototapete-bergsee-mit-majestaetischem-alpenpanorama"
+    },
+    {
+      "id": "gid://shopify/Product/11002528858450",
+      "title": "Fototapete Bergsee mit schneebedeckten Gipfeln",
+      "handle": "fototapete-bergsee-mit-schneebedeckten-gipfeln",
+      "expectedHandle": "fototapete-bergsee-mit-schneebedeckten-gipfeln"
+    },
+    {
+      "id": "gid://shopify/Product/11002528760146",
+      "title": "Fototapete Grüne Berglandschaft mit schneebedeckten Gipfeln",
+      "handle": "fototapete-gruene-berglandschaft-mit-schneebedeckten-gipfeln",
+      "expectedHandle": "fototapete-gruene-berglandschaft-mit-schneebedeckten-gipfeln"
+    },
+    {
+      "id": "gid://shopify/Product/11002512015698",
+      "title": "Fototapete Türkisblauer Traumstrand aus der Vogelperspektive",
+      "handle": "fototapete-tuerkisblauer-traumstrand-aus-der-vogelperspektive",
+      "expectedHandle": "fototapete-tuerkisblauer-traumstrand-aus-der-vogelperspektive"
+    },
+    {
+      "id": "gid://shopify/Product/11002511917394",
+      "title": "Fototapete Tropischer Strand bei Sonnenuntergang",
+      "handle": "fototapete-tropischer-strand-bei-sonnenuntergang",
+      "expectedHandle": "fototapete-tropischer-strand-bei-sonnenuntergang"
+    },
+    {
+      "id": "gid://shopify/Product/11002511720786",
+      "title": "Fototapete Sandweg zum sonnigen Traumstrand",
+      "handle": "fototapete-sandweg-zum-sonnigen-traumstrand",
+      "expectedHandle": "fototapete-sandweg-zum-sonnigen-traumstrand"
+    },
+    {
+      "id": "gid://shopify/Product/11002511491410",
+      "title": "Fototapete Tropischer Strand im goldenen Sonnenuntergang",
+      "handle": "fototapete-tropischer-strand-im-goldenen-sonnenuntergang",
+      "expectedHandle": "fototapete-tropischer-strand-im-goldenen-sonnenuntergang"
+    },
+    {
+      "id": "gid://shopify/Product/11002511425874",
+      "title": "Fototapete Tropischer Sandstrand mit Palmen und türkisem Meer",
+      "handle": "fototapete-tropischer-sandstrand-mit-palmen-und-tuerkisem-meer",
+      "expectedHandle": "fototapete-tropischer-sandstrand-mit-palmen-und-tuerkisem-meer"
+    },
+    {
+      "id": "gid://shopify/Product/11002511262034",
+      "title": "Fototapete Goldene Wildblumen im Morgenlicht",
+      "handle": "fototapete-goldene-wildblumen-im-morgenlicht",
+      "expectedHandle": "fototapete-goldene-wildblumen-im-morgenlicht"
+    },
+    {
+      "id": "gid://shopify/Product/11002511098194",
+      "title": "Fototapete Pastellhimmel im Abendlicht",
+      "handle": "fototapete-pastellhimmel-im-abendlicht",
+      "expectedHandle": "fototapete-pastellhimmel-im-abendlicht"
+    },
+    {
+      "id": "gid://shopify/Product/11000858247506",
+      "title": "Fototapete Pastellwolken im Sonnenaufgang",
+      "handle": "fototapete-pastellwolken-im-sonnenaufgang",
+      "expectedHandle": "fototapete-pastellwolken-im-sonnenaufgang"
+    },
+    {
+      "id": "gid://shopify/Product/11000856084818",
+      "title": "Fototapete Sonnenuntergang am ruhigen Sandstrand",
+      "handle": "fototapete-sonnenuntergang-am-ruhigen-sandstrand",
+      "expectedHandle": "fototapete-sonnenuntergang-am-ruhigen-sandstrand"
+    },
+    {
+      "id": "gid://shopify/Product/11000852185426",
+      "title": "Fototapete Pastellhimmel mit Lichtreflexen und Wolken",
+      "handle": "fototapete-pastellhimmel-mit-lichtreflexen-und-wolken",
+      "expectedHandle": "fototapete-pastellhimmel-mit-lichtreflexen-und-wolken"
+    },
+    {
+      "id": "gid://shopify/Product/11000845795666",
+      "title": "Fototapete Tropischer Pflanzenwald in sanften Grüntönen",
+      "handle": "fototapete-tropischer-pflanzenwald-in-sanften-gruentoenen",
+      "expectedHandle": "fototapete-tropischer-pflanzenwald-in-sanften-gruentoenen"
+    },
+    {
+      "id": "gid://shopify/Product/11000485314898",
+      "title": "Fototapete Tropische Palmenlandschaft in sanften Naturtönen",
+      "handle": "fototapete-tropische-palmenlandschaft-in-sanften-naturtoenen",
+      "expectedHandle": "fototapete-tropische-palmenlandschaft-in-sanften-naturtoenen"
+    },
+    {
+      "id": "gid://shopify/Product/11000474796370",
+      "title": "Fototapete Tropische Dschungelblätter in sattem Grün",
+      "handle": "fototapete-tropische-dschungelblaetter-in-sattem-gruen",
+      "expectedHandle": "fototapete-tropische-dschungelblaetter-in-sattem-gruen"
+    },
+    {
+      "id": "gid://shopify/Product/11000346018130",
+      "title": "Fototapete Ozeanwellen aus der Luft",
+      "handle": "fototapete-ozeanwellen-aus-der-luft",
+      "expectedHandle": "fototapete-ozeanwellen-aus-der-luft"
+    },
+    {
+      "id": "gid://shopify/Product/10997808824658",
+      "title": "Fototapete Tropische Blätter in Naturtönen",
+      "handle": "fototapete-tropische-blaetter-in-naturtoenen",
+      "expectedHandle": "fototapete-tropische-blaetter-in-naturtoenen"
+    },
+    {
+      "id": "gid://shopify/Product/10997772124498",
+      "title": "Fototapete Meereswellen aus der Vogelperspektive",
+      "handle": "fototapete-meereswellen-aus-der-vogelperspektive",
+      "expectedHandle": "fototapete-meereswellen-aus-der-vogelperspektive"
+    },
+    {
+      "id": "gid://shopify/Product/10997765636434",
+      "title": "Fototapete Türkisblaues Wasser mit Lichtreflexen",
+      "handle": "fototapete-tuerkisblaues-wasser-mit-lichtreflexen",
+      "expectedHandle": "fototapete-tuerkisblaues-wasser-mit-lichtreflexen"
+    },
+    {
+      "id": "gid://shopify/Product/10997759148370",
+      "title": "Fototapete Schimmernde Wasserreflexe in Pastell",
+      "handle": "fototapete-schimmernde-wasserreflexe-in-pastell",
+      "expectedHandle": "fototapete-schimmernde-wasserreflexe-in-pastell"
+    },
+    {
+      "id": "gid://shopify/Product/10997755543890",
+      "title": "Fototapete Tropischer Wasserfall mit exotischen Vögeln",
+      "handle": "fototapete-tropischer-wasserfall-mit-exotischen-voegeln",
+      "expectedHandle": "fototapete-tropischer-wasserfall-mit-exotischen-voegeln"
+    },
+    {
+      "id": "gid://shopify/Product/10997754855762",
+      "title": "Fototapete Eleganter Pfau im romantischen Garten",
+      "handle": "fototapete-eleganter-pfau-im-romantischen-garten",
+      "expectedHandle": "fototapete-eleganter-pfau-im-romantischen-garten"
+    },
+    {
+      "id": "gid://shopify/Product/10997754134866",
+      "title": "Fototapete Exotischer Vogel im tropischen Regenwald",
+      "handle": "fototapete-exotischer-vogel-im-tropischen-regenwald",
+      "expectedHandle": "fototapete-exotischer-vogel-im-tropischen-regenwald"
+    },
+    {
+      "id": "gid://shopify/Product/10997752856914",
+      "title": "Fototapete Nebelwald mit Tannenpanorama",
+      "handle": "fototapete-nebelwald-mit-tannenpanorama",
+      "expectedHandle": "fototapete-nebelwald-mit-tannenpanorama"
+    },
+    {
+      "id": "gid://shopify/Product/10997751873874",
+      "title": "Fototapete Mystischer Nebelwald in sattem Grün",
+      "handle": "fototapete-mystischer-nebelwald-in-sattem-gruen",
+      "expectedHandle": "fototapete-mystischer-nebelwald-in-sattem-gruen"
+    },
+    {
+      "id": "gid://shopify/Product/10997747155282",
+      "title": "Fototapete Tropischer Fluss im üppigen Regenwald",
+      "handle": "fototapete-tropischer-fluss-im-ueppigen-regenwald",
+      "expectedHandle": "fototapete-tropischer-fluss-im-ueppigen-regenwald"
+    },
+    {
+      "id": "gid://shopify/Product/10997738570066",
+      "title": "Fototapete Mystischer Regenwald im Morgennebel",
+      "handle": "fototapete-mystischer-regenwald-im-morgennebel",
+      "expectedHandle": "fototapete-mystischer-regenwald-im-morgennebel"
+    },
+    {
+      "id": "gid://shopify/Product/10997730181458",
+      "title": "Fototapete Buntes Märchenschloss im Pastellstil für Mädchenzimmer",
+      "handle": "fototapete-buntes-maerchenschloss-im-pastellstil-fuer-maedchenzimmer",
+      "expectedHandle": "fototapete-buntes-maerchenschloss-im-pastellstil-fuer-maedchenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997729132882",
+      "title": "Fototapete Zauberschloss in den Wolken mit rosa Ballons für Mädchenzimmer",
+      "handle": "fototapete-zauberschloss-in-den-wolken-mit-rosa-ballons-fuer-maedchenzimmer",
+      "expectedHandle": "fototapete-zauberschloss-in-den-wolken-mit-rosa-ballons-fuer-maedchenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997728313682",
+      "title": "Fototapete Meerjungfrauen im zauberhaften Unterwasserreich für Mädchenzimmer",
+      "handle": "fototapete-meerjungfrauen-im-zauberhaften-unterwasserreich-fuer-maedchenzimmer",
+      "expectedHandle": "fototapete-meerjungfrauen-im-zauberhaften-unterwasserreich-fuer-maedchenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997727363410",
+      "title": "Fototapete Magisches Einhorn auf Blumenwiese für Mädchenzimmer",
+      "handle": "fototapete-magisches-einhorn-auf-blumenwiese-fuer-maedchenzimmer",
+      "expectedHandle": "fototapete-magisches-einhorn-auf-blumenwiese-fuer-maedchenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997721956690",
+      "title": "Fototapete Magisches Einhorn mit Regenbogenmähne für Mädchenzimmer",
+      "handle": "fototapete-magisches-einhorn-mit-regenbogenmaehne-fuer-maedchenzimmer",
+      "expectedHandle": "fototapete-magisches-einhorn-mit-regenbogenmaehne-fuer-maedchenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997717401938",
+      "title": "Fototapete Einhorn über den Wolken mit Regenbogen für Mädchenzimmer",
+      "handle": "fototapete-einhorn-ueber-den-wolken-mit-regenbogen-fuer-maedchenzimmer",
+      "expectedHandle": "fototapete-einhorn-ueber-den-wolken-mit-regenbogen-fuer-maedchenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997716386130",
+      "title": "Fototapete Abstrakte Blüten in Pastellfarben",
+      "handle": "fototapete-abstrakte-blueten-in-pastellfarben",
+      "expectedHandle": "fototapete-abstrakte-blueten-in-pastellfarben"
+    },
+    {
+      "id": "gid://shopify/Product/10997715272018",
+      "title": "Fototapete Aquarell Lavendelfeld in Pastell für Mädchenzimmer",
+      "handle": "fototapete-aquarell-lavendelfeld-in-pastell-fuer-maedchenzimmer",
+      "expectedHandle": "fototapete-aquarell-lavendelfeld-in-pastell-fuer-maedchenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997711176018",
+      "title": "Fototapete Koalas im tropischen Dschungel für Kinderzimmer",
+      "handle": "fototapete-koalas-im-tropischen-dschungel-fuer-kinderzimmer",
+      "expectedHandle": "fototapete-koalas-im-tropischen-dschungel-fuer-kinderzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997709701458",
+      "title": "Fototapete Piratenschiff an tropischem Strand für Jungenzimmer",
+      "handle": "fototapete-piratenschiff-an-tropischem-strand-fuer-jungenzimmer",
+      "expectedHandle": "fototapete-piratenschiff-an-tropischem-strand-fuer-jungenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997708194130",
+      "title": "Fototapete T-Rex in dramatischer Berglandschaft für Jungenzimmer",
+      "handle": "fototapete-t-rex-in-dramatischer-berglandschaft-fuer-jungenzimmer",
+      "expectedHandle": "fototapete-t-rex-in-dramatischer-berglandschaft-fuer-jungenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997706326354",
+      "title": "Fototapete Dinosaurier in majestätischer Berglandschaft für Jungenzimmer",
+      "handle": "fototapete-dinosaurier-in-majestaetischer-berglandschaft-fuer-jungenzimmer",
+      "expectedHandle": "fototapete-dinosaurier-in-majestaetischer-berglandschaft-fuer-jungenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997698265426",
+      "title": "Fototapete Aquarell Dinosaurier in Berglandschaft für Jungenzimmer",
+      "handle": "fototapete-aquarell-dinosaurier-in-berglandschaft-fuer-jungenzimmer",
+      "expectedHandle": "fototapete-aquarell-dinosaurier-in-berglandschaft-fuer-jungenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997696856402",
+      "title": "Fototapete Retro Sportwagen bei Nacht in der Neonstadt",
+      "handle": "fototapete-retro-sportwagen-bei-nacht-in-der-neonstadt",
+      "expectedHandle": "fototapete-retro-sportwagen-bei-nacht-in-der-neonstadt"
+    },
+    {
+      "id": "gid://shopify/Product/10997676343634",
+      "title": "Fototapete Sportwagen in Action für Jungenzimmer",
+      "handle": "fototapete-sportwagen-in-action-fuer-jungenzimmer",
+      "expectedHandle": "fototapete-sportwagen-in-action-fuer-jungenzimmer"
+    },
+    {
+      "id": "gid://shopify/Product/10997667332434",
+      "title": "Fototapete Pastell Wolken mit Mond und Sternen",
+      "handle": "fototapete-pastell-wolken-mit-mond-und-sternen",
+      "expectedHandle": "fototapete-pastell-wolken-mit-mond-und-sternen"
+    },
+    {
+      "id": "gid://shopify/Product/10997665005906",
+      "title": "Fototapete Aquarell Waldtiere mit Rehen und Hasen",
+      "handle": "fototapete-aquarell-waldtiere-mit-rehen-und-hasen",
+      "expectedHandle": "fototapete-aquarell-waldtiere-mit-rehen-und-hasen"
+    },
+    {
+      "id": "gid://shopify/Product/10997662679378",
+      "title": "Fototapete Aquarell Safari mit Dschungeltieren",
+      "handle": "fototapete-aquarell-safari-mit-dschungeltieren",
+      "expectedHandle": "fototapete-aquarell-safari-mit-dschungeltieren"
+    },
+    {
+      "id": "gid://shopify/Product/10997652750674",
+      "title": "Fototapete Aquarell Heißluftballons mit Hasen",
+      "handle": "fototapete-aquarell-heissluftballons-mit-hasen",
+      "expectedHandle": "fototapete-aquarell-heissluftballons-mit-hasen"
+    },
+    {
+      "id": "gid://shopify/Product/10997641740626",
+      "title": "Fototapete Pastell Regenbogen mit Blumenlandschaft",
+      "handle": "fototapete-pastell-regenbogen-mit-blumenlandschaft",
+      "expectedHandle": "fototapete-pastell-regenbogen-mit-blumenlandschaft"
+    },
+    {
+      "id": "gid://shopify/Product/10997621752146",
+      "title": "Fototapete Aquarell Safari mit Heißluftballons",
+      "handle": "fototapete-aquarell-safari-mit-heissluftballons",
+      "expectedHandle": "fototapete-aquarell-safari-mit-heissluftballons"
+    },
+    {
+      "id": "gid://shopify/Product/10992259268946",
+      "title": "Fototapete Retro Sportwagen mit Palmen bei Sonnenuntergang",
+      "handle": "fototapete-retro-sportwagen-mit-palmen-bei-sonnenuntergang",
+      "expectedHandle": "fototapete-retro-sportwagen-mit-palmen-bei-sonnenuntergang"
+    }
+  ],
+  "existingEnHandleTranslation": {
+    "productId": "gid://shopify/Product/11015545749842",
+    "productTitle": "Fototapete Koi mit Lotusblüten",
+    "baseHandle": "fototapete-koi-mit-lotusblueten",
+    "translation": {
+      "key": "handle",
+      "value": "koi-wall-mural-with-lotus-flowers",
+      "locale": "en",
+      "outdated": true,
+      "market": null
+    }
+  }
+}

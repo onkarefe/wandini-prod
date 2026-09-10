@@ -16,12 +16,10 @@ type ProductPrice = {
 interface CustomProductCardProps {
   productId: string;
   title: string;
-  images: { url: string; altText?: string }[];
+  images: {url: string; altText?: string}[];
   productUrl: string;
   showSimilarMotifsButton?: boolean;
   similarProductsUrl?: string;
-  similarProductsSourceTitle?: string;
-  similarProductsSourceImageUrl?: string;
   minPrice?: ProductPrice;
   isLoggedIn?: boolean;
   isWishlisted?: boolean;
@@ -82,8 +80,6 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   productUrl,
   showSimilarMotifsButton = false,
   similarProductsUrl,
-  similarProductsSourceTitle,
-  similarProductsSourceImageUrl,
   minPrice,
   isLoggedIn = false,
   isWishlisted = false,
@@ -99,9 +95,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   const loginPath = usePrefixPathWithLocale('/account/login');
-  const fetcherLoginUrl = usePrefixPathWithLocale(
-    fetcher.data?.loginUrl ?? '',
-  );
+  const fetcherLoginUrl = usePrefixPathWithLocale(fetcher.data?.loginUrl ?? '');
   const localizedSimilarProductsUrl = usePrefixPathWithLocale(
     similarProductsUrl ?? '',
   );
@@ -196,13 +190,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
             event.stopPropagation();
 
             if (localizedSimilarProductsUrl) {
-              void navigate(localizedSimilarProductsUrl, {
-                state: {
-                  sourceProductTitle: similarProductsSourceTitle ?? title,
-                  sourceProductImageUrl:
-                    similarProductsSourceImageUrl ?? images[0]?.url ?? null,
-                },
-              });
+              void navigate(localizedSimilarProductsUrl);
             }
           }}
         >
@@ -235,7 +223,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
         <h3 className="custom-product-card__title">{title}</h3>
         {priceLabel ? (
           <p className="custom-product-card__price">
-            Ab {priceLabel} / m²
+            {t('product.startingPrice')} {priceLabel} / m²
           </p>
         ) : null}
       </div>

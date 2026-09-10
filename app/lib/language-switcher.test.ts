@@ -7,6 +7,7 @@ import {LanguageSwitcherLinks} from '~/components/LanguageSwitcher';
 import {
   getFixedLanguageSwitchLinks,
   resolveResourceLanguageSwitchLinks,
+  resolveSimilarProductsLanguageSwitchLinks,
   type LocalizedResourceType,
 } from '~/lib/language-switcher';
 
@@ -83,6 +84,22 @@ describe('checkpoint 5 language switching', () => {
         country: 'DE',
         language: 'EN',
       },
+    });
+  });
+
+  it('preserves product query parameters while switching localized handles', async () => {
+    const {result} = resolveResource({
+      url: 'https://www.wandini.shop/products/fototapete-koi-mit-lotusbluten?Quality=Selbstklebend',
+      resourceType: 'Product',
+      node: {
+        __typename: 'Product',
+        handle: 'koi-wall-mural-with-lotus-flowers',
+      },
+    });
+
+    await expect(result).resolves.toEqual({
+      DE: '/products/fototapete-koi-mit-lotusbluten?Quality=Selbstklebend',
+      EN: '/en/products/koi-wall-mural-with-lotus-flowers?Quality=Selbstklebend',
     });
   });
 
@@ -178,6 +195,71 @@ describe('checkpoint 5 language switching', () => {
     ).resolves.toEqual({
       DE: '/',
       EN: '/en/products/english-handle',
+    });
+  });
+
+  it('switches a German similar-products URL to its translated English slug', async () => {
+    const storefront = {
+      CacheLong: vi.fn(() => ({mode: 'public'})),
+      query: vi.fn().mockResolvedValue({
+        product: {
+          __typename: 'Product',
+          mainMotif: {value: 'Koi with lotus flowers'},
+          mainTheme: {value: 'Japanese garden'},
+        },
+        category: {__typename: 'Collection', handle: 'wall-murals'},
+      }),
+    };
+
+    await expect(
+      resolveSimilarProductsLanguageSwitchLinks({
+        storefront: storefront as never,
+        request: new Request(
+          'https://www.wandini.shop/similar-products/koi-lotus-fototapeten?Quality=Selbstklebend',
+        ),
+        referenceProductId: 'gid://shopify/Product/1',
+        categoryId: 'gid://shopify/Collection/1',
+      }),
+    ).resolves.toEqual({
+      DE: '/similar-products/koi-lotus-fototapeten?Quality=Selbstklebend',
+      EN: '/en/similar-products/koi-with-lotus-flowers-japanese-garden-wall-murals?Quality=Selbstklebend',
+    });
+    expect(storefront.query).toHaveBeenCalledWith(expect.any(String), {
+      cache: {mode: 'public'},
+      variables: {
+        productId: 'gid://shopify/Product/1',
+        categoryId: 'gid://shopify/Collection/1',
+        country: 'DE',
+        language: 'EN',
+      },
+    });
+  });
+
+  it('switches an English similar-products URL back to its German slug', async () => {
+    const storefront = {
+      CacheLong: vi.fn(() => ({mode: 'public'})),
+      query: vi.fn().mockResolvedValue({
+        product: {
+          __typename: 'Product',
+          mainMotif: {value: 'Koi mit Lotusblüten'},
+          mainTheme: {value: 'Japanischer Garten'},
+        },
+        category: {__typename: 'Collection', handle: 'fototapeten'},
+      }),
+    };
+
+    await expect(
+      resolveSimilarProductsLanguageSwitchLinks({
+        storefront: storefront as never,
+        request: new Request(
+          'https://www.wandini.shop/en/similar-products/english-slug?Quality=Selbstklebend',
+        ),
+        referenceProductId: 'gid://shopify/Product/1',
+        categoryId: 'gid://shopify/Collection/1',
+      }),
+    ).resolves.toEqual({
+      DE: '/similar-products/koi-mit-lotusbl-ten-japanischer-garten-fototapeten?Quality=Selbstklebend',
+      EN: '/en/similar-products/english-slug?Quality=Selbstklebend',
     });
   });
 

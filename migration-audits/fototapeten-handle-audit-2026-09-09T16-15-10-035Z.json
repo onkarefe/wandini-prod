@@ -1,0 +1,3068 @@
+{
+  "generatedAt": "2026-09-09T16:15:10.032Z",
+  "mode": "READ_ONLY",
+  "shop": "vurpri-8s.myshopify.com",
+  "apiVersion": "2026-07",
+  "collection": {
+    "id": "gid://shopify/Collection/691599966546",
+    "title": "Fototapeten",
+    "handle": "fototapeten"
+  },
+  "sourceLocale": "de",
+  "targetLocale": "en",
+  "grantedScopes": [
+    "write_fulfillments",
+    "read_markets",
+    "write_merchant_managed_fulfillment_orders",
+    "write_orders",
+    "write_products",
+    "write_translations"
+  ],
+  "slugAlgorithm": {
+    "german": {
+      "ä": "ae",
+      "ö": "oe",
+      "ü": "ue",
+      "ß": "ss"
+    },
+    "ampersand": "und",
+    "otherLatinDiacritics": "ASCII",
+    "lowercase": true,
+    "separator": "-"
+  },
+  "summary": {
+    "collectionProducts": 104,
+    "allStoreProducts": 111,
+    "alreadyCorrect": 8,
+    "needsChange": 96,
+    "suspiciousCurrentHandles": 70,
+    "germanSpecialCharacterTitles": 55,
+    "emptyTargets": 0,
+    "collectionTargetCollisionGroups": 0,
+    "collectionCollisionProducts": 0,
+    "storeWideCollisionProducts": 0,
+    "globalEnHandleTranslations": 1,
+    "marketSpecificEnHandleProducts": 0,
+    "translationSourceProblems": 0,
+    "blockedProducts": 0
+  },
+  "collectionTargetCollisions": [],
+  "products": [
+    {
+      "productId": "gid://shopify/Product/11015545749842",
+      "title": "Fototapete Koi mit Lotusblüten",
+      "status": "REVIEW_GLOBAL_EN_HANDLE_AND_BASE",
+      "currentHandle": "fototapete-koi-mit-lotusbluten",
+      "targetHandle": "fototapete-koi-mit-lotusblueten",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-koi-mit-lotusbluten",
+        "digest": "f508a956c57180478803a10c8afb843c7fca1c033919beefa745d8a3dde24838",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Koi mit Lotusblüten",
+        "digest": "feb112ff885ebab50e42514e8005004f3d424e8f291cb6450869b71629a5d465",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": "koi-wall-mural-with-lotus-flowers",
+      "enGlobalHandleOutdated": true,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11004616278354",
+      "title": "Fototapete Schwarzer Marmor mit Goldadern",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "6-2",
+      "targetHandle": "fototapete-schwarzer-marmor-mit-goldadern",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "6-2",
+        "digest": "3254289f54b12adc378f2ec18db51254bfa28931ac3c8655769537701744944a",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Schwarzer Marmor mit Goldadern",
+        "digest": "99e9fd3aa07af189674650ac2f8b01a7e35f5e2d08fb1b00344d4ba0353810eb",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11015545225554",
+      "title": "Fototapete Traumwal über den Wolken",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "3-3",
+      "targetHandle": "fototapete-traumwal-ueber-den-wolken",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "3-3",
+        "digest": "2b51daa5c1d79aed74e685e0cac62185678b6be59c16b5c87996ac064d403635",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Traumwal über den Wolken",
+        "digest": "35c0c0fed938a910260449a265dcabb5b492e99e1cdb7300f9ebc72bfa02a7d3",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11015545094482",
+      "title": "Fototapete Korallenrote Blüten",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "2-2",
+      "targetHandle": "fototapete-korallenrote-blueten",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "2-2",
+        "digest": "c539cfa2416f3e93743c22d295f9bd996ee2ab65d2d0b55202586a0ac404b871",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Korallenrote Blüten",
+        "digest": "0f74d93ff5eb99df0ab34a397e6907d435f3812783e8b30087b179e1b9de917f",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003302379858",
+      "title": "Fototapete Türkiser Marmor mit Koralle",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "15-1",
+      "targetHandle": "fototapete-tuerkiser-marmor-mit-koralle",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "15-1",
+        "digest": "a89e566afb0ec10f71f3ab3ca931c3265985a66ebc4b769d9caa5fc37e96aa15",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Türkiser Marmor mit Koralle",
+        "digest": "55da81d125438f82a0844262bfacaa79b65d2ff529933248fc6ac7aef3c8abda",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003300381010",
+      "title": "Fototapete Pastell Marmor mit Türkis und Gold",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "4-1",
+      "targetHandle": "fototapete-pastell-marmor-mit-tuerkis-und-gold",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "4-1",
+        "digest": "4caaa93fb401cbc51daf1066360a3605f7836a30d999f6fff3d12d77f66e29db",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Pastell Marmor mit Türkis und Gold",
+        "digest": "ead70be167f58df206e3adf609edf640e75aafd4c140ca5ef206ffd9f4c2475c",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002556678482",
+      "title": "Fototapete Pastellblumen auf petrolfarbenem Hintergrund",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "15",
+      "targetHandle": "fototapete-pastellblumen-auf-petrolfarbenem-hintergrund",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "15",
+        "digest": "e629fa6598d732768f7c726b4b621285f9c3b85303900aa912017db7617d8bdb",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Pastellblumen auf petrolfarbenem Hintergrund",
+        "digest": "4cb8f2bea62c14509a5a67ab9753aabce6660dcf4be93531d1b2c6196f0578d9",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002529055058",
+      "title": "Fototapete Schneeberg über den Wolken",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "targetHandle": "fototapete-schneeberg-ueber-den-wolken",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+        "digest": "bb3a3e7792059c7d4a34a39a1e084a7ac2cae18bb1a048d273049175ee7cf515",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Schneeberg über den Wolken",
+        "digest": "5bfb7e2e4ae2824d26d14c7312d23880b9d6cc2748975757a7e8612a9d670c87",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997724250450",
+      "title": "Fototapete Magisches Einhorn mit Herzen und Regenbogen für Mädchenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-magisches-einhorn-mit-herzen-und-regenbogen-fur-madchenzimmer",
+      "targetHandle": "fototapete-magisches-einhorn-mit-herzen-und-regenbogen-fuer-maedchenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-magisches-einhorn-mit-herzen-und-regenbogen-fur-madchenzimmer",
+        "digest": "503d8e599cc9006d9068dd0a872bb0fb772d62e406b8d907eab7b27f4d57bcd0",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Magisches Einhorn mit Herzen und Regenbogen für Mädchenzimmer",
+        "digest": "b45b7f64f4531294d76c291cdcbfce59594dc1eb6e3301d3f13c24dd1e6e2fe9",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11015546110290",
+      "title": "0 BASE",
+      "status": "CORRECT",
+      "currentHandle": "0-base",
+      "targetHandle": "0-base",
+      "needsChange": false,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "0-base",
+        "digest": "d74fb19c811bb00c42d658619040b28623113f51e3fbfc75f818e266672cf4e8",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "0 BASE",
+        "digest": "3358b66a1b9cd43fcd265142f18256059fe6344270636a2d9a5b6ec9081a5892",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11015545684306",
+      "title": "Fototapete Leopard im tropischen Blütenparadies",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "7-3",
+      "targetHandle": "fototapete-leopard-im-tropischen-bluetenparadies",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "7-3",
+        "digest": "b62f83ac792baacd17f428585437c8456669d0c50cfb5fdc11c9a67581d81311",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Leopard im tropischen Blütenparadies",
+        "digest": "da7fa06402a59d88d845b31e83347b27ae214f5c85970ab2f47b98c01205e2dc",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11015545553234",
+      "title": "Fototapete Koi in goldenen Wellen",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "6-3",
+      "targetHandle": "fototapete-koi-in-goldenen-wellen",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "6-3",
+        "digest": "90cddac96f703d56f8a523a6e10230d0e1a9cc6af42c7fe87f8d785976047164",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Koi in goldenen Wellen",
+        "digest": "5cd754332e7bd0af47b5490de3ff8c8fe370a76637858c0f1af8044ba2b9a20d",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11015545389394",
+      "title": "Fototapete Leopardenmuster Beige",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "5-3",
+      "targetHandle": "fototapete-leopardenmuster-beige",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "5-3",
+        "digest": "962538260cc175754911f67ea300100339b43a4b47a2dad62d5da8bfde12833f",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Leopardenmuster Beige",
+        "digest": "4c19a2e8949554bc891129369d3591c37b8963415ba9f71c601a821867312680",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11015545356626",
+      "title": "Fototapete Jaguar im tropischen Paradies",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "4-3",
+      "targetHandle": "fototapete-jaguar-im-tropischen-paradies",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "4-3",
+        "digest": "2a17f163b5fe3845f9020d4c7b66eddd570a2465ca3b114a710f70d532828275",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Jaguar im tropischen Paradies",
+        "digest": "c1212b2988bc6f735b9a5d6f9f5739d71f85947b4b31b4f596990bfd80c39fbd",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11004617490770",
+      "title": "Fototapete Tropische Blätter in Pastell",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "1-3",
+      "targetHandle": "fototapete-tropische-blaetter-in-pastell",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "1-3",
+        "digest": "f261d3d442c8de6223a64cd2cce530900639fa6ad865fd3cec08f3c9909144cb",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Tropische Blätter in Pastell",
+        "digest": "86d905b592eb2bd4657d7e88d1e03e34cad1509886ff125ed4f2d073a35d845f",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11004617130322",
+      "title": "Fototapete Beiger Marmor",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "8-2",
+      "targetHandle": "fototapete-beiger-marmor",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "8-2",
+        "digest": "821bdccb6a71a7eb2002f7aac79f58099cdcab35dee0d582cc72ab32a7939d55",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Beiger Marmor",
+        "digest": "0a4ba9d42f6e0165424fbb2576bd1b88159ef7a55bf4ee60af59514b8713fb27",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11004616769874",
+      "title": "Fototapete Brauner Marmor mit Goldadern",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "7-2",
+      "targetHandle": "fototapete-brauner-marmor-mit-goldadern",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "7-2",
+        "digest": "1ae5a0c9001739879ef812a7cb3f3294233f50e5d1dbde7471b45163307c6cd9",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Brauner Marmor mit Goldadern",
+        "digest": "0b52e42fada758698a5fe556d31c4b98ade347ffa062e06eb2da1d8deebf329e",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11004616147282",
+      "title": "Fototapete Schwarze Betonoptik",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "5-2",
+      "targetHandle": "fototapete-schwarze-betonoptik",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "5-2",
+        "digest": "ff24aa1d961a006dbe7d59df923550c1f3101559ea4f3223c4a0cc7dfbc47dd0",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Schwarze Betonoptik",
+        "digest": "d05f55eefeb08dc02e43c73c76a0c28fc6be24652ff3d5b4110282ddbc23a50b",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11004615950674",
+      "title": "Fototapete Weißer Onyx",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "4-2",
+      "targetHandle": "fototapete-weisser-onyx",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "4-2",
+        "digest": "2afafcddf683494cf329001ae8ce6a2c3f0037c0c0b84f431eb43faefead5baf",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Weißer Onyx",
+        "digest": "d756800e04667359072c48ded0fe4a2e82deeffbc556ed7109e0e4089caf079c",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11004615819602",
+      "title": "Fototapete Weißer Carrara Marmor",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "3-2",
+      "targetHandle": "fototapete-weisser-carrara-marmor",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "3-2",
+        "digest": "cd7da774aa7f1d6b5a15c22c2d655f2cd3dc5d977367dc9e17afb5682153dd1f",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Weißer Carrara Marmor",
+        "digest": "0c3575908c5cc9e0d95e941c44123f6d4c80c0b31b84994f1ec59cd2ab68b263",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11004613787986",
+      "title": "Fototapete Strukturputz Beige",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "1-2",
+      "targetHandle": "fototapete-strukturputz-beige",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "1-2",
+        "digest": "412a4789b02cad19bacb029f5c8ec8e9b115375d82b97df1d6b15997a8e70e01",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Strukturputz Beige",
+        "digest": "25a0f954bd77e582bdc8da224815f6a305586f1d58b8c4919655f248427f0fe5",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003302936914",
+      "title": "Fototapete Mintfarbener Marmor mit Gold",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "17",
+      "targetHandle": "fototapete-mintfarbener-marmor-mit-gold",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "17",
+        "digest": "4523540f1504cd17100c4835e85b7eefd49911580f8efff0599a8f283be6b9e3",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Mintfarbener Marmor mit Gold",
+        "digest": "cbd29e91febb4873450cf02ef7aa78a1758325692b4d610b89d3c60ca36b9127",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003302642002",
+      "title": "Fototapete Weißer Marmor mit Goldadern",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "16-1",
+      "targetHandle": "fototapete-weisser-marmor-mit-goldadern",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "16-1",
+        "digest": "f3a2577b1df83f1c9c235396f2425b66f9f9b965e210d102b576bf3227f980bb",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Weißer Marmor mit Goldadern",
+        "digest": "fd55a16138491545ff81072bfb653459c49c52671778818a91c6b04a1d998cc9",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003302216018",
+      "title": "Fototapete Blauer Marmor mit Goldadern",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "14-1",
+      "targetHandle": "fototapete-blauer-marmor-mit-goldadern",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "14-1",
+        "digest": "108049760e4b0cdf18dee48bbf50f8a06b73ebca07e0e86b02138e7bd459aab1",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Blauer Marmor mit Goldadern",
+        "digest": "03d0ba4db4844cce0fc54226ab818b702e3f3b53f580cce0086c95cc1b5e45c5",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003301953874",
+      "title": "Fototapete Heller Marmor in Blau und Gold",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "13-1",
+      "targetHandle": "fototapete-heller-marmor-in-blau-und-gold",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "13-1",
+        "digest": "fb7460786a8266cb60194c903b87989fa387e84de00174259654d8f3aa59d97f",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Heller Marmor in Blau und Gold",
+        "digest": "ecc4d2762eb9758ebcef4d99e1734260812055506d796008503c51e4d5cb23b3",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003301658962",
+      "title": "Fototapete Smaragdgrüner Marmor mit Gold",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "12-1",
+      "targetHandle": "fototapete-smaragdgruener-marmor-mit-gold",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "12-1",
+        "digest": "c9240e4858c51d1ce4a845e1d2e9ea8c4c6d66bbb455ad08d1fe37e733ad0974",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Smaragdgrüner Marmor mit Gold",
+        "digest": "1ced8c406868f60dd06323eee458b72bc1607ab1031818e887a1c84799482ad0",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003301560658",
+      "title": "Fototapete Marmor in Pink und Blau",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "11-1",
+      "targetHandle": "fototapete-marmor-in-pink-und-blau",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "11-1",
+        "digest": "4ab6a0ad4b50df2e2a178576f4aae0c7289ea00385b9d29be0c4e3b2921b5f2d",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Marmor in Pink und Blau",
+        "digest": "8a90a9f5511733a90efaaec982e7fefa9b7ccfcd6f4d708499ec651678efaafd",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003301364050",
+      "title": "Fototapete Salbeigrüner Marmor mit Gold",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "10-1",
+      "targetHandle": "fototapete-salbeigruener-marmor-mit-gold",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "10-1",
+        "digest": "34fa1bd4097c6e055929be714a387aab57e648ee628df377ecc860040bc9ad53",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Salbeigrüner Marmor mit Gold",
+        "digest": "68f13b623dd74295766c1cd98aa19416af999a6d4c414eb21448d47a12aa0123",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003301101906",
+      "title": "Fototapete Pastell Marmor in Rosa und Türkis",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "9-1",
+      "targetHandle": "fototapete-pastell-marmor-in-rosa-und-tuerkis",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "9-1",
+        "digest": "87b2648195d4d6ee98755b55ea84a597a3067433c1b33c3db8e93156bc2e7247",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Pastell Marmor in Rosa und Türkis",
+        "digest": "9606cc4fe55de552a7f8aa981d4d505246fd0eacdcf41436d68ef3dd13dcae41",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003301036370",
+      "title": "Fototapete Pastell Marmor in Rosa und Hellblau",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "8-1",
+      "targetHandle": "fototapete-pastell-marmor-in-rosa-und-hellblau",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "8-1",
+        "digest": "cee2e005c64d7f4c2864e82d8b1d72873852a209ba613de918386696f349d15e",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Pastell Marmor in Rosa und Hellblau",
+        "digest": "4cfa525e67587f37215dfe1609da2b66c034a787a6ddf7a20bb17d6da310d140",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003300872530",
+      "title": "Fototapete Aquarell Marmor in Salbeigrün und Gold",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "7-1",
+      "targetHandle": "fototapete-aquarell-marmor-in-salbeigruen-und-gold",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "7-1",
+        "digest": "0ec192c0f90d1332f2abca4398596d3978434ecbae6abea8ffd989412b592458",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Aquarell Marmor in Salbeigrün und Gold",
+        "digest": "4f3b51982bdcb6e26819fcd9c5e1386bb70478eff3fdc8b6acfc09f1bb9ee5fe",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003300708690",
+      "title": "Fototapete Rosa Wellen mit goldenen Akzenten",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "6-1",
+      "targetHandle": "fototapete-rosa-wellen-mit-goldenen-akzenten",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "6-1",
+        "digest": "c19f98d87a551217e84c7ab02e6579c1e75f4cffbbbd55f52f8ef6e0164b8b71",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Rosa Wellen mit goldenen Akzenten",
+        "digest": "af7abfa0fcfb66c13eb27123da591bb54752cd0c7b9a0584a4bccd8aeeb729d2",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003300577618",
+      "title": "Fototapete Ginkgo Linien in Gold und Aquarell",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "5-1",
+      "targetHandle": "fototapete-ginkgo-linien-in-gold-und-aquarell",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "5-1",
+        "digest": "ae5dd0c8f5769cc5bb28016d788914ed7e32df42417bc9b336e56a5be61f473f",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Ginkgo Linien in Gold und Aquarell",
+        "digest": "909354a6086ca3efb647bc12c7e14b806af0b38bd01fe39ecfecc3cc1dfe79e0",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003300282706",
+      "title": "Fototapete Pastell Marmor mit goldenen Linien",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "3-1",
+      "targetHandle": "fototapete-pastell-marmor-mit-goldenen-linien",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "3-1",
+        "digest": "73e23b443f02b5eeecab79cce1271719db43827879e7baf0849233db8742a240",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Pastell Marmor mit goldenen Linien",
+        "digest": "8214e9cf571297b7144604cb493b9f7c43ad11b6f16aed15a6158e62de794a8f",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003300086098",
+      "title": "Fototapete Türkise Marmorstruktur mit goldenen Details",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "2-1",
+      "targetHandle": "fototapete-tuerkise-marmorstruktur-mit-goldenen-details",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "2-1",
+        "digest": "e2433ac3278279ac90b51abed3d4dd9057d9e1f66541ad9cdfd13762a30e5a43",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Türkise Marmorstruktur mit goldenen Details",
+        "digest": "e0b186eb9467994b5fe4dfb37940ad3351722494e729461dd5976b849dcbd890",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11003300053330",
+      "title": "Fototapete Dunkle Marmorstruktur mit goldenen Akzenten",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "1-1",
+      "targetHandle": "fototapete-dunkle-marmorstruktur-mit-goldenen-akzenten",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "1-1",
+        "digest": "59510d91a04a1af467946ec474bb7593d71a8af45f3dc1911dd5b3cbf62478a2",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Dunkle Marmorstruktur mit goldenen Akzenten",
+        "digest": "39d0fb552ffba9e1c0371f7065ded68d1fd09e78c0510f1bd723e8f449e6d209",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002607894866",
+      "title": "Fototapete Pfingstrosen mit zarten Blüten im Abendlicht",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-elegante-pfingstrosen-im-abendlicht-kopie",
+      "targetHandle": "fototapete-pfingstrosen-mit-zarten-blueten-im-abendlicht",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-elegante-pfingstrosen-im-abendlicht-kopie",
+        "digest": "b61b01bfc8baafdd7588c397e645721df915b952585e0be91c0d474633dcae46",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Pfingstrosen mit zarten Blüten im Abendlicht",
+        "digest": "bba268b38c7fbdd4c1e901f7c617de232324a21d1704759ecc67ef36b2735496",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002557071698",
+      "title": "Fototapete Elegante Lilien in zarten Rosétönen",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "16",
+      "targetHandle": "fototapete-elegante-lilien-in-zarten-rosetoenen",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "16",
+        "digest": "b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Elegante Lilien in zarten Rosétönen",
+        "digest": "09b171f4ae41cefbb2edae13d122ca4077f52a8d08334a17f96e0e06f551fdec",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002556219730",
+      "title": "Fototapete Tropische Blüten mit Monstera-Blättern",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "14",
+      "targetHandle": "fototapete-tropische-blueten-mit-monstera-blaettern",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "14",
+        "digest": "8527a891e224136950ff32ca212b45bc93f69fbb801c3b1ebedac52775f99e61",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Tropische Blüten mit Monstera-Blättern",
+        "digest": "f25f56133c2ccc769e2a880e89248783d01e58ae88793dfcb43d2997f6f32d88",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002555728210",
+      "title": "Fototapete Elegante Pfingstrosen im Abendlicht",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "13",
+      "targetHandle": "fototapete-elegante-pfingstrosen-im-abendlicht",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "13",
+        "digest": "3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Elegante Pfingstrosen im Abendlicht",
+        "digest": "81e4d83cf194119116d5286bb975ff921acce63597a4f9be68ed73eef9b81890",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002555334994",
+      "title": "Fototapete Zarte Kirschblüten in Rosé",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "12",
+      "targetHandle": "fototapete-zarte-kirschblueten-in-rose",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "12",
+        "digest": "6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Zarte Kirschblüten in Rosé",
+        "digest": "f8599f045ca9183f31ddf378f914313d9b85c413644f776359c286ee03dfe9a9",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002555236690",
+      "title": "Fototapete Romantischer Blumenmix in Pastell",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "11",
+      "targetHandle": "fototapete-romantischer-blumenmix-in-pastell",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "11",
+        "digest": "4fc82b26aecb47d2868c4efbe3581732a3e7cbcc6c2efb32062c08170a05eeb8",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Romantischer Blumenmix in Pastell",
+        "digest": "ec3bf239cfc0b3abf69a54b51da36c97de780b59bb04d8ea7b1e842f8fa6e360",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002555040082",
+      "title": "Fototapete Sanfte Pfingstrosen in Pastell",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "10",
+      "targetHandle": "fototapete-sanfte-pfingstrosen-in-pastell",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "10",
+        "digest": "4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Sanfte Pfingstrosen in Pastell",
+        "digest": "586a23700e88a047f59d8253319fcf7ea63bdc52fdbbb875c8aad60d299b79ef",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002554843474",
+      "title": "Fototapete Zarte Pfingstrosen auf hellem Hintergrund",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "9",
+      "targetHandle": "fototapete-zarte-pfingstrosen-auf-hellem-hintergrund",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "9",
+        "digest": "19581e27de7ced00ff1ce50b2047e7a567c76b1cbaebabe5ef03f7c3017bb5b7",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Zarte Pfingstrosen auf hellem Hintergrund",
+        "digest": "e2ba02b96e22cafc53fac22c88d76346ba3a82741e7f48e82b2e6552a2e97a95",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002554777938",
+      "title": "Fototapete Zarte Pfingstrosen in Rosé",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "8",
+      "targetHandle": "fototapete-zarte-pfingstrosen-in-rose",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "8",
+        "digest": "2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Zarte Pfingstrosen in Rosé",
+        "digest": "0d235c823fa7afb1ed18c25a537984324e2348895723fa22b5534ab75cd18623",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002554581330",
+      "title": "Fototapete Blaue Blüte mit goldenen Akzenten",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "7",
+      "targetHandle": "fototapete-blaue-bluete-mit-goldenen-akzenten",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "7",
+        "digest": "7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Blaue Blüte mit goldenen Akzenten",
+        "digest": "77caffcb05e6769a40eec126c5b3d8635f10cd1f57384accf223096099f15244",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002554384722",
+      "title": "Fototapete Elegante Blüten in Petrol und Gold",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "6",
+      "targetHandle": "fototapete-elegante-blueten-in-petrol-und-gold",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "6",
+        "digest": "e7f6c011776e8db7cd330b54174fd76f7d0216b612387a5ffcfb81e6f0919683",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Elegante Blüten in Petrol und Gold",
+        "digest": "21f6b16bc52ab18e8fafd4d6a34a21e58ca4fff7cdf9f2197322a6d14e132a0f",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002554188114",
+      "title": "Fototapete Leuchtende Blüten bei Nacht",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "5",
+      "targetHandle": "fototapete-leuchtende-blueten-bei-nacht",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "5",
+        "digest": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Leuchtende Blüten bei Nacht",
+        "digest": "d0d3611576e7523358a3d9fcfbaa29e90f61b8a42690dfed69114267be65352e",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002553991506",
+      "title": "Fototapete Elegante Dahlien auf schwarzem Hintergrund",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "4",
+      "targetHandle": "fototapete-elegante-dahlien-auf-schwarzem-hintergrund",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "4",
+        "digest": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Elegante Dahlien auf schwarzem Hintergrund",
+        "digest": "443c01c6690e7c54ce6ae4639a48b2d6479768cb86851f0f6d374e9ce4c15727",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002553893202",
+      "title": "Fototapete Zarte Blütenblätter in Pastellfarben",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "3",
+      "targetHandle": "fototapete-zarte-bluetenblaetter-in-pastellfarben",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "3",
+        "digest": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Zarte Blütenblätter in Pastellfarben",
+        "digest": "51c153055860652273b862f68dddb0e374aa0ce0755b2db6955c8aeb3c6eb6d3",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002553532754",
+      "title": "Fototapete Abstrakte Blütenkomposition in Pastellfarben",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "2",
+      "targetHandle": "fototapete-abstrakte-bluetenkomposition-in-pastellfarben",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "2",
+        "digest": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Abstrakte Blütenkomposition in Pastellfarben",
+        "digest": "3d9889748513f558eb617f4cd57dcddad136781754099d5c8984db2cccf031c2",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002553106770",
+      "title": "Fototapete Ausdrucksstarke Blumenkomposition",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "1",
+      "targetHandle": "fototapete-ausdrucksstarke-blumenkomposition",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "1",
+        "digest": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Ausdrucksstarke Blumenkomposition",
+        "digest": "127a19e687464d504eb06a21a3209291c90a1507900d973c9678ecef89338078",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002538983762",
+      "title": "Fototapete Türkise Meeresküste aus der Vogelperspektive",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "targetHandle": "fototapete-tuerkise-meereskueste-aus-der-vogelperspektive",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+        "digest": "e7a35def327abc70b81856fd136b2d84cf320e3a7eef449f096a3c906d3b8a9e",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Türkise Meeresküste aus der Vogelperspektive",
+        "digest": "446405ff1a17059e8f3c65d871bc26da5bd839d628355bee8d1302473af86762",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002538819922",
+      "title": "Fototapete Tropische Lagune mit Longtail-Booten",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "targetHandle": "fototapete-tropische-lagune-mit-longtail-booten",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+        "digest": "7610234a773bcf4c477d2b6779855c446f92d25d7b7bf2bfdc609d3635960e88",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Tropische Lagune mit Longtail-Booten",
+        "digest": "848b38b1e14b89789f28eaa836e382dfd66140e65c5b840f4674870461870893",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002528923986",
+      "title": "Fototapete Bergsee mit majestätischem Alpenpanorama",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "targetHandle": "fototapete-bergsee-mit-majestaetischem-alpenpanorama",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+        "digest": "5482bc50cd0c061d208045a734636dab4263c9edcd62be61082232990e699c74",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Bergsee mit majestätischem Alpenpanorama",
+        "digest": "daa26db0d5e09774afead4f121c95f34e430fb39bc23acc211e7423c54d8a1c5",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002528858450",
+      "title": "Fototapete Bergsee mit schneebedeckten Gipfeln",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "targetHandle": "fototapete-bergsee-mit-schneebedeckten-gipfeln",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+        "digest": "258faacbdc0cd0fe7ee81752f1f92a0ba0489f88353e0a6bf91e4de1fd67c002",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Bergsee mit schneebedeckten Gipfeln",
+        "digest": "e57ea62b8817bcf083cb14c1cb88b2f9aea3cc254881d200ede71654fc9d7baa",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002528760146",
+      "title": "Fototapete Grüne Berglandschaft mit schneebedeckten Gipfeln",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "targetHandle": "fototapete-gruene-berglandschaft-mit-schneebedeckten-gipfeln",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+        "digest": "485ce3912491af2bb871ee4636cd9231cde69fcccbf15c3f93ccff036ca494f7",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Grüne Berglandschaft mit schneebedeckten Gipfeln",
+        "digest": "6bd1d561e9aa79ab560ebf4703aa7257a649751dce6ebd9e9d11fd6427baed81",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002512015698",
+      "title": "Fototapete Türkisblauer Traumstrand aus der Vogelperspektive",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+      "targetHandle": "fototapete-tuerkisblauer-traumstrand-aus-der-vogelperspektive",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-kopie-kopie-kopie-kopie-kopie-kopie",
+        "digest": "8ed45a26b68aeeaf06a96bc9de53c2ea462501659e06a30eda8e015b472f9af2",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Türkisblauer Traumstrand aus der Vogelperspektive",
+        "digest": "395b55216eefc61530e967833e5933c6855a7e1701eba6a65b569be5a55d730f",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002511917394",
+      "title": "Fototapete Tropischer Strand bei Sonnenuntergang",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-kopie-kopie-kopie-kopie-kopie",
+      "targetHandle": "fototapete-tropischer-strand-bei-sonnenuntergang",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-kopie-kopie-kopie-kopie-kopie",
+        "digest": "b47573a5b3a7003b62f6f99ba939cb74701ff61eb27f0f92be2d314109652d0b",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Tropischer Strand bei Sonnenuntergang",
+        "digest": "4b216cc1d639b317e9f1b230fa456ad88f09d7e648e24fcbcda81fbf5a5e05a0",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002511720786",
+      "title": "Fototapete Sandweg zum sonnigen Traumstrand",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-kopie-kopie-kopie-kopie",
+      "targetHandle": "fototapete-sandweg-zum-sonnigen-traumstrand",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-kopie-kopie-kopie-kopie",
+        "digest": "68a57a5cdc0881d71c3470bf15439d84c8b7dc3822f339d8817790878e968bb9",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Sandweg zum sonnigen Traumstrand",
+        "digest": "6ad2ef2d035602d5c9d09dc705961e920524d70d2b99fec10112b943162d34f3",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002511491410",
+      "title": "Fototapete Tropischer Strand im goldenen Sonnenuntergang",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-kopie-kopie-kopie",
+      "targetHandle": "fototapete-tropischer-strand-im-goldenen-sonnenuntergang",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-kopie-kopie-kopie",
+        "digest": "deccb893bab8597dcada3b9c33d4bbe2251d4ff37f87a463a0b9e62b8ed1ca15",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Tropischer Strand im goldenen Sonnenuntergang",
+        "digest": "153e3aa65ed9f58b98829be7e28f6d1dd081459bf27ea8deed03e3b012e29039",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002511425874",
+      "title": "Fototapete Tropischer Sandstrand mit Palmen und türkisem Meer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-kopie-kopie",
+      "targetHandle": "fototapete-tropischer-sandstrand-mit-palmen-und-tuerkisem-meer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-kopie-kopie",
+        "digest": "913357376691bf6fb831cdc223d17f7c168dd306cb88d24a4f552d1f4cda6d04",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Tropischer Sandstrand mit Palmen und türkisem Meer",
+        "digest": "49ac089c4f992e6ee6839d743916c8591a1c71727f1c945ecf11ae264b0dd96e",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002511262034",
+      "title": "Fototapete Goldene Wildblumen im Morgenlicht",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-kopie",
+      "targetHandle": "fototapete-goldene-wildblumen-im-morgenlicht",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-kopie",
+        "digest": "e0e0e36588565e1f70f3b02331765e4b58abaa614bd6900e0803c8f3173f79c0",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Goldene Wildblumen im Morgenlicht",
+        "digest": "866b4d2d7f551ee13443e29cdb59e6febe63e0f45f040b58dd95ebe2cd04d352",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11002511098194",
+      "title": "Fototapete Pastellhimmel im Abendlicht",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-4",
+      "targetHandle": "fototapete-pastellhimmel-im-abendlicht",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-4",
+        "digest": "d11e839aee36dde93a70198b5dc961649341f778cc1e904bb09c86f721671c6d",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Pastellhimmel im Abendlicht",
+        "digest": "36bef59aa703d56576bf5c7bf60919a12f0dab9908573c10e16c262eef17efb8",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11000858247506",
+      "title": "Fototapete Pastellwolken im Sonnenaufgang",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-3",
+      "targetHandle": "fototapete-pastellwolken-im-sonnenaufgang",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-3",
+        "digest": "a713d3fb4ab4bec22eae2e3b69d2bdb837f97242cb87158ad74d7842ee4fb21c",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Pastellwolken im Sonnenaufgang",
+        "digest": "f5a341e49436dc968c303488a443cbcf177f263f099838b191d4ce84d17dc5f2",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11000856084818",
+      "title": "Fototapete Sonnenuntergang am ruhigen Sandstrand",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-2",
+      "targetHandle": "fototapete-sonnenuntergang-am-ruhigen-sandstrand",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-2",
+        "digest": "74b4fa8375bd312c1d2555cafb43564b85fbc04323042c8e5efa2fcb3ada09cb",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Sonnenuntergang am ruhigen Sandstrand",
+        "digest": "fa0821219d2e97bea21ae0f4671da1a6df011bdbc008ccb976137237c7bb215e",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11000852185426",
+      "title": "Fototapete Pastellhimmel mit Lichtreflexen und Wolken",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie-1",
+      "targetHandle": "fototapete-pastellhimmel-mit-lichtreflexen-und-wolken",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie-1",
+        "digest": "3b0ca7713fc0f4bbaaa0fdf9b49373acbf48f77d1be31963256ab102075f87c7",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Pastellhimmel mit Lichtreflexen und Wolken",
+        "digest": "1395b1305f7a2657c8c1b62a167e43c4c942253cfe45f117c9b793e12df57621",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11000845795666",
+      "title": "Fototapete Tropischer Pflanzenwald in sanften Grüntönen",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-tropischer-pflanzenwald-in-sanften-gruntonen",
+      "targetHandle": "fototapete-tropischer-pflanzenwald-in-sanften-gruentoenen",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-tropischer-pflanzenwald-in-sanften-gruntonen",
+        "digest": "5efcac19d8eac711142e4515fc8caca981b044d7a3596f018b03e4f1f3b8ac7c",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Tropischer Pflanzenwald in sanften Grüntönen",
+        "digest": "3a8d16559ae145ad31528d47143a8716bca435087091a9a0faed6aee35acce32",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11000485314898",
+      "title": "Fototapete Tropische Palmenlandschaft in sanften Naturtönen",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-tropische-palmenlandschaft-in-sanften-naturtonen",
+      "targetHandle": "fototapete-tropische-palmenlandschaft-in-sanften-naturtoenen",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-tropische-palmenlandschaft-in-sanften-naturtonen",
+        "digest": "039b6401b88049055b5243f7800cbd2c237359625a384724c5ebaf7bbf45db37",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Tropische Palmenlandschaft in sanften Naturtönen",
+        "digest": "f420ddb02f286c44c683d6bc306329903d35ead67f2566b0ecd583f0303ad67c",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11000474796370",
+      "title": "Fototapete Tropische Dschungelblätter in sattem Grün",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-tropische-dschungelblatter-in-sattem-grun",
+      "targetHandle": "fototapete-tropische-dschungelblaetter-in-sattem-gruen",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-tropische-dschungelblatter-in-sattem-grun",
+        "digest": "ac15b3f4b459a72f38c2d3b45c034a1dd084bffb472e1091072a0bbf8b2371ed",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Tropische Dschungelblätter in sattem Grün",
+        "digest": "958cbad2726432939a39b32d530bcb2f5cf0885d47f5b44356b1c92aa0b46979",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/11000346018130",
+      "title": "Fototapete Ozeanwellen aus der Luft",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-meereswellen-aus-der-vogelperspektive-kopie",
+      "targetHandle": "fototapete-ozeanwellen-aus-der-luft",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-meereswellen-aus-der-vogelperspektive-kopie",
+        "digest": "f87f637d91b3b7b7b94047b6b326db945e0f66cfbadaed054701996038e06b37",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Ozeanwellen aus der Luft",
+        "digest": "e8203fc52c756cad8a7f25cac3a6382e579433276c6c6aeac51c8449eed7f2e6",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997808824658",
+      "title": "Fototapete Tropische Blätter in Naturtönen",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-kopie",
+      "targetHandle": "fototapete-tropische-blaetter-in-naturtoenen",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-kopie",
+        "digest": "82fb73d78ea82f1833f2a1a287ed9fe1bb620bbdc033da98658c259193c65e51",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Tropische Blätter in Naturtönen",
+        "digest": "4bd0b6ad94ad3f0a8bd0dbab8596d004c73e872590f1426a0a852e3f9f71ca7d",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997772124498",
+      "title": "Fototapete Meereswellen aus der Vogelperspektive",
+      "status": "CORRECT",
+      "currentHandle": "fototapete-meereswellen-aus-der-vogelperspektive",
+      "targetHandle": "fototapete-meereswellen-aus-der-vogelperspektive",
+      "needsChange": false,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-meereswellen-aus-der-vogelperspektive",
+        "digest": "d63ec1426e1ce182cbe20aaa94497a45930e8a57010aebd68561e5b2d638dfee",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Meereswellen aus der Vogelperspektive",
+        "digest": "15f11a01b20c227c901786f5ce7a8739cbcc4d4aed4d5a989694ca64e9387d47",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997765636434",
+      "title": "Fototapete Türkisblaues Wasser mit Lichtreflexen",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-schimmernde-wasserreflexe-in-pastell-kopie",
+      "targetHandle": "fototapete-tuerkisblaues-wasser-mit-lichtreflexen",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-schimmernde-wasserreflexe-in-pastell-kopie",
+        "digest": "8e654c657cf0199540c2e6e041444855d928e936ab2b4dbd9f88977be653eb1b",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Türkisblaues Wasser mit Lichtreflexen",
+        "digest": "dfd91f2c900a2cd66ac389924dce6c29c309abcc0b964c2b7d4afa04e9dfae2d",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997759148370",
+      "title": "Fototapete Schimmernde Wasserreflexe in Pastell",
+      "status": "CORRECT",
+      "currentHandle": "fototapete-schimmernde-wasserreflexe-in-pastell",
+      "targetHandle": "fototapete-schimmernde-wasserreflexe-in-pastell",
+      "needsChange": false,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-schimmernde-wasserreflexe-in-pastell",
+        "digest": "08c4eba95de8a5f387e86935b4b630a02882315fbd0b31b6e985b1ddb3fe1d78",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Schimmernde Wasserreflexe in Pastell",
+        "digest": "cff178fc84b92a9eb77389afd11acf71440603e9ab0f64d6e7be16f8c0e2ef05",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997755543890",
+      "title": "Fototapete Tropischer Wasserfall mit exotischen Vögeln",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-tropischer-wasserfall-mit-exotischen-vogeln",
+      "targetHandle": "fototapete-tropischer-wasserfall-mit-exotischen-voegeln",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-tropischer-wasserfall-mit-exotischen-vogeln",
+        "digest": "175bc20bdae9b1b86b28f05500748455b71d0e3ba7fbee5b86f800d4fff9e05f",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Tropischer Wasserfall mit exotischen Vögeln",
+        "digest": "5c999bd49b36d79d7557b52e35c570f26b5c39ec6db30b082cdb1807bad07fda",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997754855762",
+      "title": "Fototapete Eleganter Pfau im romantischen Garten",
+      "status": "CORRECT",
+      "currentHandle": "fototapete-eleganter-pfau-im-romantischen-garten",
+      "targetHandle": "fototapete-eleganter-pfau-im-romantischen-garten",
+      "needsChange": false,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-eleganter-pfau-im-romantischen-garten",
+        "digest": "e4bea2989adf0ebe75b5597c7d7e2f8f8407dccd7e4cd19fb18e095b58152e84",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Eleganter Pfau im romantischen Garten",
+        "digest": "4d744cd8380c1a39cdec1362e61a66fec9affff8bf64fe6476981624f5f8776f",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997754134866",
+      "title": "Fototapete Exotischer Vogel im tropischen Regenwald",
+      "status": "CORRECT",
+      "currentHandle": "fototapete-exotischer-vogel-im-tropischen-regenwald",
+      "targetHandle": "fototapete-exotischer-vogel-im-tropischen-regenwald",
+      "needsChange": false,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-exotischer-vogel-im-tropischen-regenwald",
+        "digest": "cf6073dfb4f7b8697ee413278e1bc7819386b615ce3e3db36ae481fea051e910",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Exotischer Vogel im tropischen Regenwald",
+        "digest": "a9be13ee6753fc01ac9124cd37f03132c189208d5f2bec68eb3c80e61329dbfe",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997752856914",
+      "title": "Fototapete Nebelwald mit Tannenpanorama",
+      "status": "CORRECT",
+      "currentHandle": "fototapete-nebelwald-mit-tannenpanorama",
+      "targetHandle": "fototapete-nebelwald-mit-tannenpanorama",
+      "needsChange": false,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-nebelwald-mit-tannenpanorama",
+        "digest": "22bb8a5bee0487ec2a5609cb7737a30df5fe8f545670e979cdc5971498f8298c",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Nebelwald mit Tannenpanorama",
+        "digest": "038bb45dfde872c6167333191b3f18a9b5ffcddcb782dba01f2080c31843c72a",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997751873874",
+      "title": "Fototapete Mystischer Nebelwald in sattem Grün",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-mystischer-nebelwald-in-sattem-grun",
+      "targetHandle": "fototapete-mystischer-nebelwald-in-sattem-gruen",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-mystischer-nebelwald-in-sattem-grun",
+        "digest": "258e70ef7454e90518918793eec254b56de97d08592c2a1f01d3d13ad45dcb88",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Mystischer Nebelwald in sattem Grün",
+        "digest": "9c39e56f01bac4cab8a71f12f52497ea30a55f1f834e19b36d3dcb69019acc73",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997747155282",
+      "title": "Fototapete Tropischer Fluss im üppigen Regenwald",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-tropischer-fluss-im-uppigen-regenwald",
+      "targetHandle": "fototapete-tropischer-fluss-im-ueppigen-regenwald",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-tropischer-fluss-im-uppigen-regenwald",
+        "digest": "0ea191df7abb406c83c71e4d9544380878341d5ffd1ed732b40c613d709a9a2f",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Tropischer Fluss im üppigen Regenwald",
+        "digest": "f206a15476975eeacb237789379b019a94cec54098d41fc5654ebd691a8ff5a7",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997738570066",
+      "title": "Fototapete Mystischer Regenwald im Morgennebel",
+      "status": "CORRECT",
+      "currentHandle": "fototapete-mystischer-regenwald-im-morgennebel",
+      "targetHandle": "fototapete-mystischer-regenwald-im-morgennebel",
+      "needsChange": false,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-mystischer-regenwald-im-morgennebel",
+        "digest": "e138af0ffe0aefc5f6eb539cdecbc4555ec5f766a40734a294b29f60f735a490",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Mystischer Regenwald im Morgennebel",
+        "digest": "aac8f2b532486641ad09e30048746709822b855c76e79d61fe7b012bae42b66f",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997730181458",
+      "title": "Fototapete Buntes Märchenschloss im Pastellstil für Mädchenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-buntes-marchenschloss-im-pastellstil-fur-madchenzimmer",
+      "targetHandle": "fototapete-buntes-maerchenschloss-im-pastellstil-fuer-maedchenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-buntes-marchenschloss-im-pastellstil-fur-madchenzimmer",
+        "digest": "9273408e836db626741f544e96d1ebe8ef6f5014bca3eeb573291a43bf5be78b",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Buntes Märchenschloss im Pastellstil für Mädchenzimmer",
+        "digest": "21926a123fb11094ad542b1cd3cb49fe0dd9bf0653de0b369a1938efc2f28d38",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997729132882",
+      "title": "Fototapete Zauberschloss in den Wolken mit rosa Ballons für Mädchenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-zauberschloss-in-den-wolken-mit-rosa-ballons-fur-madchenzimmer",
+      "targetHandle": "fototapete-zauberschloss-in-den-wolken-mit-rosa-ballons-fuer-maedchenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-zauberschloss-in-den-wolken-mit-rosa-ballons-fur-madchenzimmer",
+        "digest": "ecb14624fabd89a3ebc6a88ee0e666782fed159f9c0ef65258ba31cbda35be34",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Zauberschloss in den Wolken mit rosa Ballons für Mädchenzimmer",
+        "digest": "0e08321f54463e06f13ef9d190bbc7000d1f0cb8ae46920eb292369e5a5d173d",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997728313682",
+      "title": "Fototapete Meerjungfrauen im zauberhaften Unterwasserreich für Mädchenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-meerjungfrauen-im-zauberhaften-unterwasserreich-fur-madchenzimmer",
+      "targetHandle": "fototapete-meerjungfrauen-im-zauberhaften-unterwasserreich-fuer-maedchenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-meerjungfrauen-im-zauberhaften-unterwasserreich-fur-madchenzimmer",
+        "digest": "cef06d4394906cf2669798c3afc0af35572d56947ee280fc1fc59e3b3306af02",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Meerjungfrauen im zauberhaften Unterwasserreich für Mädchenzimmer",
+        "digest": "1e17366ac44d180cff0d24c96e8109f1d3328a3fa356a1be3ea05dd2f0a3840f",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997727363410",
+      "title": "Fototapete Magisches Einhorn auf Blumenwiese für Mädchenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-magisches-einhorn-auf-blumenwiese-fur-madchenzimmer",
+      "targetHandle": "fototapete-magisches-einhorn-auf-blumenwiese-fuer-maedchenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-magisches-einhorn-auf-blumenwiese-fur-madchenzimmer",
+        "digest": "5ac6f60e39163a1734ba499a5f6e421db55a1d27a79dbeaaac375a2ab6c2312a",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Magisches Einhorn auf Blumenwiese für Mädchenzimmer",
+        "digest": "4ca2e20dbd5add83b7b1f63dba8f9d0baeabf043114effef13a4a8ffc44bd130",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997721956690",
+      "title": "Fototapete Magisches Einhorn mit Regenbogenmähne für Mädchenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-magisches-einhorn-mit-regenbogenmahne-fur-madchenzimmer",
+      "targetHandle": "fototapete-magisches-einhorn-mit-regenbogenmaehne-fuer-maedchenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-magisches-einhorn-mit-regenbogenmahne-fur-madchenzimmer",
+        "digest": "6916f07a19df69b41282701bd624835c59c17a2bf8fd82e9d95aff664570be09",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Magisches Einhorn mit Regenbogenmähne für Mädchenzimmer",
+        "digest": "800a24646efc2217f4258c1bde47b097d6bb2ec8f7eec3d4ab3513cce6549fe4",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997717401938",
+      "title": "Fototapete Einhorn über den Wolken mit Regenbogen für Mädchenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-einhorn-uber-den-wolken-mit-regenbogen-fur-madchenzimmer",
+      "targetHandle": "fototapete-einhorn-ueber-den-wolken-mit-regenbogen-fuer-maedchenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-einhorn-uber-den-wolken-mit-regenbogen-fur-madchenzimmer",
+        "digest": "483c44220c69b322dc901d7838128be7a5aaf57f6346708787380e3806d766e4",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Einhorn über den Wolken mit Regenbogen für Mädchenzimmer",
+        "digest": "96ff9f0d852101350fb00db2d0c665148c739648790a9f6c8620aad769662298",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997716386130",
+      "title": "Fototapete Abstrakte Blüten in Pastellfarben",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-abstrakte-bluten-in-pastellfarben",
+      "targetHandle": "fototapete-abstrakte-blueten-in-pastellfarben",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-abstrakte-bluten-in-pastellfarben",
+        "digest": "3020c37ba1b50f8fc868e0bb5ec5eccd3b3215fa862dd0d4a3cdfcdcb6824fe4",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Abstrakte Blüten in Pastellfarben",
+        "digest": "b17554e0d5ddf762d2fbddf66f0aa8f74ee6e725efc4a9956c402142b2904b80",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997715272018",
+      "title": "Fototapete Aquarell Lavendelfeld in Pastell für Mädchenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-aquarell-lavendelfeld-in-pastell-fur-madchenzimmer",
+      "targetHandle": "fototapete-aquarell-lavendelfeld-in-pastell-fuer-maedchenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-aquarell-lavendelfeld-in-pastell-fur-madchenzimmer",
+        "digest": "aa175af68230afeaf5ba6d7a3d24000514e8665c46dd30c02b66beb71add8b06",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Aquarell Lavendelfeld in Pastell für Mädchenzimmer",
+        "digest": "a082ab0859361b7a655f8ada8c181da3d21a94bc459169e2d25e5d0cd36d87e8",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997711176018",
+      "title": "Fototapete Koalas im tropischen Dschungel für Kinderzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-koalas-im-tropischen-dschungel-fur-kinderzimmer",
+      "targetHandle": "fototapete-koalas-im-tropischen-dschungel-fuer-kinderzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-koalas-im-tropischen-dschungel-fur-kinderzimmer",
+        "digest": "3ca5f15de85e2052d4f78104221a669afb0b1c446e0efb2abee2c2b4f074a138",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Koalas im tropischen Dschungel für Kinderzimmer",
+        "digest": "433f03f8346fa1747f9b93f714e79c7c2aa0ee759afe617f9f09b107f5321b80",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997709701458",
+      "title": "Fototapete Piratenschiff an tropischem Strand für Jungenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-piratenschiff-an-tropischem-strand-fur-jungenzimmer",
+      "targetHandle": "fototapete-piratenschiff-an-tropischem-strand-fuer-jungenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-piratenschiff-an-tropischem-strand-fur-jungenzimmer",
+        "digest": "706c4768b3550008d47cd94e7ff4820fff57c54e2505f14d50d0697fd7b4079f",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Piratenschiff an tropischem Strand für Jungenzimmer",
+        "digest": "45fa49ceee3227d2e2ee56c7bce9a404f3feb638df31e03aff42726ec57af7b7",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997708194130",
+      "title": "Fototapete T-Rex in dramatischer Berglandschaft für Jungenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-t-rex-in-dramatischer-berglandschaft-fur-jungenzimmer",
+      "targetHandle": "fototapete-t-rex-in-dramatischer-berglandschaft-fuer-jungenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-t-rex-in-dramatischer-berglandschaft-fur-jungenzimmer",
+        "digest": "0f94804006de0b58c147667fcb1d5fddd723fc5eee3f212db32d113ddbd1ec39",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete T-Rex in dramatischer Berglandschaft für Jungenzimmer",
+        "digest": "467d77e2a7b80398e377ce0ad748439e2920af5f0f6652b12e4fcd33746da4fa",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997706326354",
+      "title": "Fototapete Dinosaurier in majestätischer Berglandschaft für Jungenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-dinosaurier-in-majestatischer-berglandschaft-fur-jungenzimmer",
+      "targetHandle": "fototapete-dinosaurier-in-majestaetischer-berglandschaft-fuer-jungenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-dinosaurier-in-majestatischer-berglandschaft-fur-jungenzimmer",
+        "digest": "aa94a38f3e7f663b87b2f5a4184beff73fcf5630a82b238bf3d3d9202e009aee",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Dinosaurier in majestätischer Berglandschaft für Jungenzimmer",
+        "digest": "24d6f3751984dd857364cb4ef6824aeedf7ae6b626def8500641c755f22e3e2b",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997698265426",
+      "title": "Fototapete Aquarell Dinosaurier in Berglandschaft für Jungenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-aquarell-dinosaurier-in-berglandschaft-fur-jungenzimmer",
+      "targetHandle": "fototapete-aquarell-dinosaurier-in-berglandschaft-fuer-jungenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-aquarell-dinosaurier-in-berglandschaft-fur-jungenzimmer",
+        "digest": "b944edf782ed0d428cba8d76e8c86e5b4865e4cb2ea53fa70d2303a499dbd8a3",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Aquarell Dinosaurier in Berglandschaft für Jungenzimmer",
+        "digest": "e6171b176f141188950ffc036f3d83d3626d7e7f28687fda297e4e26aad44f92",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997696856402",
+      "title": "Fototapete Retro Sportwagen bei Nacht in der Neonstadt",
+      "status": "CORRECT",
+      "currentHandle": "fototapete-retro-sportwagen-bei-nacht-in-der-neonstadt",
+      "targetHandle": "fototapete-retro-sportwagen-bei-nacht-in-der-neonstadt",
+      "needsChange": false,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-retro-sportwagen-bei-nacht-in-der-neonstadt",
+        "digest": "927f9e202282d148c161c5aa90770437322b516a8d05d681c1e6741f4510cfe9",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Retro Sportwagen bei Nacht in der Neonstadt",
+        "digest": "a6eadaebf8069763fdaf8be15d58f22804fa4324cf0eeb74b71705137d0c7c78",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997676343634",
+      "title": "Fototapete Sportwagen in Action für Jungenzimmer",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-sportwagen-in-action-fur-jungenzimmer",
+      "targetHandle": "fototapete-sportwagen-in-action-fuer-jungenzimmer",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-sportwagen-in-action-fur-jungenzimmer",
+        "digest": "c1a07fd04ea319bb54952d85e7f596b638bcd2b7684b88ecadcdf1175918bcbf",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Sportwagen in Action für Jungenzimmer",
+        "digest": "d9838b0a7758d1fdff3458114290606c8a4d37d8f9e28fd7f0a37d6a3ee71c19",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997667332434",
+      "title": "Fototapete Pastell Wolken mit Mond und Sternen",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-pastell-wolken-mit-mond-und-sternen-fur-kinderzimmer",
+      "targetHandle": "fototapete-pastell-wolken-mit-mond-und-sternen",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-pastell-wolken-mit-mond-und-sternen-fur-kinderzimmer",
+        "digest": "0c84525af1033ae78b7b1711531b503dae3e31842dca659a725c9a757d035d9c",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Pastell Wolken mit Mond und Sternen",
+        "digest": "155b5ff22203e088658d80bd1a04d19a2b94ed62937bc07d54a855caf22e4654",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997665005906",
+      "title": "Fototapete Aquarell Waldtiere mit Rehen und Hasen",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-aquarell-waldtiere-mit-rehen-und-hasen-fur-kinderzimmer",
+      "targetHandle": "fototapete-aquarell-waldtiere-mit-rehen-und-hasen",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-aquarell-waldtiere-mit-rehen-und-hasen-fur-kinderzimmer",
+        "digest": "818911aba3494554c88cfd2f7e1cbd6b3d73114f3c7e7169e47757d83c3f5dc1",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Aquarell Waldtiere mit Rehen und Hasen",
+        "digest": "3ceda9ea026f016f667f3229e4f5774719983fd8b5aaf149beb28af91939aa22",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997662679378",
+      "title": "Fototapete Aquarell Safari mit Dschungeltieren",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-aquarell-safari-mit-dschungeltieren-fur-kinderzimmer",
+      "targetHandle": "fototapete-aquarell-safari-mit-dschungeltieren",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-aquarell-safari-mit-dschungeltieren-fur-kinderzimmer",
+        "digest": "8eeeb078176d2e3ee10e49b8655888a544a897183db6d561f6bda9d06de11698",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Aquarell Safari mit Dschungeltieren",
+        "digest": "052fa821e1ef9372bd41edc636458460034a3eaf210ac273acf9f9824395fddd",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997652750674",
+      "title": "Fototapete Aquarell Heißluftballons mit Hasen",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-aquarell-heissluftballons-mit-hasen-fur-kinderzimmer",
+      "targetHandle": "fototapete-aquarell-heissluftballons-mit-hasen",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-aquarell-heissluftballons-mit-hasen-fur-kinderzimmer",
+        "digest": "83c0fb74d0bebd7cd48d9e0fb96c347604a01bf26fe4cd3ac2b1b3be2b9f84c5",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Aquarell Heißluftballons mit Hasen",
+        "digest": "45802ce50c32b38c99b6c26f888b71cefd8629388d4f39ba55c20ed41205512b",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997641740626",
+      "title": "Fototapete Pastell Regenbogen mit Blumenlandschaft",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-aquarell-safari-mit-heissluftballons-fur-kinderzimmer-kopie",
+      "targetHandle": "fototapete-pastell-regenbogen-mit-blumenlandschaft",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-aquarell-safari-mit-heissluftballons-fur-kinderzimmer-kopie",
+        "digest": "b5feb284abaa9121d9f9b7b17b4b302f78b554a94f42ef6d1941dcebc5cb4ed8",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Pastell Regenbogen mit Blumenlandschaft",
+        "digest": "c5f58245e99a1fc019b422615067e7d1d5479ad8e0f851564fedcbb6668402df",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10997621752146",
+      "title": "Fototapete Aquarell Safari mit Heißluftballons",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "fototapete-aquarell-safari-mit-heissluftballons-fur-kinderzimmer",
+      "targetHandle": "fototapete-aquarell-safari-mit-heissluftballons",
+      "needsChange": true,
+      "suspiciousCurrentHandle": false,
+      "germanSpecialCharacters": true,
+      "handleSource": {
+        "key": "handle",
+        "value": "fototapete-aquarell-safari-mit-heissluftballons-fur-kinderzimmer",
+        "digest": "9191e3f4ca1cc6e6a82f9c393e35fb738a908a77555858a67d787b51066f1db4",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Aquarell Safari mit Heißluftballons",
+        "digest": "a329bb57b1101952660062e2fb2b6ef5abf533598befd39a9f95f72c5ec30caa",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    },
+    {
+      "productId": "gid://shopify/Product/10992259268946",
+      "title": "Fototapete Retro Sportwagen mit Palmen bei Sonnenuntergang",
+      "status": "NEEDS_CHANGE",
+      "currentHandle": "base-product",
+      "targetHandle": "fototapete-retro-sportwagen-mit-palmen-bei-sonnenuntergang",
+      "needsChange": true,
+      "suspiciousCurrentHandle": true,
+      "germanSpecialCharacters": false,
+      "handleSource": {
+        "key": "handle",
+        "value": "base-product",
+        "digest": "326866c7a2528b9993de67b187a5a3759f4b67cbd975ee22d091d9bc1abb851a",
+        "locale": "de"
+      },
+      "titleSource": {
+        "key": "title",
+        "value": "Fototapete Retro Sportwagen mit Palmen bei Sonnenuntergang",
+        "digest": "40a5593144d0dc78b6b6c67bfd9e232d869b888f343e473700c0d38fc5b4b1af",
+        "locale": "de"
+      },
+      "translationProblems": [],
+      "enGlobalHandle": null,
+      "enGlobalHandleOutdated": null,
+      "marketSpecificEnHandles": [],
+      "targetCollisionCollection": false,
+      "targetCollisionStore": false,
+      "targetStoreOwners": []
+    }
+  ]
+}

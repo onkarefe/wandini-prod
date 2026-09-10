@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-09-09T15:41:13.967Z",
+  "shop": "vurpri-8s.myshopify.com",
+  "apiVersion": "2026-07",
+  "targetLocale": "en",
+  "targetScope": "GLOBAL",
+  "testProducts": [
+    {
+      "productId": "gid://shopify/Product/11015545749842",
+      "handle": "fototapete-koi-mit-lotusbluten",
+      "metafieldId": "gid://shopify/Metafield/71505823662418",
+      "source": {
+        "key": "value",
+        "value": "{\"type\":\"root\",\"children\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Jede Fototapete wird individuell für dich auf Maß gefertigt. Im Konfigurator kannst du zwischen vier hochwertigen Materialien wählen – passend zu deinem Raum, Untergrund und deinen Anforderungen.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Glatt\",\"bold\":true},{\"type\":\"text\",\"value\":\" ist unsere preisgünstige Vliestapete mit glatter, matter Oberfläche und hochwertiger Druckqualität. Die Fototapete ist schwer entflammbar, wird klassisch mit Kleister verarbeitet und in passgenauen Bahnen geliefert.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Feinprägung\",\"bold\":true},{\"type\":\"text\",\"value\":\" ist eine hochwertige Vliestapete mit fein geprägter, matter Oberfläche. Die dezente Struktur sorgt für eine besonders edle Optik und brillante Bildwirkung. Auch diese Fototapete ist schwer entflammbar und wird in passgenauen Bahnen geliefert.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Selbstklebend\",\"bold\":true},{\"type\":\"text\",\"value\":\" eignet sich ideal für glatte Untergründe und kommt ganz ohne Kleister aus. Die selbstklebende Fototapete lässt sich einfach anbringen, rückstandslos entfernen und wird in passgenauen Bahnen geliefert.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Nahtlos\",\"bold\":true},{\"type\":\"text\",\"value\":\" ist unsere hochwertige Textiltapete für eine besonders gleichmäßige Wandgestaltung. Sie wird aus einem Stück gefertigt und kommt vollständig ohne sichtbare Übergänge aus. Das textile, matte Finish sorgt besonders auf großen Wandflächen für eine beeindruckende und hochwertige Bildwirkung.\"}]}]}",
+        "digest": "dd86692542fd30510cad45e24a7579e109e8899654bd1353ddca63742acee3d9",
+        "locale": "de"
+      },
+      "translation": {
+        "key": "value",
+        "value": "{\"type\":\"root\",\"children\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Each wall mural is custom-made to your exact dimensions. In the configurator, you can choose from four high-quality materials – to suit your room, wall surface, and requirements.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Smooth\",\"bold\":true},{\"type\":\"text\",\"value\":\" is our affordable non-woven wallpaper with a smooth, matte surface and high-quality print reproduction. The wall mural is flame-retardant, installed traditionally using wallpaper paste, and supplied in precisely fitted panels.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Fine Embossing\",\"bold\":true},{\"type\":\"text\",\"value\":\" is a high-quality non-woven wallpaper with a finely embossed, matte surface. The subtle texture creates an especially elegant appearance and brilliant image reproduction. This wall mural is also flame-retardant and supplied in precisely fitted panels.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Self-Adhesive\",\"bold\":true},{\"type\":\"text\",\"value\":\" is ideal for smooth surfaces and requires no wallpaper paste. The self-adhesive wall mural is easy to install, can be removed without leaving residue, and is supplied in precisely fitted panels.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Seamless\",\"bold\":true},{\"type\":\"text\",\"value\":\" is our high-quality textile wallpaper for a particularly uniform wall finish. It is produced in one piece and has no visible joins. The textile, matte finish creates an impressive, premium visual impact, especially on large wall surfaces.\"}]}]}",
+        "locale": "en",
+        "outdated": false,
+        "market": null
+      }
+    },
+    {
+      "productId": "gid://shopify/Product/11004616278354",
+      "handle": "6-2",
+      "metafieldId": "gid://shopify/Metafield/71340712264018",
+      "source": {
+        "key": "value",
+        "value": "{\"type\":\"root\",\"children\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Jede Fototapete wird individuell für dich auf Maß gefertigt. Im Konfigurator kannst du zwischen vier hochwertigen Materialien wählen – passend zu deinem Raum, Untergrund und deinen Anforderungen.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Glatt\",\"bold\":true},{\"type\":\"text\",\"value\":\" ist unsere preisgünstige Vliestapete mit glatter, matter Oberfläche und hochwertiger Druckqualität. Die Fototapete ist schwer entflammbar, wird klassisch mit Kleister verarbeitet und in passgenauen Bahnen geliefert.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Feinprägung\",\"bold\":true},{\"type\":\"text\",\"value\":\" ist eine hochwertige Vliestapete mit fein geprägter, matter Oberfläche. Die dezente Struktur sorgt für eine besonders edle Optik und brillante Bildwirkung. Auch diese Fototapete ist schwer entflammbar und wird in passgenauen Bahnen geliefert.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Selbstklebend\",\"bold\":true},{\"type\":\"text\",\"value\":\" eignet sich ideal für glatte Untergründe und kommt ganz ohne Kleister aus. Die selbstklebende Fototapete lässt sich einfach anbringen, rückstandslos entfernen und wird in passgenauen Bahnen geliefert.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Nahtlos\",\"bold\":true},{\"type\":\"text\",\"value\":\" ist unsere hochwertige Textiltapete für eine besonders gleichmäßige Wandgestaltung. Sie wird aus einem Stück gefertigt und kommt vollständig ohne sichtbare Übergänge aus. Das textile, matte Finish sorgt besonders auf großen Wandflächen für eine beeindruckende und hochwertige Bildwirkung.\"}]}]}",
+        "digest": "dd86692542fd30510cad45e24a7579e109e8899654bd1353ddca63742acee3d9",
+        "locale": "de"
+      },
+      "translation": {
+        "key": "value",
+        "value": "{\"type\":\"root\",\"children\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Each wall mural is custom-made to your exact dimensions. In the configurator, you can choose from four high-quality materials – to suit your room, wall surface, and requirements.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Smooth\",\"bold\":true},{\"type\":\"text\",\"value\":\" is our affordable non-woven wallpaper with a smooth, matte surface and high-quality print reproduction. The wall mural is flame-retardant, installed traditionally using wallpaper paste, and supplied in precisely fitted panels.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Fine Embossing\",\"bold\":true},{\"type\":\"text\",\"value\":\" is a high-quality non-woven wallpaper with a finely embossed, matte surface. The subtle texture creates an especially elegant appearance and brilliant image reproduction. This wall mural is also flame-retardant and supplied in precisely fitted panels.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Self-Adhesive\",\"bold\":true},{\"type\":\"text\",\"value\":\" is ideal for smooth surfaces and requires no wallpaper paste. The self-adhesive wall mural is easy to install, can be removed without leaving residue, and is supplied in precisely fitted panels.\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"text\",\"value\":\"Seamless\",\"bold\":true},{\"type\":\"text\",\"value\":\" is our high-quality textile wallpaper for a particularly uniform wall finish. It is produced in one piece and has no visible joins. The textile, matte finish creates an impressive, premium visual impact, especially on large wall surfaces.\"}]}]}",
+        "locale": "en",
+        "outdated": false,
+        "market": null
+      }
+    }
+  ]
+}

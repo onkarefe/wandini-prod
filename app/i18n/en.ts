@@ -120,6 +120,19 @@ export const en = {
   'similarMotifs.previous': 'Show previous motifs',
   'similarMotifs.next': 'Show more motifs',
   'similarMotifs.position': '{number} of {total}',
+  'similarProducts.metaTitle': '{heading} | Wandini',
+  'similarProducts.metaDescription':
+    'Discover {category} featuring the “{theme}” theme and “{motif}” motif, along with related designs.',
+  'similarProducts.subtitle':
+    'Discover {category} with similar motifs, themes, and visual styles.',
+  'similarProducts.fallbackMetaTitle': 'Similar products | {slug} | Wandini',
+  'similarProducts.fallbackMetaDescription':
+    'Discover related designs selected by motif, theme, and category.',
+  'similarProducts.loadMore': 'Show more',
+  'similarProducts.loading': 'Loading…',
+  'similarProducts.empty': 'No similar products found.',
+  'similarProducts.missingSlug': 'The similar-products slug was not found.',
+  'similarProducts.invalidOffset': 'Invalid offset value.',
   'product.description': 'Description',
   'product.information': 'Product information',
   'product.deliveryShipping': 'Delivery & shipping',

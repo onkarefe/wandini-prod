@@ -29,8 +29,6 @@ type BestsellerProductCardProps = {
   isWishlisted?: boolean;
   showSimilarMotifsButton?: boolean;
   similarProductsUrl?: string;
-  similarProductsSourceTitle?: string;
-  similarProductsSourceImageUrl?: string;
 };
 
 function HeartOutlineIcon() {
@@ -77,8 +75,8 @@ function formatPriceLabel(
       price.currencyCode,
       locale,
       {
-      minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
-      maximumFractionDigits: 2,
+        minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+        maximumFractionDigits: 2,
       },
     );
 
@@ -98,8 +96,6 @@ export default function BestsellerProductCard({
   isWishlisted = false,
   showSimilarMotifsButton = false,
   similarProductsUrl,
-  similarProductsSourceTitle,
-  similarProductsSourceImageUrl,
 }: BestsellerProductCardProps) {
   const {locale, t} = useTranslation();
   const displayImages =
@@ -110,9 +106,7 @@ export default function BestsellerProductCard({
   const location = useLocation();
   const navigate = useNavigate();
   const loginPath = usePrefixPathWithLocale('/account/login');
-  const fetcherLoginUrl = usePrefixPathWithLocale(
-    fetcher.data?.loginUrl ?? '',
-  );
+  const fetcherLoginUrl = usePrefixPathWithLocale(fetcher.data?.loginUrl ?? '');
   const localizedSimilarProductsUrl = usePrefixPathWithLocale(
     similarProductsUrl ?? '',
   );
@@ -255,13 +249,7 @@ export default function BestsellerProductCard({
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                void navigate(localizedSimilarProductsUrl, {
-                  state: {
-                    sourceProductTitle: similarProductsSourceTitle ?? title,
-                    sourceProductImageUrl:
-                      similarProductsSourceImageUrl ?? images[0]?.url ?? null,
-                  },
-                });
+                void navigate(localizedSimilarProductsUrl);
               }}
             >
               <SimilarMotifsIcon />

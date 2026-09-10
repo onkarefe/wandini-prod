@@ -1,8 +1,14 @@
 import type {Storefront} from '@shopify/hydrogen';
-import {buildSimilarProductsPath} from '~/lib/similar-products';
+import {
+  buildSimilarProductsPath,
+  getLayer1SameMotifProducts,
+  getLayer2SameThemeProducts,
+  removeDuplicateProductsById,
+} from '~/lib/similar-products';
 
 const PREVIEW_PRODUCT_COUNT = 5;
 const CANDIDATE_LIMIT = PREVIEW_PRODUCT_COUNT + 1;
+const LOCALIZED_CANDIDATE_PAGE_SIZE = 100;
 
 export const SIMILAR_MOTIFS_CATEGORY_HANDLE = 'fototapeten';
 
@@ -27,21 +33,34 @@ export type SimilarMotifsPreviewProduct = {
 export type SimilarMotifsPreviewData = {
   products: SimilarMotifsPreviewProduct[];
   similarProductsPath: string;
-  sourceProductTitle: string;
-  sourceProductImageUrl: string | null;
 };
 
 type PreviewQueryProduct = {
   id: string;
   handle: string;
   title: string;
+  mainMotif?: {value?: string | null} | null;
+  mainTheme?: {value?: string | null} | null;
   images?: {
-    nodes?: SimilarMotifsPreviewImage[] | null;
+    nodes?: SimilarMotifsPreviewImage[];
   } | null;
   priceRange?: {
     minVariantPrice?: {
       amount: string;
       currencyCode: string;
+    } | null;
+  } | null;
+};
+
+type LocalizedPreviewCandidatesQueryResult = {
+  collection?: {
+    handle?: string | null;
+    products?: {
+      nodes?: PreviewQueryProduct[];
+      pageInfo?: {
+        hasNextPage?: boolean;
+        endCursor?: string | null;
+      } | null;
     } | null;
   } | null;
 };
@@ -52,6 +71,7 @@ type PreviewQueryConnection = {
 
 type SimilarMotifsPreviewQueryResult = {
   collection?: {
+    handle?: string | null;
     sameMotif?: PreviewQueryConnection | null;
     sameTheme?: PreviewQueryConnection | null;
     fallback?: PreviewQueryConnection | null;
@@ -81,19 +101,95 @@ function mapPreviewProduct(
   };
 }
 
+async function resolveEnglishCategoryHandle(
+  storefront: Storefront,
+  germanCategoryHandle: string,
+) {
+  const sourceCategory = await storefront.query<{
+    collection?: {id?: string | null} | null;
+  }>(SIMILAR_MOTIFS_CATEGORY_ID_QUERY, {
+    cache: storefront.CacheLong(),
+    variables: {
+      categoryHandle: germanCategoryHandle,
+      country: 'DE',
+      language: 'DE',
+    },
+  });
+  const categoryId = sourceCategory.collection?.id;
+
+  if (!categoryId) {
+    return null;
+  }
+
+  const localizedCategory = await storefront.query<{
+    category?: {__typename?: string; handle?: string | null} | null;
+  }>(SIMILAR_MOTIFS_LOCALIZED_CATEGORY_QUERY, {
+    cache: storefront.CacheLong(),
+    variables: {
+      categoryId,
+      country: storefront.i18n.country,
+      language: storefront.i18n.language,
+    },
+  });
+
+  return localizedCategory.category?.__typename === 'Collection'
+    ? localizedCategory.category.handle?.trim() || null
+    : null;
+}
+
+async function fetchLocalizedPreviewCandidates(
+  storefront: Storefront,
+  categoryHandle: string,
+) {
+  const products: PreviewQueryProduct[] = [];
+  let resolvedCategoryHandle = categoryHandle;
+  let endCursor: string | null = null;
+  let hasNextPage = true;
+
+  while (hasNextPage) {
+    const response: LocalizedPreviewCandidatesQueryResult =
+      await storefront.query<LocalizedPreviewCandidatesQueryResult>(
+        SIMILAR_MOTIFS_LOCALIZED_CANDIDATES_QUERY,
+        {
+          cache: storefront.CacheCustom({
+            mode: 'public',
+            maxAge: 60,
+            staleWhileRevalidate: 300,
+            staleIfError: 86_400,
+          }),
+          variables: {
+            categoryHandle,
+            first: LOCALIZED_CANDIDATE_PAGE_SIZE,
+            after: endCursor,
+          },
+        },
+      );
+    const collection: LocalizedPreviewCandidatesQueryResult['collection'] =
+      response.collection;
+
+    if (!collection) {
+      return null;
+    }
+
+    resolvedCategoryHandle =
+      collection.handle?.trim() || resolvedCategoryHandle;
+    products.push(...(collection.products?.nodes ?? []));
+    hasNextPage = Boolean(collection.products?.pageInfo?.hasNextPage);
+    endCursor = collection.products?.pageInfo?.endCursor ?? null;
+  }
+
+  return {categoryHandle: resolvedCategoryHandle, products};
+}
+
 export async function getSimilarMotifsPreview({
   storefront,
   sourceProductId,
-  sourceProductTitle,
-  sourceProductImageUrl,
   mainMotif,
   mainTheme,
   categoryHandle = SIMILAR_MOTIFS_CATEGORY_HANDLE,
 }: {
   storefront: Storefront;
   sourceProductId: string;
-  sourceProductTitle: string;
-  sourceProductImageUrl?: string | null;
   mainMotif: string;
   mainTheme: string;
   categoryHandle?: string;
@@ -101,20 +197,61 @@ export async function getSimilarMotifsPreview({
   const normalizedMainMotif = normalizeText(mainMotif);
   const normalizedMainTheme = normalizeText(mainTheme);
   const normalizedCategoryHandle = normalizeText(categoryHandle);
-  const similarProductsPath = buildSimilarProductsPath({
-    mainMotif: normalizedMainMotif,
-    mainTheme: normalizedMainTheme,
-    productCategory: normalizedCategoryHandle,
-  });
-
   if (
     !sourceProductId ||
     !normalizedMainMotif ||
     !normalizedMainTheme ||
-    !normalizedCategoryHandle ||
-    !similarProductsPath
+    !normalizedCategoryHandle
   ) {
     return null;
+  }
+
+  if (storefront.i18n.language === 'EN') {
+    const localizedCategoryHandle = await resolveEnglishCategoryHandle(
+      storefront,
+      normalizedCategoryHandle,
+    );
+
+    if (!localizedCategoryHandle) {
+      return null;
+    }
+
+    const candidateData = await fetchLocalizedPreviewCandidates(
+      storefront,
+      localizedCategoryHandle,
+    );
+
+    if (!candidateData) {
+      return null;
+    }
+
+    const similarProductsPath = buildSimilarProductsPath({
+      mainMotif: normalizedMainMotif,
+      mainTheme: normalizedMainTheme,
+      productCategory: candidateData.categoryHandle,
+    });
+
+    if (!similarProductsPath) {
+      return null;
+    }
+
+    const rankedProducts = removeDuplicateProductsById([
+      ...getLayer1SameMotifProducts({
+        products: candidateData.products,
+        targetMainMotif: normalizedMainMotif,
+      }),
+      ...getLayer2SameThemeProducts({
+        products: candidateData.products,
+        targetMainTheme: normalizedMainTheme,
+      }),
+      ...candidateData.products,
+    ]);
+    const products = rankedProducts
+      .filter((product) => product.id !== sourceProductId)
+      .slice(0, PREVIEW_PRODUCT_COUNT)
+      .map(mapPreviewProduct);
+
+    return products.length > 0 ? {products, similarProductsPath} : null;
   }
 
   const response = (await storefront.query(SIMILAR_MOTIFS_PREVIEW_QUERY, {
@@ -134,6 +271,17 @@ export async function getSimilarMotifsPreview({
   })) as SimilarMotifsPreviewQueryResult;
 
   if (!response.collection) {
+    return null;
+  }
+
+  const similarProductsPath = buildSimilarProductsPath({
+    mainMotif: normalizedMainMotif,
+    mainTheme: normalizedMainTheme,
+    productCategory:
+      response.collection.handle?.trim() || normalizedCategoryHandle,
+  });
+
+  if (!similarProductsPath) {
     return null;
   }
 
@@ -166,8 +314,6 @@ export async function getSimilarMotifsPreview({
   return {
     products: selectedProducts,
     similarProductsPath,
-    sourceProductTitle,
-    sourceProductImageUrl: sourceProductImageUrl ?? null,
   };
 }
 
@@ -176,6 +322,12 @@ const SIMILAR_MOTIFS_PREVIEW_PRODUCT_FRAGMENT = `#graphql
     id
     handle
     title
+    mainMotif: metafield(namespace: "custom", key: "main_motif") {
+      value
+    }
+    mainTheme: metafield(namespace: "custom", key: "main_theme") {
+      value
+    }
     priceRange {
       minVariantPrice {
         amount
@@ -193,6 +345,57 @@ const SIMILAR_MOTIFS_PREVIEW_PRODUCT_FRAGMENT = `#graphql
   }
 ` as const;
 
+const SIMILAR_MOTIFS_CATEGORY_ID_QUERY = `#graphql
+  query SimilarMotifsCategoryId(
+    $country: CountryCode!
+    $language: LanguageCode!
+    $categoryHandle: String!
+  ) @inContext(country: $country, language: $language) {
+    collection(handle: $categoryHandle) {
+      id
+    }
+  }
+` as const;
+
+const SIMILAR_MOTIFS_LOCALIZED_CATEGORY_QUERY = `#graphql
+  query SimilarMotifsLocalizedCategory(
+    $country: CountryCode!
+    $language: LanguageCode!
+    $categoryId: ID!
+  ) @inContext(country: $country, language: $language) {
+    category: node(id: $categoryId) {
+      __typename
+      ... on Collection {
+        handle
+      }
+    }
+  }
+` as const;
+
+const SIMILAR_MOTIFS_LOCALIZED_CANDIDATES_QUERY = `#graphql
+  ${SIMILAR_MOTIFS_PREVIEW_PRODUCT_FRAGMENT}
+  query SimilarMotifsLocalizedCandidates(
+    $country: CountryCode
+    $language: LanguageCode
+    $categoryHandle: String!
+    $first: Int!
+    $after: String
+  ) @inContext(country: $country, language: $language) {
+    collection(handle: $categoryHandle) {
+      handle
+      products(first: $first, after: $after) {
+        nodes {
+          ...SimilarMotifsPreviewProduct
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+` as const;
+
 const SIMILAR_MOTIFS_PREVIEW_QUERY = `#graphql
   ${SIMILAR_MOTIFS_PREVIEW_PRODUCT_FRAGMENT}
   query SimilarMotifsPreview(
@@ -204,6 +407,7 @@ const SIMILAR_MOTIFS_PREVIEW_QUERY = `#graphql
     $candidateLimit: Int!
   ) @inContext(country: $country, language: $language) {
     collection(handle: $categoryHandle) {
+      handle
       sameMotif: products(
         first: $candidateLimit
         filters: [

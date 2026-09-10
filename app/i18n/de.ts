@@ -118,6 +118,20 @@ export const de = {
   'similarMotifs.previous': 'Vorherige Motive anzeigen',
   'similarMotifs.next': 'Weitere Motive anzeigen',
   'similarMotifs.position': '{number} von {total}',
+  'similarProducts.metaTitle': '{heading} | Wandini',
+  'similarProducts.metaDescription':
+    'Entdecken Sie {category} zum Thema „{theme}“ und mit dem Motiv „{motif}“ sowie verwandte Designs.',
+  'similarProducts.subtitle':
+    'Entdecken Sie {category} mit ähnlichen Motiven, Themen und Bildstilen.',
+  'similarProducts.fallbackMetaTitle': 'Ähnliche Produkte | {slug} | Wandini',
+  'similarProducts.fallbackMetaDescription':
+    'Entdecken Sie verwandte Designs, ausgewählt nach Motiv, Thema und Kategorie.',
+  'similarProducts.loadMore': 'Mehr anzeigen',
+  'similarProducts.loading': 'Wird geladen …',
+  'similarProducts.empty': 'Keine ähnlichen Produkte gefunden.',
+  'similarProducts.missingSlug':
+    'Slug für ähnliche Produkte wurde nicht gefunden.',
+  'similarProducts.invalidOffset': 'Ungültiger Offset-Wert.',
   'product.description': 'Beschreibung',
   'product.information': 'Produktinformationen',
   'product.deliveryShipping': 'Lieferung & Versand',

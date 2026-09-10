@@ -568,6 +568,109 @@ export type LanguageSwitchResourceQuery = {
   >;
 };
 
+export type SimilarProductsLanguageSwitchQueryVariables = StorefrontAPI.Exact<{
+  productId: StorefrontAPI.Scalars['ID']['input'];
+  categoryId: StorefrontAPI.Scalars['ID']['input'];
+  country: StorefrontAPI.CountryCode;
+  language: StorefrontAPI.LanguageCode;
+}>;
+
+export type SimilarProductsLanguageSwitchQuery = {
+  product?: StorefrontAPI.Maybe<
+    | {
+        __typename:
+          | 'AppliedGiftCard'
+          | 'Article'
+          | 'Blog'
+          | 'Cart'
+          | 'CartLine'
+          | 'Collection'
+          | 'Comment'
+          | 'Company'
+          | 'CompanyContact'
+          | 'CompanyLocation'
+          | 'ComponentizableCartLine'
+          | 'ExternalVideo'
+          | 'GenericFile'
+          | 'Location'
+          | 'MailingAddress'
+          | 'Market'
+          | 'MediaImage'
+          | 'MediaPresentation'
+          | 'Menu'
+          | 'MenuItem';
+      }
+    | {
+        __typename:
+          | 'Metafield'
+          | 'Metaobject'
+          | 'Model3d'
+          | 'Order'
+          | 'Page'
+          | 'ProductOption'
+          | 'ProductOptionValue'
+          | 'ProductVariant'
+          | 'Shop'
+          | 'ShopPayInstallmentsFinancingPlan'
+          | 'ShopPayInstallmentsFinancingPlanTerm'
+          | 'ShopPayInstallmentsProductVariantPricing'
+          | 'ShopPolicy'
+          | 'TaxonomyCategory'
+          | 'UrlRedirect'
+          | 'Video';
+      }
+    | ({__typename: 'Product'} & {
+        mainMotif?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
+        mainTheme?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
+      })
+  >;
+  category?: StorefrontAPI.Maybe<
+    | {
+        __typename:
+          | 'AppliedGiftCard'
+          | 'Article'
+          | 'Blog'
+          | 'Cart'
+          | 'CartLine'
+          | 'Comment'
+          | 'Company'
+          | 'CompanyContact'
+          | 'CompanyLocation'
+          | 'ComponentizableCartLine'
+          | 'ExternalVideo'
+          | 'GenericFile'
+          | 'Location'
+          | 'MailingAddress'
+          | 'Market'
+          | 'MediaImage'
+          | 'MediaPresentation'
+          | 'Menu'
+          | 'MenuItem'
+          | 'Metafield';
+      }
+    | {
+        __typename:
+          | 'Metaobject'
+          | 'Model3d'
+          | 'Order'
+          | 'Page'
+          | 'Product'
+          | 'ProductOption'
+          | 'ProductOptionValue'
+          | 'ProductVariant'
+          | 'Shop'
+          | 'ShopPayInstallmentsFinancingPlan'
+          | 'ShopPayInstallmentsFinancingPlanTerm'
+          | 'ShopPayInstallmentsProductVariantPricing'
+          | 'ShopPolicy'
+          | 'TaxonomyCategory'
+          | 'UrlRedirect'
+          | 'Video';
+      }
+    | ({__typename: 'Collection'} & Pick<StorefrontAPI.Collection, 'handle'>)
+  >;
+};
+
 export type MarketingSeoMetaobjectsQueryVariables = StorefrontAPI.Exact<{
   type: StorefrontAPI.Scalars['String']['input'];
   first: StorefrontAPI.Scalars['Int']['input'];
@@ -606,6 +709,8 @@ export type SimilarMotifsPreviewProductFragment = Pick<
   StorefrontAPI.Product,
   'id' | 'handle' | 'title'
 > & {
+  mainMotif?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
+  mainTheme?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
   priceRange: {
     minVariantPrice: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
   };
@@ -614,6 +719,113 @@ export type SimilarMotifsPreviewProductFragment = Pick<
       Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
     >;
   };
+};
+
+export type SimilarMotifsCategoryIdQueryVariables = StorefrontAPI.Exact<{
+  country: StorefrontAPI.CountryCode;
+  language: StorefrontAPI.LanguageCode;
+  categoryHandle: StorefrontAPI.Scalars['String']['input'];
+}>;
+
+export type SimilarMotifsCategoryIdQuery = {
+  collection?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Collection, 'id'>>;
+};
+
+export type SimilarMotifsLocalizedCategoryQueryVariables = StorefrontAPI.Exact<{
+  country: StorefrontAPI.CountryCode;
+  language: StorefrontAPI.LanguageCode;
+  categoryId: StorefrontAPI.Scalars['ID']['input'];
+}>;
+
+export type SimilarMotifsLocalizedCategoryQuery = {
+  category?: StorefrontAPI.Maybe<
+    | {
+        __typename:
+          | 'AppliedGiftCard'
+          | 'Article'
+          | 'Blog'
+          | 'Cart'
+          | 'CartLine'
+          | 'Comment'
+          | 'Company'
+          | 'CompanyContact'
+          | 'CompanyLocation'
+          | 'ComponentizableCartLine'
+          | 'ExternalVideo'
+          | 'GenericFile'
+          | 'Location'
+          | 'MailingAddress'
+          | 'Market'
+          | 'MediaImage'
+          | 'MediaPresentation'
+          | 'Menu'
+          | 'MenuItem'
+          | 'Metafield';
+      }
+    | {
+        __typename:
+          | 'Metaobject'
+          | 'Model3d'
+          | 'Order'
+          | 'Page'
+          | 'Product'
+          | 'ProductOption'
+          | 'ProductOptionValue'
+          | 'ProductVariant'
+          | 'Shop'
+          | 'ShopPayInstallmentsFinancingPlan'
+          | 'ShopPayInstallmentsFinancingPlanTerm'
+          | 'ShopPayInstallmentsProductVariantPricing'
+          | 'ShopPolicy'
+          | 'TaxonomyCategory'
+          | 'UrlRedirect'
+          | 'Video';
+      }
+    | ({__typename: 'Collection'} & Pick<StorefrontAPI.Collection, 'handle'>)
+  >;
+};
+
+export type SimilarMotifsLocalizedCandidatesQueryVariables =
+  StorefrontAPI.Exact<{
+    country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+    language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+    categoryHandle: StorefrontAPI.Scalars['String']['input'];
+    first: StorefrontAPI.Scalars['Int']['input'];
+    after?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['String']['input']>;
+  }>;
+
+export type SimilarMotifsLocalizedCandidatesQuery = {
+  collection?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Collection, 'handle'> & {
+      products: {
+        nodes: Array<
+          Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
+            mainMotif?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Metafield, 'value'>
+            >;
+            mainTheme?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Metafield, 'value'>
+            >;
+            priceRange: {
+              minVariantPrice: Pick<
+                StorefrontAPI.MoneyV2,
+                'amount' | 'currencyCode'
+              >;
+            };
+            images: {
+              nodes: Array<
+                Pick<
+                  StorefrontAPI.Image,
+                  'url' | 'altText' | 'width' | 'height'
+                >
+              >;
+            };
+          }
+        >;
+        pageInfo: Pick<StorefrontAPI.PageInfo, 'hasNextPage' | 'endCursor'>;
+      };
+    }
+  >;
 };
 
 export type SimilarMotifsPreviewQueryVariables = StorefrontAPI.Exact<{
@@ -626,59 +838,88 @@ export type SimilarMotifsPreviewQueryVariables = StorefrontAPI.Exact<{
 }>;
 
 export type SimilarMotifsPreviewQuery = {
-  collection?: StorefrontAPI.Maybe<{
-    sameMotif: {
-      nodes: Array<
-        Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
-          priceRange: {
-            minVariantPrice: Pick<
-              StorefrontAPI.MoneyV2,
-              'amount' | 'currencyCode'
+  collection?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Collection, 'handle'> & {
+      sameMotif: {
+        nodes: Array<
+          Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
+            mainMotif?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Metafield, 'value'>
             >;
-          };
-          images: {
-            nodes: Array<
-              Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
+            mainTheme?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Metafield, 'value'>
             >;
-          };
-        }
-      >;
-    };
-    sameTheme: {
-      nodes: Array<
-        Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
-          priceRange: {
-            minVariantPrice: Pick<
-              StorefrontAPI.MoneyV2,
-              'amount' | 'currencyCode'
+            priceRange: {
+              minVariantPrice: Pick<
+                StorefrontAPI.MoneyV2,
+                'amount' | 'currencyCode'
+              >;
+            };
+            images: {
+              nodes: Array<
+                Pick<
+                  StorefrontAPI.Image,
+                  'url' | 'altText' | 'width' | 'height'
+                >
+              >;
+            };
+          }
+        >;
+      };
+      sameTheme: {
+        nodes: Array<
+          Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
+            mainMotif?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Metafield, 'value'>
             >;
-          };
-          images: {
-            nodes: Array<
-              Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
+            mainTheme?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Metafield, 'value'>
             >;
-          };
-        }
-      >;
-    };
-    fallback: {
-      nodes: Array<
-        Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
-          priceRange: {
-            minVariantPrice: Pick<
-              StorefrontAPI.MoneyV2,
-              'amount' | 'currencyCode'
+            priceRange: {
+              minVariantPrice: Pick<
+                StorefrontAPI.MoneyV2,
+                'amount' | 'currencyCode'
+              >;
+            };
+            images: {
+              nodes: Array<
+                Pick<
+                  StorefrontAPI.Image,
+                  'url' | 'altText' | 'width' | 'height'
+                >
+              >;
+            };
+          }
+        >;
+      };
+      fallback: {
+        nodes: Array<
+          Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
+            mainMotif?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Metafield, 'value'>
             >;
-          };
-          images: {
-            nodes: Array<
-              Pick<StorefrontAPI.Image, 'url' | 'altText' | 'width' | 'height'>
+            mainTheme?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Metafield, 'value'>
             >;
-          };
-        }
-      >;
-    };
-  }>;
+            priceRange: {
+              minVariantPrice: Pick<
+                StorefrontAPI.MoneyV2,
+                'amount' | 'currencyCode'
+              >;
+            };
+            images: {
+              nodes: Array<
+                Pick<
+                  StorefrontAPI.Image,
+                  'url' | 'altText' | 'width' | 'height'
+                >
+              >;
+            };
+          }
+        >;
+      };
+    }
+  >;
 };
 
 export type SimilarProductsBaseQueryVariables = StorefrontAPI.Exact<{
@@ -2542,11 +2783,27 @@ interface GeneratedQueryTypes {
     return: LanguageSwitchResourceQuery;
     variables: LanguageSwitchResourceQueryVariables;
   };
+  '#graphql\n  query SimilarProductsLanguageSwitch(\n    $productId: ID!\n    $categoryId: ID!\n    $country: CountryCode!\n    $language: LanguageCode!\n  ) @inContext(country: $country, language: $language) {\n    product: node(id: $productId) {\n      __typename\n      ... on Product {\n        mainMotif: metafield(namespace: "custom", key: "main_motif") {\n          value\n        }\n        mainTheme: metafield(namespace: "custom", key: "main_theme") {\n          value\n        }\n      }\n    }\n    category: node(id: $categoryId) {\n      __typename\n      ... on Collection {\n        handle\n      }\n    }\n  }\n': {
+    return: SimilarProductsLanguageSwitchQuery;
+    variables: SimilarProductsLanguageSwitchQueryVariables;
+  };
   '#graphql\n  query MarketingSeoMetaobjects(\n    $type: String!\n    $first: Int!\n    $country: CountryCode!\n    $language: LanguageCode!\n  ) @inContext(country: $country, language: $language) {\n    metaobjects(type: $type, first: $first) {\n      nodes {\n        fields {\n          key\n          value\n          reference {\n            __typename\n            ... on MediaImage {\n              image {\n                url\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: MarketingSeoMetaobjectsQuery;
     variables: MarketingSeoMetaobjectsQueryVariables;
   };
-  '#graphql\n  #graphql\n  fragment SimilarMotifsPreviewProduct on Product {\n    id\n    handle\n    title\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    images(first: 1) {\n      nodes {\n        url\n        altText\n        width\n        height\n      }\n    }\n  }\n\n  query SimilarMotifsPreview(\n    $country: CountryCode\n    $language: LanguageCode\n    $categoryHandle: String!\n    $mainMotif: String!\n    $mainTheme: String!\n    $candidateLimit: Int!\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $categoryHandle) {\n      sameMotif: products(\n        first: $candidateLimit\n        filters: [\n          {\n            productMetafield: {\n              namespace: "custom"\n              key: "main_motif"\n              value: $mainMotif\n            }\n          }\n        ]\n      ) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n      sameTheme: products(\n        first: $candidateLimit\n        filters: [\n          {\n            productMetafield: {\n              namespace: "custom"\n              key: "main_theme"\n              value: $mainTheme\n            }\n          }\n        ]\n      ) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n      fallback: products(first: $candidateLimit) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query SimilarMotifsCategoryId(\n    $country: CountryCode!\n    $language: LanguageCode!\n    $categoryHandle: String!\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $categoryHandle) {\n      id\n    }\n  }\n': {
+    return: SimilarMotifsCategoryIdQuery;
+    variables: SimilarMotifsCategoryIdQueryVariables;
+  };
+  '#graphql\n  query SimilarMotifsLocalizedCategory(\n    $country: CountryCode!\n    $language: LanguageCode!\n    $categoryId: ID!\n  ) @inContext(country: $country, language: $language) {\n    category: node(id: $categoryId) {\n      __typename\n      ... on Collection {\n        handle\n      }\n    }\n  }\n': {
+    return: SimilarMotifsLocalizedCategoryQuery;
+    variables: SimilarMotifsLocalizedCategoryQueryVariables;
+  };
+  '#graphql\n  #graphql\n  fragment SimilarMotifsPreviewProduct on Product {\n    id\n    handle\n    title\n    mainMotif: metafield(namespace: "custom", key: "main_motif") {\n      value\n    }\n    mainTheme: metafield(namespace: "custom", key: "main_theme") {\n      value\n    }\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    images(first: 1) {\n      nodes {\n        url\n        altText\n        width\n        height\n      }\n    }\n  }\n\n  query SimilarMotifsLocalizedCandidates(\n    $country: CountryCode\n    $language: LanguageCode\n    $categoryHandle: String!\n    $first: Int!\n    $after: String\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $categoryHandle) {\n      handle\n      products(first: $first, after: $after) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n        pageInfo {\n          hasNextPage\n          endCursor\n        }\n      }\n    }\n  }\n': {
+    return: SimilarMotifsLocalizedCandidatesQuery;
+    variables: SimilarMotifsLocalizedCandidatesQueryVariables;
+  };
+  '#graphql\n  #graphql\n  fragment SimilarMotifsPreviewProduct on Product {\n    id\n    handle\n    title\n    mainMotif: metafield(namespace: "custom", key: "main_motif") {\n      value\n    }\n    mainTheme: metafield(namespace: "custom", key: "main_theme") {\n      value\n    }\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    images(first: 1) {\n      nodes {\n        url\n        altText\n        width\n        height\n      }\n    }\n  }\n\n  query SimilarMotifsPreview(\n    $country: CountryCode\n    $language: LanguageCode\n    $categoryHandle: String!\n    $mainMotif: String!\n    $mainTheme: String!\n    $candidateLimit: Int!\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $categoryHandle) {\n      handle\n      sameMotif: products(\n        first: $candidateLimit\n        filters: [\n          {\n            productMetafield: {\n              namespace: "custom"\n              key: "main_motif"\n              value: $mainMotif\n            }\n          }\n        ]\n      ) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n      sameTheme: products(\n        first: $candidateLimit\n        filters: [\n          {\n            productMetafield: {\n              namespace: "custom"\n              key: "main_theme"\n              value: $mainTheme\n            }\n          }\n        ]\n      ) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n      fallback: products(first: $candidateLimit) {\n        nodes {\n          ...SimilarMotifsPreviewProduct\n        }\n      }\n    }\n  }\n': {
     return: SimilarMotifsPreviewQuery;
     variables: SimilarMotifsPreviewQueryVariables;
   };
