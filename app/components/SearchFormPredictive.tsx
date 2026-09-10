@@ -8,8 +8,10 @@ import React, {useRef, useEffect} from 'react';
 import type {PredictiveSearchReturn} from '~/lib/search';
 import {useAside} from './Aside';
 import {usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {useSearchRouteInput} from '~/lib/useSearchRouteInput';
 
 type SearchFormPredictiveChildren = (args: {
+  defaultValue: string;
   fetchResults: (event: React.ChangeEvent<HTMLInputElement>) => void;
   goToSearch: () => void;
   inputRef: React.MutableRefObject<HTMLInputElement | null>;
@@ -38,6 +40,7 @@ export function SearchFormPredictive({
 }: SearchFormPredictiveProps) {
   const fetcher = useFetcher<PredictiveSearchReturn>({key: fetcherKey});
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const defaultValue = useSearchRouteInput(inputRef);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navigate = useNavigate();
   const aside = useAside();
@@ -111,7 +114,7 @@ export function SearchFormPredictive({
       method={props.method ?? 'get'}
       onSubmit={handleSubmit}
     >
-      {children({inputRef, fetcher, fetchResults, goToSearch})}
+      {children({defaultValue, inputRef, fetcher, fetchResults, goToSearch})}
     </fetcher.Form>
   );
 }

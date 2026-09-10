@@ -566,7 +566,7 @@ function DesktopSearch({
         role="search"
         aria-label={t('search.label')}
       >
-        {({fetchResults, inputRef}) => (
+        {({defaultValue, fetchResults, inputRef}) => (
           <>
             <SearchIcon />
             <label className="dhx-srOnly" htmlFor="desktop-command-search">
@@ -576,6 +576,7 @@ function DesktopSearch({
               aria-autocomplete="list"
               aria-controls="desktop-command-results"
               aria-expanded={isOpen}
+              defaultValue={defaultValue}
               autoComplete="off"
               data-desktop-command-search="true"
               enterKeyHint="search"

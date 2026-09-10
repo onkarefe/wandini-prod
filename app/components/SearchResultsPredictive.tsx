@@ -1,10 +1,11 @@
 import {Image, Money} from '@shopify/hydrogen';
 import React, {useEffect, useRef} from 'react';
-import {useFetcher, type Fetcher} from 'react-router';
+import {useFetcher, useLocation, type Fetcher} from 'react-router';
 import noSearchResultsIcon from '~/assets/Icons/nosrIcon.png';
 import {Link} from '~/lib/i18n-router';
 import {
   getEmptyPredictiveSearchResult,
+  getSearchRouteTerm,
   type PredictiveSearchReturn,
   urlWithTrackingParams,
 } from '~/lib/search';
@@ -304,22 +305,31 @@ function usePredictiveSearch(
   inputSelector: string,
 ): UsePredictiveSearchReturn {
   const fetcher = useFetcher<PredictiveSearchReturn>({key: fetcherKey});
+  const location = useLocation();
   const term = useRef('');
+  const locationKey = useRef(location.key);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  if (fetcher.formData) {
+  const didRouteChange = locationKey.current !== location.key;
+
+  if (didRouteChange) {
+    locationKey.current = location.key;
+    term.current = getSearchRouteTerm(location.pathname, location.search);
+  } else if (fetcher.formData) {
     term.current = String(fetcher.formData.get('q') || '');
   }
 
   useEffect(() => {
     if (!inputRef.current) {
-      inputRef.current = document.querySelector<HTMLInputElement>(
-        inputSelector,
-      );
+      inputRef.current =
+        document.querySelector<HTMLInputElement>(inputSelector);
     }
   }, [inputSelector]);
 
-  const result = fetcher.data?.result ?? getEmptyPredictiveSearchResult();
+  const result =
+    fetcher.data?.term === term.current
+      ? fetcher.data.result
+      : getEmptyPredictiveSearchResult();
   const {items, total} = term.current
     ? result
     : getEmptyPredictiveSearchResult();

@@ -112,11 +112,7 @@ type HeaderProps = {
   publicStoreDomain: string;
 };
 
-export function Header({
-  header,
-  cart,
-  publicStoreDomain,
-}: HeaderProps) {
+export function Header({header, cart, publicStoreDomain}: HeaderProps) {
   return (
     <header className="h-header dh-headerHost">
       <DesktopHeader
@@ -202,7 +198,7 @@ function HeaderSearch() {
         role="search"
         aria-label={t('search.label')}
       >
-        {({fetchResults, inputRef}) => (
+        {({defaultValue, fetchResults, inputRef}) => (
           <>
             <button
               className="h-desktopSearchSubmit"
@@ -223,6 +219,7 @@ function HeaderSearch() {
               aria-autocomplete="list"
               aria-controls="header-search-results"
               aria-expanded={isOpen}
+              defaultValue={defaultValue}
               data-header-predictive-search-input="true"
               enterKeyHint="search"
               id="header-search-query"
@@ -297,9 +294,7 @@ function HeaderSearch() {
                     onClick={closeSearch}
                     to={searchUrl}
                   >
-                    <span>
-                      {t('search.allResults', {term: term.current})}
-                    </span>
+                    <span>{t('search.allResults', {term: term.current})}</span>
                     <svg viewBox="0 0 20 20" aria-hidden="true">
                       <path d="M4 10h11M11 6l4 4-4 4" />
                     </svg>
@@ -320,7 +315,11 @@ function HeaderLogo({shop}: {shop: HeaderQuery['shop'] | null}) {
   const {t} = useTranslation();
 
   return (
-    <NavLink to="/" className="h-logoLink wh-logo" aria-label={t('common.home')}>
+    <NavLink
+      to="/"
+      className="h-logoLink wh-logo"
+      aria-label={t('common.home')}
+    >
       {shop?.brand?.logo?.image?.url ? (
         <img
           src={shop.brand.logo.image.url}

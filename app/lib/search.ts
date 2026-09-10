@@ -32,6 +32,19 @@ export type PredictiveSearchReturn = ResultWithItems<
   NonNullable<PredictiveSearchQuery['predictiveSearch']>
 >;
 
+const SEARCH_ROUTE_PATTERN = /^\/(?:en|en-us|en-en|de|de-de)?\/?search\/?$/i;
+
+/**
+ * Returns the committed query only while the current URL is a localized search
+ * route. Search fields use this value as their shared, route-owned state and
+ * intentionally return to an empty value everywhere else in the storefront.
+ */
+export function getSearchRouteTerm(pathname: string, search: string) {
+  if (!SEARCH_ROUTE_PATTERN.test(pathname)) return '';
+
+  return String(new URLSearchParams(search).get('q') || '').trim();
+}
+
 /**
  * Returns the empty state of a predictive search result to reset the search state.
  */

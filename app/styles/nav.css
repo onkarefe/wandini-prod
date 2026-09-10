@@ -637,7 +637,9 @@
     padding: 12px 0 0;
   }
 
-  .h-desktopSearchResults .predictive-search-result + .predictive-search-result {
+  .h-desktopSearchResults
+    .predictive-search-result
+    + .predictive-search-result {
     margin-top: 4px;
   }
 
@@ -1015,7 +1017,9 @@
   border: 1px solid #c7c7cc;
   border-radius: 16px;
   background: #ffffff;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .footerInputBox:hover {
@@ -1081,7 +1085,9 @@
   font-size: 13.5px;
   font-weight: 650;
   letter-spacing: -0.008em;
-  transition: background-color 180ms ease, color 180ms ease;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 .footerSubscribeButton:hover {
@@ -1472,6 +1478,10 @@
 
   .aside-panel--search .predictive-search {
     padding-inline: 18px;
+  }
+
+  .aside-panel--search .predictive-search-form input {
+    font-size: 1rem;
   }
 }
 

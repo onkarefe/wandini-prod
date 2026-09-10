@@ -1,14 +1,17 @@
 import {useEffect, useRef} from 'react';
 import {Form, type FormProps} from 'react-router';
+import {useSearchRouteInput} from '~/lib/useSearchRouteInput';
 
 type SearchFormProps = Omit<FormProps, 'children'> & {
   children: (args: {
+    defaultValue: string;
     inputRef: React.RefObject<HTMLInputElement>;
   }) => React.ReactNode;
 };
 
 export function SearchForm({children, className, ...props}: SearchFormProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const defaultValue = useSearchRouteInput(inputRef);
 
   useSearchKeyboardShortcut(inputRef);
 
@@ -18,7 +21,7 @@ export function SearchForm({children, className, ...props}: SearchFormProps) {
       className={['search-page__form', className].filter(Boolean).join(' ')}
       method="get"
     >
-      {children({inputRef})}
+      {children({defaultValue, inputRef})}
     </Form>
   );
 }

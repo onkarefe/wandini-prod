@@ -87,20 +87,46 @@ export default function SearchPage() {
 
   const {products, pages, articles} = result.items;
   const hasResults = result.total > 0;
+  const showResults = !error && Boolean(term) && hasResults;
 
   return (
     <main className="search-page" aria-busy={isSearching}>
       <div className="search-page__container">
-        <header className="search-page__header">
-          <p className="search-page__eyebrow">Wandini</p>
-          <h1>{t('search.title')}</h1>
-          <p className="search-page__lead">{t('search.pageLead')}</p>
+        <header
+          className={`search-page__header${showResults ? ' search-page__header--results' : ''}`}
+          aria-live={showResults ? 'polite' : undefined}
+        >
+          {showResults ? (
+            <>
+              <p className="search-page__results-label">
+                {t('search.resultsFor')}
+              </p>
+              <h1>{term}</h1>
+            </>
+          ) : (
+            <>
+              <p className="search-page__eyebrow">Wandini</p>
+              <h1>{t('search.title')}</h1>
+              <p className="search-page__lead">{t('search.pageLead')}</p>
+            </>
+          )}
         </header>
 
-        <SearchForm role="search" aria-label={t('search.label')}>
-          {({inputRef}) => (
+        <SearchForm
+          className={showResults ? 'search-page__form--results' : undefined}
+          role="search"
+          aria-label={t('search.label')}
+        >
+          {({defaultValue, inputRef}) => (
             <>
-              <label className="search-page__label" htmlFor="search-query">
+              <label
+                className={
+                  showResults
+                    ? 'search-page__visually-hidden'
+                    : 'search-page__label'
+                }
+                htmlFor="search-query"
+              >
                 {t('search.termLabel')}
               </label>
               <div className="search-page__field">
@@ -110,7 +136,7 @@ export default function SearchPage() {
                 </svg>
                 <input
                   autoComplete="off"
-                  defaultValue={term}
+                  defaultValue={defaultValue}
                   enterKeyHint="search"
                   id="search-query"
                   name="q"
@@ -135,13 +161,8 @@ export default function SearchPage() {
         {!error && !term ? <SearchStart /> : null}
         {!error && term && !hasResults ? <SearchEmpty term={term} /> : null}
 
-        {!error && term && hasResults ? (
+        {showResults ? (
           <div className="search-page__results">
-            <div className="search-page__results-heading">
-              <p>{t('search.resultsFor')}</p>
-              <h2>{term}</h2>
-            </div>
-
             <ProductResults products={products} term={term} />
             <ContentResults pages={pages} articles={articles} term={term} />
           </div>

@@ -80,13 +80,17 @@ function SearchAside() {
     <Aside type="search" heading={t('search.title')}>
       <div className="predictive-search">
         <SearchFormPredictive>
-          {({fetchResults, inputRef}) => (
+          {({defaultValue, fetchResults, inputRef}) => (
             <div className="predictive-search-form__field">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="11" cy="11" r="6.5" />
                 <path d="m16 16 4 4" />
               </svg>
               <input
+                aria-label={t('search.inputLabel')}
+                autoComplete={'off'}
+                defaultValue={defaultValue}
+                enterKeyHint={'search'}
                 data-predictive-search-input="true"
                 name="q"
                 onChange={fetchResults}
