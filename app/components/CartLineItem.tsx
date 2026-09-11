@@ -14,6 +14,7 @@ import {
   getCartLineDisplayTotal,
   type CartLinePricingLike,
 } from '~/lib/cart-pricing';
+import {getCartLineDimensionText} from '~/lib/cart-line-dimensions';
 
 type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 
@@ -35,6 +36,7 @@ export function CartLineItem({
   const displayPrice = getCartLineDisplayTotal(
     line as unknown as CartLinePricingLike,
   );
+  const dimensionText = getCartLineDimensionText(line.attributes);
   const isZubehorProduct =
     product.productLayout?.value?.trim().toLowerCase() === 'zubehor';
 
@@ -77,6 +79,9 @@ export function CartLineItem({
             </li>
           ))}
         </ul>
+        {dimensionText ? (
+          <p className="custom-cart-line__dimensions">{dimensionText}</p>
+        ) : null}
         {layout === 'page' && isZubehorProduct ? (
           <CartLineQuantity line={line} />
         ) : null}

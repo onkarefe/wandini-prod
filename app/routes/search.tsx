@@ -5,10 +5,13 @@ import {useTranslation} from '~/i18n/useTranslation';
 import {createTranslator} from '~/i18n';
 import {getLocaleFromI18n} from '~/lib/locale';
 import noSearchResultsIcon from '~/assets/Icons/nosrIcon.png';
-import SearchProductCard from '~/components/SearchPageProductCard';
+import {CustomProductCard} from '~/components/CustomProductCard';
 import {SearchForm} from '~/components/SearchForm';
 import {Link} from '~/lib/i18n-router';
 import {getRobotsDirective} from '~/lib/seo';
+import {buildSimilarProductsPath} from '~/lib/similar-products';
+import {resolveSimilarMotifsCategoryHandle} from '~/lib/similar-products-preview';
+import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {
   getEmptyPredictiveSearchResult,
   getEmptyRegularSearchResult,
@@ -45,13 +48,57 @@ export async function loader({request, context}: Route.LoaderArgs) {
   const isPredictive = url.searchParams.has('predictive');
   const term = String(url.searchParams.get('q') || '').trim();
   const selectedLocale = getLocaleFromI18n(context.storefront.i18n);
+  const emptyWishlistState = {
+    isLoggedIn: false,
+    wishlistProductIds: [] as string[],
+    wishlistStatus: 'ready' as const,
+  };
 
   try {
-    const searchData = isPredictive
-      ? await predictiveSearch({request, context})
-      : await regularSearch({request, context});
+    if (isPredictive) {
+      const searchData = await predictiveSearch({request, context});
 
-    return {...searchData, selectedLocale};
+      return {
+        ...searchData,
+        ...emptyWishlistState,
+        similarProductsCategoryHandle: null,
+        selectedLocale,
+      };
+    }
+
+    if (!term) {
+      const searchData = await regularSearch({request, context});
+
+      return {
+        ...searchData,
+        ...emptyWishlistState,
+        similarProductsCategoryHandle: null,
+        selectedLocale,
+      };
+    }
+
+    const [searchData, wishlistState, similarProductsCategoryHandle] =
+      await Promise.all([
+        regularSearch({request, context}),
+        loadCustomerWishlistState({
+          customerAccount: context.customerAccount,
+          env: context.env,
+          request,
+        }),
+        resolveSimilarMotifsCategoryHandle(context.storefront).catch(
+          (error) => {
+            console.error(error);
+            return null;
+          },
+        ),
+      ]);
+
+    return {
+      ...searchData,
+      ...wishlistState,
+      similarProductsCategoryHandle,
+      selectedLocale,
+    };
   } catch (error) {
     console.error(error);
 
@@ -61,6 +108,8 @@ export async function loader({request, context}: Route.LoaderArgs) {
         term,
         error: SEARCH_ERROR_KEY,
         result: getEmptyPredictiveSearchResult(),
+        ...emptyWishlistState,
+        similarProductsCategoryHandle: null,
         selectedLocale,
       };
     }
@@ -70,6 +119,8 @@ export async function loader({request, context}: Route.LoaderArgs) {
       term,
       error: SEARCH_ERROR_KEY,
       result: getEmptyRegularSearchResult(),
+      ...emptyWishlistState,
+      similarProductsCategoryHandle: null,
       selectedLocale,
     };
   }
@@ -77,7 +128,16 @@ export async function loader({request, context}: Route.LoaderArgs) {
 
 export default function SearchPage() {
   const {t} = useTranslation();
-  const {type, term, result, error} = useLoaderData<typeof loader>();
+  const {
+    type,
+    term,
+    result,
+    error,
+    isLoggedIn,
+    wishlistProductIds,
+    wishlistStatus,
+    similarProductsCategoryHandle,
+  } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const isSearching =
     navigation.state === 'loading' &&
@@ -158,12 +218,24 @@ export default function SearchPage() {
           </p>
         ) : null}
 
+        {isLoggedIn && wishlistStatus === 'unavailable' ? (
+          <p className="wishlist-page-feedback" role="status">
+            {t('wishlist.loadUnavailable')}
+          </p>
+        ) : null}
+
         {!error && !term ? <SearchStart /> : null}
         {!error && term && !hasResults ? <SearchEmpty term={term} /> : null}
 
         {showResults ? (
           <div className="search-page__results">
-            <ProductResults products={products} term={term} />
+            <ProductResults
+              products={products}
+              term={term}
+              isLoggedIn={isLoggedIn}
+              wishlistProductIds={wishlistProductIds}
+              similarProductsCategoryHandle={similarProductsCategoryHandle}
+            />
             <ContentResults pages={pages} articles={articles} term={term} />
           </div>
         ) : null}
@@ -179,12 +251,19 @@ export default function SearchPage() {
 function ProductResults({
   products,
   term,
+  isLoggedIn,
+  wishlistProductIds,
+  similarProductsCategoryHandle,
 }: {
   products: SearchProducts;
   term: string;
+  isLoggedIn: boolean;
+  wishlistProductIds: string[];
+  similarProductsCategoryHandle: string | null;
 }) {
   const {t} = useTranslation();
   if (!products.nodes.length) return null;
+  const wishlistProductIdSet = new Set(wishlistProductIds);
 
   return (
     <section
@@ -199,19 +278,48 @@ function ProductResults({
         {({nodes, isLoading, NextLink, PreviousLink}) => (
           <div aria-busy={isLoading}>
             <div className="search-products__grid">
-              {nodes.map((product: SearchProduct, index: number) => {
+              {nodes.map((product: SearchProduct) => {
                 const productUrl = urlWithTrackingParams({
                   baseUrl: `/products/${product.handle}`,
                   trackingParams: product.trackingParameters,
                   term,
                 });
+                const mainMotif = product.mainMotif?.value?.trim() ?? '';
+                const mainTheme = product.mainTheme?.value?.trim() ?? '';
+                const hasSimilarProductsTarget = Boolean(
+                  mainMotif && mainTheme && similarProductsCategoryHandle,
+                );
+                const similarProductsUrl = hasSimilarProductsTarget
+                  ? buildSimilarProductsPath({
+                      mainMotif,
+                      mainTheme,
+                      productCategory: similarProductsCategoryHandle!,
+                    })
+                  : null;
 
                 return (
-                  <SearchProductCard
+                  <CustomProductCard
                     key={product.id}
-                    product={product}
-                    to={productUrl}
-                    loading={index === 0 ? 'eager' : 'lazy'}
+                    productId={product.id}
+                    title={product.title}
+                    images={product.images.nodes.map((image) => ({
+                      url: image.url,
+                      altText: image.altText ?? undefined,
+                    }))}
+                    productUrl={productUrl}
+                    showSimilarMotifsButton={hasSimilarProductsTarget}
+                    similarProductsUrl={similarProductsUrl ?? undefined}
+                    minPrice={
+                      product.priceRange?.minVariantPrice
+                        ? {
+                            amount: product.priceRange.minVariantPrice.amount,
+                            currencyCode:
+                              product.priceRange.minVariantPrice.currencyCode,
+                          }
+                        : undefined
+                    }
+                    isLoggedIn={isLoggedIn}
+                    isWishlisted={wishlistProductIdSet.has(product.id)}
                   />
                 );
               })}
@@ -357,6 +465,24 @@ const SEARCH_PRODUCT_FRAGMENT = `#graphql
     id
     title
     trackingParameters
+    mainMotif: metafield(namespace: "custom", key: "main_motif") {
+      value
+    }
+    mainTheme: metafield(namespace: "custom", key: "main_theme") {
+      value
+    }
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+    images(first: 3) {
+      nodes {
+        url
+        altText
+      }
+    }
     selectedOrFirstAvailableVariant(
       selectedOptions: []
       ignoreUnknownOptions: true

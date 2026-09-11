@@ -69,7 +69,7 @@ export default function Policies() {
           dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
         />
       ) : null}
-      <div className="breadcrumb-container container mx-auto">
+      <div className="container mx-auto">
         <Breadcrumbs items={breadcrumbItems} />
       </div>
       <div className="policies">

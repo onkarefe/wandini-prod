@@ -401,7 +401,7 @@ export default function Collection() {
           dangerouslySetInnerHTML={{__html: stringifyJsonLd(itemListJsonLd)}}
         />
       ) : null}
-      <div className={'breadcrumb-container container mx-auto'}>
+      <div className="container mx-auto">
         <Breadcrumbs items={breadcrumbItems} />
       </div>
 

@@ -20,6 +20,7 @@ import {useTranslation} from '~/i18n/useTranslation';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import {classifyConfiguredProductMetafields} from '~/lib/configured-product-classification';
+import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {
   hasExplicitProductOptionSelection,
   isWallpaperMaterialOption,
@@ -173,9 +174,16 @@ export const meta: Route.MetaFunction = ({data}) => {
 };
 
 export async function loader(args: Route.LoaderArgs) {
-  const criticalData = await loadCriticalData(args);
+  const [criticalData, wishlistState] = await Promise.all([
+    loadCriticalData(args),
+    loadCustomerWishlistState({
+      customerAccount: args.context.customerAccount,
+      env: args.context.env,
+      request: args.request,
+    }),
+  ]);
   const deferredData = loadDeferredData(args, criticalData.product);
-  return {...deferredData, ...criticalData};
+  return {...deferredData, ...criticalData, ...wishlistState};
 }
 
 async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
@@ -288,6 +296,9 @@ export default function Product() {
     productClassification,
     seoVariants,
     similarMotifsPreview,
+    isLoggedIn,
+    wishlistProductIds,
+    wishlistStatus,
   } = useLoaderData<typeof loader>();
   const selectedVariant = product.selectedOrFirstAvailableVariant;
   const isZubehor = isZubehorProduct(product);
@@ -302,9 +313,7 @@ export default function Product() {
   );
   const breadcrumbJsonLd =
     buildProductBreadcrumbStructuredData(breadcrumbItems);
-  const ProductLayout = isZubehor
-    ? ZubehorProductLayout
-    : WallpaperProductLayout;
+  const isWishlisted = new Set<string>(wishlistProductIds).has(product.id);
 
   return (
     <>
@@ -317,7 +326,7 @@ export default function Product() {
         dangerouslySetInnerHTML={{__html: stringifyJsonLd(breadcrumbJsonLd)}}
       />
 
-      <div className="breadcrumb-container container mx-auto">
+      <div className="container mx-auto">
         <ProductBreadcrumb items={breadcrumbItems} />
       </div>
 
@@ -331,7 +340,21 @@ export default function Product() {
           />
         }
       >
-        <ProductLayout product={product} />
+        {isZubehor ? (
+          <ZubehorProductLayout
+            product={product}
+            isLoggedIn={isLoggedIn}
+            isWishlisted={isWishlisted}
+            wishlistStatus={wishlistStatus}
+          />
+        ) : (
+          <WallpaperProductLayout
+            product={product}
+            isLoggedIn={isLoggedIn}
+            isWishlisted={isWishlisted}
+            wishlistStatus={wishlistStatus}
+          />
+        )}
       </Suspense>
 
       {!isZubehor ? (

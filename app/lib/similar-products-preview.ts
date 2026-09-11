@@ -137,6 +137,23 @@ async function resolveEnglishCategoryHandle(
     : null;
 }
 
+export async function resolveSimilarMotifsCategoryHandle(
+  storefront: Storefront,
+  categoryHandle = SIMILAR_MOTIFS_CATEGORY_HANDLE,
+) {
+  const normalizedCategoryHandle = normalizeText(categoryHandle);
+
+  if (!normalizedCategoryHandle) {
+    return null;
+  }
+
+  if (storefront.i18n.language !== 'EN') {
+    return normalizedCategoryHandle;
+  }
+
+  return resolveEnglishCategoryHandle(storefront, normalizedCategoryHandle);
+}
+
 async function fetchLocalizedPreviewCandidates(
   storefront: Storefront,
   categoryHandle: string,
@@ -207,7 +224,7 @@ export async function getSimilarMotifsPreview({
   }
 
   if (storefront.i18n.language === 'EN') {
-    const localizedCategoryHandle = await resolveEnglishCategoryHandle(
+    const localizedCategoryHandle = await resolveSimilarMotifsCategoryHandle(
       storefront,
       normalizedCategoryHandle,
     );

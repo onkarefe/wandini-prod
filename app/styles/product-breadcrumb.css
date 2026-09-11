@@ -1,11 +1,9 @@
 .product-breadcrumb {
+  margin: 0;
+  padding: 16px 0;
   color: #646464;
   font-size: 0.82rem;
   line-height: 1.4;
-}
-
-.breadcrumb-container {
-  padding-top: 20px;
 }
 
 .product-breadcrumb ol {
@@ -53,11 +51,13 @@
   white-space: nowrap;
 }
 
-@media (max-width: 640px) {
-  .breadcrumb-container {
-    padding-top: 14px;
+@media (max-width: 1023px) {
+  .product-breadcrumb {
+    padding: 16px;
   }
+}
 
+@media (max-width: 640px) {
   .product-breadcrumb {
     font-size: 0.76rem;
   }

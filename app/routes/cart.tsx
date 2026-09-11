@@ -322,11 +322,11 @@ export default function Cart() {
     : false;
 
   return (
-    <div className="cartMainContainer container mx-auto">
-      <header className="cart-page-header">
+    <div className="container mx-auto">
+      <div className="cart-page-header">
         <h1>{t('cart.pageTitle')}</h1>
         <p>{t('cart.pageIntro')}</p>
-      </header>
+      </div>
       {new URLSearchParams(location.search).get('checkout') === 'disabled' ? (
         <p className="order-summary__error" role="alert">
           {t('cart.checkoutDisabled')}

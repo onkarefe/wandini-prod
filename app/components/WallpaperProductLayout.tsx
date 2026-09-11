@@ -16,6 +16,7 @@ import {ProductDetailTabs} from '~/components/ProductDetailTabs';
 import {ProductForm} from '~/components/ProductForm';
 import {ProductImage} from '~/components/ProductImage';
 import {ProductSize} from '~/components/productSize';
+import {ProductWishlistButton} from '~/components/ProductWishlistButton';
 import {
   CONFIGURATOR_INSTANCE_ATTRIBUTE,
   CONFIGURATOR_PAYLOAD_ATTRIBUTE,
@@ -29,10 +30,7 @@ import {
 } from '~/lib/configurator-pricing';
 import {usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
-import {
-  formatLocaleCurrency,
-  formatLocaleNumber,
-} from '~/lib/locale-format';
+import {formatLocaleCurrency, formatLocaleNumber} from '~/lib/locale-format';
 import {isWallpaperMaterialOption} from '~/lib/wallpaper-variant-selection';
 
 type CropRect = {
@@ -120,10 +118,16 @@ function splitMaterialProperties(value?: string | null) {
 
 export type WallpaperProductLayoutProps = {
   product: ProductFragment;
+  isLoggedIn: boolean;
+  isWishlisted: boolean;
+  wishlistStatus: 'ready' | 'unavailable';
 };
 
 export default function WallpaperProductLayout({
   product,
+  isLoggedIn,
+  isWishlisted,
+  wishlistStatus,
 }: WallpaperProductLayoutProps) {
   const navigate = useNavigate();
   const {locale, t} = useTranslation();
@@ -154,7 +158,8 @@ export default function WallpaperProductLayout({
   });
   const qualityOption = productOptions.find(isWallpaperMaterialOption);
 
-  const materialStartingPrice = qualityOption?.optionValues.map((value) => {
+  const materialStartingPrice = qualityOption?.optionValues
+    .map((value) => {
       const variant = value.firstSelectableVariant as
         | (NonNullable<typeof value.firstSelectableVariant> & {
             printQuality?: {
@@ -346,13 +351,12 @@ export default function WallpaperProductLayout({
               printQuality?.handle ?? printQuality?.id ?? variant?.id ?? '',
             ),
             title: optionTitle,
-            calculatedPrice:
-              configuredPrice
-                ? formatMaterialPrice(
-                    Number(configuredPrice.amount),
-                    configuredPrice.currencyCode,
-                  )
-                : '—',
+            calculatedPrice: configuredPrice
+              ? formatMaterialPrice(
+                  Number(configuredPrice.amount),
+                  configuredPrice.currencyCode,
+                )
+              : '—',
             properties: getPropertiesForQuality(value),
             image: materialImage?.url
               ? {
@@ -422,9 +426,7 @@ export default function WallpaperProductLayout({
     ) : (
       <p key="nodesc">{t('product.noDescription')}</p>
     ),
-    productInfoContent || (
-      <p key="noinfo">{t('product.noInformation')}</p>
-    ),
+    productInfoContent || <p key="noinfo">{t('product.noInformation')}</p>,
     deliveryAndShippingContent || (
       <p key="noshipping">{t('product.noDeliveryShipping')}</p>
     ),
@@ -443,90 +445,98 @@ export default function WallpaperProductLayout({
         </div>
 
         <div className="productDetailRight">
-          <div className="product-main productPurchaseCard">
-            <section className="productPurchaseCardIntro">
-              <h1 className="productDetailTitle">{title}</h1>
-              <p className="productPurchaseNote">
-                {t('product.trimNotice')}
-              </p>
+          <div className="productDetailPurchaseStack">
+            <div className="product-main productPurchaseCard">
+              <section className="productPurchaseCardIntro">
+                <h1 className="productDetailTitle">{title}</h1>
+                <p className="productPurchaseNote">{t('product.trimNotice')}</p>
 
-              {materialStartingPrice && (
-                <div
-                  className="productStartingPrice"
-                  aria-label={t('product.startingPriceLabel')}
-                >
-                  <span className="productStartingPriceLabel">
-                    {t('product.startingPrice')}
-                  </span>
-                  <strong className="productStartingPriceAmount">
-                    {formatMaterialPrice(
-                      materialStartingPrice.amount,
-                      materialStartingPrice.currencyCode,
-                    )}
-                  </strong>
-                  <span className="productStartingPriceUnit">
-                    {t('product.perSquareMeter')}
-                  </span>
-                  {materialStartingPrice.priceWithoutDiscount && (
-                    <del className="productStartingPricePrevious">
+                {materialStartingPrice && (
+                  <div
+                    className="productStartingPrice"
+                    aria-label={t('product.startingPriceLabel')}
+                  >
+                    <span className="productStartingPriceLabel">
+                      {t('product.startingPrice')}
+                    </span>
+                    <strong className="productStartingPriceAmount">
                       {formatMaterialPrice(
-                        materialStartingPrice.priceWithoutDiscount,
+                        materialStartingPrice.amount,
                         materialStartingPrice.currencyCode,
                       )}
-                    </del>
-                  )}
+                    </strong>
+                    <span className="productStartingPriceUnit">
+                      {t('product.perSquareMeter')}
+                    </span>
+                    {materialStartingPrice.priceWithoutDiscount && (
+                      <del className="productStartingPricePrevious">
+                        {formatMaterialPrice(
+                          materialStartingPrice.priceWithoutDiscount,
+                          materialStartingPrice.currencyCode,
+                        )}
+                      </del>
+                    )}
+                  </div>
+                )}
+              </section>
+
+              <div className="productPurchaseCardDivider" aria-hidden="true" />
+
+              <section className="productPurchaseCardConfiguration">
+                <ProductSize
+                  onChange={setSize}
+                  widthError={widthError}
+                  heightError={heightError}
+                />
+
+                <div className="productOrderSummary" aria-live="polite">
+                  <div className="productOrderSummaryItem">
+                    <span className="productOrderSummaryLabel">
+                      {t('product.wallArea')}
+                    </span>
+                    <strong className="productOrderSummaryValue">
+                      {wallAreaM2 > 0 ? `${formattedWallArea} m²` : '— m²'}
+                    </strong>
+                  </div>
+                  <div className="productOrderSummaryItem productOrderSummaryItemPrice">
+                    <span className="productOrderSummaryLabel">
+                      {t('product.priceFrom')}
+                    </span>
+                    <strong className="productOrderSummaryValue">
+                      {wallAreaM2 > 0 && startingTotalPrice
+                        ? formatMaterialPrice(
+                            Number(startingTotalPrice.amount),
+                            startingTotalPrice.currencyCode,
+                          )
+                        : '—'}
+                    </strong>
+                  </div>
                 </div>
-              )}
-            </section>
 
-            <div className="productPurchaseCardDivider" aria-hidden="true" />
+                <ProductForm
+                  productOptions={productOptions}
+                  selectedVariant={selectedVariant}
+                  size={size}
+                  crop={crop}
+                  isConfiguring={isConfiguring}
+                  onConfigure={() => {
+                    setShowSizeErrors(false);
+                    setIsConfiguring(true);
+                  }}
+                  onSizeValidationError={() => setShowSizeErrors(true)}
+                  masterAssetId={product.masterAssetId?.value}
+                  showQualityOptions={false}
+                />
+              </section>
+            </div>
 
-            <section className="productPurchaseCardConfiguration">
-              <ProductSize
-                onChange={setSize}
-                widthError={widthError}
-                heightError={heightError}
-              />
-
-              <div className="productOrderSummary" aria-live="polite">
-                <div className="productOrderSummaryItem">
-                  <span className="productOrderSummaryLabel">
-                    {t('product.wallArea')}
-                  </span>
-                  <strong className="productOrderSummaryValue">
-                    {wallAreaM2 > 0 ? `${formattedWallArea} m²` : '— m²'}
-                  </strong>
-                </div>
-                <div className="productOrderSummaryItem productOrderSummaryItemPrice">
-                  <span className="productOrderSummaryLabel">
-                    {t('product.priceFrom')}
-                  </span>
-                  <strong className="productOrderSummaryValue">
-                    {wallAreaM2 > 0 && startingTotalPrice
-                      ? formatMaterialPrice(
-                          Number(startingTotalPrice.amount),
-                          startingTotalPrice.currencyCode,
-                        )
-                      : '—'}
-                  </strong>
-                </div>
-              </div>
-
-              <ProductForm
-                productOptions={productOptions}
-                selectedVariant={selectedVariant}
-                size={size}
-                crop={crop}
-                isConfiguring={isConfiguring}
-                onConfigure={() => {
-                  setShowSizeErrors(false);
-                  setIsConfiguring(true);
-                }}
-                onSizeValidationError={() => setShowSizeErrors(true)}
-                masterAssetId={product.masterAssetId?.value}
-                showQualityOptions={false}
-              />
-            </section>
+            <ProductWishlistButton
+              productId={product.id}
+              productTitle={title}
+              isLoggedIn={isLoggedIn}
+              isWishlisted={isWishlisted}
+              wishlistStatus={wishlistStatus}
+            />
           </div>
         </div>
       </div>

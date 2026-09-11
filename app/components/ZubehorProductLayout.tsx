@@ -19,6 +19,7 @@ import {
 import type {ProductFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {ProductPrice} from '~/components/ProductPrice';
+import {ProductWishlistButton} from '~/components/ProductWishlistButton';
 import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
 import {prefixPathWithLocale, type SelectedLocale} from '~/lib/locale';
@@ -42,6 +43,9 @@ type CartActionData = {
 
 type ZubehorProductLayoutProps = {
   product: ProductFragment;
+  isLoggedIn: boolean;
+  isWishlisted: boolean;
+  wishlistStatus: 'ready' | 'unavailable';
 };
 
 function ArrowIcon({direction}: {direction: 'left' | 'right'}) {
@@ -347,9 +351,7 @@ function ZubehorCartSubmit({
 
     const response = fetcher.data as CartActionData | undefined;
     if (response?.errors?.length) {
-      setFeedback(
-        t('product.addError'),
-      );
+      setFeedback(t('product.addError'));
       return;
     }
 
@@ -412,6 +414,9 @@ function ZubehorAddToCart({
 
 export default function ZubehorProductLayout({
   product,
+  isLoggedIn,
+  isWishlisted,
+  wishlistStatus,
 }: ZubehorProductLayoutProps) {
   const {locale, t} = useTranslation();
   const navigate = useNavigate();
@@ -515,9 +520,7 @@ export default function ZubehorProductLayout({
           />
 
           <section className="zpd-purchase" aria-labelledby="zpd-title">
-            <p className="zpd-purchase__eyebrow">
-              {t('product.accessories')}
-            </p>
+            <p className="zpd-purchase__eyebrow">{t('product.accessories')}</p>
             <h1 id="zpd-title">{product.title}</h1>
             {selectedVariant?.sku ? (
               <p className="zpd-purchase__sku">
@@ -700,6 +703,14 @@ export default function ZubehorProductLayout({
 
                 <ZubehorAddToCart line={cartLine} isAvailable={isAvailable} />
               </div>
+
+              <ProductWishlistButton
+                productId={product.id}
+                productTitle={product.title}
+                isLoggedIn={isLoggedIn}
+                isWishlisted={isWishlisted}
+                wishlistStatus={wishlistStatus}
+              />
             </div>
           </section>
         </div>
