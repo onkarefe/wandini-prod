@@ -312,6 +312,13 @@ export const de = {
   'errors.generic': 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
   'errors.notFound': 'Die gewünschte Seite wurde nicht gefunden.',
   'errors.backHome': 'Zur Startseite',
+  'notFound.eyebrow': 'SEITE NICHT GEFUNDEN',
+  'notFound.title': 'Diese Wand haben wir nicht gefunden.',
+  'notFound.description':
+    'Die gesuchte Seite ist nicht mehr verfügbar oder wurde verschoben. Entdecke stattdessen unsere Fototapeten und finde dein nächstes Lieblingsmotiv.',
+  'notFound.home': 'Zur Startseite',
+  'notFound.explore': 'Fototapeten entdecken',
+  'notFound.decorative': 'WÄNDE ERZÄHLEN GESCHICHTEN',
   'errors.notAvailable': 'Nicht verfügbar',
   'order.dateUnavailable': 'Datum nicht verfügbar',
   'order.financial.AUTHORIZED': 'Autorisiert',

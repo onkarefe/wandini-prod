@@ -22,7 +22,9 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import navStyles from '~/styles/nav.css?url';
 import desktopHeaderStyles from '~/styles/desktop-header.css?url';
+import notFoundStyles from '~/styles/not-found.css?url';
 import {PageLayout} from './components/PageLayout';
+import {NotFoundPage} from './components/NotFoundPage';
 import {didLocaleChange, getLocaleFromI18n} from '~/lib/locale';
 import {SEO_DISABLED_ROBOTS_DIRECTIVE, SEO_ENABLED} from '~/lib/seo';
 import {loadShopifyGlobalSeoSettings} from '~/lib/shopify-marketing-seo.server';
@@ -77,6 +79,7 @@ export function links() {
     },
     {rel: 'stylesheet', href: navStyles},
     {rel: 'stylesheet', href: desktopHeaderStyles},
+    {rel: 'stylesheet', href: notFoundStyles},
     {
       rel: 'preconnect',
       href: 'https://cdn.shopify.com',
@@ -232,6 +235,7 @@ export default function App() {
 export function ErrorBoundary() {
   const {t} = useTranslation();
   const error = useRouteError();
+  const data = useRouteLoaderData<RootLoader>('root');
   const isDevelopment = import.meta.env.DEV;
   let errorMessage = t('errors.generic');
   let errorStatus = 500;
@@ -245,6 +249,16 @@ export function ErrorBoundary() {
     if (isDevelopment) {
       errorMessage = error.message;
     }
+  }
+
+  if (errorStatus === 404) {
+    const notFoundPage = <NotFoundPage />;
+
+    return data ? (
+      <PageLayout {...data}>{notFoundPage}</PageLayout>
+    ) : (
+      notFoundPage
+    );
   }
 
   return (

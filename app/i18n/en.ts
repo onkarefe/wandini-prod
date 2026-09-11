@@ -304,6 +304,13 @@ export const en = {
   'errors.generic': 'Something went wrong. Please try again.',
   'errors.notFound': 'The page you requested could not be found.',
   'errors.backHome': 'Back to homepage',
+  'notFound.eyebrow': 'PAGE NOT FOUND',
+  'notFound.title': 'We couldn\'t find this wall.',
+  'notFound.description':
+    'The page you\'re looking for is no longer available or may have moved. Explore our wall murals and find your next favorite design.',
+  'notFound.home': 'Back to home',
+  'notFound.explore': 'Explore wall murals',
+  'notFound.decorative': 'WALLS TELL STORIES',
   'errors.notAvailable': 'Unavailable',
   'order.dateUnavailable': 'Date unavailable',
   'order.financial.AUTHORIZED': 'Authorized',
