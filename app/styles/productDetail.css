@@ -471,6 +471,14 @@
 }
 
 @media (max-width: 767.98px) {
+  .embla__container {
+    margin-left: 0;
+  }
+
+  .embla__slide {
+    padding-left: 0;
+  }
+
   .productDetailLeft{
     flex-basis: 100%;
     margin: 0 0 16px 0;
