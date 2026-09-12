@@ -9,8 +9,7 @@ import {CustomProductCard} from '~/components/CustomProductCard';
 import {SearchForm} from '~/components/SearchForm';
 import {Link} from '~/lib/i18n-router';
 import {getRobotsDirective} from '~/lib/seo';
-import {buildSimilarProductsPath} from '~/lib/similar-products';
-import {resolveSimilarMotifsCategoryHandle} from '~/lib/similar-products-preview';
+import {getSimilarProductsTarget} from '~/lib/similar-products';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {
   getEmptyPredictiveSearchResult,
@@ -61,7 +60,6 @@ export async function loader({request, context}: Route.LoaderArgs) {
       return {
         ...searchData,
         ...emptyWishlistState,
-        similarProductsCategoryHandle: null,
         selectedLocale,
       };
     }
@@ -72,31 +70,22 @@ export async function loader({request, context}: Route.LoaderArgs) {
       return {
         ...searchData,
         ...emptyWishlistState,
-        similarProductsCategoryHandle: null,
         selectedLocale,
       };
     }
 
-    const [searchData, wishlistState, similarProductsCategoryHandle] =
-      await Promise.all([
-        regularSearch({request, context}),
-        loadCustomerWishlistState({
-          customerAccount: context.customerAccount,
-          env: context.env,
-          request,
-        }),
-        resolveSimilarMotifsCategoryHandle(context.storefront).catch(
-          (error) => {
-            console.error(error);
-            return null;
-          },
-        ),
-      ]);
+    const [searchData, wishlistState] = await Promise.all([
+      regularSearch({request, context}),
+      loadCustomerWishlistState({
+        customerAccount: context.customerAccount,
+        env: context.env,
+        request,
+      }),
+    ]);
 
     return {
       ...searchData,
       ...wishlistState,
-      similarProductsCategoryHandle,
       selectedLocale,
     };
   } catch (error) {
@@ -109,7 +98,6 @@ export async function loader({request, context}: Route.LoaderArgs) {
         error: SEARCH_ERROR_KEY,
         result: getEmptyPredictiveSearchResult(),
         ...emptyWishlistState,
-        similarProductsCategoryHandle: null,
         selectedLocale,
       };
     }
@@ -120,7 +108,6 @@ export async function loader({request, context}: Route.LoaderArgs) {
       error: SEARCH_ERROR_KEY,
       result: getEmptyRegularSearchResult(),
       ...emptyWishlistState,
-      similarProductsCategoryHandle: null,
       selectedLocale,
     };
   }
@@ -136,7 +123,6 @@ export default function SearchPage() {
     isLoggedIn,
     wishlistProductIds,
     wishlistStatus,
-    similarProductsCategoryHandle,
   } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const isSearching =
@@ -234,7 +220,6 @@ export default function SearchPage() {
               term={term}
               isLoggedIn={isLoggedIn}
               wishlistProductIds={wishlistProductIds}
-              similarProductsCategoryHandle={similarProductsCategoryHandle}
             />
             <ContentResults pages={pages} articles={articles} term={term} />
           </div>
@@ -253,15 +238,13 @@ function ProductResults({
   term,
   isLoggedIn,
   wishlistProductIds,
-  similarProductsCategoryHandle,
 }: {
   products: SearchProducts;
   term: string;
   isLoggedIn: boolean;
   wishlistProductIds: string[];
-  similarProductsCategoryHandle: string | null;
 }) {
-  const {t} = useTranslation();
+  const {t, locale} = useTranslation();
   if (!products.nodes.length) return null;
   const wishlistProductIdSet = new Set(wishlistProductIds);
 
@@ -284,18 +267,7 @@ function ProductResults({
                   trackingParams: product.trackingParameters,
                   term,
                 });
-                const mainMotif = product.mainMotif?.value?.trim() ?? '';
-                const mainTheme = product.mainTheme?.value?.trim() ?? '';
-                const hasSimilarProductsTarget = Boolean(
-                  mainMotif && mainTheme && similarProductsCategoryHandle,
-                );
-                const similarProductsUrl = hasSimilarProductsTarget
-                  ? buildSimilarProductsPath({
-                      mainMotif,
-                      mainTheme,
-                      productCategory: similarProductsCategoryHandle!,
-                    })
-                  : null;
+                const similarTarget = getSimilarProductsTarget(product, locale);
 
                 return (
                   <CustomProductCard
@@ -307,8 +279,8 @@ function ProductResults({
                       altText: image.altText ?? undefined,
                     }))}
                     productUrl={productUrl}
-                    showSimilarMotifsButton={hasSimilarProductsTarget}
-                    similarProductsUrl={similarProductsUrl ?? undefined}
+                    showSimilarMotifsButton={Boolean(similarTarget)}
+                    similarProductsUrl={similarTarget?.path}
                     minPrice={
                       product.priceRange?.minVariantPrice
                         ? {

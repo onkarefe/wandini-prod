@@ -4,6 +4,7 @@ import {useFetcher, useLocation, useNavigate} from 'react-router';
 import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import type {WishlistActionData} from '~/lib/wishlist';
 import {formatLocaleCurrency} from '~/lib/locale-format';
+import {getSimilarProductsRootPath} from '~/lib/similar-products';
 import type {SelectedLocale} from '~/lib/locale';
 import '../styles/customProductCard.css';
 import '../styles/wishlistFeedback.css';
@@ -97,7 +98,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   const loginPath = usePrefixPathWithLocale('/account/login');
   const fetcherLoginUrl = usePrefixPathWithLocale(fetcher.data?.loginUrl ?? '');
   const localizedSimilarProductsUrl = usePrefixPathWithLocale(
-    similarProductsUrl ?? '',
+    similarProductsUrl ?? getSimilarProductsRootPath(locale),
   );
   const [wishlisted, setWishlisted] = useState(isWishlisted);
   const [wishlistError, setWishlistError] = useState<string | null>(null);

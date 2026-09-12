@@ -32,8 +32,10 @@ const CUSTOMER_FACING_STOREFRONT_OPERATIONS = {
   'routes/blogs.$blogHandle.$articleHandle.tsx': ['Article'],
   'routes/policies._index.tsx': ['Policies'],
   'routes/policies.$handle.tsx': ['Policy'],
-  'lib/similar-products.ts': ['SimilarProductsBase'],
-  'lib/similar-products-preview.ts': ['SimilarMotifsPreview'],
+  'lib/similar-products.server.ts': [
+    'SimilarProductsCandidates',
+    'SimilarProductsCards',
+  ],
   'routes/cart.tsx': ['CartUpsellProducts'],
 } as const;
 

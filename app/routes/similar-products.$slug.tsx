@@ -1,14 +1,16 @@
-import {useFetcher, useLoaderData} from 'react-router';
+import {redirect, useFetcher, useLoaderData} from 'react-router';
 import type {ShouldRevalidateFunction} from 'react-router';
 import {useEffect, useState} from 'react';
 import type {Route} from './+types/similar-products.$slug';
 import {CustomProductCard} from '~/components/CustomProductCard';
 import {
+  getSimilarProductsTarget,
+  getSimilarProductsRootPath,
   buildSimilarProductsPath,
-  getSimilarProductsPageData,
   mergeSimilarProductsById,
   type SimilarProductsBaseProduct,
 } from '~/lib/similar-products';
+import {getSimilarProductsPageData} from '~/lib/similar-products.server';
 import {loadCustomerWishlistState} from '~/lib/customer-wishlist-state.server';
 import {useTranslation} from '~/i18n/useTranslation';
 import {createTranslator, type Translator} from '~/i18n';
@@ -21,58 +23,30 @@ import '../styles/wishlistFeedback.css';
 
 const PAGE_SIZE = 9;
 
-function buildSimilarCategoryLabel(
-  collectionTitle: string | null,
-  categoryHandle: string,
-) {
-  if (
-    typeof collectionTitle === 'string' &&
-    collectionTitle.trim().length > 0
-  ) {
-    return collectionTitle.trim();
-  }
-
-  return categoryHandle
-    .split('-')
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
 function buildSeoIdentity(
-  target: {
-    mainTheme: string;
-    mainMotif: string;
-    collectionTitle: string | null;
-    categoryHandle: string;
-  },
+  target: {mainTheme: string; mainMotif: string},
   t: Translator,
 ) {
-  const categoryLabel = buildSimilarCategoryLabel(
-    target.collectionTitle,
-    target.categoryHandle,
-  );
-  const heading = `${target.mainTheme} ${target.mainMotif} ${categoryLabel}`;
-  const description = t('similarProducts.metaDescription', {
-    category: categoryLabel,
-    theme: target.mainTheme,
-    motif: target.mainMotif,
-  });
-  const subtitle = t('similarProducts.subtitle', {
-    category: categoryLabel.toLowerCase(),
-  });
-
+  const heading =
+    [target.mainTheme, target.mainMotif].filter(Boolean).join(' ') ||
+    t('similarMotifs.title');
   return {
-    categoryLabel,
     heading,
     title: t('similarProducts.metaTitle', {heading}),
-    description,
-    subtitle,
+    description: target.mainMotif
+      ? t('similarProducts.metaDescription', {
+          category: t('search.products'),
+          theme: target.mainTheme,
+          motif: target.mainMotif,
+        })
+      : t('similarProducts.fallbackMetaDescription'),
+    subtitle: t('similarProducts.subtitle', {category: t('search.products')}),
   };
 }
 
 type LoadMoreResponse = {
   ok: boolean;
+  language: 'DE' | 'EN';
   message?: string;
   target: Awaited<ReturnType<typeof loader>>['target'];
   items: SimilarProductsBaseProduct[];
@@ -105,15 +79,9 @@ export const meta: Route.MetaFunction = ({data, params}) => {
 };
 
 export async function loader({context, params, request}: Route.LoaderArgs) {
-  const slug = params.slug;
+  const slug = params.slug ?? '';
   const selectedLocale = getLocaleFromI18n(context.storefront.i18n);
   const t = createTranslator(selectedLocale);
-
-  if (!slug) {
-    throw new Response(t('similarProducts.missingSlug'), {
-      status: 404,
-    });
-  }
 
   const [pageData, wishlistState] = await Promise.all([
     getSimilarProductsPageData({
@@ -128,11 +96,14 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
       request,
     }),
   ]);
+  if (!pageData) throw redirect(getSimilarProductsRootPath(selectedLocale));
+  if (slug !== pageData.target.slug) {
+    throw redirect(buildSimilarProductsPath(pageData.target, selectedLocale));
+  }
   const languageSwitchLinks = await resolveSimilarProductsLanguageSwitchLinks({
     storefront: context.storefront,
     request,
     referenceProductId: pageData.target.referenceProductId,
-    categoryId: pageData.target.categoryId,
   });
 
   return {
@@ -153,18 +124,9 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
 }
 
 export async function action({context, params, request}: Route.ActionArgs) {
-  const slug = params.slug;
-  const t = createTranslator(getLocaleFromI18n(context.storefront.i18n));
-
-  if (!slug) {
-    return Response.json(
-      {
-        ok: false,
-        message: t('similarProducts.missingSlug'),
-      },
-      {status: 404},
-    );
-  }
+  const slug = params.slug ?? '';
+  const selectedLocale = getLocaleFromI18n(context.storefront.i18n);
+  const t = createTranslator(selectedLocale);
 
   const formData = await request.formData();
   const offsetValue = formData.get('offset');
@@ -185,8 +147,11 @@ export async function action({context, params, request}: Route.ActionArgs) {
     pageSize: PAGE_SIZE,
   });
 
+  if (!page) throw redirect(getSimilarProductsRootPath(selectedLocale));
+
   return Response.json({
     ok: true,
+    language: selectedLocale.language,
     ...page,
   });
 }
@@ -232,7 +197,13 @@ export default function SimilarProductsSlugPage() {
   useEffect(() => {
     const response = fetcher.data;
 
-    if (!response || !('ok' in response) || !response.ok) {
+    if (
+      !response ||
+      !('ok' in response) ||
+      !response.ok ||
+      response.target.slug !== initialData.target.slug ||
+      response.language !== initialData.selectedLocale.language
+    ) {
       return;
     }
 
@@ -241,7 +212,11 @@ export default function SimilarProductsSlugPage() {
     );
     setNextOffset(response.nextOffset);
     setHasMore(response.hasMore);
-  }, [fetcher.data]);
+  }, [
+    fetcher.data,
+    initialData.target.slug,
+    initialData.selectedLocale.language,
+  ]);
 
   return (
     <div className="collection">
@@ -266,16 +241,10 @@ export default function SimilarProductsSlugPage() {
         <div className="custom-products-grid container mx-auto">
           {items.length === 0 ? <p>{t('similarProducts.empty')}</p> : null}
           {items.map((product) => {
-            const mainMotif = product.mainMotif?.value?.trim() ?? '';
-            const mainTheme = product.mainTheme?.value?.trim() ?? '';
-            const hasSimilarProductsTarget = Boolean(mainMotif && mainTheme);
-            const similarProductsUrl = hasSimilarProductsTarget
-              ? buildSimilarProductsPath({
-                  mainMotif,
-                  mainTheme,
-                  productCategory: initialData.target.categoryHandle,
-                })
-              : null;
+            const similarTarget = getSimilarProductsTarget(
+              product,
+              initialData.selectedLocale,
+            );
 
             return (
               <CustomProductCard
@@ -289,8 +258,8 @@ export default function SimilarProductsSlugPage() {
                   })) ?? []
                 }
                 productUrl={`/products/${product.handle}`}
-                showSimilarMotifsButton={hasSimilarProductsTarget}
-                similarProductsUrl={similarProductsUrl ?? undefined}
+                showSimilarMotifsButton={Boolean(similarTarget)}
+                similarProductsUrl={similarTarget?.path}
                 minPrice={
                   product.priceRange?.minVariantPrice
                     ? {

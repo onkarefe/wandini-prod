@@ -218,17 +218,15 @@ describe('checkpoint 5 language switching', () => {
           'https://www.wandini.shop/similar-products/koi-lotus-fototapeten?Quality=Selbstklebend',
         ),
         referenceProductId: 'gid://shopify/Product/1',
-        categoryId: 'gid://shopify/Collection/1',
       }),
     ).resolves.toEqual({
       DE: '/similar-products/koi-lotus-fototapeten?Quality=Selbstklebend',
-      EN: '/en/similar-products/koi-with-lotus-flowers-japanese-garden-wall-murals?Quality=Selbstklebend',
+      EN: '/en/similar-products/koi-with-lotus-flowers--japanese-garden?Quality=Selbstklebend',
     });
     expect(storefront.query).toHaveBeenCalledWith(expect.any(String), {
       cache: {mode: 'public'},
       variables: {
         productId: 'gid://shopify/Product/1',
-        categoryId: 'gid://shopify/Collection/1',
         country: 'DE',
         language: 'EN',
       },
@@ -255,10 +253,9 @@ describe('checkpoint 5 language switching', () => {
           'https://www.wandini.shop/en/similar-products/english-slug?Quality=Selbstklebend',
         ),
         referenceProductId: 'gid://shopify/Product/1',
-        categoryId: 'gid://shopify/Collection/1',
       }),
     ).resolves.toEqual({
-      DE: '/similar-products/koi-mit-lotusbl-ten-japanischer-garten-fototapeten?Quality=Selbstklebend',
+      DE: '/similar-products/koi-mit-lotusbluten--japanischer-garten?Quality=Selbstklebend',
       EN: '/en/similar-products/english-slug?Quality=Selbstklebend',
     });
   });

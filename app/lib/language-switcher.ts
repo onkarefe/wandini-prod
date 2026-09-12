@@ -5,7 +5,10 @@ import {
   getLocaleFromRequest,
   prefixPathWithLocale,
 } from '~/lib/locale';
-import {buildSimilarProductsPath} from '~/lib/similar-products';
+import {
+  getSimilarProductsTarget,
+  getSimilarProductsRootPath,
+} from '~/lib/similar-products';
 
 export type LanguageSwitchLinks = {
   DE: string;
@@ -39,10 +42,6 @@ type SimilarProductsLanguageSwitchQuery = {
     __typename: 'Product';
     mainMotif?: {value?: string | null} | null;
     mainTheme?: {value?: string | null} | null;
-  } | null;
-  category: {
-    __typename: 'Collection';
-    handle: string;
   } | null;
 };
 
@@ -79,7 +78,6 @@ const LANGUAGE_SWITCH_RESOURCE_QUERY = `#graphql
 const SIMILAR_PRODUCTS_LANGUAGE_SWITCH_QUERY = `#graphql
   query SimilarProductsLanguageSwitch(
     $productId: ID!
-    $categoryId: ID!
     $country: CountryCode!
     $language: LanguageCode!
   ) @inContext(country: $country, language: $language) {
@@ -92,12 +90,6 @@ const SIMILAR_PRODUCTS_LANGUAGE_SWITCH_QUERY = `#graphql
         mainTheme: metafield(namespace: "custom", key: "main_theme") {
           value
         }
-      }
-    }
-    category: node(id: $categoryId) {
-      __typename
-      ... on Collection {
-        handle
       }
     }
   }
@@ -189,62 +181,45 @@ export async function resolveSimilarProductsLanguageSwitchLinks({
   storefront,
   request,
   referenceProductId,
-  categoryId,
 }: {
   storefront: Storefront;
   request: Request;
-  referenceProductId: string;
-  categoryId: string;
+  referenceProductId: string | null;
 }): Promise<LanguageSwitchLinks> {
   const currentLocale = getLocaleFromRequest(request);
   const targetLocale =
     currentLocale.language === 'DE' ? ENGLISH_LOCALE : GERMAN_LOCALE;
   const requestUrl = new URL(request.url);
   const currentPath = `${requestUrl.pathname}${requestUrl.search}`;
-  const fallbackTarget = prefixPathWithLocale('/', targetLocale);
+  const fallbackTarget = getSimilarProductsRootPath(targetLocale);
   const links: LanguageSwitchLinks = {
     DE: currentLocale.language === 'DE' ? currentPath : fallbackTarget,
     EN: currentLocale.language === 'EN' ? currentPath : fallbackTarget,
   };
 
+  if (!referenceProductId) return links;
+
   try {
-    const {product, category} =
+    const {product} =
       await storefront.query<SimilarProductsLanguageSwitchQuery>(
         SIMILAR_PRODUCTS_LANGUAGE_SWITCH_QUERY,
         {
           cache: storefront.CacheLong(),
           variables: {
             productId: referenceProductId,
-            categoryId,
             country: targetLocale.country,
             language: targetLocale.language,
           },
         },
       );
-    const mainMotif = product?.mainMotif?.value?.trim();
-    const mainTheme = product?.mainTheme?.value?.trim();
-
-    if (
-      product?.__typename !== 'Product' ||
-      category?.__typename !== 'Collection' ||
-      !mainMotif ||
-      !mainTheme
-    ) {
-      return links;
-    }
-
-    const localizedPath = buildSimilarProductsPath({
-      mainMotif,
-      mainTheme,
-      productCategory: category.handle,
-    });
-
-    if (!localizedPath) {
-      return links;
-    }
+    const target =
+      product?.__typename === 'Product'
+        ? getSimilarProductsTarget(product, targetLocale)
+        : null;
+    if (!target) return links;
 
     links[targetLocale.language] = prefixPathWithLocale(
-      `${localizedPath}${requestUrl.search}`,
+      `${target.path}${requestUrl.search}`,
       targetLocale,
     );
     return links;

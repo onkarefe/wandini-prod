@@ -23,7 +23,7 @@ import {
   getSelectedCollectionSort,
   normalizeCollectionSortParam,
 } from '~/lib/collectionParams';
-import {buildSimilarProductsPath} from '~/lib/similar-products';
+import {getSimilarProductsTarget} from '~/lib/similar-products';
 import {
   buildBreadcrumbStructuredData,
   buildContentBreadcrumbItems,
@@ -458,7 +458,7 @@ function DefaultCollectionLayout({
   isLoggedIn: boolean;
   wishlistProductIds: string[];
 }) {
-  const {t} = useTranslation();
+  const {t, locale} = useTranslation();
   const navigate = useNavigate();
   const navigation = useNavigation();
   const location = useLocation();
@@ -548,22 +548,10 @@ function DefaultCollectionLayout({
             {({node: product}) => {
               const productWithSimilarFields =
                 product as CollectionProductWithSimilarFields;
-              const hasMainMotif = Boolean(
-                productWithSimilarFields.mainMotif?.value?.trim(),
+              const similarTarget = getSimilarProductsTarget(
+                productWithSimilarFields,
+                locale,
               );
-              const hasMainTheme = Boolean(
-                productWithSimilarFields.mainTheme?.value?.trim(),
-              );
-              const similarProductsUrl =
-                hasMainMotif && hasMainTheme
-                  ? buildSimilarProductsPath({
-                      mainMotif:
-                        productWithSimilarFields.mainMotif?.value ?? '',
-                      mainTheme:
-                        productWithSimilarFields.mainTheme?.value ?? '',
-                      productCategory: collection.handle,
-                    })
-                  : null;
 
               return (
                 <CustomProductCard
@@ -575,8 +563,8 @@ function DefaultCollectionLayout({
                     altText: image.altText ?? undefined,
                   }))}
                   productUrl={`/products/${product.handle}`}
-                  showSimilarMotifsButton={hasMainMotif && hasMainTheme}
-                  similarProductsUrl={similarProductsUrl ?? undefined}
+                  showSimilarMotifsButton={Boolean(similarTarget)}
+                  similarProductsUrl={similarTarget?.path}
                   minPrice={
                     product.priceRange?.minVariantPrice
                       ? {
