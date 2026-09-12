@@ -677,7 +677,7 @@ describe('Similar Motifs final stabilization', () => {
         }),
       );
       expect(html).toContain(
-        locale.language === 'DE' ? 'Ähnliche Motive' : 'Similar motifs',
+        locale.language === 'DE' ? 'Ähnliche Motive' : 'Similar Motifs',
       );
       const malformed = await handler.query(
         new Request('https://www.wandini.shop' + path + 'extra/path'),

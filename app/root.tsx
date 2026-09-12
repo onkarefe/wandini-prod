@@ -33,6 +33,18 @@ export type RootLoader = typeof loader;
 
 const archivoFontHref = '/fonts/archivo-latin-wght-normal.woff2';
 
+// Run before inputs render, including before hydration/autofocus. On iOS,
+// maximum-scale prevents focus zoom while Safari still allows pinch zoom.
+// Keep Android's responsive viewport unrestricted so pinch zoom stays available.
+const mobileViewportScript = `
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+    document.querySelector('meta[name="viewport"]').setAttribute(
+      'content', 'width=device-width,initial-scale=1,maximum-scale=1'
+    );
+  }
+`;
+
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
  */
@@ -179,7 +191,15 @@ export function Layout({children}: {children?: React.ReactNode}) {
     <html lang={lang}>
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta
+          name="viewport"
+          content="width=device-width,initial-scale=1"
+          suppressHydrationWarning
+        />
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{__html: mobileViewportScript}}
+        />
         <link rel="stylesheet" href={tailwindCss}></link>
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>

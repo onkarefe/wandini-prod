@@ -27,9 +27,12 @@ function buildSeoIdentity(
   target: {mainTheme: string; mainMotif: string},
   t: Translator,
 ) {
-  const heading =
+  const rawHeading =
     [target.mainTheme, target.mainMotif].filter(Boolean).join(' ') ||
     t('similarMotifs.title');
+  const heading = rawHeading
+    .toLowerCase()
+    .replace(/(^|[\s\p{Pd}])\p{L}/gu, (part) => part.toUpperCase());
   return {
     heading,
     title: t('similarProducts.metaTitle', {heading}),
