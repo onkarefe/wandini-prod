@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from '~/i18n/useTranslation';
-import {useFetcher, useLocation, useNavigate} from 'react-router';
+import {useFetcher, useLocation} from 'react-router';
 import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import type {WishlistActionData} from '~/lib/wishlist';
 import {formatLocaleCurrency} from '~/lib/locale-format';
@@ -94,11 +94,10 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   );
   const fetcher = useFetcher<WishlistActionData>();
   const location = useLocation();
-  const navigate = useNavigate();
   const loginPath = usePrefixPathWithLocale('/account/login');
   const fetcherLoginUrl = usePrefixPathWithLocale(fetcher.data?.loginUrl ?? '');
   const localizedSimilarProductsUrl = usePrefixPathWithLocale(
-    similarProductsUrl ?? getSimilarProductsRootPath(locale),
+    similarProductsUrl?.trim() || getSimilarProductsRootPath(locale),
   );
   const [wishlisted, setWishlisted] = useState(isWishlisted);
   const [wishlistError, setWishlistError] = useState<string | null>(null);
@@ -162,7 +161,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   const similarMotifsButtonLabel = t('productCard.similarMotifs');
 
   return (
-    <Link to={productUrl} className="custom-product-card" aria-label={title}>
+    <article className="custom-product-card">
       <button
         type="button"
         className={`custom-product-card__wishlist ${
@@ -181,54 +180,52 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
         </span>
       ) : null}
       {showSimilarMotifsButton ? (
-        <button
-          type="button"
+        <Link
+          to={localizedSimilarProductsUrl}
           className="custom-product-card__similar-motifs"
           aria-label={similarMotifsButtonLabel}
           data-tooltip={similarMotifsButtonLabel}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-
-            if (localizedSimilarProductsUrl) {
-              void navigate(localizedSimilarProductsUrl);
-            }
-          }}
         >
           <SimilarMotifsIcon />
-        </button>
+        </Link>
       ) : null}
-      {listingImage ? (
-        <div className="custom-product-card__media">
-          <img
-            src={listingImage.url}
-            alt={listingImage.altText || title}
-            className="custom-product-card__image custom-product-card__image--listing"
-            loading="lazy"
-            decoding="async"
-          />
-          {hasHoverImage && primaryImage ? (
+      <Link
+        to={productUrl}
+        className="custom-product-card__product-link"
+        aria-label={title}
+      >
+        {listingImage ? (
+          <div className="custom-product-card__media">
             <img
-              src={primaryImage.url}
-              alt=""
-              aria-hidden="true"
-              className="custom-product-card__image custom-product-card__image--primary"
+              src={listingImage.url}
+              alt={listingImage.altText || title}
+              className="custom-product-card__image custom-product-card__image--listing"
               loading="lazy"
               decoding="async"
             />
+            {hasHoverImage && primaryImage ? (
+              <img
+                src={primaryImage.url}
+                alt=""
+                aria-hidden="true"
+                className="custom-product-card__image custom-product-card__image--primary"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="custom-product-card__body">
+          <h3 className="custom-product-card__title">{title}</h3>
+          {priceLabel ? (
+            <p className="custom-product-card__price">
+              {t('product.startingPrice')} {priceLabel} / m²
+            </p>
           ) : null}
         </div>
-      ) : null}
-
-      <div className="custom-product-card__body">
-        <h3 className="custom-product-card__title">{title}</h3>
-        {priceLabel ? (
-          <p className="custom-product-card__price">
-            {t('product.startingPrice')} {priceLabel} / m²
-          </p>
-        ) : null}
-      </div>
-    </Link>
+      </Link>
+    </article>
   );
 };
 

@@ -5,11 +5,15 @@ import {
 } from '~/lib/locale';
 
 type SimilarMetafields = {
+  handle?: string | null;
   mainMotif?: {value?: string | null} | null;
   mainTheme?: {value?: string | null} | null;
 };
 
-export type SimilarProductsCandidate = SimilarMetafields & {id: string};
+export type SimilarProductsCandidate = SimilarMetafields & {
+  id: string;
+  availableForSale?: boolean;
+};
 export type SimilarProductsBaseProduct = SimilarProductsCandidate & {
   handle: string;
   title: string;
@@ -75,13 +79,17 @@ export function getSimilarProductsRootPath(locale = DEFAULT_LOCALE) {
 }
 
 export function buildSimilarProductsPath(
-  input: {mainMotif: string; mainTheme: string},
+  input: {mainMotif: string; mainTheme: string; sourceHandle?: string | null},
   locale = DEFAULT_LOCALE,
 ) {
   const slug = buildSimilarProductsSlug(input);
-  return slug
-    ? prefixPathWithLocale(`/similar-products/${slug}`, locale)
-    : getSimilarProductsRootPath(locale);
+  if (!slug) return getSimilarProductsRootPath(locale);
+  // The localized product handle carries exclusion context without public IDs.
+  const sourceHandle = input.sourceHandle?.trim();
+  const search = sourceHandle
+    ? '?' + new URLSearchParams({from: sourceHandle})
+    : '';
+  return prefixPathWithLocale('/similar-products/' + slug + search, locale);
 }
 
 export function getSimilarProductsTarget(
@@ -97,7 +105,10 @@ export function getSimilarProductsTarget(
     mainMotif,
     mainTheme,
     slug,
-    path: buildSimilarProductsPath({mainMotif, mainTheme}, locale),
+    path: buildSimilarProductsPath(
+      {mainMotif, mainTheme, sourceHandle: product.handle},
+      locale,
+    ),
   };
 }
 
@@ -137,7 +148,12 @@ export function rankSimilarProducts<T extends SimilarProductsCandidate>({
   const seen = new Set<string>();
   return products
     .filter((product) => {
-      if (product.id === excludeProductId || seen.has(product.id)) return false;
+      if (
+        product.id === excludeProductId ||
+        seen.has(product.id) ||
+        product.availableForSale === false
+      )
+        return false;
       // Keep unrelated accessories out of fallback recommendations.
       if (
         !getMetafieldTextValue(product.mainMotif) &&

@@ -269,6 +269,7 @@ function loadDeferredData(
   const similarMotifsPreview = getSimilarMotifsPreview({
     storefront: context.storefront,
     sourceProductId: product.id,
+    sourceProductHandle: product.handle,
     mainMotif,
     mainTheme,
   }).catch((error: unknown) => {

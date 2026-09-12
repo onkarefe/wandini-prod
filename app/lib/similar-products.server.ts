@@ -117,48 +117,78 @@ export async function getSimilarProductsPageData({
   offset = 0,
   pageSize = 15,
   excludeProductId,
+  sourceHandle = '',
+  productIds,
 }: {
   storefront: Storefront;
   slug?: string;
   offset?: number;
   pageSize?: number;
   excludeProductId?: string | null;
+  sourceHandle?: string;
+  productIds?: string[];
 }) {
   const candidates = await fetchSimilarProductsCandidates(storefront);
-  const target = resolveTarget(candidates, slug);
+  const sourceProduct = sourceHandle
+    ? candidates.find((product) => product.handle === sourceHandle)
+    : null;
+  const sourceTarget = sourceProduct && getSimilarProductsTarget(sourceProduct);
+  if (slug && sourceProduct && !sourceTarget) return null;
+  // A known source makes a stale group URL safely recoverable after a metafield edit.
+  const target = resolveTarget(
+    candidates.filter((product) => product.availableForSale !== false),
+    slug && sourceTarget ? sourceTarget.slug : slug,
+  );
   if (!target) return null;
+  const sourceProductId = excludeProductId || sourceProduct?.id || null;
   const ranked = rankSimilarProducts({
     products: candidates,
     target: target.slug ? target : null,
-    excludeProductId,
+    excludeProductId: sourceProductId,
   });
   const start = Number.isFinite(offset) ? Math.max(0, Math.floor(offset)) : 0;
   const size = Number.isFinite(pageSize)
     ? Math.min(250, Math.max(1, Math.floor(pageSize)))
     : 15;
-  const ids = ranked.slice(start, start + size).map(({id}) => id);
+  // Keep the first request's order across publication/metafield changes.
+  // IDs stay in loader/form data, never in the URL.
+  const orderedIds = productIds ?? ranked.map(({id}) => id);
+  const slots = orderedIds.slice(start, start + size);
+  const eligibleIds = new Set(ranked.map(({id}) => id));
+  const ids = slots.filter(
+    (id) => eligibleIds.has(id) && id !== sourceProductId,
+  );
   const data = ids.length
     ? await storefront.query<{nodes: (SimilarProductsBaseProduct | null)[]}>(
         SIMILAR_PRODUCTS_CARDS_QUERY,
         {
-          cache: storefront.CacheShort(),
+          // Check current publication/availability when hydrating the requested cards.
+          cache: storefront.CacheNone(),
           variables: {...storefront.i18n, ids},
         },
       )
     : {nodes: []};
   const cards = new Map(
     data.nodes.flatMap((product) =>
-      product?.id && product.handle ? [[product.id, product] as const] : [],
+      product?.id &&
+      product.handle?.trim() &&
+      product.title?.trim() &&
+      product.availableForSale !== false
+        ? [[product.id, product] as const]
+        : [],
     ),
   );
   return {
     target,
+    sourceHandle,
+    sourceProductId,
+    productIds: orderedIds,
     introContent: null,
     items: ids.flatMap((id) => (cards.has(id) ? [cards.get(id)!] : [])),
-    total: ranked.length,
+    total: orderedIds.length,
     // Advance by consumed candidates, including products deleted between queries.
-    nextOffset: start + ids.length,
-    hasMore: start + ids.length < ranked.length,
+    nextOffset: start + slots.length,
+    hasMore: start + slots.length < orderedIds.length,
   };
 }
 
@@ -172,6 +202,8 @@ const SIMILAR_PRODUCTS_CANDIDATES_QUERY = `#graphql
     products(first: $first, after: $after, sortKey: ID) {
       nodes {
         id
+        handle
+        availableForSale
         mainMotif: metafield(namespace: "custom", key: "main_motif") { value }
         mainTheme: metafield(namespace: "custom", key: "main_theme") { value }
       }
@@ -191,6 +223,7 @@ const SIMILAR_PRODUCTS_CARDS_QUERY = `#graphql
         id
         handle
         title
+        availableForSale
         mainMotif: metafield(namespace: "custom", key: "main_motif") { value }
         mainTheme: metafield(namespace: "custom", key: "main_theme") { value }
         priceRange { minVariantPrice { amount currencyCode } }

@@ -24,16 +24,22 @@ export type SimilarMotifsPreviewData = {
 export async function getSimilarMotifsPreview({
   storefront,
   sourceProductId,
+  sourceProductHandle,
   mainMotif,
   mainTheme,
 }: {
   storefront: Storefront;
   sourceProductId: string;
+  sourceProductHandle: string;
   mainMotif: string;
   mainTheme: string;
 }): Promise<SimilarMotifsPreviewData | null> {
   const target = getSimilarProductsTarget(
-    {mainMotif: {value: mainMotif}, mainTheme: {value: mainTheme}},
+    {
+      handle: sourceProductHandle,
+      mainMotif: {value: mainMotif},
+      mainTheme: {value: mainTheme},
+    },
     getLocaleFromI18n(storefront.i18n),
   );
   if (!target) return null;

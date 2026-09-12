@@ -40,6 +40,7 @@ type LanguageSwitchResourceQuery = {
 type SimilarProductsLanguageSwitchQuery = {
   product: {
     __typename: 'Product';
+    handle?: string;
     mainMotif?: {value?: string | null} | null;
     mainTheme?: {value?: string | null} | null;
   } | null;
@@ -84,6 +85,7 @@ const SIMILAR_PRODUCTS_LANGUAGE_SWITCH_QUERY = `#graphql
     product: node(id: $productId) {
       __typename
       ... on Product {
+        handle
         mainMotif: metafield(namespace: "custom", key: "main_motif") {
           value
         }
@@ -181,10 +183,12 @@ export async function resolveSimilarProductsLanguageSwitchLinks({
   storefront,
   request,
   referenceProductId,
+  sourceProductId,
 }: {
   storefront: Storefront;
   request: Request;
   referenceProductId: string | null;
+  sourceProductId?: string | null;
 }): Promise<LanguageSwitchLinks> {
   const currentLocale = getLocaleFromRequest(request);
   const targetLocale =
@@ -206,7 +210,7 @@ export async function resolveSimilarProductsLanguageSwitchLinks({
         {
           cache: storefront.CacheLong(),
           variables: {
-            productId: referenceProductId,
+            productId: sourceProductId || referenceProductId,
             country: targetLocale.country,
             language: targetLocale.language,
           },
@@ -214,12 +218,19 @@ export async function resolveSimilarProductsLanguageSwitchLinks({
       );
     const target =
       product?.__typename === 'Product'
-        ? getSimilarProductsTarget(product, targetLocale)
+        ? getSimilarProductsTarget(
+            {mainMotif: product.mainMotif, mainTheme: product.mainTheme},
+            targetLocale,
+          )
         : null;
     if (!target) return links;
 
+    const search = new URLSearchParams(requestUrl.search);
+    search.delete('from');
+    if (sourceProductId && product?.handle) search.set('from', product.handle);
+    const suffix = search.size ? '?' + search : '';
     links[targetLocale.language] = prefixPathWithLocale(
-      `${target.path}${requestUrl.search}`,
+      `${target.path}${suffix}`,
       targetLocale,
     );
     return links;

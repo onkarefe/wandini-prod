@@ -47,6 +47,7 @@ function buildSeoIdentity(
 type LoadMoreResponse = {
   ok: boolean;
   language: 'DE' | 'EN';
+  sourceHandle: string;
   message?: string;
   target: Awaited<ReturnType<typeof loader>>['target'];
   items: SimilarProductsBaseProduct[];
@@ -80,6 +81,8 @@ export const meta: Route.MetaFunction = ({data, params}) => {
 
 export async function loader({context, params, request}: Route.LoaderArgs) {
   const slug = params.slug ?? '';
+  const sourceHandle =
+    new URL(request.url).searchParams.get('from')?.trim() ?? '';
   const selectedLocale = getLocaleFromI18n(context.storefront.i18n);
   const t = createTranslator(selectedLocale);
 
@@ -87,6 +90,7 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
     getSimilarProductsPageData({
       storefront: context.storefront,
       slug,
+      sourceHandle,
       offset: 0,
       pageSize: PAGE_SIZE,
     }),
@@ -98,12 +102,18 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
   ]);
   if (!pageData) throw redirect(getSimilarProductsRootPath(selectedLocale));
   if (slug !== pageData.target.slug) {
-    throw redirect(buildSimilarProductsPath(pageData.target, selectedLocale));
+    throw redirect(
+      buildSimilarProductsPath(
+        {...pageData.target, sourceHandle},
+        selectedLocale,
+      ),
+    );
   }
   const languageSwitchLinks = await resolveSimilarProductsLanguageSwitchLinks({
     storefront: context.storefront,
     request,
     referenceProductId: pageData.target.referenceProductId,
+    sourceProductId: pageData.sourceProductId,
   });
 
   return {
@@ -125,29 +135,71 @@ export async function loader({context, params, request}: Route.LoaderArgs) {
 
 export async function action({context, params, request}: Route.ActionArgs) {
   const slug = params.slug ?? '';
+  const sourceHandle =
+    new URL(request.url).searchParams.get('from')?.trim() ?? '';
   const selectedLocale = getLocaleFromI18n(context.storefront.i18n);
   const t = createTranslator(selectedLocale);
 
   const formData = await request.formData();
   const offsetValue = formData.get('offset');
   const offset =
-    typeof offsetValue === 'string' ? Number.parseInt(offsetValue, 10) : 0;
+    typeof offsetValue === 'string' && /^\d+$/.test(offsetValue)
+      ? Number(offsetValue)
+      : NaN;
 
-  if (!Number.isFinite(offset) || offset < 0) {
+  if (!Number.isSafeInteger(offset) || offset < 0) {
     return Response.json(
       {ok: false, message: t('similarProducts.invalidOffset')},
       {status: 400},
     );
   }
 
+  let productIds: string[] | undefined;
+  const rawPagination = formData.get('pagination');
+  if (rawPagination !== null) {
+    try {
+      const pagination = JSON.parse(String(rawPagination)) as {
+        slug: string;
+        language: string;
+        sourceHandle: string;
+        ids: unknown[];
+      };
+      if (
+        pagination.slug !== slug ||
+        pagination.language !== selectedLocale.language ||
+        pagination.sourceHandle !== sourceHandle ||
+        !Array.isArray(pagination.ids) ||
+        pagination.ids.length > 10000 ||
+        !pagination.ids.every(
+          (id): id is string => typeof id === 'string' && id.length < 200,
+        ) ||
+        new Set(pagination.ids).size !== pagination.ids.length
+      )
+        throw new Error('Invalid pagination');
+      productIds = pagination.ids;
+    } catch {
+      return Response.json(
+        {ok: false, message: t('similarProducts.invalidOffset')},
+        {status: 400},
+      );
+    }
+  }
+
   const page = await getSimilarProductsPageData({
     storefront: context.storefront,
     slug,
+    sourceHandle,
+    productIds,
     offset,
     pageSize: PAGE_SIZE,
   });
 
   if (!page) throw redirect(getSimilarProductsRootPath(selectedLocale));
+  if (slug !== page.target.slug) {
+    throw redirect(
+      buildSimilarProductsPath({...page.target, sourceHandle}, selectedLocale),
+    );
+  }
 
   return Response.json({
     ok: true,
@@ -160,12 +212,16 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
   formMethod,
   formAction,
   currentUrl,
+  nextUrl,
   defaultShouldRevalidate,
 }) => {
   if (
     formMethod?.toUpperCase() === 'POST' &&
     formAction &&
-    new URL(formAction, currentUrl).pathname === currentUrl.pathname
+    new URL(formAction, currentUrl).pathname === currentUrl.pathname &&
+    (!nextUrl ||
+      (nextUrl.pathname === currentUrl.pathname &&
+        nextUrl.search === currentUrl.search))
   ) {
     return false;
   }
@@ -174,8 +230,25 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
 };
 
 export default function SimilarProductsSlugPage() {
-  const {t} = useTranslation();
   const initialData = useLoaderData<typeof loader>();
+  return (
+    <SimilarProductsContent
+      key={JSON.stringify([
+        initialData.selectedLocale.language,
+        initialData.target.slug,
+        initialData.sourceHandle,
+      ])}
+      initialData={initialData}
+    />
+  );
+}
+
+function SimilarProductsContent({
+  initialData,
+}: {
+  initialData: Awaited<ReturnType<typeof loader>>;
+}) {
+  const {t} = useTranslation();
   const fetcher = useFetcher<LoadMoreResponse>();
   const [items, setItems] = useState(initialData.items);
   const [nextOffset, setNextOffset] = useState(initialData.nextOffset);
@@ -202,7 +275,8 @@ export default function SimilarProductsSlugPage() {
       !('ok' in response) ||
       !response.ok ||
       response.target.slug !== initialData.target.slug ||
-      response.language !== initialData.selectedLocale.language
+      response.language !== initialData.selectedLocale.language ||
+      response.sourceHandle !== initialData.sourceHandle
     ) {
       return;
     }
@@ -216,6 +290,7 @@ export default function SimilarProductsSlugPage() {
     fetcher.data,
     initialData.target.slug,
     initialData.selectedLocale.language,
+    initialData.sourceHandle,
   ]);
 
   return (
@@ -286,6 +361,16 @@ export default function SimilarProductsSlugPage() {
       {hasMore ? (
         <fetcher.Form method="post">
           <input type="hidden" name="offset" value={String(nextOffset)} />
+          <input
+            type="hidden"
+            name="pagination"
+            value={JSON.stringify({
+              slug: initialData.target.slug,
+              language: initialData.selectedLocale.language,
+              sourceHandle: initialData.sourceHandle,
+              ids: initialData.productIds,
+            })}
+          />
           <button
             type="submit"
             className="collectionReloadButton"

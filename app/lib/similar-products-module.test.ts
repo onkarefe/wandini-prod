@@ -37,6 +37,7 @@ function product(
     id,
     handle: `english-handle-${id}`,
     title: id,
+    availableForSale: true,
     mainMotif: {value: motif},
     mainTheme: {value: theme},
     images: {nodes: [{url: `https://cdn.example.com/${id}.jpg`}]},
@@ -52,6 +53,7 @@ function storefrontFor(
     i18n: {language, country: 'DE'},
     CacheShort: vi.fn(() => ({mode: 'public', maxAge: 1})),
     CacheLong: vi.fn(() => ({mode: 'public'})),
+    CacheNone: vi.fn(() => ({mode: 'no-store'})),
     query: vi.fn(
       async (query: string, options: {variables: Record<string, unknown>}) => {
         if (query.includes('query SimilarProductsCandidates')) {
@@ -60,11 +62,15 @@ function storefrontFor(
             products: {
               nodes: products
                 .slice(start, start + 250)
-                .map(({id, mainMotif, mainTheme}) => ({
-                  id,
-                  mainMotif,
-                  mainTheme,
-                })),
+                .map(
+                  ({id, handle, availableForSale, mainMotif, mainTheme}) => ({
+                    handle,
+                    availableForSale,
+                    id,
+                    mainMotif,
+                    mainTheme,
+                  }),
+                ),
               pageInfo: {
                 hasNextPage: start + 250 < products.length,
                 endCursor: String(start + 250),
@@ -90,15 +96,24 @@ function routeArgs(
   slug?: string,
   method = 'GET',
   offset = '0',
+  from = '',
+  pagination?: unknown,
 ) {
   const prefix = storefront.i18n.language === 'EN' ? '/en' : '';
   return {
     params: slug === undefined ? {} : {slug},
     request: new Request(
-      `https://www.wandini.shop${prefix}/similar-products/${slug ?? ''}`,
+      `https://www.wandini.shop${prefix}/similar-products/${slug ?? ''}${from ? '?' + new URLSearchParams({from}) : ''}`,
       {
         method,
-        ...(method === 'POST' ? {body: new URLSearchParams({offset})} : {}),
+        ...(method === 'POST'
+          ? {
+              body: new URLSearchParams({
+                offset,
+                ...(pagination ? {pagination: JSON.stringify(pagination)} : {}),
+              }),
+            }
+          : {}),
       },
     ),
     context: {
@@ -134,7 +149,7 @@ describe('Similar Motifs shared contract', () => {
           product('source', mainMotif, mainTheme),
           locale,
         )?.path,
-      ).toBe(expected);
+      ).toBe(expected + '?from=english-handle-source');
     },
   );
 
@@ -193,7 +208,10 @@ describe('Similar Motifs shared contract', () => {
       const motif = locale.language === 'DE' ? 'Lotusblüten' : 'Lotus flowers';
       const theme =
         locale.language === 'DE' ? 'Japanischer Garten' : 'Japanese garden';
-      const source = product('source', motif, theme);
+      const source = {
+        ...product('source', motif, theme),
+        handle: locale.htmlLang + '-localized-source',
+      };
       const products = [
         product('fallback', 'Forest', 'Nature'),
         product('theme', 'Cranes', theme),
@@ -206,15 +224,19 @@ describe('Similar Motifs shared contract', () => {
       const preview = await getSimilarMotifsPreview({
         storefront: storefront as never,
         sourceProductId: source.id,
+        sourceProductHandle: source.handle,
         mainMotif: motif,
         mainTheme: theme,
       });
-      const page = await loader(routeArgs(storefront, cardTarget.slug));
+      const page = await loader(
+        routeArgs(storefront, cardTarget.slug, 'GET', '0', source.handle),
+      );
       expect(preview?.similarProductsPath).toBe(cardTarget.path);
       expect(page.target.slug).toBe(cardTarget.slug);
       expect(preview?.products.map(({id}) => id)).toEqual(
-        page.items.filter(({id}) => id !== source.id).map(({id}) => id),
+        page.items.map(({id}) => id),
       );
+      expect(page.items.some(({id}) => id === source.id)).toBe(false);
       expect(preview?.products.map(({id}) => id)).toEqual([
         'exact',
         'motif',
@@ -339,7 +361,7 @@ describe('Similar Motifs shared contract', () => {
           getSimilarProductsTarget(
             source,
             language === 'EN' ? ENGLISH_LOCALE : GERMAN_LOCALE,
-          )?.path,
+          )?.path.split('?')[0],
         );
       }
     },
@@ -449,8 +471,17 @@ describe('Similar Motifs shared contract', () => {
       new URL('./similar-products.server.ts', import.meta.url),
       'utf8',
     );
+    const switchSource = readFileSync(
+      new URL('./language-switcher.ts', import.meta.url),
+      'utf8',
+    );
     const queries = [...source.matchAll(/`#graphql([\s\S]*?)`/g)];
-    expect(queries).toHaveLength(2);
+    queries.push(
+      ...[...switchSource.matchAll(/`#graphql([\s\S]*?)`/g)].filter(
+        ([, query]) => query.includes('query SimilarProductsLanguageSwitch'),
+      ),
+    );
+    expect(queries).toHaveLength(3);
     for (const [, query] of queries)
       expect(validate(schema, parse(query))).toEqual([]);
   });
