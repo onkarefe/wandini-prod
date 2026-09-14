@@ -148,6 +148,7 @@ export const de = {
   'product.perSquareMeter': '/ m²',
   'product.wallArea': 'Wandfläche',
   'product.priceFrom': 'Preis ab',
+  'product.priceDetails': 'Preisdetails',
   'product.widthCm': 'Breite (cm)',
   'product.heightCm': 'Höhe (cm)',
   'product.widthRequired': 'Bitte geben Sie die Breite ein.',

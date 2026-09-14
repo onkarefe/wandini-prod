@@ -149,6 +149,7 @@ export const en = {
   'product.perSquareMeter': '/ m²',
   'product.wallArea': 'Wall area',
   'product.priceFrom': 'Price from',
+  'product.priceDetails': 'Price details',
   'product.widthCm': 'Width (cm)',
   'product.heightCm': 'Height (cm)',
   'product.widthRequired': 'Please enter the width.',

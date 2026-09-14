@@ -16,7 +16,7 @@
 }
 
 .productDetailMainContainer {
-  margin: 50px auto;
+  margin: 0px auto;
 }
 
 .product-image-carousel {
@@ -644,8 +644,8 @@
 
   .productDetailMainContainer {
     width: 100%;
-    margin: 24px auto;
-    padding: 16px;
+    margin: 0 auto;
+    padding: 0;
   }
 
   .productDetailLeft {
@@ -682,8 +682,8 @@
 /* lg only: 1024–1279px */
 @media (min-width: 1024px) and (max-width: 1279.98px) {
   .productDetailMainContainer {
-    padding: 16px;
-    margin: 24px auto;
+    padding: 0;
+    margin: 0 auto;
   }
 
   .productDetailTitle {
@@ -737,5 +737,240 @@
 @media (prefers-reduced-motion: reduce) {
   .product-detail-wishlist__button {
     transition: none;
+  }
+}
+
+/* Keep one set of purchase controls across desktop and mobile. */
+.productPurchaseCardIntro.productPurchaseCardHeading {
+  padding-bottom: 0;
+}
+
+.productPurchasePriceDetails {
+  padding: 0 24px 24px;
+}
+
+.productMobilePriceToggle {
+  display: none;
+}
+
+.productMobileActions {
+  display: contents;
+}
+
+@media (min-width: 768px) and (max-width: 1279.98px) {
+  .productPurchasePriceDetails {
+    padding: 0 20px 20px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .productDetailMainContainer {
+    padding-bottom: calc(var(--product-mobile-panel-height, 220px) + 24px);
+  }
+
+  .productDetailRight,
+  .productDetailPurchaseStack,
+  .productDetailRight .productPurchaseCard {
+    display: contents;
+  }
+
+  .productPurchaseCardIntro.productPurchaseCardHeading {
+    order: -1;
+    width: 100%;
+    padding: 0 0 16px;
+  }
+
+  .productPurchaseCardHeading .productPurchaseNote {
+    min-height: 0;
+  }
+
+  .productMobilePurchasePanel {
+    position: fixed;
+    z-index: 50;
+    right: max(6px, env(safe-area-inset-right));
+    bottom: calc(6px + var(--product-mobile-keyboard-offset, 0px));
+    left: max(6px, env(safe-area-inset-left));
+    display: flex;
+    flex-direction: column;
+    max-height: var(--product-mobile-viewport-height, calc(100dvh - 16px));
+    padding: 8px 10px max(8px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid rgba(17, 17, 17, 0.14);
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 -4px 24px rgba(17, 17, 17, 0.14);
+  }
+
+  .productMobilePurchasePanel[data-configuring='true'],
+  body:has(.dhx-menuToggle[aria-expanded='true']) .productMobilePurchasePanel,
+  body:has(.overlay.expanded) .productMobilePurchasePanel {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .productMobileActions {
+    order: 4;
+    display: grid;
+    flex-shrink: 0;
+    grid-template-columns: minmax(0, 1.6fr) minmax(112px, 1fr);
+    gap: 8px;
+  }
+
+  .productMobileActions .product-form {
+    min-width: 0;
+  }
+
+  .productMobilePriceToggle {
+    display: flex;
+    min-width: 0;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0;
+    padding: 7px 9px;
+    border: 1px solid #171717;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #171717;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .productMobilePriceToggle:focus-visible {
+    outline: 2px solid #171717;
+    outline-offset: -2px;
+  }
+
+  .productMobilePriceToggle svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .productMobilePriceToggle[aria-expanded='true'] svg {
+    transform: rotate(180deg);
+  }
+
+  .productMobilePurchasePanel .productPurchasePriceDetails {
+    order: 1;
+    min-height: 0;
+    max-height: 42px;
+    padding: 0 0 6px;
+    overflow: hidden;
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    transition:
+      max-height 220ms ease,
+      padding 220ms ease,
+      opacity 160ms ease,
+      transform 220ms ease,
+      visibility 0s;
+  }
+
+  .productMobilePurchasePanel .productStartingPrice {
+    margin-top: 0;
+  }
+
+  .productMobilePurchasePanel .productStartingPriceLabel,
+  .productMobilePurchasePanel .productStartingPriceAmount {
+    font-size: 18px;
+  }
+
+  .productMobilePurchasePanel .productStartingPriceUnit {
+    font-size: 13px;
+  }
+
+  .productMobilePurchasePanel .productPurchaseCardDivider {
+    display: none;
+  }
+
+  .productMobilePurchasePanel .productPurchaseCardConfiguration {
+    display: contents;
+  }
+
+  .productMobilePurchasePanel .productOrderSummary {
+    order: 2;
+    flex-shrink: 1;
+    min-height: 0;
+    max-height: 58px;
+    gap: 8px;
+    margin-bottom: 6px;
+    padding: 7px 10px;
+    overflow: hidden;
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    transition:
+      max-height 220ms ease,
+      margin 220ms ease,
+      padding 220ms ease,
+      opacity 160ms ease,
+      transform 220ms ease,
+      visibility 0s;
+  }
+
+  .productMobilePurchasePanel .productOrderSummaryLabel {
+    font-size: 11px;
+  }
+
+  .productMobilePurchasePanel .productOrderSummaryValue {
+    font-size: 15px;
+  }
+
+  .productMobilePurchasePanel .customSizeMainBox {
+    order: 3;
+    flex-shrink: 0;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .productMobilePurchasePanel .customSizeField label {
+    margin-bottom: 4px;
+    font-size: 12px;
+  }
+
+  .productMobilePurchasePanel .relativeInputBox {
+    height: 40px;
+  }
+
+  .productMobilePurchasePanel .customSizeField input {
+    padding: 0 10px;
+    font-size: 15px;
+  }
+
+  .productMobilePurchasePanel .customAddToCartButton {
+    min-height: 42px;
+    padding: 9px 14px;
+    font-size: 15px;
+  }
+
+  .productMobilePurchasePanel[data-expanded='false']
+    .productPurchasePriceDetails,
+  .productMobilePurchasePanel[data-expanded='false'] .productOrderSummary {
+    max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    visibility: hidden;
+    transition:
+      max-height 220ms ease,
+      margin 220ms ease,
+      padding 220ms ease,
+      opacity 140ms ease,
+      transform 220ms ease,
+      visibility 0s linear 220ms;
   }
 }

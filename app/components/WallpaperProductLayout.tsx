@@ -1,4 +1,11 @@
-import {Fragment, useState, type ReactNode} from 'react';
+import {
+  Fragment,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import {useNavigate} from 'react-router';
 import {
   getAdjacentAndFirstAvailableVariants,
@@ -133,6 +140,70 @@ export default function WallpaperProductLayout({
   const {locale, t} = useTranslation();
   const cartPath = usePrefixPathWithLocale('/cart');
   const [isConfiguring, setIsConfiguring] = useState(false);
+
+  const [isMobilePriceExpanded, setIsMobilePriceExpanded] = useState(false);
+  const purchasePanelId = useId();
+  const purchaseContainerRef = useRef<HTMLDivElement>(null);
+  const purchasePanelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = purchaseContainerRef.current;
+    const panel = purchasePanelRef.current;
+    if (!container || !panel) return;
+
+    const mobileQuery = window.matchMedia('(max-width: 767.98px)');
+    const viewport = window.visualViewport;
+    let frame = 0;
+
+    const updatePanelLayout = () => {
+      if (!mobileQuery.matches) {
+        container.style.removeProperty('--product-mobile-panel-height');
+        panel.style.removeProperty('--product-mobile-keyboard-offset');
+        panel.style.removeProperty('--product-mobile-viewport-height');
+        return;
+      }
+
+      const viewportHeight = viewport?.height ?? window.innerHeight;
+      const bottomOffset = Math.max(
+        0,
+        window.innerHeight - viewportHeight - (viewport?.offsetTop ?? 0),
+      );
+      panel.style.setProperty(
+        '--product-mobile-keyboard-offset',
+        `${bottomOffset}px`,
+      );
+      panel.style.setProperty(
+        '--product-mobile-viewport-height',
+        `${Math.max(0, viewportHeight - 16)}px`,
+      );
+      container.style.setProperty(
+        '--product-mobile-panel-height',
+        `${panel.getBoundingClientRect().height}px`,
+      );
+    };
+
+    const scheduleUpdate = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(updatePanelLayout);
+    };
+    const observer = new ResizeObserver(scheduleUpdate);
+    observer.observe(panel);
+    mobileQuery.addEventListener('change', scheduleUpdate);
+    window.addEventListener('resize', scheduleUpdate);
+    viewport?.addEventListener('resize', scheduleUpdate);
+    viewport?.addEventListener('scroll', scheduleUpdate);
+    updatePanelLayout();
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      mobileQuery.removeEventListener('change', scheduleUpdate);
+      window.removeEventListener('resize', scheduleUpdate);
+      viewport?.removeEventListener('resize', scheduleUpdate);
+      viewport?.removeEventListener('scroll', scheduleUpdate);
+    };
+  }, []);
+
   const [size, setSize] = useState({width: 0, height: 0});
   const [showSizeErrors, setShowSizeErrors] = useState(false);
   const [crop, setCrop] = useState<CropRect | null>(null);
@@ -433,7 +504,10 @@ export default function WallpaperProductLayout({
   ];
 
   return (
-    <div className="container productDetailMainContainer">
+    <div
+      ref={purchaseContainerRef}
+      className="container productDetailMainContainer"
+    >
       <div className="productDetailRow1">
         <div className="productDetailLeft">
           <ProductImage images={product.images} productTitle={title} />
@@ -447,87 +521,118 @@ export default function WallpaperProductLayout({
         <div className="productDetailRight">
           <div className="productDetailPurchaseStack">
             <div className="product-main productPurchaseCard">
-              <section className="productPurchaseCardIntro">
+              <section className="productPurchaseCardIntro productPurchaseCardHeading">
                 <h1 className="productDetailTitle">{title}</h1>
                 <p className="productPurchaseNote">{t('product.trimNotice')}</p>
+              </section>
 
-                {materialStartingPrice && (
-                  <div
-                    className="productStartingPrice"
-                    aria-label={t('product.startingPriceLabel')}
-                  >
-                    <span className="productStartingPriceLabel">
-                      {t('product.startingPrice')}
-                    </span>
-                    <strong className="productStartingPriceAmount">
-                      {formatMaterialPrice(
-                        materialStartingPrice.amount,
-                        materialStartingPrice.currencyCode,
-                      )}
-                    </strong>
-                    <span className="productStartingPriceUnit">
-                      {t('product.perSquareMeter')}
-                    </span>
-                    {materialStartingPrice.priceWithoutDiscount && (
-                      <del className="productStartingPricePrevious">
+              <div
+                ref={purchasePanelRef}
+                className="productMobilePurchasePanel"
+                data-expanded={isMobilePriceExpanded}
+                data-configuring={isConfiguring}
+              >
+                <div
+                  id={`${purchasePanelId}-price`}
+                  className="productPurchasePriceDetails"
+                >
+                  {materialStartingPrice && (
+                    <div
+                      className="productStartingPrice"
+                      aria-label={t('product.startingPriceLabel')}
+                    >
+                      <span className="productStartingPriceLabel">
+                        {t('product.startingPrice')}
+                      </span>
+                      <strong className="productStartingPriceAmount">
                         {formatMaterialPrice(
-                          materialStartingPrice.priceWithoutDiscount,
+                          materialStartingPrice.amount,
                           materialStartingPrice.currencyCode,
                         )}
-                      </del>
-                    )}
-                  </div>
-                )}
-              </section>
-
-              <div className="productPurchaseCardDivider" aria-hidden="true" />
-
-              <section className="productPurchaseCardConfiguration">
-                <ProductSize
-                  onChange={setSize}
-                  widthError={widthError}
-                  heightError={heightError}
-                />
-
-                <div className="productOrderSummary" aria-live="polite">
-                  <div className="productOrderSummaryItem">
-                    <span className="productOrderSummaryLabel">
-                      {t('product.wallArea')}
-                    </span>
-                    <strong className="productOrderSummaryValue">
-                      {wallAreaM2 > 0 ? `${formattedWallArea} m²` : '— m²'}
-                    </strong>
-                  </div>
-                  <div className="productOrderSummaryItem productOrderSummaryItemPrice">
-                    <span className="productOrderSummaryLabel">
-                      {t('product.priceFrom')}
-                    </span>
-                    <strong className="productOrderSummaryValue">
-                      {wallAreaM2 > 0 && startingTotalPrice
-                        ? formatMaterialPrice(
-                            Number(startingTotalPrice.amount),
-                            startingTotalPrice.currencyCode,
-                          )
-                        : '—'}
-                    </strong>
-                  </div>
+                      </strong>
+                      <span className="productStartingPriceUnit">
+                        {t('product.perSquareMeter')}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <ProductForm
-                  productOptions={productOptions}
-                  selectedVariant={selectedVariant}
-                  size={size}
-                  crop={crop}
-                  isConfiguring={isConfiguring}
-                  onConfigure={() => {
-                    setShowSizeErrors(false);
-                    setIsConfiguring(true);
-                  }}
-                  onSizeValidationError={() => setShowSizeErrors(true)}
-                  masterAssetId={product.masterAssetId?.value}
-                  showQualityOptions={false}
+                <div
+                  className="productPurchaseCardDivider"
+                  aria-hidden="true"
                 />
-              </section>
+
+                <section className="productPurchaseCardConfiguration">
+                  <ProductSize
+                    onChange={setSize}
+                    widthError={widthError}
+                    heightError={heightError}
+                  />
+
+                  <div
+                    id={`${purchasePanelId}-summary`}
+                    className="productOrderSummary"
+                    aria-live="polite"
+                  >
+                    <div className="productOrderSummaryItem">
+                      <span className="productOrderSummaryLabel">
+                        {t('product.wallArea')}
+                      </span>
+                      <strong className="productOrderSummaryValue">
+                        {wallAreaM2 > 0 ? `${formattedWallArea} m²` : '— m²'}
+                      </strong>
+                    </div>
+                    <div className="productOrderSummaryItem productOrderSummaryItemPrice">
+                      <span className="productOrderSummaryLabel">
+                        {t('product.priceFrom')}
+                      </span>
+                      <strong className="productOrderSummaryValue">
+                        {wallAreaM2 > 0 && startingTotalPrice
+                          ? formatMaterialPrice(
+                              Number(startingTotalPrice.amount),
+                              startingTotalPrice.currencyCode,
+                            )
+                          : '—'}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="productMobileActions">
+                    <ProductForm
+                      productOptions={productOptions}
+                      selectedVariant={selectedVariant}
+                      size={size}
+                      crop={crop}
+                      isConfiguring={isConfiguring}
+                      onConfigure={() => {
+                        setShowSizeErrors(false);
+                        setIsConfiguring(true);
+                      }}
+                      onSizeValidationError={() => setShowSizeErrors(true)}
+                      masterAssetId={product.masterAssetId?.value}
+                      showQualityOptions={false}
+                    />
+                    <button
+                      type="button"
+                      className="productMobilePriceToggle"
+                      aria-expanded={isMobilePriceExpanded}
+                      aria-controls={`${purchasePanelId}-price ${purchasePanelId}-summary`}
+                      onClick={() =>
+                        setIsMobilePriceExpanded((expanded) => !expanded)
+                      }
+                    >
+                      <span>{t('product.priceDetails')}</span>
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        focusable="false"
+                      >
+                        <path d="m6 15 6-6 6 6" />
+                      </svg>
+                    </button>
+                  </div>
+                </section>
+              </div>
             </div>
 
             <ProductWishlistButton
