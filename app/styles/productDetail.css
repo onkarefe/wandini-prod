@@ -784,7 +784,7 @@
     position: fixed;
     z-index: 50;
     right: max(6px, env(safe-area-inset-right));
-    bottom: calc(6px + var(--product-mobile-keyboard-offset, 0px));
+    bottom: var(--product-mobile-keyboard-offset, 0px);
     left: max(6px, env(safe-area-inset-left));
     display: flex;
     flex-direction: column;
@@ -793,7 +793,7 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     border: 1px solid rgba(17, 17, 17, 0.14);
-    border-radius: 12px;
+    border-radius: 12px 12px 0 0;
     background: #ffffff;
     box-shadow: 0 -4px 24px rgba(17, 17, 17, 0.14);
   }
