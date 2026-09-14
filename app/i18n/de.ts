@@ -134,7 +134,7 @@ export const de = {
   'similarProducts.invalidOffset': 'Ungültiger Offset-Wert.',
   'product.description': 'Beschreibung',
   'product.information': 'Produktinformationen',
-  'product.materialDetails': 'Materialinformationen',
+  'product.materialDetails': 'Welches Material',
   'product.deliveryShipping': 'Lieferung & Versand',
   'product.noDescription': 'Keine Beschreibung verfügbar.',
   'product.noInformation': 'Keine Produktinformationen verfügbar.',
