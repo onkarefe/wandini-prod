@@ -640,7 +640,9 @@ function DesktopSearch({
                 setIsOpen(Boolean(event.currentTarget.value.trim()));
                 fetchResults(event);
               }}
-              placeholder={t('search.placeholder')}
+              placeholder={t(
+                isMobileExpanded ? 'search.submit' : 'search.placeholder',
+              )}
               ref={inputRef}
               role="combobox"
               type="search"
