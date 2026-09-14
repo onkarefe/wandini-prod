@@ -17,6 +17,7 @@ import type {ProductFragment} from 'storefrontapi.generated';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {
   ConfiguratorModal,
+  resolveMaterialVisual,
   type ConfiguratorMaterialOption,
 } from '~/components/ConfiguratorModal';
 import {ProductDetailTabs} from '~/components/ProductDetailTabs';
@@ -483,6 +484,7 @@ export default function WallpaperProductLayout({
   const tabTitles = [
     t('product.description'),
     t('product.information'),
+    t('product.materialDetails'),
     t('product.deliveryShipping'),
   ];
   const productInfoContent = parsedProductInfo
@@ -491,6 +493,60 @@ export default function WallpaperProductLayout({
   const deliveryAndShippingContent = parsedDeliveryAndShipping
     ? renderShopifyRichText(parsedDeliveryAndShipping)
     : null;
+  const materialDetailsContent = materialOptions.length ? (
+    <div key="materials" className="productMaterialDetailsGrid">
+      {materialOptions.map((material) => {
+        const materialVisual = resolveMaterialVisual(material.identity);
+
+        return (
+          <article
+            key={material.id}
+            className={`productMaterialDetailsCard${
+              materialVisual?.featured
+                ? ' productMaterialDetailsCard--featured'
+                : ''
+            }`}
+          >
+            {material.image ? (
+              <div className="productMaterialDetailsMedia">
+                <img
+                  src={material.image.url}
+                  alt={material.image.altText || material.title}
+                  loading="lazy"
+                  decoding="async"
+                  style={{objectPosition: materialVisual?.objectPosition}}
+                />
+                {material.badge ? (
+                  <span
+                    className={`productMaterialDetailsBadge${
+                      materialVisual?.featured
+                        ? ' productMaterialDetailsBadge--featured'
+                        : ''
+                    }`}
+                  >
+                    {material.badge}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+
+            <div className="productMaterialDetailsBody">
+              <h3>{material.title}</h3>
+              {material.properties.length ? (
+                <ul className="productMaterialDetailsFeatures">
+                  {material.properties.map((property) => (
+                    <li key={`${material.id}-${property}`}>{property}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  ) : (
+    <p key="no-materials">{t('product.noMaterialDetails')}</p>
+  );
   const tabContents = [
     descriptionHtml ? (
       <div key="desc" dangerouslySetInnerHTML={{__html: descriptionHtml}} />
@@ -498,6 +554,7 @@ export default function WallpaperProductLayout({
       <p key="nodesc">{t('product.noDescription')}</p>
     ),
     productInfoContent || <p key="noinfo">{t('product.noInformation')}</p>,
+    materialDetailsContent,
     deliveryAndShippingContent || (
       <p key="noshipping">{t('product.noDeliveryShipping')}</p>
     ),

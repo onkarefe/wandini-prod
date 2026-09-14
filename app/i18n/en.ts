@@ -135,9 +135,11 @@ export const en = {
   'similarProducts.invalidOffset': 'Invalid offset value.',
   'product.description': 'Description',
   'product.information': 'Product information',
+  'product.materialDetails': 'Material details',
   'product.deliveryShipping': 'Delivery & shipping',
   'product.noDescription': 'No description is available.',
   'product.noInformation': 'No product information is available.',
+  'product.noMaterialDetails': 'No material details are available.',
   'product.noDeliveryShipping':
     'No delivery and shipping information is available.',
   'product.aiNotice':

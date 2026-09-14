@@ -54,8 +54,7 @@
   line-height: 1.25;
   text-align: left;
   cursor: pointer;
-  transition:
-    color 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .custom-tabs-header button:first-child {
@@ -178,6 +177,123 @@
   vertical-align: top;
 }
 
+.productMaterialDetailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.productMaterialDetailsCard {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #dadddb;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(18, 24, 21, 0.025),
+    0 8px 22px rgba(18, 24, 21, 0.035);
+}
+
+.productMaterialDetailsCard--featured {
+  border-color: #b9c4be;
+}
+
+.productMaterialDetailsMedia {
+  position: relative;
+  width: 100%;
+  height: clamp(165px, 20vw, 235px);
+  flex: 0 0 auto;
+  overflow: hidden;
+  background: #e9ecea;
+}
+
+.productMaterialDetailsMedia::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(11, 16, 13, 0.14) 0%,
+    transparent 34%,
+    transparent 100%
+  );
+}
+
+.productMaterialDetailsMedia img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.productMaterialDetailsBadge {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  left: 10px;
+  max-width: calc(100% - 20px);
+  padding: 6px 9px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #26302b;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+}
+
+.productMaterialDetailsBody {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding: 14px 15px 16px;
+}
+
+.customTabContent .productMaterialDetailsCard h3 {
+  margin: 0 0 7px;
+  color: #1d2421;
+  font-size: clamp(19px, 1.55vw, 22px);
+  font-weight: 720;
+  line-height: 1.2;
+}
+
+.customTabContent .productMaterialDetailsFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  color: #5b625e;
+  font-size: 14px;
+  font-weight: 520;
+  line-height: 1.35;
+  list-style: none;
+}
+
+.customTabContent .productMaterialDetailsFeatures li {
+  position: relative;
+  margin: 0;
+  padding-left: 16px;
+}
+
+.productMaterialDetailsFeatures li::before {
+  content: '✓';
+  position: absolute;
+  top: -0.02em;
+  left: 0;
+  color: #526d61;
+  font-size: 11px;
+  font-weight: 750;
+}
+
 @media (max-width: 1023.98px) {
   .custom-tabs,
   .custom-tabs-header,
@@ -255,6 +371,35 @@
   .customTabContent {
     font-size: 14px;
     line-height: 1.65;
+  }
+
+  .productMaterialDetailsGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .productMaterialDetailsCard {
+    display: grid;
+    grid-template-columns: minmax(140px, 42%) minmax(0, 1fr);
+    border-radius: 12px;
+  }
+
+  .productMaterialDetailsMedia {
+    height: 100%;
+    min-height: 150px;
+  }
+
+  .productMaterialDetailsBody {
+    padding: 10px 11px;
+  }
+
+  .customTabContent .productMaterialDetailsCard h3 {
+    font-size: 17px;
+  }
+
+  .customTabContent .productMaterialDetailsFeatures {
+    gap: 3px;
+    font-size: 11.5px;
   }
 }
 
