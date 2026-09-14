@@ -764,10 +764,6 @@
 }
 
 @media (max-width: 767.98px) {
-  .productDetailMainContainer {
-    padding-bottom: calc(var(--product-mobile-panel-height, 220px) + 24px);
-  }
-
   .productDetailRight,
   .productDetailPurchaseStack,
   .productDetailRight .productPurchaseCard {
