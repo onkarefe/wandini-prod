@@ -136,6 +136,7 @@ export function DesktopHeader({
   const brandLogo = shop.brand?.logo?.image;
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileOpenKey, setMobileOpenKey] = useState<string | null>(null);
   const intentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const banner =
@@ -233,10 +234,15 @@ export function DesktopHeader({
       const menuButton = document.querySelector<HTMLButtonElement>(
         '.dhx-menuToggle[aria-expanded="true"]',
       );
+      const searchButton = document.querySelector<HTMLButtonElement>(
+        '.dhx-searchToggle[aria-expanded="true"]',
+      );
       setOpenMenu(null);
       setMobileMenuOpen(false);
+      setMobileSearchOpen(false);
       setMobileOpenKey(null);
-      if (menuButton) requestAnimationFrame(() => menuButton.focus());
+      const activeButton = menuButton ?? searchButton;
+      if (activeButton) requestAnimationFrame(() => activeButton.focus());
     }
 
     document.addEventListener('keydown', closeOnEscape);
@@ -261,6 +267,7 @@ export function DesktopHeader({
     const closeAtDesktop = (event: MediaQueryListEvent) => {
       if (!event.matches) return;
       setMobileMenuOpen(false);
+      setMobileSearchOpen(false);
       setMobileOpenKey(null);
     };
 
@@ -273,12 +280,30 @@ export function DesktopHeader({
     setMobileOpenKey(null);
   }, []);
 
+  const closeMobileOverlays = useCallback(() => {
+    setMobileMenuOpen(false);
+    setMobileSearchOpen(false);
+    setMobileOpenKey(null);
+  }, []);
+
+  useEffect(() => {
+    if (!mobileSearchOpen) return;
+    requestAnimationFrame(() => {
+      document
+        .querySelector<HTMLInputElement>('#desktop-command-search')
+        ?.focus();
+    });
+  }, [mobileSearchOpen]);
+
   function closeWhenFocusLeaves(event: FocusEvent<HTMLDivElement>) {
     if (!event.currentTarget.contains(event.relatedTarget)) setOpenMenu(null);
   }
 
   return (
-    <div className="dhx-header">
+    <div
+      className="dhx-header"
+      data-mobile-search-open={mobileSearchOpen ? 'true' : 'false'}
+    >
       <div className="dhx-topRail">
         <div className="container mx-auto dhx-container dhx-topRailInner">
           <div className="dhx-announcement">
@@ -294,7 +319,7 @@ export function DesktopHeader({
             className="dhx-brand"
             to="/"
             aria-label={t('common.home')}
-            onClick={closeMobileMenu}
+            onClick={closeMobileOverlays}
           >
             {brandLogo?.url ? (
               <img
@@ -310,14 +335,23 @@ export function DesktopHeader({
 
           <DesktopSearch
             forceClosed={mobileMenuOpen}
+            isMobileExpanded={mobileSearchOpen}
             onEngage={closeMobileMenu}
           />
           <DesktopActions
             cart={cart}
             isMenuOpen={mobileMenuOpen}
-            onNavigate={closeMobileMenu}
+            isSearchOpen={mobileSearchOpen}
+            onNavigate={closeMobileOverlays}
+            onSearchToggle={() => {
+              setOpenMenu(null);
+              setMobileMenuOpen(false);
+              setMobileOpenKey(null);
+              setMobileSearchOpen((current) => !current);
+            }}
             onMenuToggle={() => {
               setOpenMenu(null);
+              setMobileSearchOpen(false);
               setMobileMenuOpen((current) => !current);
             }}
           />
@@ -368,7 +402,7 @@ export function DesktopHeader({
         <MobileNavigation
           items={resolvedNavigation}
           openKey={mobileOpenKey}
-          onNavigate={closeMobileMenu}
+          onNavigate={closeMobileOverlays}
           onToggle={(key) =>
             setMobileOpenKey((current) => (current === key ? null : key))
           }
@@ -507,9 +541,11 @@ function MobileMegaMenu({
 
 function DesktopSearch({
   forceClosed,
+  isMobileExpanded,
   onEngage,
 }: {
   forceClosed: boolean;
+  isMobileExpanded: boolean;
   onEngage: () => void;
 }) {
   const {t} = useTranslation();
@@ -523,6 +559,17 @@ function DesktopSearch({
     close();
     searchRef.current?.querySelector('input')?.blur();
   }, [close, forceClosed]);
+
+  useEffect(() => {
+    if (
+      isMobileExpanded ||
+      !window.matchMedia('(max-width: 1023.97px)').matches
+    ) {
+      return;
+    }
+    close();
+    searchRef.current?.querySelector('input')?.blur();
+  }, [close, isMobileExpanded]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -556,7 +603,7 @@ function DesktopSearch({
   }
 
   return (
-    <div className="dhx-search" ref={searchRef}>
+    <div className="dhx-search" id="dhx-command-search-panel" ref={searchRef}>
       <SearchFormPredictive
         className="dhx-searchForm"
         fetcherKey="desktop-command-search"
@@ -673,12 +720,16 @@ function DesktopSearch({
 function DesktopActions({
   cart,
   isMenuOpen,
+  isSearchOpen,
   onNavigate,
+  onSearchToggle,
   onMenuToggle,
 }: {
   cart: Promise<CartApiQueryFragment | null>;
   isMenuOpen: boolean;
+  isSearchOpen: boolean;
   onNavigate: () => void;
+  onSearchToggle: () => void;
   onMenuToggle: () => void;
 }) {
   const {t} = useTranslation();
@@ -686,6 +737,17 @@ function DesktopActions({
   return (
     <nav className="dhx-actions" aria-label={t('navigation.quickActions')}>
       <LanguageSwitcher className="dhx-desktopLanguageSwitcher" />
+      <button
+        className="dhx-searchToggle"
+        type="button"
+        aria-controls="dhx-command-search-panel"
+        aria-expanded={isSearchOpen}
+        aria-label={t('search.label')}
+        title={t('search.label')}
+        onClick={onSearchToggle}
+      >
+        <MobileSearchIcon />
+      </button>
       <NavLink
         className="dhx-account"
         to="/account"
@@ -836,6 +898,14 @@ function SearchIcon() {
     <svg className="dhx-searchIcon" viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="10.7" cy="10.7" r="6.3" />
       <path d="m15.5 15.5 4.1 4.1" />
+    </svg>
+  );
+}
+
+function MobileSearchIcon() {
+  return (
+    <svg viewBox="0 0 640 640" aria-hidden="true">
+      <path d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z" />
     </svg>
   );
 }

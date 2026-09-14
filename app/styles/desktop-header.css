@@ -17,13 +17,18 @@
   container-type: inline-size;
 }
 
+.dhx-searchToggle {
+  display: none;
+}
+
 @media (max-width: 1023.97px) {
   html {
-    --wandini-header-height: 154px;
+    --wandini-header-height: 98px;
     scroll-padding-top: var(--wandini-header-height);
   }
 
   .dh-headerHost {
+    z-index: 100;
     border: 0;
     background: #fff;
   }
@@ -71,10 +76,11 @@
   }
 
   .dhx-commandGrid {
+    position: relative;
     display: grid;
-    min-height: 122px;
+    min-height: 66px;
     grid-template-columns: minmax(120px, 1fr) max-content;
-    grid-template-rows: 66px 56px;
+    grid-template-rows: 66px;
     align-items: center;
     column-gap: 20px;
   }
@@ -103,12 +109,32 @@
   }
 
   .dhx-search {
-    position: relative;
-    z-index: 72;
-    grid-column: 1 / -1;
-    grid-row: 2;
+    position: absolute;
+    z-index: 80;
+    top: calc(100% + 4px);
+    right: 24px;
+    left: 24px;
     min-width: 0;
-    align-self: start;
+    height: 44px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition:
+      opacity 140ms ease,
+      transform 180ms ease,
+      visibility 0s linear 180ms;
+  }
+
+  .dhx-header[data-mobile-search-open='true'] .dhx-search {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+    transition:
+      opacity 160ms ease 30ms,
+      transform 180ms ease,
+      visibility 0s linear 0s;
   }
 
   .dhx-searchForm {
@@ -241,6 +267,7 @@
   .dhx-account,
   .dhx-saved,
   .dhx-cart,
+  .dhx-searchToggle,
   .dhx-menuToggle {
     display: grid;
     width: 38px;
@@ -258,12 +285,21 @@
       transform 150ms ease;
   }
 
+  .dhx-searchToggle,
   .dhx-menuToggle {
     cursor: pointer;
   }
 
+  .dhx-searchToggle[aria-expanded='true'],
   .dhx-menuToggle[aria-expanded='true'] {
     background: #fff;
+  }
+
+  .dhx-searchToggle > svg {
+    width: 21px;
+    height: 21px;
+    fill: currentColor;
+    stroke: none;
   }
 
   .dhx-account > svg,
@@ -627,6 +663,7 @@
 
   .dhx-brand:focus-visible,
   .dhx-searchForm > button:focus-visible,
+  .dhx-searchToggle:focus-visible,
   .dhx-account:focus-visible,
   .dhx-saved:focus-visible,
   .dhx-cart:focus-visible,
@@ -1390,7 +1427,7 @@
 
 @media (max-width: 767.97px) {
   html {
-    --wandini-header-height: 148px;
+    --wandini-header-height: 92px;
   }
 
   .dhx-container {
@@ -1412,10 +1449,15 @@
   }
 
   .dhx-commandGrid {
-    min-height: 118px;
+    min-height: 62px;
     grid-template-columns: minmax(90px, 1fr) max-content;
-    grid-template-rows: 62px 56px;
+    grid-template-rows: 62px;
     column-gap: 10px;
+  }
+
+  .dhx-search {
+    right: 16px;
+    left: 16px;
   }
 
   .dhx-brand {
@@ -1438,6 +1480,7 @@
   .dhx-account,
   .dhx-saved,
   .dhx-cart,
+  .dhx-searchToggle,
   .dhx-menuToggle {
     width: 35px;
     height: 35px;
@@ -1446,6 +1489,7 @@
   .dhx-account > svg,
   .dhx-saved > svg,
   .dhx-bag > svg,
+  .dhx-searchToggle > svg,
   .dhx-menuIcon {
     width: 20px;
     height: 20px;
@@ -1511,6 +1555,11 @@
     column-gap: 6px;
   }
 
+  .dhx-search {
+    right: 12px;
+    left: 12px;
+  }
+
   .dhx-brand {
     max-width: 108px;
   }
@@ -1526,6 +1575,7 @@
   .dhx-account,
   .dhx-saved,
   .dhx-cart,
+  .dhx-searchToggle,
   .dhx-menuToggle {
     width: 32px;
     height: 34px;
@@ -1544,6 +1594,7 @@
   .dhx-account:hover,
   .dhx-saved:hover,
   .dhx-cart:hover,
+  .dhx-searchToggle:hover,
   .dhx-menuToggle:hover {
     background: #fff;
     transform: translateY(-1px);
