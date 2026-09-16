@@ -501,14 +501,7 @@ export default function ZubehorProductLayout({
 
   return (
     <main className="zpd">
-      <div className="zpd__shell">
-        <nav className="zpd-back-link" aria-label={t('product.accessories')}>
-          <Link to="/collections/zubehor">
-            <ArrowIcon direction="left" />
-            <span>{t('product.backToAccessories')}</span>
-          </Link>
-        </nav>
-
+      <div className="container mx-auto">
         <div className="zpd__product">
           <ZubehorProductGallery
             images={images}

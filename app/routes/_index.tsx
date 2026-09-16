@@ -16,6 +16,7 @@ import AllProdutsNew, {
 } from '~/components/AllProdutsNew';
 import CustomGrid, {type CustomGridItem} from '~/components/CustomGrid';
 import CustomOrder from '~/components/CustomOrder';
+import ExampleSetHomepage from '~/components/ExampleSetHomepage';
 import UberUnsHomepage from '~/components/UberUnsHomepage';
 import CustomerRevs from '~/components/CustomerRevs';
 import homepageStyles from '~/styles/homepage.css?url';
@@ -216,6 +217,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     bestsellerRes,
     customGridRes,
     stepByStepRes,
+    exampleSetHomepageRes,
     uberUnsRes,
     customerReviewsRes,
   ] = await Promise.all([
@@ -225,6 +227,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     context.storefront.query(BESTSELLER_PRODUCTS_QUERY),
     context.storefront.query(CUSTOM_GRID_QUERY),
     context.storefront.query(STEP_BY_STEP_QUERY),
+    context.storefront.query(EXAMPLE_SET_HOMEPAGE_QUERY),
     context.storefront.query(UBER_UNS_QUERY),
     context.storefront.query(CUSTOMER_REVIEWS_QUERY),
   ]);
@@ -421,6 +424,34 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     bullets,
   };
 
+  const exampleSetHomepageNode = exampleSetHomepageRes?.metaobjects?.nodes?.[0];
+  const exampleSetHomepageFields = Array.isArray(exampleSetHomepageNode?.fields)
+    ? exampleSetHomepageNode.fields
+    : [];
+  const exampleSetHomepageFieldMap = Object.fromEntries(
+    exampleSetHomepageFields.map((field) => [field.key, field]),
+  );
+  const exampleSetHomepageTitle = exampleSetHomepageFieldMap.title?.value ?? '';
+  const exampleSetHomepageCtaAction =
+    exampleSetHomepageFieldMap.cta_action?.reference;
+  const exampleSetHomepage = {
+    title: exampleSetHomepageTitle,
+    subdesc1: exampleSetHomepageFieldMap.subdesc1?.value ?? '',
+    subdesc2: exampleSetHomepageFieldMap.subdesc2?.value ?? '',
+    ctaText: exampleSetHomepageFieldMap.cta_text?.value ?? '',
+    ctaAction:
+      exampleSetHomepageCtaAction &&
+      typeof exampleSetHomepageCtaAction === 'object' &&
+      'handle' in exampleSetHomepageCtaAction
+        ? exampleSetHomepageCtaAction
+        : null,
+    image:
+      normalizeReferenceImage(
+        exampleSetHomepageFieldMap.image?.reference,
+        exampleSetHomepageTitle,
+      ) ?? null,
+  };
+
   const uberUnsNode = uberUnsRes?.metaobjects?.nodes?.[0];
   const uberUnsFields = Array.isArray(uberUnsNode?.fields)
     ? uberUnsNode.fields
@@ -509,6 +540,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     customGridItems,
     customGridSectionTitle,
     stepByStep,
+    exampleSetHomepage,
     uberUns,
     customerReviews,
     customerReviewsSectionTitle,
@@ -576,6 +608,7 @@ export default function Homepage() {
         sectionTitle={data.customGridSectionTitle}
       />
       <CustomOrder content={data.stepByStep} />
+      <ExampleSetHomepage content={data.exampleSetHomepage} />
       <UberUnsHomepage content={data.uberUns} />
       <CustomerRevs
         reviews={data.customerReviews ?? []}
@@ -848,6 +881,46 @@ const STEP_BY_STEP_QUERY = `#graphql
                 handle
                 title
               }
+            }
+          }
+        }
+      }
+    }
+  }
+` as const;
+
+const EXAMPLE_SET_HOMEPAGE_QUERY = `#graphql
+  query ExampleSetHomepageMetaobject(
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    metaobjects(type: "example_set_homepage", first: 1) {
+      nodes {
+        id
+        handle
+        type
+        fields {
+          key
+          value
+          type
+          reference {
+            ... on MediaImage {
+              id
+              image {
+                url
+                altText
+                width
+                height
+              }
+            }
+            ... on GenericFile {
+              id
+              url
+            }
+            ... on Product {
+              id
+              handle
+              title
             }
           }
         }

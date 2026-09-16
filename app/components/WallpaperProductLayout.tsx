@@ -36,7 +36,7 @@ import {
   createConfiguratorInstanceId,
   resolveConfiguratorPricePerM2,
 } from '~/lib/configurator-pricing';
-import {usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
 import {formatLocaleCurrency, formatLocaleNumber} from '~/lib/locale-format';
 import {isWallpaperMaterialOption} from '~/lib/wallpaper-variant-selection';
@@ -493,59 +493,76 @@ export default function WallpaperProductLayout({
   const deliveryAndShippingContent = parsedDeliveryAndShipping
     ? renderShopifyRichText(parsedDeliveryAndShipping)
     : null;
-  const materialDetailsContent = materialOptions.length ? (
-    <div key="materials" className="productMaterialDetailsGrid">
-      {materialOptions.map((material) => {
-        const materialVisual = resolveMaterialVisual(material.identity);
+  const materialDetailsContent = (
+    <div key="materials" className="productMaterialDetails">
+      {materialOptions.length ? (
+        <div className="productMaterialDetailsGrid">
+          {materialOptions.map((material) => {
+            const materialVisual = resolveMaterialVisual(material.identity);
 
-        return (
-          <article
-            key={material.id}
-            className={`productMaterialDetailsCard${
-              materialVisual?.featured
-                ? ' productMaterialDetailsCard--featured'
-                : ''
-            }`}
-          >
-            {material.image ? (
-              <div className="productMaterialDetailsMedia">
-                <img
-                  src={material.image.url}
-                  alt={material.image.altText || material.title}
-                  loading="lazy"
-                  decoding="async"
-                  style={{objectPosition: materialVisual?.objectPosition}}
-                />
-                {material.badge ? (
-                  <span
-                    className={`productMaterialDetailsBadge${
-                      materialVisual?.featured
-                        ? ' productMaterialDetailsBadge--featured'
-                        : ''
-                    }`}
-                  >
-                    {material.badge}
-                  </span>
+            return (
+              <article
+                key={material.id}
+                className={`productMaterialDetailsCard${
+                  materialVisual?.featured
+                    ? ' productMaterialDetailsCard--featured'
+                    : ''
+                }`}
+              >
+                {material.image ? (
+                  <div className="productMaterialDetailsMedia">
+                    <img
+                      src={material.image.url}
+                      alt={material.image.altText || material.title}
+                      loading="lazy"
+                      decoding="async"
+                      style={{objectPosition: materialVisual?.objectPosition}}
+                    />
+                    {material.badge ? (
+                      <span
+                        className={`productMaterialDetailsBadge${
+                          materialVisual?.featured
+                            ? ' productMaterialDetailsBadge--featured'
+                            : ''
+                        }`}
+                      >
+                        {material.badge}
+                      </span>
+                    ) : null}
+                  </div>
                 ) : null}
-              </div>
-            ) : null}
 
-            <div className="productMaterialDetailsBody">
-              <h3>{material.title}</h3>
-              {material.properties.length ? (
-                <ul className="productMaterialDetailsFeatures">
-                  {material.properties.map((property) => (
-                    <li key={`${material.id}-${property}`}>{property}</li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
-          </article>
-        );
-      })}
+                <div className="productMaterialDetailsBody">
+                  <h3>{material.title}</h3>
+                  {material.properties.length ? (
+                    <ul className="productMaterialDetailsFeatures">
+                      {material.properties.map((property) => (
+                        <li key={`${material.id}-${property}`}>{property}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <p>{t('product.noMaterialDetails')}</p>
+      )}
+
+      <div className="productMaterialSampleCta">
+        <div className="productMaterialSampleCopy">
+          <h3>{t('product.materialSampleTitle')}</h3>
+          <p>{t('product.materialSampleDescription')}</p>
+        </div>
+        <Link
+          className="productMaterialSampleButton"
+          to={t('product.materialSampleLink')}
+        >
+          {t('product.materialSampleButton')}
+        </Link>
+      </div>
     </div>
-  ) : (
-    <p key="no-materials">{t('product.noMaterialDetails')}</p>
   );
   const tabContents = [
     descriptionHtml ? (

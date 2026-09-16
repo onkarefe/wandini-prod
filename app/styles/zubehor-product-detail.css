@@ -28,46 +28,6 @@
   font: inherit;
 }
 
-.zpd__shell {
-  width: min(calc(100% - 40px), 1200px);
-  margin: 0 auto;
-}
-
-.zpd-back-link {
-  margin-bottom: clamp(18px, 2.2vw, 26px);
-}
-
-.zpd-back-link a {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--zpd-muted);
-  font-size: 0.77rem;
-  font-weight: 580;
-  line-height: 1;
-  text-decoration: none;
-  transition: color 160ms ease;
-}
-
-.zpd-back-link a:hover {
-  color: var(--zpd-ink);
-}
-
-.zpd-back-link svg {
-  width: 15px;
-  height: 15px;
-  transition: transform 160ms ease;
-}
-
-.zpd-back-link a:hover svg {
-  transform: translateX(-2px);
-}
-
-.zpd-back-link a:focus-visible {
-  outline: 2px solid var(--zpd-ink);
-  outline-offset: 4px;
-}
-
 .zpd__product {
   display: grid;
   grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
@@ -780,14 +740,6 @@
     padding-bottom: 58px;
   }
 
-  .zpd__shell {
-    width: calc(100% - 32px);
-  }
-
-  .zpd-back-link {
-    margin-bottom: 17px;
-  }
-
   .zpd__product {
     grid-template-columns: minmax(0, 1fr);
     gap: 24px;
@@ -881,8 +833,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .zpd-back-link a,
-  .zpd-back-link svg,
   .zpd-gallery__track,
   .zpd-gallery__controls button,
   .zpd-gallery__thumbnails button,

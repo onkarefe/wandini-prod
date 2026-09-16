@@ -134,7 +134,12 @@ export const de = {
   'similarProducts.invalidOffset': 'Ungültiger Offset-Wert.',
   'product.description': 'Beschreibung',
   'product.information': 'Produktinformationen',
-  'product.materialDetails': 'Welches Material',
+  'product.materialDetails': 'Welches Material?',
+  'product.materialSampleTitle': 'Noch unsicher beim Material?',
+  'product.materialSampleDescription':
+    'Bestelle unser Muster-Set und vergleiche alle vier Materialien zu Hause.',
+  'product.materialSampleLink': '/products/muster-set',
+  'product.materialSampleButton': 'Zum Muster-Set \u2192',
   'product.deliveryShipping': 'Lieferung & Versand',
   'product.noDescription': 'Keine Beschreibung verfügbar.',
   'product.noInformation': 'Keine Produktinformationen verfügbar.',
