@@ -508,6 +508,8 @@ export const de = {
     'Schreiben Sie uns. Unser Team hilft Ihnen persönlich und zuverlässig weiter.',
   'faq.question': 'Ihre Frage',
   'faq.send': 'Frage senden',
+  'faq.sampleSetCta': 'Muster-Set bestellen →',
+  'faq.sampleSetUrl': '/products/muster-set',
   'faq.invalidQuestion': 'Ihre Frage muss mindestens 10 Zeichen enthalten.',
   'faq.success': 'Vielen Dank. Ihre Frage wurde erfolgreich gesendet.',
   'faq.error':

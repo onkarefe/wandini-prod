@@ -136,6 +136,7 @@ function sanitizeShopifyPageHtml(html: string | null | undefined) {
 
 type FAQMetaobjectNode = {
   id?: unknown;
+  handle?: unknown;
   title?: {value?: unknown} | null;
   order?: {value?: unknown} | null;
   question?: {value?: unknown} | null;
@@ -199,6 +200,7 @@ function parseFAQMetaobjects(value: unknown): FAQCategory[] {
         : '';
     const category = categoriesById.get(categoryId);
     const id = typeof node.id === 'string' ? node.id : '';
+    const handle = typeof node.handle === 'string' ? node.handle.trim() : '';
     const question = getFAQFieldText(node.question);
     const answer = getFAQFieldText(node.answer);
 
@@ -208,6 +210,7 @@ function parseFAQMetaobjects(value: unknown): FAQCategory[] {
 
     category.items.push({
       id,
+      handle,
       question,
       answer,
       order: getFAQOrder(node.order),
@@ -229,7 +232,12 @@ function parseFAQMetaobjects(value: unknown): FAQCategory[] {
             first.order - second.order ||
             first.sourceIndex - second.sourceIndex,
         )
-        .map(({id, question, answer}) => ({id, question, answer})),
+        .map(({id, handle, question, answer}) => ({
+          id,
+          handle,
+          question,
+          answer,
+        })),
     }));
 }
 
@@ -941,6 +949,7 @@ const FAQ_QUERY = `#graphql
     faqItems: metaobjects(first: 250, type: $faqItemType) {
       nodes {
         id
+        handle
         question: field(key: $questionKey) {
           value
         }

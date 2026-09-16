@@ -1,10 +1,14 @@
 import {RichText} from '@shopify/hydrogen';
 import {useEffect, useId, useRef, useState, type KeyboardEvent} from 'react';
-import {useFetcher} from 'react-router';
+import {Link, useFetcher} from 'react-router';
 import {useTranslation} from '~/i18n/useTranslation';
+
+const SAMPLE_SET_FAQ_HANDLE =
+  'kann-ich-die-materialien-vor-der-bestellung-testen';
 
 export type FAQItem = {
   id: string;
+  handle: string;
   question: string;
   answer: string;
 };
@@ -151,6 +155,14 @@ export default function FAQ({title, categories, copy}: FAQProps) {
                         className="faq-page__answer"
                         data={item.answer}
                       />
+                      {item.handle === SAMPLE_SET_FAQ_HANDLE ? (
+                        <Link
+                          className="faq-page__sample-set-link"
+                          to={t('faq.sampleSetUrl')}
+                        >
+                          {t('faq.sampleSetCta')}
+                        </Link>
+                      ) : null}
                     </details>
                   ))}
                 </div>

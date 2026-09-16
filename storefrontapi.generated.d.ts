@@ -1523,7 +1523,7 @@ export type FaqQuery = {
   };
   faqItems: {
     nodes: Array<
-      Pick<StorefrontAPI.Metaobject, 'id'> & {
+      Pick<StorefrontAPI.Metaobject, 'id' | 'handle'> & {
         question?: StorefrontAPI.Maybe<
           Pick<StorefrontAPI.MetaobjectField, 'value'>
         >;
@@ -2651,7 +2651,7 @@ interface GeneratedQueryTypes {
     return: KontaktPageDetailsQuery;
     variables: KontaktPageDetailsQueryVariables;
   };
-  '#graphql\n  query FAQ(\n    $language: LanguageCode\n    $country: CountryCode\n    $faqCategoryType: String!\n    $faqItemType: String!\n    $titleKey: String!\n    $orderKey: String!\n    $questionKey: String!\n    $answerKey: String!\n    $categoryKey: String!\n  )\n  @inContext(language: $language, country: $country) {\n    faqCategories: metaobjects(first: 250, type: $faqCategoryType) {\n      nodes {\n        id\n        title: field(key: $titleKey) {\n          value\n        }\n        order: field(key: $orderKey) {\n          value\n        }\n      }\n    }\n    faqItems: metaobjects(first: 250, type: $faqItemType) {\n      nodes {\n        id\n        question: field(key: $questionKey) {\n          value\n        }\n        answer: field(key: $answerKey) {\n          value\n        }\n        category: field(key: $categoryKey) {\n          reference {\n            ... on Metaobject {\n              id\n            }\n          }\n        }\n        order: field(key: $orderKey) {\n          value\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query FAQ(\n    $language: LanguageCode\n    $country: CountryCode\n    $faqCategoryType: String!\n    $faqItemType: String!\n    $titleKey: String!\n    $orderKey: String!\n    $questionKey: String!\n    $answerKey: String!\n    $categoryKey: String!\n  )\n  @inContext(language: $language, country: $country) {\n    faqCategories: metaobjects(first: 250, type: $faqCategoryType) {\n      nodes {\n        id\n        title: field(key: $titleKey) {\n          value\n        }\n        order: field(key: $orderKey) {\n          value\n        }\n      }\n    }\n    faqItems: metaobjects(first: 250, type: $faqItemType) {\n      nodes {\n        id\n        handle\n        question: field(key: $questionKey) {\n          value\n        }\n        answer: field(key: $answerKey) {\n          value\n        }\n        category: field(key: $categoryKey) {\n          reference {\n            ... on Metaobject {\n              id\n            }\n          }\n        }\n        order: field(key: $orderKey) {\n          value\n        }\n      }\n    }\n  }\n': {
     return: FAQQuery;
     variables: FAQQueryVariables;
   };

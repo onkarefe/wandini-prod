@@ -200,6 +200,40 @@
   text-underline-offset: 3px;
 }
 
+.faq-page__sample-set-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0 0 26px 2px;
+  padding: 0 22px;
+  border: 1px solid #332f2a;
+  background: #332f2a;
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+.faq-page__item[open] .faq-page__sample-set-link {
+  animation: faq-answer-reveal 120ms ease-out both;
+}
+
+.faq-page__sample-set-link:hover {
+  background: transparent;
+  color: #332f2a;
+}
+
+.faq-page__sample-set-link:focus-visible {
+  outline: 2px solid #332f2a;
+  outline-offset: 4px;
+}
+
 .faq-contact {
   width: 100%;
   padding: clamp(64px, 6vw, 96px) 0 clamp(72px, 7vw, 112px);
@@ -463,6 +497,11 @@
     font-size: 0.9375rem;
   }
 
+  .faq-page__sample-set-link {
+    margin-bottom: 22px;
+    margin-left: 0;
+  }
+
   .faq-contact__grid {
     grid-template-columns: 1fr;
     gap: 24px;
@@ -514,6 +553,7 @@
 @media (prefers-reduced-motion: reduce) {
   .faq-page__tab,
   .faq-page__toggle-icon,
+  .faq-page__sample-set-link,
   .faq-contact input,
   .faq-contact textarea,
   .faq-contact__footer button {
@@ -521,6 +561,10 @@
   }
 
   .faq-page__item[open] .faq-page__answer {
+    animation: none;
+  }
+
+  .faq-page__item[open] .faq-page__sample-set-link {
     animation: none;
   }
 }

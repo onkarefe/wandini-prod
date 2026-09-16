@@ -497,6 +497,8 @@ export const en = {
     'Send us a message. Our team will be happy to help.',
   'faq.question': 'Your question',
   'faq.send': 'Send question',
+  'faq.sampleSetCta': 'Order Sample Set →',
+  'faq.sampleSetUrl': '/en/products/sample-set',
   'faq.invalidQuestion': 'Your question must contain at least 10 characters.',
   'faq.success': 'Thank you. Your question was sent successfully.',
   'faq.error': 'Your question could not be sent right now. Please try again.',
