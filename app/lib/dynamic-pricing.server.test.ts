@@ -1771,6 +1771,20 @@ describe('checkout proof canonicalization', () => {
     expect(canonicalCheckoutProofMoney(input)).toBe(expected);
   });
 
+  it('accepts a syntactically valid 64-character money input', () => {
+    const input = '1.' + '0'.repeat(62);
+    expect(input).toHaveLength(64);
+    expect(canonicalCheckoutProofMoney(input)).toBe('1');
+  });
+
+  it('rejects a syntactically valid money input longer than 64 characters', () => {
+    const input = '1.' + '0'.repeat(63);
+    expect(input).toHaveLength(65);
+    expect(() => canonicalCheckoutProofMoney(input)).toThrow(
+      DynamicPricingError,
+    );
+  });
+
   it.each([
     '-1',
     '-0',

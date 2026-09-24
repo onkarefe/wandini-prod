@@ -1163,7 +1163,11 @@ export function canonicalCheckoutProofJson(value: unknown, depth = 0): string {
 }
 
 export function canonicalCheckoutProofMoney(value: string): string {
-  if (typeof value !== 'string' || !/^(0|[1-9]\d*)(?:\.\d+)?$/.test(value)) {
+  if (
+    typeof value !== 'string' ||
+    value.length > 64 ||
+    !/^(0|[1-9]\d*)(?:\.\d+)?$/.test(value)
+  ) {
     throw new DynamicPricingError(
       'INVALID_CONFIGURATION',
       'Checkout proof price is invalid.',
