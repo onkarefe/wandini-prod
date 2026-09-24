@@ -1,6 +1,9 @@
+import {createHmac} from 'node:crypto';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {
   DynamicPricingError,
+  canonicalCheckoutProofJson,
+  canonicalCheckoutProofMoney,
   findOrCreateDraftOrder,
   getCartPricingEvaluation,
   getOrCreateDraftOrderCheckout,
@@ -73,6 +76,7 @@ function configuredVariant(overrides: Record<string, unknown> = {}) {
     id: 'gid://shopify/ProductVariant/1',
     availableForSale: true,
     price: '28.89',
+    sku: '20-140.1-3',
     product: {
       id: 'gid://shopify/Product/1',
       masterAssetId: {value: 'asset-1'},
@@ -120,7 +124,7 @@ function pricingClient(overrides: Record<string, unknown> = {}) {
 }
 
 function prepareDraftOrder(cartValue: DynamicPricingCart, client: AdminClient) {
-  return prepareDraftOrderForCheckout(cartValue, client);
+  return prepareDraftOrderForCheckout(cartValue, client, checkoutEnv());
 }
 
 function checkoutEnv(
@@ -132,6 +136,7 @@ function checkoutEnv(
   | 'SHOPIFY_PRICING_CLIENT_ID'
   | 'SHOPIFY_PRICING_CLIENT_SECRET'
   | 'DYNAMIC_PRICING_CHECKOUT_ENABLED'
+  | 'WANDINI_CHECKOUT_HMAC_SECRET'
 > {
   return {
     PUBLIC_STORE_DOMAIN: 'checkout-test.myshopify.com',
@@ -139,6 +144,7 @@ function checkoutEnv(
     SHOPIFY_PRICING_CLIENT_ID: 'checkout-test-client',
     SHOPIFY_PRICING_CLIENT_SECRET: 'secret',
     DYNAMIC_PRICING_CHECKOUT_ENABLED: 'true',
+    WANDINI_CHECKOUT_HMAC_SECRET: 'wandini-test-secret',
     ...overrides,
   };
 }
@@ -494,6 +500,7 @@ describe('Draft Order line preparation', () => {
     const prepared = await prepareDraftOrderForCheckout(
       ordinaryOnly,
       pricingClient(),
+      {},
     );
     expect(prepared.configuredLineCount).toBe(0);
     expect(prepared.input.lineItems).toEqual([
@@ -912,6 +919,7 @@ describe('Draft Order line preparation', () => {
         SHOPIFY_PRICING_CLIENT_ID: 'draft-client',
         SHOPIFY_PRICING_CLIENT_SECRET: 'secret',
         DYNAMIC_PRICING_CHECKOUT_ENABLED: 'true',
+        WANDINI_CHECKOUT_HMAC_SECRET: 'wandini-test-secret',
       }),
     ).resolves.toEqual({
       checkoutMode: 'draft',
@@ -1118,12 +1126,7 @@ describe('Draft Order line preparation', () => {
                 id: 'gid://shopify/DraftOrder/1',
                 status: 'OPEN',
                 invoiceUrl: 'https://example.myshopify.com/invoice/1',
-                customAttributes: [
-                  {
-                    key: 'wandini_checkout_fingerprint',
-                    value: prepared.fingerprint,
-                  },
-                ],
+                customAttributes: prepared.input.customAttributes,
               },
             ],
           },
@@ -1155,12 +1158,7 @@ describe('Draft Order line preparation', () => {
                     id: 'gid://shopify/DraftOrder/paid',
                     status,
                     invoiceUrl: 'https://example.myshopify.com/invoice/paid',
-                    customAttributes: [
-                      {
-                        key: 'wandini_checkout_fingerprint',
-                        value: prepared.fingerprint,
-                      },
-                    ],
+                    customAttributes: prepared.input.customAttributes,
                   },
                 ],
               },
@@ -1203,12 +1201,7 @@ describe('Draft Order line preparation', () => {
                 id: 'gid://shopify/DraftOrder/1',
                 status: 'OPEN',
                 invoiceUrl: null,
-                customAttributes: [
-                  {
-                    key: 'wandini_checkout_fingerprint',
-                    value: prepared.fingerprint,
-                  },
-                ],
+                customAttributes: prepared.input.customAttributes,
               },
             ],
           },
@@ -1278,12 +1271,7 @@ describe('Draft Order line preparation', () => {
   it('selects one deterministic canonical Draft after a cross-worker create race', async () => {
     const prepared = await prepareDraftOrder(cart(), pricingClient());
     let requestCount = 0;
-    const exactAttributes = [
-      {
-        key: 'wandini_checkout_fingerprint',
-        value: prepared.fingerprint,
-      },
-    ];
+    const exactAttributes = prepared.input.customAttributes;
     const client = {
       request: async <T>() => {
         requestCount += 1;
@@ -1351,5 +1339,454 @@ describe('Draft Order line preparation', () => {
       reused: true,
     });
     expect(requestCount).toBe(3);
+  });
+});
+
+const expectedProof =
+  '{"lines":[{"configurator_instance_id":"configuration-1","currency":"EUR","master_asset_id":"asset-1","output":{"height":2500,"unit":"mm","width":2000},"payload_sha256":"c607609acd8859a80406f95d819f61ead5c58da9bef5a801e8fe44a747bf4b73","price":"144.45","quantity":1,"sku":"20-140.1-3","variant_id":"1"}],"version":"1"}';
+const expectedSignature =
+  '759f540e1752986910dec719a8a1250267e251b11194eb86a84a15a67326d555';
+
+function proofValue(
+  prepared: Awaited<ReturnType<typeof prepareDraftOrder>>,
+  key = 'wandini_checkout_proof',
+) {
+  return prepared.input.customAttributes.find(
+    (attribute) => attribute.key === key,
+  )!.value;
+}
+
+function parseProof(value: string) {
+  return JSON.parse(value) as {
+    lines: Array<{configurator_instance_id: string; price: string}>;
+  };
+}
+
+describe('orchestrator checkout security proof', () => {
+  it.each([false, true])(
+    'matches the independent fixed vector (mixed: %s)',
+    async (mixed) => {
+      const value = cart();
+      if (!mixed) value.lines.nodes = [value.lines.nodes[0]];
+      const prepared = await prepareDraftOrder(value, pricingClient());
+      expect(proofValue(prepared)).toBe(expectedProof);
+      expect(proofValue(prepared, 'wandini_checkout_signature')).toBe(
+        expectedSignature,
+      );
+      expect(
+        prepared.input.customAttributes.filter(({key}) =>
+          [
+            'wandini_checkout_proof_version',
+            'wandini_checkout_proof',
+            'wandini_checkout_signature',
+          ].includes(key),
+        ),
+      ).toEqual([
+        {key: 'wandini_checkout_proof_version', value: '1'},
+        {key: 'wandini_checkout_proof', value: expectedProof},
+        {key: 'wandini_checkout_signature', value: expectedSignature},
+      ]);
+    },
+  );
+
+  it.each([undefined, '', ' \t\n '])(
+    'blocks configured/mixed checkout for an absent or blank secret (%s)',
+    async (secret) => {
+      const operations = stubAdminApi({
+        nodes: [configuredVariant(), accessoryVariant()],
+      });
+      for (const mixed of [false, true]) {
+        const value = cart();
+        if (!mixed) value.lines.nodes = [value.lines.nodes[0]];
+        const env = checkoutEnv({WANDINI_CHECKOUT_HMAC_SECRET: secret});
+        await expect(
+          getOrCreateDraftOrderCheckout(value, env),
+        ).rejects.toMatchObject({code: 'CONFIGURATION_ERROR'});
+        await expect(
+          getCartPricingEvaluation(value, env),
+        ).rejects.toMatchObject({code: 'CONFIGURATION_ERROR'});
+      }
+      expect(
+        operations.every((operation) => operation === 'variant-pricing'),
+      ).toBe(true);
+    },
+  );
+
+  it('keeps ordinary checkout native without a secret or proof', async () => {
+    const value = cart();
+    value.lines.nodes = [value.lines.nodes[1]];
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(
+      getCartPricingEvaluation(
+        value,
+        checkoutEnv({WANDINI_CHECKOUT_HMAC_SECRET: undefined}),
+      ),
+    ).resolves.toEqual({checkoutMode: 'native', pricingQuote: null});
+    expect(fetchMock).not.toHaveBeenCalled();
+    const prepared = await prepareDraftOrderForCheckout(
+      value,
+      pricingClient(),
+      {},
+    );
+    expect(
+      prepared.input.customAttributes.some(
+        ({key}) => key.includes('proof') || key.includes('signature'),
+      ),
+    ).toBe(false);
+  });
+
+  it.each([undefined, null, '', ' \t '])(
+    'requires a nonempty Admin SKU (%s)',
+    async (sku) => {
+      await expect(
+        prepareDraftOrder(cart(), pricingClient({sku})),
+      ).rejects.toMatchObject({code: 'INVALID_CONFIGURATION'});
+    },
+  );
+
+  it('trims the authoritative SKU and ignores a forged client SKU', async () => {
+    const value = cart();
+    value.lines.nodes[0].attributes.push({key: 'sku', value: 'forged'});
+    const prepared = await prepareDraftOrder(
+      value,
+      pricingClient({sku: ' 20-140.1-3 \t'}),
+    );
+    expect(proofValue(prepared)).toBe(expectedProof);
+  });
+
+  it('requests the Admin SKU and signs pre-discount prices during discounted calculation', async () => {
+    stubAdminApi({
+      nodes: [configuredVariant(), accessoryVariant()],
+      calculatedDraftOrder: {
+        subtotalPriceSet: {
+          presentmentMoney: {amount: '168.45', currencyCode: 'EUR'},
+        },
+        totalPriceSet: {
+          presentmentMoney: {amount: '151.61', currencyCode: 'EUR'},
+        },
+        discountCodes: ['WAND10'],
+      },
+    });
+    const result = await getCartPricingEvaluation(cart(), checkoutEnv());
+    expect(result.pricingQuote?.totalAmount.amount).toBe('151.61');
+    const requests = vi
+      .mocked(fetch)
+      .mock.calls.filter(([url]) => String(url).includes('/graphql.json'))
+      .map(
+        ([, init]) =>
+          JSON.parse(String(init?.body)) as {
+            query: string;
+            variables: {input: unknown};
+          },
+      );
+    expect(requests[0].query).toMatch(/price\s+sku/);
+    expect(requests[1].variables.input).toMatchObject({
+      acceptAutomaticDiscounts: true,
+      allowDiscountCodesInCheckout: true,
+      discountCodes: ['WAND10'],
+      customAttributes: expect.arrayContaining([
+        {key: 'wandini_checkout_proof', value: expectedProof},
+      ]),
+    });
+    const noDiscount = cart();
+    noDiscount.discountCodes = [];
+    const plain = await prepareDraftOrder(noDiscount, pricingClient());
+    const discounted = await prepareDraftOrder(cart(), pricingClient());
+    expect(proofValue(plain)).toBe(proofValue(discounted));
+    expect(plain.fingerprint).not.toBe(discounted.fingerprint);
+  });
+
+  it('sorts only proof lines by raw code-unit instance order', async () => {
+    const value = cart();
+    value.lines.nodes = ['a', 'Z', 'A', 'a_', 'a-'].map((id) => {
+      const line = structuredClone(cart().lines.nodes[0]);
+      line.id = id;
+      line.attributes[1].value = id;
+      return line;
+    });
+    const first = await prepareDraftOrder(value, pricingClient());
+    const proof = parseProof(proofValue(first));
+    expect(
+      proof.lines.map(
+        (line: {configurator_instance_id: string}) =>
+          line.configurator_instance_id,
+      ),
+    ).toEqual(['A', 'Z', 'a', 'a-', 'a_']);
+    value.lines.nodes.reverse();
+    const second = await prepareDraftOrder(value, pricingClient());
+    expect(second.fingerprint).toBe(first.fingerprint);
+    expect(second.input.customAttributes).toEqual(first.input.customAttributes);
+  });
+
+  it('hashes payload semantics while retaining the exact private payload text', async () => {
+    const value = cart();
+    const reformatted = JSON.stringify(
+      {
+        crop_ratio: {h: 1, w: 1, y: 0, x: 0},
+        output: {height: 2500, width: 2000, unit: 'mm'},
+        master_asset_id: 'asset-1',
+        version: 1,
+      },
+      null,
+      2,
+    );
+    value.lines.nodes[0].attributes[0].value = reformatted;
+    const prepared = await prepareDraftOrder(value, pricingClient());
+    expect(proofValue(prepared)).toBe(expectedProof);
+    expect(proofValue(prepared, 'wandini_checkout_signature')).toBe(
+      expectedSignature,
+    );
+    expect(prepared.input.lineItems[0].customAttributes).toContainEqual({
+      key: '_configurator_payload',
+      value: reformatted,
+    });
+  });
+
+  it('signs 20.00 as 20 without changing the Draft priceOverride', async () => {
+    const prepared = await prepareDraftOrder(
+      cart(),
+      pricingClient({price: '4.00'}),
+    );
+    expect(prepared.input.lineItems[0].priceOverride?.amount).toBe('20.00');
+    expect(parseProof(proofValue(prepared)).lines[0].price).toBe('20');
+  });
+
+  it('excludes injected server-owned attributes at both cart and line levels', async () => {
+    const value = cart();
+    const keys = [
+      'wandini_checkout_fingerprint',
+      'wandini_cart_id',
+      'wandini_checkout_proof_version',
+      'wandini_checkout_proof',
+      'wandini_checkout_signature',
+      '_configurator_payload',
+      '_configurator_instance_id',
+    ];
+    value.attributes = keys.flatMap((key) => [
+      {key, value: 'forged'},
+      {key, value: 'duplicate'},
+    ]);
+    for (const line of value.lines.nodes)
+      line.attributes.push(...value.attributes);
+    const prepared = await prepareDraftOrder(value, pricingClient());
+    const clean = await prepareDraftOrder(cart(), pricingClient());
+    expect(prepared).toEqual(clean);
+    for (const key of keys.slice(0, 5)) {
+      expect(
+        prepared.input.customAttributes.filter(
+          (attribute) => attribute.key === key,
+        ),
+      ).toHaveLength(1);
+    }
+    expect(prepared.input.lineItems[0].customAttributes).toEqual([
+      {key: '_configurator_payload', value: payload},
+      {key: '_configurator_instance_id', value: 'configuration-1'},
+    ]);
+  });
+
+  it('uses exact UTF-8 secret bytes, including surrounding whitespace', async () => {
+    const secret = ' \tsecret-\u00e9\n';
+    const prepared = await prepareDraftOrderForCheckout(
+      cart(),
+      pricingClient(),
+      checkoutEnv({WANDINI_CHECKOUT_HMAC_SECRET: secret}),
+    );
+    // Independent Node crypto is test-only; runtime implementation uses Web Crypto.
+    expect(proofValue(prepared, 'wandini_checkout_signature')).toBe(
+      createHmac('sha256', secret).update(expectedProof, 'utf8').digest('hex'),
+    );
+    const trimmed = await prepareDraftOrderForCheckout(
+      cart(),
+      pricingClient(),
+      checkoutEnv({WANDINI_CHECKOUT_HMAC_SECRET: secret.trim()}),
+    );
+    expect(prepared.fingerprint).not.toBe(trimmed.fingerprint);
+  });
+
+  it('changes identity for changed authoritative SKU', async () => {
+    const first = await prepareDraftOrder(cart(), pricingClient());
+    const changed = await prepareDraftOrder(
+      cart(),
+      pricingClient({sku: 'new-sku'}),
+    );
+    expect(first.fingerprint).not.toBe(changed.fingerprint);
+  });
+
+  it.each(['unsigned', 'other-secret', 'altered-proof', 'duplicate-signature'])(
+    'never reuses an OPEN Draft with %s security',
+    async (kind) => {
+      const prepared = await prepareDraftOrder(cart(), pricingClient());
+      const previous = await prepareDraftOrderForCheckout(
+        cart(),
+        pricingClient(),
+        checkoutEnv({WANDINI_CHECKOUT_HMAC_SECRET: 'previous-secret'}),
+      );
+      expect(previous.fingerprint).not.toBe(prepared.fingerprint);
+      let attributes = structuredClone(prepared.input.customAttributes);
+      if (kind === 'unsigned')
+        attributes = attributes.filter(
+          ({key}) => !key.includes('proof') && !key.includes('signature'),
+        );
+      if (kind === 'other-secret') attributes = previous.input.customAttributes;
+      if (kind === 'altered-proof')
+        attributes.find(({key}) => key === 'wandini_checkout_proof')!.value =
+          '{}';
+      if (kind === 'duplicate-signature')
+        attributes.push({key: 'wandini_checkout_signature', value: 'forged'});
+      const operations: string[] = [];
+      const client: AdminClient = {
+        async request<T>(query: string) {
+          if (query.includes('WandiniExistingDraftOrder')) {
+            operations.push('lookup');
+            return {
+              draftOrders: {
+                nodes: [
+                  {
+                    id: 'gid://shopify/DraftOrder/1',
+                    status: 'OPEN',
+                    invoiceUrl: 'https://example.myshopify.com/invoice/old',
+                    customAttributes: attributes,
+                  },
+                ],
+              },
+            } as T;
+          }
+          operations.push('create');
+          expect(query).toContain('WandiniDraftOrderCreate');
+          return {
+            draftOrderCreate: {
+              draftOrder: {
+                id: 'gid://shopify/DraftOrder/2',
+                invoiceUrl: 'https://example.myshopify.com/invoice/new',
+              },
+              userErrors: [],
+            },
+          } as T;
+        },
+      };
+      await expect(
+        findOrCreateDraftOrder(prepared, client),
+      ).resolves.toMatchObject({
+        draftOrderId: 'gid://shopify/DraftOrder/2',
+        reused: false,
+      });
+      expect(operations).toEqual(['lookup', 'create', 'lookup']);
+    },
+  );
+
+  it('permits 100 configured lines and rejects 101 before any Draft request', async () => {
+    const value = cart();
+    value.lines.nodes = Array.from({length: 101}, (_, index) => {
+      const line = structuredClone(cart().lines.nodes[0]);
+      line.id = String(index);
+      line.attributes[1].value = 'configuration-' + index;
+      return line;
+    });
+    const operations = stubAdminApi({nodes: [configuredVariant()]});
+    await expect(
+      getOrCreateDraftOrderCheckout(value, checkoutEnv()),
+    ).rejects.toMatchObject({code: 'INVALID_CART'});
+    expect(operations).toEqual(['variant-pricing']);
+    value.lines.nodes.pop();
+    expect(
+      parseProof(proofValue(await prepareDraftOrder(value, pricingClient())))
+        .lines,
+    ).toHaveLength(100);
+  });
+
+  it('enforces the proof size limit in UTF-8 bytes at the exact boundary', async () => {
+    const base = await prepareDraftOrder(cart(), pricingClient());
+    const overhead =
+      new TextEncoder().encode(proofValue(base)).byteLength -
+      '20-140.1-3'.length;
+    const maxSku = 'x'.repeat(65_536 - overhead);
+    const atLimit = await prepareDraftOrder(
+      cart(),
+      pricingClient({sku: maxSku}),
+    );
+    expect(new TextEncoder().encode(proofValue(atLimit)).byteLength).toBe(
+      65_536,
+    );
+    const operations = stubAdminApi({
+      nodes: [configuredVariant({sku: maxSku + '\u00e9'}), accessoryVariant()],
+    });
+    await expect(
+      getOrCreateDraftOrderCheckout(cart(), checkoutEnv()),
+    ).rejects.toMatchObject({code: 'INVALID_CART'});
+    expect(operations).toEqual(['variant-pricing']);
+  });
+});
+
+describe('checkout proof canonicalization', () => {
+  it('sorts nested keys using code units and preserves array order', () => {
+    expect(
+      canonicalCheckoutProofJson({
+        a: 1,
+        Z: {b: 2, A: true},
+        list: [2, null, 'x', false, -0],
+      }),
+    ).toBe('{"Z":{"A":true,"b":2},"a":1,"list":[2,null,"x",false,0]}');
+  });
+
+  it.each([
+    undefined,
+    NaN,
+    Infinity,
+    -Infinity,
+    1n,
+    Symbol('x'),
+    () => 1,
+    new Date(),
+    {a: undefined},
+    new Array<unknown>(2),
+  ])('rejects unsupported or non-finite values (%s)', (value) => {
+    expect(() => canonicalCheckoutProofJson(value)).toThrow(
+      DynamicPricingError,
+    );
+  });
+
+  it('accepts depth 32 and rejects depth 33 and cycles', () => {
+    let nested: unknown = null;
+    for (let i = 0; i < 32; i++) nested = {x: nested};
+    expect(() => canonicalCheckoutProofJson(nested)).not.toThrow();
+    expect(() => canonicalCheckoutProofJson({x: nested})).toThrow(
+      DynamicPricingError,
+    );
+    const cycle: Record<string, unknown> = {};
+    cycle.self = cycle;
+    expect(() => canonicalCheckoutProofJson(cycle)).toThrow(
+      DynamicPricingError,
+    );
+  });
+
+  it.each([
+    ['144.45', '144.45'],
+    ['20.00', '20'],
+    ['123.40', '123.4'],
+    ['0.00', '0'],
+    ['100', '100'],
+    ['999999999999999999999.0100', '999999999999999999999.01'],
+  ])('normalizes %s to %s', (input, expected) => {
+    expect(canonicalCheckoutProofMoney(input)).toBe(expected);
+  });
+
+  it.each([
+    '-1',
+    '-0',
+    '1e2',
+    '01',
+    '01.5',
+    '.5',
+    '1.',
+    '+1',
+    ' 1',
+    '1 ',
+    '',
+    'NaN',
+  ])('rejects noncanonical money syntax %s', (input) => {
+    expect(() => canonicalCheckoutProofMoney(input)).toThrow(
+      DynamicPricingError,
+    );
   });
 });

@@ -108,9 +108,9 @@ code, applied-gift-card, or gift-card payment input.
   Draft preparation receive only Shopify's applied gift-card metadata and
   never expose, persist, or log full codes.
 
-## Removed legacy Checkout Guard / HMAC
+## Removed legacy Checkout Guard / HMAC (historical context)
 
-The old Checkout Guard proof mechanism was removed completely:
+At the earlier hardening checkpoint, the old Checkout Guard proof mechanism was removed completely:
 
 - `checkout-proof.server.ts` and its tests were deleted.
 - `SHOPIFY_CHECKOUT_GUARD_SECRET` was removed from runtime and environment
@@ -119,9 +119,71 @@ The old Checkout Guard proof mechanism was removed completely:
   removed.
 - Dynamic-pricing tests no longer depend on proof secrets or signatures.
 
-Repository-wide dependency search found no proof verifier or consumer. The only
+At that checkpoint, repository-wide dependency search found no proof verifier or consumer. The only
 active path generated the attribute and copied it into Draft Orders, so it
 provided no enforcement in the final Draft Order architecture.
+
+## New orchestrator order-level security proof
+
+A new defense-in-depth proof matches the supplied orchestrator verifier contract
+at `onkarefe/orchestrator-mvp@25560be967e9539877800cdf4410d73d51842c23`.
+This is separate from the removed Checkout Guard mechanism above; the deleted
+module, old secret, and old line-level proof are not restored.
+
+- Configured/mixed Draft preparation requires the server-only
+  `WANDINI_CHECKOUT_HMAC_SECRET`. Missing or whitespace-only values fail closed
+  before Draft calculation/creation. Ordinary native checkout requires no secret.
+  Validation uses `trim()`, but HMAC uses the original exact UTF-8 secret bytes.
+- The Admin ProductVariant query supplies the configured SKU, which must be
+  nonempty and is trimmed. Client/cart SKU attributes are never used for signing.
+- Only validated configured wallpaper lines are signed. Each line contains its
+  validated unique instance ID, numeric variant GID tail, Admin SKU, quantity 1,
+  validated/Admin-matched master asset, validated millimetre output, semantic
+  payload SHA-256, calculated pre-discount priceOverride, and shop EUR currency.
+- Payload hashing and proof serialization use a dedicated canonicalizer with
+  recursive raw JavaScript code-unit key ordering, preserved array order,
+  JSON primitive serialization, rejected unsupported/non-finite values, and
+  maximum depth 32. Only proof lines are sorted by instance ID. Payload JSON
+  whitespace/key order does not affect its hash; private Draft payload text is
+  still preserved exactly.
+- Proof money uses plain non-negative decimal strings with trailing fractional
+  zeroes removed (`20.00` becomes `20`). Draft priceOverride is unchanged.
+  Codes and automatic discounts remain supported and apply after the signed price.
+- Web Crypto SHA-256/HMAC-SHA256 uses UTF-8 and lowercase hexadecimal. The
+  canonical proof permits at most 100 configured lines and 65,536 UTF-8 bytes.
+
+The Draft receives these three order-level custom attributes, once each:
+
+| Attribute                        | Value                     |
+| -------------------------------- | ------------------------- |
+| `wandini_checkout_proof_version` | `1`                       |
+| `wandini_checkout_proof`         | Canonical proof JSON      |
+| `wandini_checkout_signature`     | Lowercase HMAC-SHA256 hex |
+
+Client/cart copies of those keys, `wandini_checkout_fingerprint`,
+`wandini_cart_id`, `_configurator_payload`, and
+`_configurator_instance_id` are excluded before Draft attributes are built.
+The legitimate public configurator attributes retain their existing mapping
+to the private line attributes.
+
+Fingerprint version 3 includes the proof contract, canonical proof, and signature.
+The proof does not depend on the fingerprint. Identical validated inputs and
+secret produce identical proofs/signatures/fingerprints; secret rotation or
+changed signed data changes reuse identity. Reuse and reconciliation additionally
+require exact, unique server-owned order attributes, so an unsigned or altered
+OPEN Draft is not accepted even with a copied fingerprint. Existing process-local
+coalescing, OPEN-only reuse, deterministic selection, and no-update behavior remain.
+
+The independent supplied vector passes with payload hash
+`c607609acd8859a80406f95d819f61ead5c58da9bef5a801e8fe44a747bf4b73`
+and signature
+`759f540e1752986910dec719a8a1250267e251b11194eb86a84a15a67326d555`.
+
+Draft -> completed Order -> paid webhook transport of the three order-level
+attributes remains a real-Shopify rollout verification item. Mocked unit tests
+prove generation/reuse behavior, not Shopify transport or production verifier
+acceptance. Deployment must separately provision the same secret in storefront
+and verifier; no real environment, Shopify Admin, or orchestrator is changed here.
 
 ## Regression coverage
 

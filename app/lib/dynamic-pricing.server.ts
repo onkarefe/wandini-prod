@@ -19,11 +19,21 @@ const EXPECTED_CHECKOUT_CURRENCY = 'EUR';
 const CHECKOUT_FINGERPRINT_ATTRIBUTE = 'wandini_checkout_fingerprint';
 const CHECKOUT_CART_ATTRIBUTE = 'wandini_cart_id';
 const CHECKOUT_TAG = 'wandini-dynamic-pricing';
-const CHECKOUT_FINGERPRINT_VERSION = 2;
-const PRIVATE_CONFIGURATOR_PAYLOAD_ATTRIBUTE =
-  `_${CONFIGURATOR_PAYLOAD_ATTRIBUTE}`;
-const PRIVATE_CONFIGURATOR_INSTANCE_ATTRIBUTE =
-  `_${CONFIGURATOR_INSTANCE_ATTRIBUTE}`;
+const CHECKOUT_FINGERPRINT_VERSION = 3;
+const CHECKOUT_PROOF_VERSION_ATTRIBUTE = 'wandini_checkout_proof_version';
+const CHECKOUT_PROOF_ATTRIBUTE = 'wandini_checkout_proof';
+const CHECKOUT_SIGNATURE_ATTRIBUTE = 'wandini_checkout_signature';
+const PRIVATE_CONFIGURATOR_PAYLOAD_ATTRIBUTE = `_${CONFIGURATOR_PAYLOAD_ATTRIBUTE}`;
+const PRIVATE_CONFIGURATOR_INSTANCE_ATTRIBUTE = `_${CONFIGURATOR_INSTANCE_ATTRIBUTE}`;
+const SERVER_OWNED_ATTRIBUTES = new Set([
+  CHECKOUT_FINGERPRINT_ATTRIBUTE,
+  CHECKOUT_CART_ATTRIBUTE,
+  CHECKOUT_PROOF_VERSION_ATTRIBUTE,
+  CHECKOUT_PROOF_ATTRIBUTE,
+  CHECKOUT_SIGNATURE_ATTRIBUTE,
+  PRIVATE_CONFIGURATOR_PAYLOAD_ATTRIBUTE,
+  PRIVATE_CONFIGURATOR_INSTANCE_ATTRIBUTE,
+]);
 
 type DynamicPricingEnv = Pick<
   Env,
@@ -32,6 +42,7 @@ type DynamicPricingEnv = Pick<
   | 'SHOPIFY_PRICING_CLIENT_ID'
   | 'SHOPIFY_PRICING_CLIENT_SECRET'
   | 'DYNAMIC_PRICING_CHECKOUT_ENABLED'
+  | 'WANDINI_CHECKOUT_HMAC_SECRET'
 >;
 
 type CartAttribute = {key: string; value?: string | null};
@@ -85,6 +96,7 @@ type AdminVariant = {
   id: string;
   availableForSale: boolean;
   price: string;
+  sku: string | null;
   product: {
     id: string;
     masterAssetId: {value: string} | null;
@@ -205,7 +217,7 @@ export async function getCartPricingEvaluation(
 
   assertDynamicCheckoutEnabled(env);
   const client = createAdminClient(env);
-  const prepared = await prepareDraftOrder(cart, client);
+  const prepared = await prepareDraftOrder(cart, client, env);
   if (prepared.configuredLineCount === 0) {
     return {checkoutMode: 'native', pricingQuote: null};
   }
@@ -359,7 +371,7 @@ export async function getOrCreateDraftOrderCheckout(
   }
   assertDynamicCheckoutEnabled(env);
   const client = createAdminClient(env);
-  const prepared = await prepareDraftOrder(cart, client);
+  const prepared = await prepareDraftOrder(cart, client, env);
   if (prepared.configuredLineCount === 0) {
     throw new DynamicPricingError(
       'INVALID_CART',
@@ -382,6 +394,7 @@ export async function getOrCreateDraftOrderCheckout(
 export async function prepareDraftOrder(
   cart: DynamicPricingCart,
   client: AdminClient,
+  env: Pick<DynamicPricingEnv, 'WANDINI_CHECKOUT_HMAC_SECRET'>,
 ): Promise<PreparedDraftOrder> {
   if (!cart.id || cart.lines.nodes.length === 0) {
     throw new DynamicPricingError('INVALID_CART', 'The cart is empty.');
@@ -398,6 +411,7 @@ export async function prepareDraftOrder(
       .map((variant) => [variant.id, variant]),
   );
   let configuredLineCount = 0;
+  const proofLines = [];
   const instanceIds = new Set<string>();
 
   const lineItems: DraftOrderLineInput[] = [];
@@ -409,9 +423,75 @@ export async function prepareDraftOrder(
     );
     if (mappedLine.priceOverride) {
       configuredLineCount += 1;
-      registerConfiguratorInstanceId(line, instanceIds);
+      const instanceId = registerConfiguratorInstanceId(line, instanceIds);
+      if (!env.WANDINI_CHECKOUT_HMAC_SECRET?.trim()) {
+        throw new DynamicPricingError(
+          'CONFIGURATION_ERROR',
+          'Checkout security is not configured.',
+        );
+      }
+      if (configuredLineCount > 100) {
+        throw new DynamicPricingError(
+          'INVALID_CART',
+          'Too many configured proof lines.',
+        );
+      }
+      const variant = getAvailableAdminVariant(line, variants);
+      const sku = variant.sku?.trim();
+      if (!sku) {
+        throw new DynamicPricingError(
+          'INVALID_CONFIGURATION',
+          'The configured variant has no SKU.',
+        );
+      }
+      // Reuse complete server validation, including the Admin asset relationship.
+      const payload = validateLineConfiguration(line, variant)!;
+      proofLines.push({
+        configurator_instance_id: instanceId,
+        variant_id: mappedLine.variantId.slice(
+          'gid://shopify/ProductVariant/'.length,
+        ),
+        sku,
+        quantity: 1,
+        master_asset_id: payload.master_asset_id,
+        output: {
+          width: payload.output.width,
+          height: payload.output.height,
+          unit: 'mm',
+        },
+        payload_sha256: await sha256(canonicalCheckoutProofJson(payload)),
+        price: canonicalCheckoutProofMoney(mappedLine.priceOverride.amount),
+        currency: shopCurrency,
+      });
     }
     lineItems.push(mappedLine);
+  }
+  const proofAttributes: Array<{key: string; value: string}> = [];
+  if (proofLines.length) {
+    proofLines.sort((a, b) =>
+      compareStrings(a.configurator_instance_id, b.configurator_instance_id),
+    );
+    const proof = canonicalCheckoutProofJson({version: '1', lines: proofLines});
+    const message = new TextEncoder().encode(proof);
+    if (message.byteLength > 65_536) {
+      throw new DynamicPricingError(
+        'INVALID_CART',
+        'Checkout proof exceeds the size limit.',
+      );
+    }
+    const key = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(env.WANDINI_CHECKOUT_HMAC_SECRET!),
+      {name: 'HMAC', hash: 'SHA-256'},
+      false,
+      ['sign'],
+    );
+    const signature = toHex(await crypto.subtle.sign('HMAC', key, message));
+    proofAttributes.push(
+      {key: CHECKOUT_PROOF_VERSION_ATTRIBUTE, value: '1'},
+      {key: CHECKOUT_PROOF_ATTRIBUTE, value: proof},
+      {key: CHECKOUT_SIGNATURE_ATTRIBUTE, value: signature},
+    );
   }
   const discountCodes = [
     ...new Set(
@@ -423,6 +503,7 @@ export async function prepareDraftOrder(
   const normalizedDiscountCodes = [...discountCodes].sort(compareStrings);
   const copiedCartAttributes = (cart.attributes ?? [])
     .filter(hasStringValue)
+    .filter(({key}) => !SERVER_OWNED_ATTRIBUTES.has(key))
     .map(({key, value}) => ({key, value}));
   const normalizedCartAttributes = sortAttributes(copiedCartAttributes);
   const normalizedLineItems = [...lineItems]
@@ -437,6 +518,7 @@ export async function prepareDraftOrder(
     );
   const fingerprintSource = canonicalJson({
     version: CHECKOUT_FINGERPRINT_VERSION,
+    checkoutProof: proofAttributes,
     cartId: cart.id,
     lineItems: normalizedLineItems,
     discountCodes: normalizedDiscountCodes,
@@ -456,6 +538,7 @@ export async function prepareDraftOrder(
   const customAttributes = [
     {key: CHECKOUT_FINGERPRINT_ATTRIBUTE, value: fingerprint},
     {key: CHECKOUT_CART_ATTRIBUTE, value: cart.id},
+    ...proofAttributes,
     ...copiedCartAttributes,
   ];
 
@@ -501,6 +584,7 @@ export function mapCartLineToDraftOrderLine(
 
   const customAttributes = line.attributes
     .filter(hasStringValue)
+    .filter(({key}) => !SERVER_OWNED_ATTRIBUTES.has(key))
     .map(mapCartAttributeToDraftOrderAttribute);
   const payloadAttribute = line.attributes.find(
     ({key}) => key === CONFIGURATOR_PAYLOAD_ATTRIBUTE,
@@ -650,7 +734,7 @@ export async function findOrCreateDraftOrder(
   );
   const matchingDrafts = getExactOpenFingerprintMatches(
     existingDrafts,
-    prepared.fingerprint,
+    prepared,
   );
   const reusableDraft = selectCanonicalDraft(matchingDrafts);
 
@@ -661,7 +745,7 @@ export async function findOrCreateDraftOrder(
       reused: true,
     };
   }
-  if (hasExactOpenFingerprintMatch(existingDrafts, prepared.fingerprint)) {
+  if (hasExactOpenFingerprintMatch(existingDrafts, prepared)) {
     throw new DynamicPricingError(
       'DRAFT_ORDER_ERROR',
       'The existing checkout no longer has an invoice URL.',
@@ -695,14 +779,12 @@ export async function findOrCreateDraftOrder(
     client,
   );
   const canonicalDraft = selectCanonicalDraft([
-    ...getExactOpenFingerprintMatches(reconciledDrafts, prepared.fingerprint),
+    ...getExactOpenFingerprintMatches(reconciledDrafts, prepared),
     {
       id: draftOrder.id,
       status: 'OPEN',
       invoiceUrl: draftOrder.invoiceUrl,
-      customAttributes: [
-        {key: CHECKOUT_FINGERPRINT_ATTRIBUTE, value: prepared.fingerprint},
-      ],
+      customAttributes: prepared.input.customAttributes,
     },
   ]);
   if (!canonicalDraft) {
@@ -733,30 +815,40 @@ async function findDraftOrdersByFingerprintTag(
 
 function hasExactOpenFingerprintMatch(
   drafts: DraftOrderSummary[],
-  fingerprint: string,
+  prepared: PreparedDraftOrder,
 ) {
   return drafts.some(
     (draft) =>
-      draft.status === 'OPEN' && getDraftFingerprint(draft) === fingerprint,
+      draft.status === 'OPEN' && hasDraftSecurityIdentity(draft, prepared),
   );
 }
 
 function getExactOpenFingerprintMatches(
   drafts: DraftOrderSummary[],
-  fingerprint: string,
+  prepared: PreparedDraftOrder,
 ) {
   return drafts.filter(
     (draft): draft is DraftOrderSummary & {invoiceUrl: string} =>
       draft.status === 'OPEN' &&
-      getDraftFingerprint(draft) === fingerprint &&
+      hasDraftSecurityIdentity(draft, prepared) &&
       Boolean(draft.invoiceUrl?.trim()),
   );
 }
 
-function getDraftFingerprint(draft: DraftOrderSummary) {
-  return draft.customAttributes.find(
-    ({key}) => key === CHECKOUT_FINGERPRINT_ATTRIBUTE,
-  )?.value;
+function hasDraftSecurityIdentity(
+  draft: DraftOrderSummary,
+  prepared: PreparedDraftOrder,
+) {
+  // Check transported proof as well as its fingerprint: unsigned or altered
+  // OPEN Drafts must not be reused, even if they retain a matching fingerprint.
+  return prepared.input.customAttributes
+    .filter(({key}) => SERVER_OWNED_ATTRIBUTES.has(key))
+    .every(({key, value}) => {
+      const matches = draft.customAttributes.filter(
+        (attribute) => attribute.key === key,
+      );
+      return matches.length === 1 && matches[0].value === value;
+    });
 }
 
 export function selectCanonicalDraft(
@@ -1016,14 +1108,84 @@ function canonicalJson(value: unknown): string {
   return JSON.stringify(value);
 }
 
+// Dedicated verifier contract: never use the legacy fingerprint canonicalizer.
+export function canonicalCheckoutProofJson(value: unknown, depth = 0): string {
+  if (depth > 32) {
+    throw new DynamicPricingError(
+      'INVALID_CONFIGURATION',
+      'Checkout proof nesting exceeds the limit.',
+    );
+  }
+  if (
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'boolean' ||
+    (typeof value === 'number' && Number.isFinite(value))
+  ) {
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) {
+    return (
+      '[' +
+      Array.from(value, (item) =>
+        canonicalCheckoutProofJson(item, depth + 1),
+      ).join(',') +
+      ']'
+    );
+  }
+  if (
+    value &&
+    typeof value === 'object' &&
+    Object.getPrototypeOf(value) === Object.prototype &&
+    Object.getOwnPropertySymbols(value).length === 0
+  ) {
+    return (
+      '{' +
+      Object.keys(value)
+        .sort(compareStrings)
+        .map(
+          (key) =>
+            JSON.stringify(key) +
+            ':' +
+            canonicalCheckoutProofJson(
+              (value as Record<string, unknown>)[key],
+              depth + 1,
+            ),
+        )
+        .join(',') +
+      '}'
+    );
+  }
+  throw new DynamicPricingError(
+    'INVALID_CONFIGURATION',
+    'Checkout proof contains an unsupported value.',
+  );
+}
+
+export function canonicalCheckoutProofMoney(value: string): string {
+  if (typeof value !== 'string' || !/^(0|[1-9]\d*)(?:\.\d+)?$/.test(value)) {
+    throw new DynamicPricingError(
+      'INVALID_CONFIGURATION',
+      'Checkout proof price is invalid.',
+    );
+  }
+  return value.includes('.')
+    ? value.replace(/0+$/, '').replace(/\.$/, '')
+    : value;
+}
+
+function toHex(value: ArrayBuffer) {
+  return [...new Uint8Array(value)]
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 async function sha256(value: string) {
   const digest = await crypto.subtle.digest(
     'SHA-256',
     new TextEncoder().encode(value),
   );
-  return [...new Uint8Array(digest)]
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('');
+  return toHex(digest);
 }
 
 function createAdminClient(env: DynamicPricingEnv): AdminClient {
@@ -1279,6 +1441,7 @@ const VARIANT_PRICING_QUERY = `
         id
         availableForSale
         price
+        sku
         product {
           id
           masterAssetId: metafield(namespace: "custom", key: "master_asset_id") {

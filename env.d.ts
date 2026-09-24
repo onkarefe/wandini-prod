@@ -15,5 +15,6 @@ declare global {
     SHOPIFY_PRICING_CLIENT_ID?: string;
     SHOPIFY_PRICING_CLIENT_SECRET?: string;
     DYNAMIC_PRICING_CHECKOUT_ENABLED?: string;
+    WANDINI_CHECKOUT_HMAC_SECRET?: string;
   }
 }
