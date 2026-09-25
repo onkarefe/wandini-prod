@@ -1,28 +1,14 @@
 import {WishlistServiceError} from '~/lib/wishlist-errors.server';
+import {
+  createAdminGraphqlClient,
+  type ShopifyAdminEnv as WishlistEnv,
+} from '~/lib/shopify-admin.server';
 
-const ADMIN_API_VERSION = '2026-07';
 const WISHLIST_NAMESPACE = 'custom';
 const WISHLIST_KEY = 'wishlist';
 const WISHLIST_TYPE = 'list.product_reference';
 const WISHLIST_MAX_ITEMS = 128;
-const ADMIN_REQUEST_TIMEOUT_MS = 10_000;
 const MAX_STALE_WRITE_RETRIES = 3;
-
-type WishlistEnv = Pick<
-  Env,
-  | 'PUBLIC_STORE_DOMAIN'
-  | 'SHOPIFY_SHOP'
-  | 'SHOPIFY_CLIENT_ID'
-  | 'SHOPIFY_CLIENT_SECRET'
->;
-
-type AdminGraphqlResponse<T> = {
-  data?: T;
-  errors?: Array<{
-    message: string;
-    extensions?: {code?: string};
-  }>;
-};
 
 type CustomerWishlistQuery = {
   customer: {
@@ -48,12 +34,6 @@ type MetafieldsSetMutation = {
   };
 };
 
-type AdminAccessToken = {
-  cacheKey: string;
-  accessToken: string;
-  expiresAt: number;
-};
-
 type WishlistSnapshot = {
   productIds: string[];
   compareDigest: string | null;
@@ -64,232 +44,7 @@ type WishlistResult = {
   wishlisted: boolean;
 };
 
-let cachedAdminAccessToken: AdminAccessToken | null = null;
-
-function normalizeShopDomain(value: string) {
-  const candidate = value.includes('://') ? value : `https://${value}`;
-  let url: URL;
-
-  try {
-    url = new URL(candidate);
-  } catch (cause) {
-    throw new WishlistServiceError(
-      'CONFIGURATION_ERROR',
-      'Wishlist store domain is invalid.',
-      {cause},
-    );
-  }
-
-  const hostname = url.hostname.toLowerCase();
-  if (!hostname.endsWith('.myshopify.com')) {
-    throw new WishlistServiceError(
-      'CONFIGURATION_ERROR',
-      'Wishlist store domain must be a myshopify.com domain.',
-    );
-  }
-
-  return hostname;
-}
-
-function getWishlistConfig(env: WishlistEnv) {
-  const shopValue = env.SHOPIFY_SHOP ?? env.PUBLIC_STORE_DOMAIN;
-  const clientId = env.SHOPIFY_CLIENT_ID;
-  const clientSecret = env.SHOPIFY_CLIENT_SECRET;
-
-  if (!shopValue) {
-    throw new WishlistServiceError(
-      'CONFIGURATION_ERROR',
-      'Wishlist store domain is not configured.',
-    );
-  }
-  if (!clientId) {
-    throw new WishlistServiceError(
-      'CONFIGURATION_ERROR',
-      'Wishlist client ID is not configured.',
-    );
-  }
-  if (!clientSecret) {
-    throw new WishlistServiceError(
-      'CONFIGURATION_ERROR',
-      'Wishlist client secret is not configured.',
-    );
-  }
-
-  return {
-    shop: normalizeShopDomain(shopValue),
-    clientId,
-    clientSecret,
-  };
-}
-
-async function fetchWithTimeout(input: string, init: RequestInit) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), ADMIN_REQUEST_TIMEOUT_MS);
-
-  try {
-    return await fetch(input, {...init, signal: controller.signal});
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-async function getAdminAccessToken(env: WishlistEnv) {
-  const {shop, clientId, clientSecret} = getWishlistConfig(env);
-  const cacheKey = `${shop}:${clientId}`;
-
-  if (
-    cachedAdminAccessToken?.cacheKey === cacheKey &&
-    Date.now() < cachedAdminAccessToken.expiresAt - 60_000
-  ) {
-    return {shop, accessToken: cachedAdminAccessToken.accessToken};
-  }
-
-  let response: Response;
-
-  try {
-    response = await fetchWithTimeout(
-      `https://${shop}/admin/oauth/access_token`,
-      {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: new URLSearchParams({
-          grant_type: 'client_credentials',
-          client_id: clientId,
-          client_secret: clientSecret,
-        }),
-      },
-    );
-  } catch (cause) {
-    throw new WishlistServiceError(
-      'AUTHENTICATION_ERROR',
-      'Wishlist authentication request failed.',
-      {cause, retryable: true},
-    );
-  }
-
-  if (!response.ok) {
-    throw new WishlistServiceError(
-      'AUTHENTICATION_ERROR',
-      `Wishlist authentication failed with status ${response.status}.`,
-      {
-        retryable: response.status === 429 || response.status >= 500,
-        shopifyStatus: response.status,
-      },
-    );
-  }
-
-  let payload: {access_token?: string; expires_in?: number};
-
-  try {
-    payload = (await response.json()) as typeof payload;
-  } catch (cause) {
-    throw new WishlistServiceError(
-      'INVALID_ADMIN_RESPONSE',
-      'Wishlist authentication returned an invalid response.',
-      {cause, retryable: true},
-    );
-  }
-
-  if (!payload.access_token) {
-    throw new WishlistServiceError(
-      'INVALID_ADMIN_RESPONSE',
-      'Wishlist authentication returned no access token.',
-      {retryable: true},
-    );
-  }
-
-  cachedAdminAccessToken = {
-    cacheKey,
-    accessToken: payload.access_token,
-    expiresAt: Date.now() + (payload.expires_in ?? 86_399) * 1000,
-  };
-
-  return {shop, accessToken: payload.access_token};
-}
-
-async function adminGraphql<T>({
-  env,
-  query,
-  variables,
-}: {
-  env: WishlistEnv;
-  query: string;
-  variables?: Record<string, unknown>;
-}): Promise<T> {
-  const {shop, accessToken} = await getAdminAccessToken(env);
-  let response: Response;
-
-  try {
-    response = await fetchWithTimeout(
-      `https://${shop}/admin/api/${ADMIN_API_VERSION}/graphql.json`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Access-Token': accessToken,
-        },
-        body: JSON.stringify({query, variables}),
-      },
-    );
-  } catch (cause) {
-    throw new WishlistServiceError(
-      'ADMIN_API_ERROR',
-      'Wishlist Admin API request failed.',
-      {cause, retryable: true},
-    );
-  }
-
-  if (!response.ok) {
-    if (response.status === 401 || response.status === 403) {
-      cachedAdminAccessToken = null;
-    }
-
-    throw new WishlistServiceError(
-      'ADMIN_API_ERROR',
-      `Wishlist Admin API failed with status ${response.status}.`,
-      {
-        retryable: response.status === 429 || response.status >= 500,
-        shopifyStatus: response.status,
-      },
-    );
-  }
-
-  let payload: AdminGraphqlResponse<T>;
-
-  try {
-    payload = (await response.json()) as AdminGraphqlResponse<T>;
-  } catch (cause) {
-    throw new WishlistServiceError(
-      'INVALID_ADMIN_RESPONSE',
-      'Wishlist Admin API returned an invalid response.',
-      {cause, retryable: true},
-    );
-  }
-
-  if (payload.errors?.length) {
-    const shopifyCodes = payload.errors.flatMap((error) =>
-      error.extensions?.code ? [error.extensions.code] : [],
-    );
-
-    throw new WishlistServiceError(
-      'ADMIN_GRAPHQL_ERROR',
-      'Wishlist Admin API returned a GraphQL error.',
-      {
-        retryable: shopifyCodes.includes('THROTTLED'),
-        shopifyCodes,
-      },
-    );
-  }
-  if (!payload.data) {
-    throw new WishlistServiceError(
-      'INVALID_ADMIN_RESPONSE',
-      'Wishlist Admin API returned no data.',
-      {retryable: true},
-    );
-  }
-
-  return payload.data;
-}
+const adminGraphql = createAdminGraphqlClient(WishlistServiceError, 'Wishlist');
 
 function isProductGid(value: unknown): value is string {
   return (

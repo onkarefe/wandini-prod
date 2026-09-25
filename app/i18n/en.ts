@@ -73,7 +73,7 @@ export const en = {
   'footer.subscribe': 'Subscribe',
   'footer.newsletterSubmitting': 'Submitting…',
   'footer.newsletterSuccess':
-    'Almost done! Please confirm your subscription using the link in the email we sent you.',
+    "Thank you! You've successfully subscribed to our newsletter.",
   'footer.newsletterInvalidEmail': 'Please enter a valid email address.',
   'footer.newsletterError':
     "We couldn't complete your sign-up. Please try again.",

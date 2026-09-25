@@ -71,7 +71,7 @@ export const de = {
   'footer.subscribe': 'Abonnieren',
   'footer.newsletterSubmitting': 'Wird gesendet…',
   'footer.newsletterSuccess':
-    'Fast geschafft! Bitte bestätige deine Anmeldung über den Link in der E-Mail, die wir dir gesendet haben.',
+    'Vielen Dank! Deine Newsletter-Anmeldung war erfolgreich.',
   'footer.newsletterInvalidEmail': 'Bitte gib eine gültige E-Mail-Adresse ein.',
   'footer.newsletterError':
     'Die Anmeldung konnte nicht abgeschlossen werden. Bitte versuche es erneut.',

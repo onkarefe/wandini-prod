@@ -1,3 +1,5 @@
+import {subscribeToNewsletter} from '~/lib/newsletter.server';
+import {ShopifyAdminError} from '~/lib/shopify-admin.server';
 import type {Route} from './+types/api.newsletter';
 
 export type NewsletterActionData =
@@ -16,28 +18,6 @@ function newsletterResponse(data: NewsletterActionData, status = 200) {
       ...(status === 405 ? {Allow: 'POST'} : {}),
     },
   });
-}
-
-// Keep this tiny URL normalizer local so Kontakt/FAQ behavior stays unchanged.
-function getShopifyContactUrl(domain: string | undefined) {
-  if (!domain) return null;
-
-  try {
-    const url = new URL(
-      domain.startsWith('http://') || domain.startsWith('https://')
-        ? domain
-        : `https://${domain}`,
-    );
-    url.protocol = 'https:';
-    url.username = '';
-    url.password = '';
-    url.pathname = '/contact';
-    url.search = '';
-    url.hash = '';
-    return url;
-  } catch {
-    return null;
-  }
 }
 
 export function loader() {
@@ -71,42 +51,14 @@ export async function action({request, context}: Route.ActionArgs) {
     );
   }
 
-  const contactUrl = getShopifyContactUrl(context.env.PUBLIC_STORE_DOMAIN);
-  if (!contactUrl) {
-    return newsletterResponse({ok: false, error: 'upstream_failure'}, 503);
-  }
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
   try {
-    const response = await fetch(contactUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      },
-      body: new URLSearchParams({
-        form_type: 'customer',
-        utf8: '✓',
-        'contact[email]': email,
-        'contact[tags]': 'newsletter',
-      }),
-      redirect: 'follow',
-      signal: controller.signal,
-    });
-
-    // A redirect to an interactive challenge/password page is not acceptance.
-    const blockedRedirect =
-      response.url &&
-      /\/(?:challenge|password)(?:\/|$)/.test(new URL(response.url).pathname);
-    if (!response.ok || blockedRedirect) {
-      return newsletterResponse({ok: false, error: 'upstream_failure'}, 502);
-    }
-
-    // Never inspect or disclose whether the address already exists.
+    await subscribeToNewsletter(context.env, email);
     return newsletterResponse({ok: true});
-  } catch {
-    return newsletterResponse({ok: false, error: 'upstream_failure'}, 502);
-  } finally {
-    clearTimeout(timeout);
+  } catch (error) {
+    const status =
+      error instanceof ShopifyAdminError && error.code === 'CONFIGURATION_ERROR'
+        ? 503
+        : 502;
+    return newsletterResponse({ok: false, error: 'upstream_failure'}, status);
   }
 }
