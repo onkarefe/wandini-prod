@@ -71,6 +71,12 @@ export const en = {
     'Subscribe to our newsletter and be the first to receive news, offers, and product information. Keep up with the latest trends.',
   'footer.emailPlaceholder': 'Enter your email address',
   'footer.subscribe': 'Subscribe',
+  'footer.newsletterSubmitting': 'Submitting…',
+  'footer.newsletterSuccess':
+    'Almost done! Please confirm your subscription using the link in the email we sent you.',
+  'footer.newsletterInvalidEmail': 'Please enter a valid email address.',
+  'footer.newsletterError':
+    "We couldn't complete your sign-up. Please try again.",
   'footer.navigation': 'Footer',
   'footer.copyright': 'Copyright © 2026 – Wandini. All rights reserved.',
   'filters.title': 'Filters',

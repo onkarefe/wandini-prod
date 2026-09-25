@@ -3,6 +3,7 @@ import {route, type RouteConfig} from '@react-router/dev/routes';
 import {hydrogenRoutes} from '@shopify/hydrogen';
 
 const RESOURCE_ROUTE_IDS = new Set([
+  'routes/api.newsletter',
   'routes/api.$version.[graphql.json]',
   'routes/api.wishlist',
   'routes/[robots.txt]',

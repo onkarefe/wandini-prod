@@ -1099,6 +1099,11 @@
   background: #d2d2d7;
 }
 
+.footerSubscribeButton:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 .overlay--search {
   --aside-width: 480px;
 }

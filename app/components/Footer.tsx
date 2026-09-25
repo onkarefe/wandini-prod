@@ -1,5 +1,7 @@
-import {Suspense} from 'react';
-import {Await} from 'react-router';
+import {Suspense, useEffect, useRef} from 'react';
+import {Await, useFetcher} from 'react-router';
+import {toast} from 'sonner';
+import type {NewsletterActionData} from '~/routes/api.newsletter';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
 import wandiniWhiteLogo from '~/assets/logos/wanWhite.png';
 import amexIcon from '~/assets/Icons/amex.svg';
@@ -76,6 +78,33 @@ export function Footer({
   publicStoreDomain,
 }: FooterProps) {
   const {t} = useTranslation();
+  const fetcher = useFetcher<NewsletterActionData>();
+  const emailRef = useRef<HTMLInputElement>(null);
+  const submissionPendingRef = useRef(false);
+  const handledResponsesRef = useRef(new WeakSet<object>());
+  const isSubmitting = fetcher.state !== 'idle';
+
+  useEffect(() => {
+    if (fetcher.state !== 'idle') return;
+    submissionPendingRef.current = false;
+
+    const data = fetcher.data;
+    if (!data || handledResponsesRef.current.has(data)) return;
+    handledResponsesRef.current.add(data);
+
+    if (data.ok) {
+      toast.success(t('footer.newsletterSuccess'));
+      if (emailRef.current) emailRef.current.value = '';
+    } else {
+      toast.error(
+        t(
+          data.fieldErrors?.email
+            ? 'footer.newsletterInvalidEmail'
+            : 'footer.newsletterError',
+        ),
+      );
+    }
+  }, [fetcher.data, fetcher.state, t]);
 
   return (
     <Suspense>
@@ -91,7 +120,19 @@ export function Footer({
                 {t('footer.newsletterDescription')}
               </div>
 
-              <div className='footerInputBox'>
+              <fetcher.Form
+                method='post'
+                action='/api/newsletter'
+                className='footerInputBox'
+                aria-busy={isSubmitting}
+                onSubmit={(event) => {
+                  if (submissionPendingRef.current || isSubmitting) {
+                    event.preventDefault();
+                    return;
+                  }
+                  submissionPendingRef.current = true;
+                }}
+              >
                 <svg
                   className='footerEmailIcon'
                   viewBox='0 0 24 24'
@@ -101,14 +142,33 @@ export function Footer({
                   <path d='m4 6 8 6 8-6' />
                 </svg>
                 <input
+                  ref={emailRef}
                   type='email'
+                  name='email'
+                  required
+                  maxLength={254}
+                  autoComplete='email'
+                  aria-label={t('footer.emailPlaceholder')}
                   placeholder={t('footer.emailPlaceholder')}
                   className='footerEmailInput'
+                  onInvalid={(event) => {
+                    event.preventDefault();
+                    event.currentTarget.focus();
+                    toast.error(t('footer.newsletterInvalidEmail'));
+                  }}
                 />
-                <button className='footerSubscribeButton'>
-                  {t('footer.subscribe')}
+                <button
+                  type='submit'
+                  className='footerSubscribeButton'
+                  disabled={isSubmitting}
+                >
+                  {t(
+                    isSubmitting
+                      ? 'footer.newsletterSubmitting'
+                      : 'footer.subscribe',
+                  )}
                 </button>
-              </div>
+              </fetcher.Form>
             </div>
 
             <div className='footer-main'>

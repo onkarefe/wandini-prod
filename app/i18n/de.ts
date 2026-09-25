@@ -69,6 +69,12 @@ export const de = {
     'Abonniere unseren Newsletter und erfahre als Erstes von aktuellen Neuigkeiten, exklusiven Angeboten und neuen Produkten. Lass dich inspirieren und bleib über die neuesten Trends auf dem Laufenden.',
   'footer.emailPlaceholder': 'E-Mail-Adresse eingeben',
   'footer.subscribe': 'Abonnieren',
+  'footer.newsletterSubmitting': 'Wird gesendet…',
+  'footer.newsletterSuccess':
+    'Fast geschafft! Bitte bestätige deine Anmeldung über den Link in der E-Mail, die wir dir gesendet haben.',
+  'footer.newsletterInvalidEmail': 'Bitte gib eine gültige E-Mail-Adresse ein.',
+  'footer.newsletterError':
+    'Die Anmeldung konnte nicht abgeschlossen werden. Bitte versuche es erneut.',
   'footer.navigation': 'Fußzeile',
   'footer.copyright': 'Copyright © 2026 – Wandini. Alle Rechte vorbehalten.',
   'filters.title': 'Filter',
