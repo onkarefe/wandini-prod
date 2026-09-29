@@ -1,4 +1,4 @@
-// Uploaded data stays request-local; Phase 1 never persists or forwards it.
+// Uploaded bytes stay request-local and are only forwarded after validation.
 export const MAX_REVIEW_PHOTO_BYTES = 5 * 1024 * 1024;
 export const MAX_REVIEW_REQUEST_BYTES = MAX_REVIEW_PHOTO_BYTES + 64 * 1024;
 
@@ -25,11 +25,18 @@ export type ReviewError =
   | 'malformed'
   | 'requestSize'
   | 'method'
-  | 'contentType';
+  | 'contentType'
+  | 'locale'
+  | 'delivery';
 export type ReviewFieldErrors = Partial<Record<ReviewField, ReviewError>>;
 export type CustomerReviewActionData =
   | {ok: true}
   | {ok: false; fieldErrors: ReviewFieldErrors};
+
+export type ValidatedReviewPhoto = {
+  format: 'jpeg' | 'png' | 'webp';
+  bytes: Uint8Array;
+};
 
 export function validateReviewFields(form: FormData) {
   const fieldErrors: ReviewFieldErrors = {};
@@ -44,6 +51,10 @@ export function validateReviewFields(form: FormData) {
     }
     return String(entries[0] ?? '').trim();
   };
+  const locales = form.getAll('locale');
+  if (locales.length !== 1 || (locales[0] !== 'DE' && locales[0] !== 'EN')) {
+    fieldErrors._form = 'locale';
+  }
   const value = {
     firstName: read('firstName'),
     lastName: read('lastName'),
@@ -51,6 +62,7 @@ export function validateReviewFields(form: FormData) {
     phone: read('phone'),
     rating: read('rating'),
     comment: read('comment'),
+    locale: locales[0] === 'EN' ? ('EN' as const) : ('DE' as const),
   };
   if (value.firstName.length < 2 || value.firstName.length > 80)
     fieldErrors.firstName = 'firstName';
@@ -69,7 +81,9 @@ export function validateReviewFields(form: FormData) {
 
 // Binary signature/container checks, not image decoding. Browser MIME types and
 // extensions are deliberately ignored. No uploaded bytes are rendered.
-function hasPhotoSignature(bytes: Uint8Array): boolean {
+function detectPhotoFormat(
+  bytes: Uint8Array,
+): ValidatedReviewPhoto['format'] | false {
   const matches = (offset: number, signature: number[]) =>
     signature.every((byte, index) => bytes[offset + index] === byte);
   const ascii = (offset: number, text: string) =>
@@ -105,12 +119,12 @@ function hasPhotoSignature(bytes: Uint8Array): boolean {
         hasFrame = true;
       }
       if (marker === 0xda) {
-        return (
-          hasFrame &&
+        return hasFrame &&
           length >= 6 &&
           offset + length < bytes.length - 2 &&
           matches(bytes.length - 2, [0xff, 0xd9])
-        );
+          ? 'jpeg'
+          : false;
       }
       if (marker === 0 || marker === 0xd8 || marker === 0xd9) return false;
       offset += length;
@@ -135,7 +149,9 @@ function hasPhotoSignature(bytes: Uint8Array): boolean {
       if (end > bytes.length) return false;
       if (ascii(offset + 4, 'IDAT') && length > 0) hasImageData = true;
       if (ascii(offset + 4, 'IEND'))
-        return hasImageData && length === 0 && end === bytes.length;
+        return hasImageData && length === 0 && end === bytes.length
+          ? 'png'
+          : false;
       offset = end;
     }
     return false;
@@ -180,14 +196,14 @@ function hasPhotoSignature(bytes: Uint8Array): boolean {
       }
       return hasImageData && offset === limit;
     };
-    return checkChunks(12, bytes.length, true);
+    return checkChunks(12, bytes.length, true) ? 'webp' : false;
   }
   return false;
 }
 
 export async function validateReviewPhoto(
   form: FormData,
-): Promise<ReviewError | undefined> {
+): Promise<ReviewError | ValidatedReviewPhoto | undefined> {
   const photos = form.getAll('photo');
   if (photos.length > 1) return 'photoCount';
   const photo = photos[0];
@@ -197,8 +213,9 @@ export async function validateReviewPhoto(
   if (photo.size === 0 && photo.name === '') return;
   if (photo.size === 0) return 'photoEmpty';
   if (photo.size > MAX_REVIEW_PHOTO_BYTES) return 'photoSize';
-  if (!hasPhotoSignature(new Uint8Array(await photo.arrayBuffer())))
-    return 'photoType';
+  const bytes = new Uint8Array(await photo.arrayBuffer());
+  const format = detectPhotoFormat(bytes);
+  return format ? {format, bytes} : 'photoType';
 }
 
 export async function readReviewForm(

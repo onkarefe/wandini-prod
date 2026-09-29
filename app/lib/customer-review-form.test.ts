@@ -47,7 +47,10 @@ vi.mock('react-router', async (importOriginal) => {
   };
 });
 vi.mock('~/i18n/useTranslation', () => ({
-  useTranslation: () => ({t: createTranslator({language: ui.language})}),
+  useTranslation: () => ({
+    t: createTranslator({language: ui.language}),
+    locale: {language: ui.language},
+  }),
 }));
 
 const page = {
@@ -117,12 +120,36 @@ afterEach(() => vi.unstubAllGlobals());
 describe('customer review form and display', () => {
   it('retains Unicode in localized review feedback', () => {
     expect(createTranslator({language: 'DE'})('reviews.success')).toContain(
-      'gepr\u00fcft',
+      'pr\u00fcfen',
     );
     expect(createTranslator({language: 'EN'})('reviews.submitting')).toBe(
       'Validating \u2026',
     );
   });
+  it.each(['DE', 'EN'] as const)(
+    'submits the explicit %s storefront locale and preserves inputs on delivery failure',
+    (language) => {
+      ui.language = language;
+      render();
+      flushEffects();
+      submit();
+      ui.state = 'submitting';
+      render();
+      flushEffects();
+      ui.state = 'idle';
+      ui.data = {ok: false, fieldErrors: {_form: 'delivery'}};
+      const html = render();
+      flushEffects();
+      expect(html).toContain(
+        'type="hidden" name="locale" value="' + language + '"',
+      );
+      expect(html).toContain(
+        createTranslator({language})('reviews.error.delivery'),
+      );
+      expect(html).toContain('role="alert"');
+      expect(ui.reset).not.toHaveBeenCalled();
+    },
+  );
   it('posts multipart to the isolated resource route and hides the honeypot accessibly', () => {
     const html = render();
     expect(html).toContain('action="/api/customer-review"');

@@ -1,3 +1,4 @@
+import type {BrevoMessage} from '~/lib/brevo.server';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {action, loader} from '~/routes/api.customer-review';
 import {
@@ -25,6 +26,7 @@ function form(overrides: Record<string, string | null> = {}) {
     rating: '5',
     comment: 'A beautiful room and a great experience.',
     company: '',
+    locale: 'DE',
     ...overrides,
   })) {
     if (value !== null) data.set(key, value);
@@ -32,26 +34,35 @@ function form(overrides: Record<string, string | null> = {}) {
   return data;
 }
 async function submit(body: BodyInit = form(), headers?: HeadersInit) {
-  return action({
+  const callsBefore = fetchMock.mock.calls.length;
+  const response = await action({
+    context: {env: {BREVO_API_KEY: 'fake-review-test-key'}},
     request: new Request('https://example.com/api/customer-review', {
       method: 'POST',
       body,
       headers,
     }),
   } as Parameters<typeof action>[0]);
+  const trapped = body instanceof FormData && Boolean(body.get('company'));
+  const expectedCalls = response.status === 200 && !trapped ? 2 : 0;
+  expectedMailCalls += expectedCalls;
+  expect(fetchMock.mock.calls.length - callsBefore).toBe(expectedCalls);
+  return response;
 }
 async function expectResult(response: Response, status: number, body: unknown) {
   expect(response.status).toBe(status);
   expect(response.headers.get('Cache-Control')).toBe('no-store');
   expect(await response.json()).toEqual(body);
 }
-const noExternalCall = vi.fn();
+const fetchMock = vi.fn<typeof fetch>();
+let expectedMailCalls = 0;
 beforeEach(() => {
-  noExternalCall.mockReset();
-  vi.stubGlobal('fetch', noExternalCall);
+  expectedMailCalls = 0;
+  fetchMock.mockReset().mockResolvedValue(new Response(null, {status: 201}));
+  vi.stubGlobal('fetch', fetchMock);
 });
 afterEach(() => {
-  expect(noExternalCall).not.toHaveBeenCalled();
+  expect(fetchMock).toHaveBeenCalledTimes(expectedMailCalls);
   vi.unstubAllGlobals();
 });
 
@@ -104,6 +115,7 @@ describe('isolated customer review endpoint', () => {
         phone: '+49 123',
         rating: 4,
         comment: 'A lovely experience.',
+        locale: 'DE',
       },
       fieldErrors: {},
     });
@@ -163,6 +175,24 @@ describe('isolated customer review endpoint', () => {
         'untrusted.txt',
       );
       await expectResult(await submit(data), 200, {ok: true});
+      const internal = JSON.parse(
+        String(fetchMock.mock.calls[0][1]?.body),
+      ) as BrevoMessage & {attachment: NonNullable<BrevoMessage['attachment']>};
+      const acknowledgement = JSON.parse(
+        String(fetchMock.mock.calls[1][1]?.body),
+      );
+      expect(internal.attachment).toEqual([
+        {
+          name: 'customer-review.' + (format === 'jpeg' ? 'jpg' : format),
+          content: Buffer.from(bytes(format)).toString('base64'),
+        },
+      ]);
+      expect(
+        new Uint8Array(Buffer.from(internal.attachment[0].content, 'base64')),
+      ).toEqual(bytes(format));
+      expect(JSON.stringify(internal)).not.toContain('untrusted.txt');
+      expect(internal.textContent).toContain('Foto beigef\u00fcgt: Ja');
+      expect(acknowledgement).not.toHaveProperty('attachment');
     },
   );
   it('accepts extended and animated WebP containers with real image chunks', async () => {

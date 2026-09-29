@@ -309,10 +309,12 @@ const REVIEW_ERROR_KEYS = {
   requestSize: 'reviews.error.requestSize',
   method: 'reviews.error.method',
   contentType: 'reviews.error.contentType',
+  locale: 'reviews.error.locale',
+  delivery: 'reviews.error.delivery',
 } as const satisfies Record<ReviewError, TranslationKey>;
 
 function CustomerReviewForm() {
-  const {t} = useTranslation();
+  const {t, locale} = useTranslation();
   const fetcher = useFetcher<CustomerReviewActionData>();
   const formRef = useRef<HTMLFormElement>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
@@ -377,6 +379,7 @@ function CustomerReviewForm() {
             );
           }}
         >
+          <input type="hidden" name="locale" value={locale.language} />
           <div hidden aria-hidden="true">
             <label htmlFor="review-company">{t('common.company')}</label>
             <input

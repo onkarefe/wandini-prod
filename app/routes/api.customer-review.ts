@@ -1,3 +1,8 @@
+import {sendBrevoEmail} from '~/lib/brevo.server';
+import {
+  buildInternalReviewEmail,
+  buildReviewAcknowledgement,
+} from '~/lib/customer-review-email.server';
 import type {Route} from './+types/api.customer-review';
 import {
   readReviewForm,
@@ -20,7 +25,7 @@ export function loader() {
   return reviewResponse({ok: false, fieldErrors: {_form: 'method'}}, 405);
 }
 
-export async function action({request}: Route.ActionArgs) {
+export async function action({request, context}: Route.ActionArgs) {
   if (request.method !== 'POST') return loader();
   const form = await readReviewForm(request);
   if (typeof form === 'string') {
@@ -48,6 +53,7 @@ export async function action({request}: Route.ActionArgs) {
     'comment',
     'photo',
     'company',
+    'locale',
   ]);
   if (
     Array.from(form.keys()).some((key) => !allowedFields.has(key)) ||
@@ -57,8 +63,9 @@ export async function action({request}: Route.ActionArgs) {
     return reviewResponse({ok: false, fieldErrors: {_form: 'malformed'}}, 400);
   }
 
-  const {fieldErrors} = validateReviewFields(form);
-  const photoError = await validateReviewPhoto(form);
+  const {value, fieldErrors} = validateReviewFields(form);
+  const photo = await validateReviewPhoto(form);
+  const photoError = typeof photo === 'string' ? photo : undefined;
   if (photoError) fieldErrors.photo = photoError;
   if (Object.keys(fieldErrors).length) {
     return reviewResponse(
@@ -67,6 +74,24 @@ export async function action({request}: Route.ActionArgs) {
     );
   }
 
-  // Phase 1 ends here: no email, persistence, logging or external calls.
+  const apiKey = context.env.BREVO_API_KEY?.trim();
+  if (!apiKey) {
+    return reviewResponse({ok: false, fieldErrors: {_form: 'delivery'}}, 503);
+  }
+
+  const internalAccepted = await sendBrevoEmail(
+    apiKey,
+    buildInternalReviewEmail(
+      value,
+      typeof photo === 'string' ? undefined : photo,
+    ),
+  );
+  if (!internalAccepted) {
+    return reviewResponse({ok: false, fieldErrors: {_form: 'delivery'}}, 502);
+  }
+
+  // Acknowledgement is attempted only after acceptance; its failure cannot
+  // turn an already delivered review into a failed storefront submission.
+  await sendBrevoEmail(apiKey, buildReviewAcknowledgement(value));
   return reviewResponse({ok: true});
 }

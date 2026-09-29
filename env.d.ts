@@ -8,6 +8,7 @@ import '@total-typescript/ts-reset';
 
 declare global {
   interface Env {
+    BREVO_API_KEY?: string;
     PUBLIC_CANONICAL_ORIGIN?: string;
     SHOPIFY_SHOP?: string;
     SHOPIFY_CLIENT_ID?: string;

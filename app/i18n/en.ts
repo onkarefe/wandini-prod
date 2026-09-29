@@ -524,7 +524,8 @@ export const en = {
   'reviews.photo': 'Photo of your room',
   'reviews.fileTypes': 'JPG, PNG, or WEBP, maximum 5 MB',
   'reviews.submitting': 'Validating …',
-  'reviews.success': 'Thank you. Your review was successfully validated.',
+  'reviews.success':
+    'Thank you for your review. We received it and will review it.',
   'reviews.errorSummary': 'Please check your details and try again.',
   'reviews.error.firstName':
     'Please enter a first name with 2 to 80 characters.',
@@ -548,6 +549,15 @@ export const en = {
   'reviews.error.method': 'The form could not be submitted. Please try again.',
   'reviews.error.contentType':
     'This form format is not supported. Please try again.',
+  'reviews.error.delivery':
+    'Your review could not be sent right now. Please try again later.',
+  'reviews.error.locale': 'Please reload the page and try again.',
+  'reviews.email.internalSubject':
+    'New customer review – {rating}/5 – {customerName}',
+  'reviews.email.acknowledgementSubject': 'Thank you for your review',
+  'reviews.email.photo': 'Photo supplied',
+  'reviews.email.photoYes': 'Yes',
+  'reviews.email.photoNo': 'No',
   'reviews.submit': 'Submit review',
   'policies.title': 'Policies',
   'policies.back': 'Back to policies',

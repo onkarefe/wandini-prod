@@ -536,7 +536,8 @@ export const de = {
   'reviews.photo': 'Foto deines Raumes',
   'reviews.fileTypes': 'JPG, PNG oder WEBP, maximal 5 MB',
   'reviews.submitting': 'Wird geprüft …',
-  'reviews.success': 'Vielen Dank. Deine Bewertung wurde erfolgreich geprüft.',
+  'reviews.success':
+    'Vielen Dank für deine Bewertung. Wir haben sie erhalten und werden sie prüfen.',
   'reviews.errorSummary': 'Bitte prüfe deine Angaben und versuche es erneut.',
   'reviews.error.firstName':
     'Bitte gib einen Vornamen mit 2 bis 80 Zeichen ein.',
@@ -562,6 +563,15 @@ export const de = {
     'Das Formular konnte nicht übermittelt werden. Bitte versuche es erneut.',
   'reviews.error.contentType':
     'Das Formularformat wird nicht unterstützt. Bitte versuche es erneut.',
+  'reviews.error.delivery':
+    'Deine Bewertung konnte gerade nicht gesendet werden. Bitte versuche es später erneut.',
+  'reviews.error.locale': 'Bitte lade die Seite neu und versuche es erneut.',
+  'reviews.email.internalSubject':
+    'Neue Kundenbewertung – {rating}/5 – {customerName}',
+  'reviews.email.acknowledgementSubject': 'Vielen Dank für deine Bewertung',
+  'reviews.email.photo': 'Foto beigefügt',
+  'reviews.email.photoYes': 'Ja',
+  'reviews.email.photoNo': 'Nein',
   'reviews.submit': 'Bewertung senden',
   'policies.title': 'Richtlinien',
   'policies.back': 'Zurück zu den Richtlinien',
