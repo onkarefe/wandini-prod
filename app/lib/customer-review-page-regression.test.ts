@@ -1,3 +1,4 @@
+import type {BrevoMessage} from '~/lib/brevo.server';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {
@@ -151,23 +152,53 @@ describe('review resource isolation and existing page behavior', () => {
               'pages/kontakt',
             {method: 'POST', body},
           ),
-          context: {env: {PUBLIC_STORE_DOMAIN: 'store.myshopify.com'}},
+          context: {
+            env: {
+              PUBLIC_STORE_DOMAIN: 'store.myshopify.com',
+              ...(intent === 'kontakt-contact'
+                ? {BREVO_API_KEY: 'unit-test-placeholder'}
+                : {}),
+            },
+          },
         } as Parameters<typeof pageAction>[0]);
       const response = await call(makeForm());
       expect(response.status).toBe(200);
       expect(await response.json()).toEqual({ok: true, message: t(successKey)});
-      expect(fetchMock).toHaveBeenCalledOnce();
-      const [url, options] = fetchMock.mock.calls[0];
-      expect(String(url)).toBe('https://store.myshopify.com/contact');
-      expect(
-        Object.fromEntries(options?.body as URLSearchParams),
-      ).toMatchObject({
-        form_type: 'contact',
-        'contact[name]': 'Anna Example',
-        'contact[email]': 'anna@example.com',
-        'contact[phone]': '+49 123',
-        'contact[body]': 'An existing contact question.',
-      });
+      if (intent === 'kontakt-contact') {
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        for (const [url, options] of fetchMock.mock.calls) {
+          expect(url).toBe('https://api.brevo.com/v3/smtp/email');
+          expect(options?.method).toBe('POST');
+        }
+        const internal = JSON.parse(
+          String(fetchMock.mock.calls[0][1]?.body),
+        ) as BrevoMessage;
+        const acknowledgement = JSON.parse(
+          String(fetchMock.mock.calls[1][1]?.body),
+        ) as BrevoMessage;
+        expect(internal.to).toEqual([{email: 'info@wandini.shop'}]);
+        expect(internal.replyTo).toEqual({
+          email: 'anna@example.com',
+          name: 'Anna Example',
+        });
+        expect(internal.textContent).toContain('An existing contact question.');
+        expect(acknowledgement.to).toEqual([
+          {email: 'anna@example.com', name: 'Anna Example'},
+        ]);
+      } else {
+        expect(fetchMock).toHaveBeenCalledOnce();
+        const [url, options] = fetchMock.mock.calls[0];
+        expect(String(url)).toBe('https://store.myshopify.com/contact');
+        expect(
+          Object.fromEntries(options?.body as URLSearchParams),
+        ).toMatchObject({
+          form_type: 'contact',
+          'contact[name]': 'Anna Example',
+          'contact[email]': 'anna@example.com',
+          'contact[phone]': '+49 123',
+          'contact[body]': 'An existing contact question.',
+        });
+      }
       fetchMock.mockClear();
       const invalid = makeForm();
       invalid.set('email', 'bad');

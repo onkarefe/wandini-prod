@@ -22,6 +22,11 @@ import type {FAQCategory, FAQCopy} from '~/components/FAQ';
 import type {KontaktPageData} from '~/components/kontakt';
 import {createTranslator} from '~/i18n';
 import {getLocaleFromRequest} from '~/lib/locale';
+import {sendBrevoEmail} from '~/lib/brevo.server';
+import {
+  buildInternalKontaktEmail,
+  buildKontaktAcknowledgement,
+} from '~/lib/kontakt-email.server';
 import {resolveResourceLanguageSwitchLinks} from '~/lib/language-switcher';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import {getOnlineStoreId} from '~/lib/store-schema';
@@ -542,7 +547,8 @@ export async function action({
   context,
   request,
 }: Route.ActionArgs): Promise<Response> {
-  const t = createTranslator(getLocaleFromRequest(request));
+  const locale = getLocaleFromRequest(request);
+  const t = createTranslator(locale);
   const FAQ_ACTION_MESSAGES = {
     required: t('contact.required'),
     invalidEmail: t('contact.invalidEmail'),
@@ -613,6 +619,31 @@ export async function action({
     return Response.json({ok: false, fieldErrors}, {status: 400});
   }
 
+  if (isKontaktForm) {
+    const apiKey = context.env.BREVO_API_KEY?.trim();
+    if (!apiKey) {
+      return Response.json({ok: false, message: messages.error}, {status: 503});
+    }
+
+    const submission = {fullName, email, phone, message};
+    const internalAccepted = await sendBrevoEmail(
+      apiKey,
+      buildInternalKontaktEmail(submission, locale),
+    );
+    if (!internalAccepted) {
+      return Response.json({ok: false, message: messages.error}, {status: 502});
+    }
+
+    // Acceptance depends on the internal email; acknowledgement failure must
+    // not turn an accepted Kontakt submission into a failure.
+    await sendBrevoEmail(
+      apiKey,
+      buildKontaktAcknowledgement(submission, locale),
+    );
+    return Response.json({ok: true, message: messages.success});
+  }
+
+  // faq-contact retains its existing Shopify delivery path.
   const contactUrl = getShopifyContactUrl(context.env.PUBLIC_STORE_DOMAIN);
   if (!contactUrl) {
     return Response.json({ok: false, message: messages.error}, {status: 503});
