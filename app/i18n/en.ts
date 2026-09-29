@@ -522,7 +522,32 @@ export const en = {
   'reviews.experiencePlaceholder':
     'Tell us about your motif, the room, and your impressions.',
   'reviews.photo': 'Photo of your room',
-  'reviews.fileTypes': 'JPG, PNG, or WEBP',
+  'reviews.fileTypes': 'JPG, PNG, or WEBP, maximum 5 MB',
+  'reviews.submitting': 'Validating …',
+  'reviews.success': 'Thank you. Your review was successfully validated.',
+  'reviews.errorSummary': 'Please check your details and try again.',
+  'reviews.error.firstName':
+    'Please enter a first name with 2 to 80 characters.',
+  'reviews.error.lastName':
+    'Your last name must contain no more than 80 characters.',
+  'reviews.error.email':
+    'Please enter a valid email address with no more than 254 characters.',
+  'reviews.error.phone':
+    'Your phone number must contain no more than 40 characters.',
+  'reviews.error.rating': 'Please select a rating from 1 to 5 stars.',
+  'reviews.error.comment':
+    'Your experience must contain 10 to 3000 characters.',
+  'reviews.error.photoEmpty':
+    'The selected file is empty. Please choose a photo.',
+  'reviews.error.photoType': 'Please choose a valid JPEG, PNG, or WebP photo.',
+  'reviews.error.photoSize': 'Your photo must be no larger than 5 MB.',
+  'reviews.error.photoCount': 'Please choose no more than one photo.',
+  'reviews.error.malformed': 'The form could not be read. Please try again.',
+  'reviews.error.requestSize':
+    'The form is too large. Please shorten your details or choose a smaller photo.',
+  'reviews.error.method': 'The form could not be submitted. Please try again.',
+  'reviews.error.contentType':
+    'This form format is not supported. Please try again.',
   'reviews.submit': 'Submit review',
   'policies.title': 'Policies',
   'policies.back': 'Back to policies',

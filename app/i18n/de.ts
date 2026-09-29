@@ -534,7 +534,34 @@ export const de = {
   'reviews.experiencePlaceholder':
     'Erzählen Sie uns von Ihrem Motiv, dem Raum und Ihrem Eindruck.',
   'reviews.photo': 'Foto deines Raumes',
-  'reviews.fileTypes': 'JPG, PNG oder WEBP',
+  'reviews.fileTypes': 'JPG, PNG oder WEBP, maximal 5 MB',
+  'reviews.submitting': 'Wird geprüft …',
+  'reviews.success': 'Vielen Dank. Deine Bewertung wurde erfolgreich geprüft.',
+  'reviews.errorSummary': 'Bitte prüfe deine Angaben und versuche es erneut.',
+  'reviews.error.firstName':
+    'Bitte gib einen Vornamen mit 2 bis 80 Zeichen ein.',
+  'reviews.error.lastName': 'Der Nachname darf höchstens 80 Zeichen enthalten.',
+  'reviews.error.email':
+    'Bitte gib eine gültige E-Mail-Adresse mit höchstens 254 Zeichen ein.',
+  'reviews.error.phone':
+    'Die Telefonnummer darf höchstens 40 Zeichen enthalten.',
+  'reviews.error.rating': 'Bitte wähle eine Bewertung von 1 bis 5 Sternen.',
+  'reviews.error.comment':
+    'Deine Erfahrung muss 10 bis 3000 Zeichen enthalten.',
+  'reviews.error.photoEmpty':
+    'Die ausgewählte Datei ist leer. Bitte wähle ein Foto aus.',
+  'reviews.error.photoType':
+    'Bitte wähle ein gültiges JPEG-, PNG- oder WebP-Foto aus.',
+  'reviews.error.photoSize': 'Das Foto darf höchstens 5 MB groß sein.',
+  'reviews.error.photoCount': 'Bitte wähle höchstens ein Foto aus.',
+  'reviews.error.malformed':
+    'Das Formular konnte nicht gelesen werden. Bitte versuche es erneut.',
+  'reviews.error.requestSize':
+    'Das Formular ist zu groß. Bitte kürze deine Angaben oder wähle ein kleineres Foto.',
+  'reviews.error.method':
+    'Das Formular konnte nicht übermittelt werden. Bitte versuche es erneut.',
+  'reviews.error.contentType':
+    'Das Formularformat wird nicht unterstützt. Bitte versuche es erneut.',
   'reviews.submit': 'Bewertung senden',
   'policies.title': 'Richtlinien',
   'policies.back': 'Zurück zu den Richtlinien',

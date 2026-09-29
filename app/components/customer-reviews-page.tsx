@@ -1,3 +1,11 @@
+import {useEffect, useRef} from 'react';
+import {useFetcher} from 'react-router';
+import type {
+  CustomerReviewActionData,
+  ReviewError,
+  ReviewField,
+} from '~/lib/customer-review.server';
+import type {TranslationKey} from '~/i18n';
 import type {
   CustomerReview,
   CustomerReviewsHero,
@@ -286,8 +294,56 @@ function ExperienceSteps({content}: {content: CustomerReviewsSteps}) {
 
 const REVIEW_RATING_OPTIONS = [5, 4, 3, 2, 1] as const;
 
+const REVIEW_ERROR_KEYS = {
+  firstName: 'reviews.error.firstName',
+  lastName: 'reviews.error.lastName',
+  email: 'reviews.error.email',
+  phone: 'reviews.error.phone',
+  rating: 'reviews.error.rating',
+  comment: 'reviews.error.comment',
+  photoEmpty: 'reviews.error.photoEmpty',
+  photoType: 'reviews.error.photoType',
+  photoSize: 'reviews.error.photoSize',
+  photoCount: 'reviews.error.photoCount',
+  malformed: 'reviews.error.malformed',
+  requestSize: 'reviews.error.requestSize',
+  method: 'reviews.error.method',
+  contentType: 'reviews.error.contentType',
+} as const satisfies Record<ReviewError, TranslationKey>;
+
 function CustomerReviewForm() {
   const {t} = useTranslation();
+  const fetcher = useFetcher<CustomerReviewActionData>();
+  const formRef = useRef<HTMLFormElement>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
+  const pendingRef = useRef(false);
+  const submittedCompanyRef = useRef(false);
+  const isSubmitting = fetcher.state !== 'idle';
+  const result = isSubmitting ? undefined : fetcher.data;
+  const errors = result && !result.ok ? result.fieldErrors : undefined;
+
+  useEffect(() => {
+    if (fetcher.state !== 'idle' || !pendingRef.current) return;
+    pendingRef.current = false;
+    if (fetcher.data?.ok && !submittedCompanyRef.current) {
+      formRef.current?.reset();
+    }
+    feedbackRef.current?.focus();
+  }, [fetcher.state, fetcher.data]);
+
+  const fieldAttributes = (field: ReviewField) => ({
+    disabled: isSubmitting,
+    'aria-invalid': Boolean(errors?.[field]),
+    'aria-describedby': errors?.[field] ? `review-${field}-error` : undefined,
+  });
+  const fieldError = (field: ReviewField) => {
+    const code = errors?.[field];
+    if (!code) return null;
+    const key = Object.prototype.hasOwnProperty.call(REVIEW_ERROR_KEYS, code)
+      ? REVIEW_ERROR_KEYS[code]
+      : 'reviews.error.malformed';
+    return <p id={`review-${field}-error`}>{t(key)}</p>;
+  };
   return (
     <section
       className="customer-reviews-page__submission"
@@ -299,25 +355,55 @@ function CustomerReviewForm() {
             {t('reviews.formKicker')}
           </span>
           <h2 id="customer-review-form-title">{t('reviews.formTitle')}</h2>
-          <p>
-            {t('reviews.formDescription')}
-          </p>
+          <p>{t('reviews.formDescription')}</p>
         </header>
 
-        <form
+        <fetcher.Form
           className="customer-reviews-page__submission-form"
-          onSubmit={(event) => event.preventDefault()}
+          ref={formRef}
+          method="post"
+          action="/api/customer-review"
+          encType="multipart/form-data"
+          noValidate
+          aria-busy={isSubmitting}
+          onSubmit={(event) => {
+            if (pendingRef.current || isSubmitting) {
+              event.preventDefault();
+              return;
+            }
+            pendingRef.current = true;
+            submittedCompanyRef.current = Boolean(
+              new FormData(event.currentTarget).get('company'),
+            );
+          }}
         >
+          <div hidden aria-hidden="true">
+            <label htmlFor="review-company">{t('common.company')}</label>
+            <input
+              id="review-company"
+              name="company"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
           <div className="customer-reviews-page__form-grid">
             <div className="customer-reviews-page__form-field">
-              <label htmlFor="review-first-name">{t('account.firstName')}</label>
+              <label htmlFor="review-first-name">
+                {t('account.firstName')}
+              </label>
               <input
                 id="review-first-name"
                 name="firstName"
                 type="text"
                 autoComplete="given-name"
+                minLength={2}
+                maxLength={80}
+                required
+                {...fieldAttributes('firstName')}
                 placeholder={t('reviews.firstNamePlaceholder')}
               />
+              {fieldError('firstName')}
             </div>
 
             <div className="customer-reviews-page__form-field">
@@ -327,8 +413,11 @@ function CustomerReviewForm() {
                 name="lastName"
                 type="text"
                 autoComplete="family-name"
+                maxLength={80}
+                {...fieldAttributes('lastName')}
                 placeholder={t('reviews.lastNamePlaceholder')}
               />
+              {fieldError('lastName')}
             </div>
 
             <div className="customer-reviews-page__form-field">
@@ -339,8 +428,12 @@ function CustomerReviewForm() {
                 type="email"
                 autoComplete="email"
                 inputMode="email"
+                maxLength={254}
+                required
+                {...fieldAttributes('email')}
                 placeholder={t('reviews.emailPlaceholder')}
               />
+              {fieldError('email')}
             </div>
 
             <div className="customer-reviews-page__form-field">
@@ -351,11 +444,17 @@ function CustomerReviewForm() {
                 type="tel"
                 autoComplete="tel"
                 inputMode="tel"
+                maxLength={40}
+                {...fieldAttributes('phone')}
                 placeholder={t('reviews.phonePlaceholder')}
               />
+              {fieldError('phone')}
             </div>
 
-            <fieldset className="customer-reviews-page__rating-field">
+            <fieldset
+              className="customer-reviews-page__rating-field"
+              {...fieldAttributes('rating')}
+            >
               <legend>{t('reviews.yourRating')}</legend>
               <div className="customer-reviews-page__rating-control">
                 {REVIEW_RATING_OPTIONS.map((rating) => (
@@ -365,6 +464,7 @@ function CustomerReviewForm() {
                       name="rating"
                       type="radio"
                       value={rating}
+                      required
                     />
                     <label htmlFor={`review-rating-${rating}`}>
                       <span aria-hidden="true">★</span>
@@ -375,6 +475,7 @@ function CustomerReviewForm() {
                   </div>
                 ))}
               </div>
+              {fieldError('rating')}
             </fieldset>
 
             <div className="customer-reviews-page__form-field customer-reviews-page__form-field--wide">
@@ -383,8 +484,13 @@ function CustomerReviewForm() {
                 id="review-comment"
                 name="comment"
                 rows={5}
+                minLength={10}
+                maxLength={3000}
+                required
+                {...fieldAttributes('comment')}
                 placeholder={t('reviews.experiencePlaceholder')}
               />
+              {fieldError('comment')}
             </div>
 
             <div className="customer-reviews-page__form-field customer-reviews-page__form-field--wide customer-reviews-page__upload-field">
@@ -394,15 +500,30 @@ function CustomerReviewForm() {
                 name="photo"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
+                {...fieldAttributes('photo')}
               />
               <span>{t('reviews.fileTypes')}</span>
+              {fieldError('photo')}
             </div>
           </div>
 
           <footer className="customer-reviews-page__submission-footer">
-            <button type="submit">{t('reviews.submit')}</button>
+            <button type="submit" disabled={isSubmitting}>
+              {t(isSubmitting ? 'reviews.submitting' : 'reviews.submit')}
+            </button>
           </footer>
-        </form>
+          <div
+            ref={feedbackRef}
+            tabIndex={-1}
+            role={result && !result.ok ? 'alert' : 'status'}
+            aria-live={result && !result.ok ? 'assertive' : 'polite'}
+            aria-atomic="true"
+          >
+            {result?.ok ? <p>{t('reviews.success')}</p> : null}
+            {result && !result.ok ? <p>{t('reviews.errorSummary')}</p> : null}
+            {fieldError('_form')}
+          </div>
+        </fetcher.Form>
       </div>
     </section>
   );
