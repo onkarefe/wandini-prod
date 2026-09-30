@@ -113,7 +113,7 @@ describe('storefront semantic invariants', () => {
     },
   );
 
-  it('resolves every tab control against the mounted shared panel', async () => {
+  it('connects only the active tab to the mounted shared panel without a hidden heading', async () => {
     const html = await markup(
       createElement(ProductDetailTabs, {
         tabTitles: ['Description', 'Materials', 'Delivery'],
@@ -135,6 +135,22 @@ describe('storefront semantic invariants', () => {
       'false',
       'false',
     ]);
+    const tabs = [...html.matchAll(/<button\b[^>]*role="tab"[^>]*>/g)].map(
+      ([tag]) => tag,
+    );
+    const panel = html.match(/<div\b[^>]*role="tabpanel"[^>]*>/)?.[0] ?? '';
+    const activeTab = tabs[0];
+    expect(attributes(activeTab, 'aria-controls')).toHaveLength(1);
+    expect(
+      tabs.slice(1).map((tab) => attributes(tab, 'aria-controls')),
+    ).toEqual([[], []]);
+    expect(attributes(activeTab, 'aria-controls')).toEqual(
+      attributes(panel, 'id'),
+    );
+    expect(attributes(panel, 'aria-labelledby')).toEqual(
+      attributes(activeTab, 'id'),
+    );
+    expect(html).not.toMatch(/<h2\b[^>]*>Description<\/h2>/);
     expectResolvedRelationships(html);
   });
 

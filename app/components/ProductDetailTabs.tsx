@@ -1,9 +1,4 @@
-import {
-  useId,
-  useState,
-  type KeyboardEvent,
-  type ReactNode,
-} from 'react';
+import {useId, useState, type KeyboardEvent, type ReactNode} from 'react';
 import {useTranslation} from '~/i18n/useTranslation';
 
 export interface ProductDetailTabsProps {
@@ -68,7 +63,9 @@ export function ProductDetailTabs({
               type="button"
               role="tab"
               id={`${tabsId}-tab-${index}`}
-              aria-controls={`${tabsId}-panel`}
+              aria-controls={
+                activeTab === index ? `${tabsId}-panel` : undefined
+              }
               aria-selected={activeTab === index}
               tabIndex={activeTab === index ? 0 : -1}
             >
@@ -83,7 +80,6 @@ export function ProductDetailTabs({
       </div>
 
       <div className="custom-tabs-content">
-        <h2 className="sr-only">{tabTitles[activeTab]}</h2>
         <div
           className="customTabContent"
           role="tabpanel"

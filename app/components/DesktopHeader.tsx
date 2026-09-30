@@ -23,7 +23,7 @@ import {
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {LanguageSwitcher} from '~/components/LanguageSwitcher';
-import {Link, NavLink} from '~/lib/i18n-router';
+import {Link, NavLink, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
 
 type FieldRecord = {
@@ -803,11 +803,12 @@ function CartAction({
   const {t} = useTranslation();
   const {open} = useAside();
   const {publish, shop, cart, prevCart} = useAnalytics();
+  const cartPath = usePrefixPathWithLocale('/cart');
 
   return (
-    <button
-      type="button"
+    <a
       className="dhx-cart"
+      href={cartPath}
       aria-label={t('navigation.openCart')}
       title={t('navigation.cart')}
       onClick={(event) => {
@@ -826,7 +827,7 @@ function CartAction({
         <BagIcon />
         {count !== null && count > 0 ? <b>{count}</b> : null}
       </span>
-    </button>
+    </a>
   );
 }
 

@@ -66,11 +66,6 @@
 }
 
 .h-cartBox {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #000;
-  font: inherit;
   position: relative;
   display: flex;
   width: max-content;
@@ -648,7 +643,9 @@
     margin-top: 4px;
   }
 
-  .h-desktopSearchResults .predictive-search-result .predictive-search-result__title {
+  .h-desktopSearchResults
+    .predictive-search-result
+    .predictive-search-result__title {
     margin: 0;
     padding: 0 0 9px;
     border-bottom: 1px solid #dededb;
@@ -1283,7 +1280,9 @@
   margin-top: 10px;
 }
 
-.aside-panel--search .predictive-search-result .predictive-search-result__title {
+.aside-panel--search
+  .predictive-search-result
+  .predictive-search-result__title {
   line-height: 1.4;
   margin: 0;
   padding: 0 0 12px;

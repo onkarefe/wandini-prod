@@ -22,7 +22,7 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
-import {Link, NavLink} from '~/lib/i18n-router';
+import {Link, NavLink, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
 
 type FieldRecord = {
@@ -244,7 +244,8 @@ function HeaderSearch() {
         onClose={closeResults}
       >
         {({items, total, term, state, closeSearch}) => {
-          if (!isOpen || !term.current) return <datalist id={queriesDatalistId} />;
+          if (!isOpen || !term.current)
+            return <datalist id={queriesDatalistId} />;
 
           const {collections, products, queries} = items;
           const searchUrl = `${SEARCH_ENDPOINT}?${new URLSearchParams({
@@ -955,10 +956,11 @@ function CartBadge({
   const {open} = useAside();
   const {t} = useTranslation();
   const {publish, shop, cart, prevCart} = useAnalytics();
+  const cartPath = usePrefixPathWithLocale('/cart');
 
   return (
-    <button
-      type="button"
+    <a
+      href={cartPath}
       className="h-cartBox"
       aria-label={t('navigation.cart')}
       onClick={(e) => {
@@ -998,6 +1000,6 @@ function CartBadge({
       {showLabel ? (
         <span className="wh-actionLabel">{t('navigation.cart')}</span>
       ) : null}
-    </button>
+    </a>
   );
 }
