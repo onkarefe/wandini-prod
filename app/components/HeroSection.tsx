@@ -34,13 +34,6 @@ export default function HeroSection({
             alt=""
             className="hero-background-image"
             sizes="100vw"
-            srcSet={[480, 768, 1024, 1280, 1600, 1920]
-              .map((width) => {
-                const url = new URL(backgroundImage.url);
-                url.searchParams.set('width', String(width));
-                return `${url.toString()} ${width}w`;
-              })
-              .join(', ')}
             loading="eager"
             fetchPriority="high"
           />
