@@ -2,62 +2,71 @@ import {Image} from '@shopify/hydrogen';
 import {Link} from '~/lib/i18n-router';
 
 type HeroImage = {
-    url: string;
-    altText?: string | null;
-    width?: number | null;
-    height?: number | null;
+  url: string;
+  altText?: string | null;
+  width?: number | null;
+  height?: number | null;
 } | null;
 
 export default function HeroSection({
-    title,
-    st1,
-    st2,
-    buttonText,
-    buttonAction,
-    backgroundImage,
+  title,
+  st1,
+  st2,
+  buttonText,
+  buttonAction,
+  backgroundImage,
 }: {
-    title: string;
-    st1: string;
-    st2: string;
-    buttonText: string;
-    buttonAction: string;
-    backgroundImage: HeroImage;
+  title: string;
+  st1: string;
+  st2: string;
+  buttonText: string;
+  buttonAction: string;
+  backgroundImage: HeroImage;
 }) {
-    const buttonHref = buttonAction.trim();
+  const buttonHref = buttonAction.trim();
 
-    return (
-        <section className="relative overflow-hidden !p-0">
-            <div className="relative overflow-hidden mainHeroDiv">
-                {backgroundImage?.url ? (
-                    <Image
-                        data={backgroundImage}
-                        alt=""
-                        className="hero-background-image"
-                        sizes="100vw"
-                        loading="eager"
-                        fetchPriority="high"
-                    />
-                ) : null}
-                <div className="container mx-auto hero-ContentContainer">
-                    <div className="hero-TitleBox">
-                        <p className="hero-st1">{st1}</p>
-                        {title.trim() ? <h1 className="hero-mainTitle">{title}</h1> : <div className="hero-mainTitle" />}
-                        <p className="hero-st2">{st2}</p>
-                        {buttonText && buttonHref ? (
-                            <Link
-                                className="defaultButton"
-                                to={buttonHref}
-                                aria-label={buttonText}
-                                title={buttonText}
-                            >
-                                {buttonText}
-                            </Link>
-                        ) : null}
-                    </div>
-                </div>
-            </div>
-
-
-        </section>
-    );
+  return (
+    <section className="relative overflow-hidden !p-0">
+      <div className="relative overflow-hidden mainHeroDiv">
+        {backgroundImage?.url ? (
+          <Image
+            data={backgroundImage}
+            alt=""
+            className="hero-background-image"
+            sizes="100vw"
+            srcSet={[480, 768, 1024, 1280, 1600, 1920]
+              .map((width) => {
+                const url = new URL(backgroundImage.url);
+                url.searchParams.set('width', String(width));
+                return `${url.toString()} ${width}w`;
+              })
+              .join(', ')}
+            loading="eager"
+            fetchPriority="high"
+          />
+        ) : null}
+        <div className="container mx-auto hero-ContentContainer">
+          <div className="hero-TitleBox">
+            <p className="hero-st1">{st1}</p>
+            {title.trim() ? (
+              <h1 className="hero-mainTitle">{title}</h1>
+            ) : (
+              <div className="hero-mainTitle" />
+            )}
+            <p className="hero-st2">{st2}</p>
+            {buttonText && buttonHref ? (
+              <Link
+                className="defaultButton"
+                to={buttonHref}
+                aria-label={buttonText}
+                title={buttonText}
+              >
+                {buttonText}
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }

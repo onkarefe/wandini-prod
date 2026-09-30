@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {Image} from '@shopify/hydrogen';
 import {useTranslation} from '~/i18n/useTranslation';
 
 export type UspImage = {
@@ -43,13 +44,20 @@ export default function UspBar({items, className}: UspBarProps) {
               <li key={key} className="uspbar__item">
                 {hasImg ? (
                   <span className="uspbar__icon" aria-hidden="true">
-                    <img
-                      src={item.icon!.url}
+                    <Image
+                      data={item.icon!}
                       alt=""
-                      width={item.icon?.width ?? 40}
-                      height={item.icon?.height ?? 40}
+                      aria-hidden="true"
                       loading="lazy"
                       className="uspbar__img"
+                      sizes="40px"
+                      srcSet={[40, 80, 120]
+                        .map((width) => {
+                          const url = new URL(item.icon!.url);
+                          url.searchParams.set('width', String(width));
+                          return `${url.toString()} ${width}w`;
+                        })
+                        .join(', ')}
                     />
                   </span>
                 ) : null}

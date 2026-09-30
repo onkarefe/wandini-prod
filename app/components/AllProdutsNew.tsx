@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useState} from 'react';
+import {Image} from '@shopify/hydrogen';
 import useEmblaCarousel from 'embla-carousel-react';
 import {useTranslation} from '~/i18n/useTranslation';
 import {Link} from '~/lib/i18n-router';
@@ -72,25 +73,37 @@ export function BestsellerCard({
     >
       {listingImage ? (
         <div className="all-productIMGBOX bestseller-product-media">
-          <img
-            src={listingImage.url}
+          <Image
+            data={listingImage}
             alt={listingImage.altText || product.title}
             className="all-product-image bestseller-product-image bestseller-product-image--listing"
-            width={listingImage.width ?? undefined}
-            height={listingImage.height ?? undefined}
             loading="lazy"
             decoding="async"
+            sizes="(max-width: 767px) 88vw, (max-width: 1199px) 45vw, 33vw"
+            srcSet={[320, 480, 640, 800, 960]
+              .map((width) => {
+                const url = new URL(listingImage.url);
+                url.searchParams.set('width', String(width));
+                return `${url.toString()} ${width}w`;
+              })
+              .join(', ')}
           />
           {hasHoverImage ? (
-            <img
-              src={primaryImage.url}
+            <Image
+              data={primaryImage}
               alt=""
               aria-hidden="true"
               className="all-product-image bestseller-product-image bestseller-product-image--primary"
-              width={primaryImage.width ?? undefined}
-              height={primaryImage.height ?? undefined}
               loading="lazy"
               decoding="async"
+              sizes="(max-width: 767px) 88vw, (max-width: 1199px) 45vw, 33vw"
+              srcSet={[320, 480, 640, 800, 960]
+                .map((width) => {
+                  const url = new URL(primaryImage.url);
+                  url.searchParams.set('width', String(width));
+                  return `${url.toString()} ${width}w`;
+                })
+                .join(', ')}
             />
           ) : null}
         </div>

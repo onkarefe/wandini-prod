@@ -1,4 +1,5 @@
 import {Link} from '~/lib/i18n-router';
+import {Image} from '@shopify/hydrogen';
 
 type StepByStepImage = {
   url: string;
@@ -100,13 +101,19 @@ export default function CustomOrder({content}: CustomOrderProps) {
               >
                 {step.image?.url ? (
                   <div className="processSteps__media">
-                    <img
+                    <Image
                       className="processSteps__image"
-                      src={step.image.url}
+                      data={step.image}
                       alt={step.image.altText ?? step.title}
-                      width={step.image.width}
-                      height={step.image.height}
                       loading="lazy"
+                      sizes="(max-width: 767px) 100vw, 50vw"
+                      srcSet={[320, 480, 640, 800, 1024]
+                        .map((width) => {
+                          const url = new URL(step.image!.url);
+                          url.searchParams.set('width', String(width));
+                          return `${url.toString()} ${width}w`;
+                        })
+                        .join(', ')}
                     />
                   </div>
                 ) : null}

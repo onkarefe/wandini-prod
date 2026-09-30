@@ -110,20 +110,20 @@ export function Footer({
     <Suspense>
       <Await resolve={footerPromise}>
         {(footer) => (
-          <footer className='custom-footer'>
-            <div className='footer-subsBox'>
-              <div className='footerSubsTitle'>
+          <footer className="custom-footer">
+            <div className="footer-subsBox">
+              <div className="footerSubsTitle">
                 {t('footer.newsletterTitle')}
               </div>
 
-              <div className='footerSubsSubtitle'>
+              <div className="footerSubsSubtitle">
                 {t('footer.newsletterDescription')}
               </div>
 
               <fetcher.Form
-                method='post'
-                action='/api/newsletter'
-                className='footerInputBox'
+                method="post"
+                action="/api/newsletter"
+                className="footerInputBox"
                 aria-busy={isSubmitting}
                 onSubmit={(event) => {
                   if (submissionPendingRef.current || isSubmitting) {
@@ -134,23 +134,23 @@ export function Footer({
                 }}
               >
                 <svg
-                  className='footerEmailIcon'
-                  viewBox='0 0 24 24'
-                  aria-hidden='true'
+                  className="footerEmailIcon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
-                  <path d='M3.5 5.5h17v13h-17z' />
-                  <path d='m4 6 8 6 8-6' />
+                  <path d="M3.5 5.5h17v13h-17z" />
+                  <path d="m4 6 8 6 8-6" />
                 </svg>
                 <input
                   ref={emailRef}
-                  type='email'
-                  name='email'
+                  type="email"
+                  name="email"
                   required
                   maxLength={254}
-                  autoComplete='email'
+                  autoComplete="email"
                   aria-label={t('footer.emailPlaceholder')}
                   placeholder={t('footer.emailPlaceholder')}
-                  className='footerEmailInput'
+                  className="footerEmailInput"
                   onInvalid={(event) => {
                     event.preventDefault();
                     event.currentTarget.focus();
@@ -158,8 +158,8 @@ export function Footer({
                   }}
                 />
                 <button
-                  type='submit'
-                  className='footerSubscribeButton'
+                  type="submit"
+                  className="footerSubscribeButton"
                   disabled={isSubmitting}
                 >
                   {t(
@@ -171,31 +171,33 @@ export function Footer({
               </fetcher.Form>
             </div>
 
-            <div className='footer-main'>
-              <div className='container mx-auto'>
-                <div className='footerRow'>
-                  <div className='footer-logoCol'>
+            <div className="footer-main">
+              <div className="container mx-auto">
+                <div className="footerRow">
+                  <div className="footer-logoCol">
                     <img
                       src={wandiniWhiteLogo}
+                      width={2172}
+                      height={724}
                       alt={header.shop.name || 'Wandini'}
-                      className='footer-logo-img'
+                      className="footer-logo-img"
                     />
                   </div>
 
                   {/* ----- FOOTER MENÜ BÖLÜMLERİ ----- */}
                   {footer?.menu && (
                     <nav
-                      className='footer-sections'
+                      className="footer-sections"
                       aria-label={t('footer.navigation')}
                     >
                       {footer.menu.items.map((section) => (
-                        <div className='footer-section' key={section.id}>
-                          <div className='footer-section-title'>
+                        <div className="footer-section" key={section.id}>
+                          <div className="footer-section-title">
                             {section.title}
                           </div>
 
                           {section.items && section.items.length > 0 && (
-                            <ul className='footer-links'>
+                            <ul className="footer-links">
                               {section.items.map((item) => {
                                 const cleanedUrl = normalizeMenuUrl(
                                   item.url ?? '#',
@@ -207,7 +209,7 @@ export function Footer({
                                   <li key={item.id}>
                                     <NavLink
                                       to={cleanedUrl}
-                                      className='footer-link'
+                                      className="footer-link"
                                     >
                                       {item.title}
                                     </NavLink>
@@ -222,15 +224,19 @@ export function Footer({
                   )}
                 </div>
 
-                <div className='footerSubBanner'>
+                <div className="footerSubBanner">
                   <span>{t('footer.copyright')}</span>
                   <ul
-                    className='footerPaymentMethods'
-                    aria-label='Accepted payment methods'
+                    className="footerPaymentMethods"
+                    aria-label="Accepted payment methods"
                   >
                     {PAYMENT_METHODS.map((method) => (
                       <li key={method.name}>
-                        <img src={method.icon} alt={method.name} loading='lazy' />
+                        <img
+                          src={method.icon}
+                          alt={method.name}
+                          loading="lazy"
+                        />
                       </li>
                     ))}
                   </ul>
