@@ -394,7 +394,7 @@ export default function Addresses() {
         <button
           className="account-button account-button--primary"
           type="button"
-          aria-controls={NEW_ADDRESS_ID}
+          aria-controls={isCreateOpen ? NEW_ADDRESS_ID : undefined}
           aria-expanded={isCreateOpen}
           onClick={() => setIsCreateOpen((current) => !current)}
         >

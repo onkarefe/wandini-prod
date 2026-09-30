@@ -15,6 +15,7 @@ type ProductPrice = {
 };
 
 interface CustomProductCardProps {
+  headingLevel?: 'h2' | 'h3';
   productId: string;
   title: string;
   images: {url: string; altText?: string}[];
@@ -75,6 +76,7 @@ function formatPriceLabel(
 }
 
 export const CustomProductCard: React.FC<CustomProductCardProps> = ({
+  headingLevel = 'h3',
   productId,
   title,
   images,
@@ -86,6 +88,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   isWishlisted = false,
   onWishlistChange,
 }) => {
+  const Heading = headingLevel;
   const {locale, t} = useTranslation();
   const primaryImage = images[0] ?? null;
   const listingImage = images[1] ?? primaryImage;
@@ -217,7 +220,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
         ) : null}
 
         <div className="custom-product-card__body">
-          <h3 className="custom-product-card__title">{title}</h3>
+          <Heading className="custom-product-card__title">{title}</Heading>
           {priceLabel ? (
             <p className="custom-product-card__price">
               {t('product.startingPrice')} {priceLabel} / m²

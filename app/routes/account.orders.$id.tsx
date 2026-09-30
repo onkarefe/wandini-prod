@@ -364,7 +364,7 @@ function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
         <div className="account-order__product">
           {lineItem?.image && (
             <div className="account-order__product-image">
-              <Image data={lineItem.image} width={88} height={88} />
+              <Image alt={lineItem.image.altText || lineItem.title} data={lineItem.image} width={88} height={88} />
             </div>
           )}
           <div className="account-order__product-copy">

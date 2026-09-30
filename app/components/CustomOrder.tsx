@@ -78,9 +78,9 @@ export default function CustomOrder({content}: CustomOrderProps) {
           <header className="processSteps__header">
             {mainTitle ? (
               <div className="seperator processSteps__heading">
-                <h3 id="process-steps-title" className="processSteps__title">
+                <h2 id="process-steps-title" className="processSteps__title">
                   {mainTitle}
-                </h3>
+                </h2>
               </div>
             ) : null}
             {mainDescription ? (
@@ -120,7 +120,7 @@ export default function CustomOrder({content}: CustomOrderProps) {
                   </div>
 
                   {step.title ? (
-                    <h4 className="processSteps__cardTitle">{step.title}</h4>
+                    <h3 className="processSteps__cardTitle">{step.title}</h3>
                   ) : null}
                   {step.description ? (
                     <p className="processSteps__cardDescription">

@@ -835,9 +835,9 @@ export default function Page() {
         ) : null}
         <Suspense
           fallback={
-            <main className="kontakt-page" aria-busy="true">
+            <div className="kontakt-page" aria-busy="true">
               <div className="kontakt-page__hero container mx-auto" />
-            </main>
+            </div>
           }
         >
           <Kontakt title={page.title} data={kontakt} />
@@ -860,9 +860,9 @@ export default function Page() {
         ) : null}
         <Suspense
           fallback={
-            <main className="faq-page" aria-busy="true">
+            <div className="faq-page" aria-busy="true">
               <div className="faq-page__content container mx-auto" />
-            </main>
+            </div>
           }
         >
           <FAQ title={page.title} categories={faqCategories} copy={faqCopy} />
@@ -877,11 +877,12 @@ export default function Page() {
         {breadcrumbContent}
         <Suspense
           fallback={
-            <main className="static-page" aria-busy="true">
+            <div className="static-page" aria-busy="true">
               <div className="static-page__article container mx-auto" />
-            </main>
+            </div>
           }
         >
+          {!customerReviewsHero?.title?.trim() ? <h1 className="sr-only">{page.title}</h1> : null}
           <CustomerReviewsPage
             hero={customerReviewsHero}
             reviews={customerReviews}
@@ -896,7 +897,7 @@ export default function Page() {
   return (
     <>
       {breadcrumbContent}
-      <main className="static-page">
+      <div className="static-page">
         <article className="static-page__article container mx-auto">
           <header className="static-page__header">
             <h1 className="static-page__title">{page.title}</h1>
@@ -906,7 +907,7 @@ export default function Page() {
             dangerouslySetInnerHTML={{__html: page.body}}
           />
         </article>
-      </main>
+      </div>
     </>
   );
 }

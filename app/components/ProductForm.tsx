@@ -120,7 +120,7 @@ export function ProductForm({
 
           return (
             <div className="product-options" key={option.name}>
-              <h5>{t('product.selectMaterial')}</h5>
+              <h2>{t('product.selectMaterial')}</h2>
               <div>
                 {option.optionValues.map((value) => {
                   const { name, variantUriQuery, selected, exists } = value;
@@ -154,9 +154,10 @@ export function ProductForm({
                       key={option.name + name}
                       className={`propertyLabelBox${selected ? ' selectedVariant' : ''}`}
                     >
-                      <div className="propertyRatioTitle">
+                      <span className="propertyRatioTitle">
                         <input
                           type="radio"
+                          aria-label={title}
                           checked={selected}
                           disabled={!exists}
                           onChange={() => {
@@ -175,12 +176,12 @@ export function ProductForm({
                           </span>
                         )}
                         {ratio && <span>({ratio})</span>}
-                      </div>
-                      <ul className="propertyBox">
+                      </span>
+                      <span className="propertyBox" role="list">
                         {propertyList.map((p: string) => (
-                          <li key={`${name}-${p}`}>{p}</li>
+                          <span role="listitem" key={`${name}-${p}`}>{p}</span>
                         ))}
-                      </ul>
+                      </span>
                     </label>
                   );
                 })}
@@ -192,7 +193,7 @@ export function ProductForm({
         // -------- OTHER OPTIONS --------
         return (
           <div className="product-options" key={option.name}>
-            <h5>{option.name}</h5>
+            <h2>{option.name}</h2>
             <div className="product-options-grid">
               {option.optionValues.map((value) => {
                 const {
@@ -209,6 +210,7 @@ export function ProductForm({
                   return (
                     <Link
                       key={name}
+                      aria-label={name}
                       to={`/products/${handle}?${variantUriQuery}`}
                       replace
                       preventScrollReset
@@ -220,6 +222,9 @@ export function ProductForm({
 
                 return (
                   <button
+                    type="button"
+                    aria-label={name}
+                    aria-pressed={selected}
                     key={name}
                     disabled={!exists}
                     onClick={() => {
@@ -300,7 +305,7 @@ function ProductOptionSwatch({
   if (!image && !color) return name;
 
   return (
-    <div aria-label={name} style={{ backgroundColor: color || 'transparent' }}>
+    <div aria-hidden="true" style={{ backgroundColor: color || 'transparent' }}>
       {!!image && <img src={image} alt={name} />}
     </div>
   );

@@ -68,7 +68,7 @@ export function ProductDetailTabs({
               type="button"
               role="tab"
               id={`${tabsId}-tab-${index}`}
-              aria-controls={`${tabsId}-panel-${index}`}
+              aria-controls={`${tabsId}-panel`}
               aria-selected={activeTab === index}
               tabIndex={activeTab === index ? 0 : -1}
             >
@@ -83,10 +83,11 @@ export function ProductDetailTabs({
       </div>
 
       <div className="custom-tabs-content">
+        <h2 className="sr-only">{tabTitles[activeTab]}</h2>
         <div
           className="customTabContent"
           role="tabpanel"
-          id={`${tabsId}-panel-${activeTab}`}
+          id={`${tabsId}-panel`}
           aria-labelledby={`${tabsId}-tab-${activeTab}`}
           tabIndex={0}
         >

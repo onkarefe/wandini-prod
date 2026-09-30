@@ -66,6 +66,11 @@
 }
 
 .h-cartBox {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #000;
+  font: inherit;
   position: relative;
   display: flex;
   width: max-content;
@@ -643,7 +648,7 @@
     margin-top: 4px;
   }
 
-  .h-desktopSearchResults .predictive-search-result h2 {
+  .h-desktopSearchResults .predictive-search-result .predictive-search-result__title {
     margin: 0;
     padding: 0 0 9px;
     border-bottom: 1px solid #dededb;
@@ -1131,7 +1136,7 @@
   border-bottom: 1px solid #dededb;
 }
 
-.aside-panel--search > header h3 {
+.aside-panel--search > header .aside-title {
   margin: 0;
   font-size: 0.72rem;
   font-weight: 650;
@@ -1160,7 +1165,7 @@
   text-decoration: none;
 }
 
-.aside-panel--search > main {
+.aside-panel--search > .aside-content {
   min-height: 0;
   margin: 0;
   overflow: hidden;
@@ -1278,7 +1283,8 @@
   margin-top: 10px;
 }
 
-.aside-panel--search .predictive-search-result h2 {
+.aside-panel--search .predictive-search-result .predictive-search-result__title {
+  line-height: 1.4;
   margin: 0;
   padding: 0 0 12px;
   border-bottom: 1px solid #111;
@@ -1527,7 +1533,7 @@ aside header .close {
   margin: 0;
 }
 
-.aside-panel--cart > main {
+.aside-panel--cart > .aside-content {
   min-width: 0;
   min-height: 0;
   margin: 0;

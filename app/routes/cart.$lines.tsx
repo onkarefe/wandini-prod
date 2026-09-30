@@ -1,6 +1,6 @@
 import {Form, redirect, useLoaderData, useLocation} from 'react-router';
 import type {Route} from './+types/cart.$lines';
-import {getLocaleFromRequest, redirectToLocalePath} from '~/lib/locale';
+import {getLocaleFromPathname, getLocaleFromRequest, redirectToLocalePath} from '~/lib/locale';
 import {createTranslator} from '~/i18n';
 import {useTranslation} from '~/i18n/useTranslation';
 import {Link} from '~/lib/i18n-router';
@@ -17,8 +17,11 @@ type CartCheckoutConfirmation = {
   lineCount: number;
 };
 
-export const meta: Route.MetaFunction = () => {
-  return [{name: 'robots', content: getRobotsDirective('noindex,follow')}];
+export const meta: Route.MetaFunction = ({location}) => {
+  return [
+    {title: createTranslator(getLocaleFromPathname(location.pathname))('cart.continueCheckoutTitle')},
+    {name: 'robots', content: getRobotsDirective('noindex,follow')},
+  ];
 };
 
 function parseCartLines(lines: string) {
@@ -164,7 +167,7 @@ export default function Component() {
   const location = useLocation();
 
   return (
-    <main
+    <div
       style={{
         minHeight: '60vh',
         display: 'grid',
@@ -200,6 +203,6 @@ export default function Component() {
           <Link to="/cart">{t('cart.cancelToCart')}</Link>
         </p>
       </div>
-    </main>
+    </div>
   );
 }

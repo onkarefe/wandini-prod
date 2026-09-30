@@ -13,6 +13,7 @@ import {
   useRouteLoaderData,
 } from 'react-router';
 import {useTranslation} from '~/i18n/useTranslation';
+import {createTranslator} from '~/i18n';
 import {Link} from '~/lib/i18n-router';
 import type {Route} from './+types/root';
 import favicon from '~/assets/favicon.png';
@@ -25,11 +26,28 @@ import desktopHeaderStyles from '~/styles/desktop-header.css?url';
 import notFoundStyles from '~/styles/not-found.css?url';
 import {PageLayout} from './components/PageLayout';
 import {NotFoundPage} from './components/NotFoundPage';
-import {didLocaleChange, getLocaleFromI18n} from '~/lib/locale';
+import {
+  didLocaleChange,
+  getLocaleFromI18n,
+  getLocaleFromPathname,
+} from '~/lib/locale';
 import {SEO_DISABLED_ROBOTS_DIRECTIVE, SEO_ENABLED} from '~/lib/seo';
 import {loadShopifyGlobalSeoSettings} from '~/lib/shopify-marketing-seo.server';
 
 export type RootLoader = typeof loader;
+
+export const meta: Route.MetaFunction = ({data, error, location}) => {
+  const t = createTranslator(
+    data?.selectedLocale ?? getLocaleFromPathname(location.pathname),
+  );
+  return [{
+    title: error
+      ? t(isRouteErrorResponse(error) && error.status === 404
+          ? 'notFound.title'
+          : 'errors.title')
+      : data?.header?.shop?.name || 'Wandini',
+  }];
+};
 
 const archivoFontHref = '/fonts/archivo-latin-wght-normal.woff2';
 
@@ -224,7 +242,7 @@ export default function App() {
   const data = useRouteLoaderData<RootLoader>('root');
 
   if (!data) {
-    return <Outlet />;
+    return <main><Outlet /></main>;
   }
 
   const appContent = (
@@ -277,12 +295,12 @@ export function ErrorBoundary() {
     return data ? (
       <PageLayout {...data}>{notFoundPage}</PageLayout>
     ) : (
-      notFoundPage
+      <main>{notFoundPage}</main>
     );
   }
 
   return (
-    <div className="route-error">
+    <main className="route-error">
       <h1>{t('errors.title')}</h1>
       <h2>{errorStatus}</h2>
       {errorMessage && (
@@ -291,6 +309,6 @@ export function ErrorBoundary() {
         </fieldset>
       )}
       <Link to="/">{t('errors.backHome')}</Link>
-    </div>
+    </main>
   );
 }

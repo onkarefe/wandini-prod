@@ -79,7 +79,7 @@ function SearchAside() {
   return (
     <Aside type="search" heading={t('search.title')}>
       <div className="predictive-search">
-        <SearchFormPredictive>
+        <SearchFormPredictive role="search" aria-label={t('search.label')}>
           {({defaultValue, fetchResults, inputRef}) => (
             <div className="predictive-search-form__field">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -120,15 +120,23 @@ function SearchAside() {
 
             if (state !== 'idle' && term.current) {
               return (
-                <div className="predictive-search__loading" role="status">
-                  <span aria-hidden="true" />
-                  {t('search.searching')}
-                </div>
+                <>
+                  <datalist id={queriesDatalistId} />
+                  <div className="predictive-search__loading" role="status">
+                    <span aria-hidden="true" />
+                    {t('search.searching')}
+                  </div>
+                </>
               );
             }
 
             if (!total) {
-              return <SearchResultsPredictive.Empty term={term} />;
+              return (
+                <>
+                  <datalist id={queriesDatalistId} />
+                  <SearchResultsPredictive.Empty term={term} />
+                </>
+              );
             }
 
             return (
@@ -138,21 +146,25 @@ function SearchAside() {
                   queriesDatalistId={queriesDatalistId}
                 />
                 <SearchResultsPredictive.Products
+                  headingLevel="h3"
                   products={products}
                   closeSearch={closeSearch}
                   term={term}
                 />
                 <SearchResultsPredictive.Collections
+                  headingLevel="h3"
                   collections={collections}
                   closeSearch={closeSearch}
                   term={term}
                 />
                 <SearchResultsPredictive.Pages
+                  headingLevel="h3"
                   pages={pages}
                   closeSearch={closeSearch}
                   term={term}
                 />
                 <SearchResultsPredictive.Articles
+                  headingLevel="h3"
                   articles={articles}
                   closeSearch={closeSearch}
                   term={term}

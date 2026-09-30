@@ -33,6 +33,7 @@ export function SearchPageProductCard({
             aspectRatio="4/3"
             className="search-product-card__image"
             data={image}
+          alt={image.altText || product.title}
             fetchPriority={loading === 'eager' ? 'high' : 'auto'}
             loading={loading}
             sizes="(min-width: 1280px) 25vw, (min-width: 900px) 33vw, (min-width: 540px) 50vw, 100vw"

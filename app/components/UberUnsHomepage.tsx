@@ -55,7 +55,7 @@ export default function UberUnsHomepage({content}: UberUnsHomepageProps) {
         {hasText ? (
           <div className="uberUnsHomepage__content">
             {sectionTitle ? (
-              <h3 id="uber-uns-homepage-title">{sectionTitle}</h3>
+              <h2 id="uber-uns-homepage-title">{sectionTitle}</h2>
             ) : null}
             {sectionContent ? <p>{sectionContent}</p> : null}
             <img

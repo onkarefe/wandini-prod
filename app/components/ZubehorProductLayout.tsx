@@ -229,7 +229,8 @@ function ZubehorProductGallery({
 
       {hasMultipleImages ? (
         <div
-          className="zpd-gallery__thumbnails"
+          role="group"
+        className="zpd-gallery__thumbnails"
           aria-label={t('product.selectImage')}
         >
           {images.map((image, index) => (
@@ -500,7 +501,7 @@ export default function ZubehorProductLayout({
     : undefined;
 
   return (
-    <main className="zpd">
+    <div className="zpd">
       <div className="container mx-auto">
         <div className="zpd__product">
           <ZubehorProductGallery
@@ -729,6 +730,6 @@ export default function ZubehorProductLayout({
           </div>
         ) : null}
       </div>
-    </main>
+    </div>
   );
 }

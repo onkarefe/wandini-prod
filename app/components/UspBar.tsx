@@ -55,7 +55,7 @@ export default function UspBar({items, className}: UspBarProps) {
                 ) : null}
 
                 <div className="uspbar__text">
-                  <h3 className="uspbar__title">{item.title}</h3>
+                  <div className="uspbar__title">{item.title}</div>
                   {item.subtitle ? (
                     <p className="uspbar__subtitle">{item.subtitle}</p>
                   ) : null}

@@ -58,12 +58,12 @@ export default function ExampleSetHomepage({content}: ExampleSetHomepageProps) {
             ) : null}
 
             {title ? (
-              <h3
+              <h2
                 id="example-set-homepage-title"
                 className="exampleSetHomepage__title"
               >
                 {title}
-              </h3>
+              </h2>
             ) : null}
 
             {subdesc2 ? (

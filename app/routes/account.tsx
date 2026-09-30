@@ -81,13 +81,13 @@ export default function AccountLayout() {
         </header>
         <div className="account-shell__layout">
           <AccountMenu />
-          <main
+          <div
             className="account-shell__content"
             aria-busy={isNavigating || undefined}
             data-loading={isNavigating || undefined}
           >
             <Outlet context={{customer}} />
-          </main>
+          </div>
         </div>
       </div>
     </div>

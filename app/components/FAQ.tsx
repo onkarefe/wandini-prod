@@ -102,7 +102,7 @@ export default function FAQ({title, categories, copy}: FAQProps) {
   };
 
   return (
-    <main className="faq-page">
+    <div className="faq-page">
       <section className="faq-page__content container mx-auto">
         <header className="faq-page__header">
           <h1 className="faq-page__title">{title}</h1>
@@ -315,6 +315,6 @@ export default function FAQ({title, categories, copy}: FAQProps) {
           </fetcher.Form>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

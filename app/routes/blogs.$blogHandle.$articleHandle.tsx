@@ -291,6 +291,7 @@ export default function Article() {
               <div className="blog-detail-hero-media">
                 <Image
                   data={image}
+                  alt={image.altText || title}
                   sizes="(min-width: 1200px) 60vw, 100vw"
                   loading="eager"
                 />

@@ -93,6 +93,7 @@
 }
 
 .custom-product-card__title {
+  line-height: inherit;
   font-size: 18px;
   font-weight: bold;
   color: #111;

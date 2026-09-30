@@ -1,3 +1,5 @@
+import {getLocaleFromPathname} from '~/lib/locale';
+import {createTranslator} from '~/i18n';
 import {useLoaderData} from 'react-router';
 import type {Route} from './+types/policies._index';
 import type {PoliciesQuery, PolicyItemFragment} from 'storefrontapi.generated';
@@ -21,8 +23,11 @@ function stringifyJsonLd(data: unknown) {
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
-export const meta: Route.MetaFunction = () => {
-  return [{name: 'robots', content: getRobotsDirective('noindex,follow')}];
+export const meta: Route.MetaFunction = ({location}) => {
+  return [
+    {title: createTranslator(getLocaleFromPathname(location.pathname))('policies.title')},
+    {name: 'robots', content: getRobotsDirective('noindex,follow')},
+  ];
 };
 
 export async function loader({context, request}: Route.LoaderArgs) {

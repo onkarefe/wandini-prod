@@ -1,0 +1,1743 @@
+{
+  "sourceFiles": [
+    "app/components/AddToCartButton.tsx",
+    "app/components/AllProduts.tsx",
+    "app/components/AllProdutsNew.tsx",
+    "app/components/Aside.tsx",
+    "app/components/BestsellerCollectionLayout.tsx",
+    "app/components/BestsellerProductCard.tsx",
+    "app/components/CartLineItem.tsx",
+    "app/components/CartMain.tsx",
+    "app/components/CartSummary.tsx",
+    "app/components/CartUpsellCard.tsx",
+    "app/components/ConfigratorScene.tsx",
+    "app/components/ConfigratorScene2.tsx",
+    "app/components/Configurator.tsx",
+    "app/components/ConfiguratorModal.tsx",
+    "app/components/customCart.tsx",
+    "app/components/CustomCartSummary.tsx",
+    "app/components/customer-reviews-page.tsx",
+    "app/components/CustomerRevs.tsx",
+    "app/components/CustomGrid.tsx",
+    "app/components/CustomOrder.tsx",
+    "app/components/CustomProductCard.tsx",
+    "app/components/CustomProductGrid.tsx",
+    "app/components/CustomProductImage.tsx",
+    "app/components/DesktopHeader.tsx",
+    "app/components/ExampleSetHomepage.tsx",
+    "app/components/FAQ.tsx",
+    "app/components/filterBar.tsx",
+    "app/components/Footer.tsx",
+    "app/components/Header.tsx",
+    "app/components/HeroSection.tsx",
+    "app/components/kontakt.tsx",
+    "app/components/LanguageSwitcher.tsx",
+    "app/components/NotFoundPage.tsx",
+    "app/components/PageLayout.tsx",
+    "app/components/PaginatedResourceSection.tsx",
+    "app/components/ProductBreadcrumb.tsx",
+    "app/components/ProductDetailTabs.tsx",
+    "app/components/ProductForm.tsx",
+    "app/components/ProductImage.tsx",
+    "app/components/ProductItem.tsx",
+    "app/components/ProductPrice.tsx",
+    "app/components/productSize.tsx",
+    "app/components/ProductWishlistButton.tsx",
+    "app/components/SearchForm.tsx",
+    "app/components/SearchFormPredictive.tsx",
+    "app/components/SearchPageProductCard.tsx",
+    "app/components/SearchResults.tsx",
+    "app/components/SearchResultsPredictive.tsx",
+    "app/components/SimilarMotifsCarousel.tsx",
+    "app/components/UberUnsHomepage.tsx",
+    "app/components/UspBar.tsx",
+    "app/components/WallpaperProductLayout.tsx",
+    "app/components/WishlistToastListener.tsx",
+    "app/components/ZubehorCollectionLayout.tsx",
+    "app/components/ZubehorProductCard.tsx",
+    "app/components/ZubehorProductLayout.tsx",
+    "app/entry.client.tsx",
+    "app/entry.server.tsx",
+    "app/lib/i18n-router.tsx",
+    "app/root.tsx",
+    "app/routes/$.tsx",
+    "app/routes/account.$.tsx",
+    "app/routes/account.addresses.tsx",
+    "app/routes/account.favorites.tsx",
+    "app/routes/account.orders.$id.tsx",
+    "app/routes/account.orders._index.tsx",
+    "app/routes/account.profile.tsx",
+    "app/routes/account.tsx",
+    "app/routes/account._index.tsx",
+    "app/routes/account_.authorize.tsx",
+    "app/routes/account_.login.tsx",
+    "app/routes/account_.logout.tsx",
+    "app/routes/api.$version.[graphql.json].tsx",
+    "app/routes/api.wishlist.tsx",
+    "app/routes/blogs.$blogHandle.$articleHandle.tsx",
+    "app/routes/blogs.$blogHandle._index.tsx",
+    "app/routes/blogs._index.tsx",
+    "app/routes/cart.$lines.tsx",
+    "app/routes/cart.tsx",
+    "app/routes/checkout.tsx",
+    "app/routes/collections.$handle.tsx",
+    "app/routes/collections.all.tsx",
+    "app/routes/collections._index.tsx",
+    "app/routes/discount.$code.tsx",
+    "app/routes/locale.tsx",
+    "app/routes/pages.$handle.tsx",
+    "app/routes/policies.$handle.tsx",
+    "app/routes/policies._index.tsx",
+    "app/routes/products.$handle.tsx",
+    "app/routes/search.tsx",
+    "app/routes/similar-products.$.tsx",
+    "app/routes/similar-products.$slug.tsx",
+    "app/routes/similar-products._index.tsx",
+    "app/routes/sitemap.$type.$page[.xml].tsx",
+    "app/routes/[robots.txt].tsx",
+    "app/routes/[sitemap-similar-products.xml].tsx",
+    "app/routes/[sitemap.xml].tsx",
+    "app/routes/_index.tsx"
+  ],
+  "browserSnapshots": [
+    {
+      "title": "Made-to-Measure Wall Murals | Wandini",
+      "url": "/en",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Your wall. Your design."
+      ],
+      "headings": [
+        "H1 Your wall. Your design.",
+        "H2 Bestseller",
+        "H3 Watercolor Safari Wall Mural with Hot Air Balloons",
+        "H3 Elegant Peacock Wall Mural in a Romantic Garden",
+        "H3 Wall Mural Elegant Peonies in the Evening Light",
+        "H3 Wall Mural White Onyx",
+        "H3 Coral Red Flowers Wall Mural",
+        "H3 Wall Mural Expressive Floral Composition",
+        "H2 Wall Murals for Every Room",
+        "H2 Your Wall Mural. Made to Fit. Made Easy.",
+        "H3 Choose a Design",
+        "H3 Enter Wall Dimensions",
+        "H3 Choose Material",
+        "H3 Easy to Apply Yourself",
+        "H2 Still unsure which material to choose?",
+        "H2 Transform Rooms. Enchant Walls.",
+        "H2 Inspiration for your home",
+        "H3 Unsere Kleine liebt ihre neue Wand",
+        "H3 Sieht richtig hochwertig aus",
+        "H3 Toller Blickfang",
+        "H3 Unser Flur ist nicht wiederzuerkennen",
+        "H3 Wunderschöne Farben",
+        "H3 Super fürs Kinderzimmer",
+        "H3 Passt perfekt in unser Wohnzimmer ·",
+        "H3 Genau das Richtige fürs Babyzimmer"
+      ],
+      "navs": [
+        "Quick actions",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Kollektionen | Wandini",
+      "url": "/collections",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Kollektionen"
+      ],
+      "headings": [
+        "H1 Kollektionen",
+        "H2 Fototapeten Natur",
+        "H2 Fototapeten Blumen",
+        "H2 Fototapeten Tiere",
+        "H2 Fototapeten Abstrakt",
+        "H2 Fototapeten Marmor & Stein"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Collections | Wandini",
+      "url": "/en/collections",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Collections"
+      ],
+      "headings": [
+        "H1 Collections",
+        "H2 Nature Wall Murals",
+        "H2 Flower Wall Murals",
+        "H2 Animal Wall Murals",
+        "H2 Abstract Wall Murals",
+        "H2 Marble & Stone Wall Murals"
+      ],
+      "navs": [
+        "Quick actions",
+        "Breadcrumb",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Fototapeten | Wandini",
+      "url": "/collections/fototapeten",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Fototapeten"
+      ],
+      "headings": [
+        "H1 Fototapeten",
+        "H2 Fototapete Koi mit Lotusblüten",
+        "H2 Fototapete Schwarzer Marmor mit Goldadern",
+        "H2 Fototapete Magisches Einhorn mit Herzen und Regenbogen für Mädchenzimmer",
+        "H2 Fototapete Traumwal über den Wolken",
+        "H2 Fototapete Korallenrote Blüten",
+        "H2 Fototapete Türkiser Marmor mit Koralle",
+        "H2 Fototapete Schneeberg über den Wolken",
+        "H2 Fototapete Weißer Onyx",
+        "H2 Fototapete Mintfarbener Marmor mit Gold"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Bestseller | Wandini",
+      "url": "/collections/bestseller",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Bestseller"
+      ],
+      "headings": [
+        "H1 Bestseller",
+        "H2 Fototapete Korallenrote Blüten",
+        "H2 Fototapete Weißer Onyx",
+        "H2 Fototapete Mintfarbener Marmor mit Gold",
+        "H2 Fototapete Elegante Lilien in zarten Rosétönen",
+        "H2 Fototapete Aquarell Safari mit Heißluftballons",
+        "H2 Fototapete Elegante Pfingstrosen im Abendlicht",
+        "H2 Fototapete Ausdrucksstarke Blumenkomposition",
+        "H2 Fototapete Eleganter Pfau im romantischen Garten"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Zubehör | Wandini",
+      "url": "/collections/zubehor",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Zubehör"
+      ],
+      "headings": [
+        "H1 Zubehör",
+        "H2 Add-On Spezialkleister Medium",
+        "H2 Add-On Spezialkleister High",
+        "H2 Add-On Tapezier-Set",
+        "H2 Muster-Set",
+        "H2 Add-On Wandreiniger",
+        "H2 Add-On Schutzversiegelung für Fototapeten",
+        "H2 Add-On Primer Plus Grundierung",
+        "H2 Add-On Primer Grundierung"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Häufig gestellte Fragen (FAQ) | Wandini",
+      "url": "/pages/faq",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Häufig gestellte Fragen (FAQ)"
+      ],
+      "headings": [
+        "H1 Häufig gestellte Fragen (FAQ)",
+        "H2 Ihre Frage ist noch offen?"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Kontakt | Wandini",
+      "url": "/pages/kontakt",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Kontakt"
+      ],
+      "headings": [
+        "H1 Kontakt",
+        "H2 Wie können wir dir helfen?"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Kontaktseiten",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Erfahrungen | Wandini",
+      "url": "/pages/erfahrungen",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Erfahrungen mit Wandini Fototapeten"
+      ],
+      "headings": [
+        "H1 Erfahrungen mit Wandini Fototapeten",
+        "H2 Inspiration für dein Zuhause",
+        "H3 Unsere Kleine liebt ihre neue Wand",
+        "H3 Sieht richtig hochwertig aus",
+        "H3 Toller Blickfang",
+        "H3 Unser Flur ist nicht wiederzuerkennen",
+        "H3 Wunderschöne Farben",
+        "H3 Super fürs Kinderzimmer",
+        "H3 Passt perfekt in unser Wohnzimmer ·",
+        "H3 Genau das Richtige fürs Babyzimmer",
+        "H2 Deine Erfahrung. Dein Raum."
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Impressum | Wandini",
+      "url": "/pages/impressum",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Impressum"
+      ],
+      "headings": [
+        "H1 Impressum"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Suche | Wandini",
+      "url": "/search",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Suche"
+      ],
+      "headings": [
+        "H1 Suche",
+        "H2 Was möchten Sie finden?"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Suche | Wandini",
+      "url": "/search?q=blumen",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "blumen"
+      ],
+      "headings": [
+        "H1 blumen",
+        "H2 Produkte",
+        "H3 Fototapete Ausdrucksstarke Blumenkomposition",
+        "H3 Fototapete Romantischer Blumenmix in Pastell",
+        "H3 Fototapete Pastellblumen auf petrolfarbenem Hintergrund",
+        "H3 Fototapete Korallenrote Blüten",
+        "H3 Fototapete Magisches Einhorn auf Blumenwiese für Mädchenzimmer",
+        "H3 Fototapete Elegante Blüten in Petrol und Gold",
+        "H3 Fototapete Blaue Blüte mit goldenen Akzenten",
+        "H3 Fototapete Goldene Wildblumen im Morgenlicht",
+        "H3 Fototapete Leuchtende Blüten bei Nacht",
+        "H3 Fototapete Abstrakte Blüten in Pastellfarben",
+        "H3 Fototapete Pfingstrosen mit zarten Blüten im Abendlicht",
+        "H3 Fototapete Tropische Blüten mit Monstera-Blättern"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Ergebnisseiten",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Inspiration & Ratgeber | Wandini",
+      "url": "/blogs",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Blog"
+      ],
+      "headings": [
+        "H1 Blog",
+        "H2 Neuigkeiten"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Richtlinien",
+      "url": "/policies",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Richtlinien"
+      ],
+      "headings": [
+        "H1 Richtlinien"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Warenkorb | Wandini",
+      "url": "/cart",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Warenkorb"
+      ],
+      "headings": [
+        "H1 Warenkorb",
+        "H2 Ihr Warenkorb ist leer",
+        "H2 Passendes Zubehör",
+        "H3 Add-On Tapezier-Set",
+        "H3 Add-On Spezialkleister High",
+        "H3 Add-On Spezialkleister Medium"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Diese Wand haben wir nicht gefunden.",
+      "url": "/does-not-exist-semantic-audit",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Diese Wand haben wir nicht gefunden."
+      ],
+      "headings": [
+        "H1 Diese Wand haben wir nicht gefunden."
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Fototapete Aquarell Safari mit Heißluftballons | Wandini",
+      "url": "/products/fototapete-aquarell-safari-mit-heissluftballons?Quality=Selbstklebend",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Fototapete Aquarell Safari mit Heißluftballons"
+      ],
+      "headings": [
+        "H2 Beschreibung",
+        "H1 Fototapete Aquarell Safari mit Heißluftballons",
+        "H2 Ähnliche Motive",
+        "H3 Alle ähnlichen Motive entdecken",
+        "H3 Fototapete Aquarell Heißluftballons mit Hasen",
+        "H3 Fototapete Retro Sportwagen mit Palmen bei Sonnenuntergang",
+        "H3 Fototapete Pastell Regenbogen mit Blumenlandschaft",
+        "H3 Fototapete Aquarell Safari mit Dschungeltieren",
+        "H3 Fototapete Aquarell Waldtiere mit Rehen und Hasen"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Muster-Set | Wandini",
+      "url": "/products/muster-set",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Muster-Set"
+      ],
+      "headings": [
+        "H1 Muster-Set",
+        "H2 Beschreibung",
+        "H3 Kaufpreis vollständig als Guthaben"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Add-On Tapezier-Set | Wandini",
+      "url": "/products/add-on-tapezier-set",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Add-On Tapezier-Set"
+      ],
+      "headings": [
+        "H1 Add-On Tapezier-Set",
+        "H2 Beschreibung",
+        "H3 Alles, was Sie für die professionelle Montage Ihrer Fototapete benötigen.",
+        "H2 Produktinformationen",
+        "H3 Lieferumfang",
+        "H3 Vorteile"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Neuigkeiten | Wandini",
+      "url": "/blogs/neuigkeiten",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Neuigkeiten"
+      ],
+      "headings": [
+        "H1 Neuigkeiten"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Privacy Policy",
+      "url": "/policies/privacy-policy",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Privacy Policy"
+      ],
+      "headings": [
+        "H1 Privacy Policy",
+        "H2 Welche personenbezogenen Daten erfassen oder verarbeiten wir?",
+        "H2 Quellen von personenbezogenen Daten",
+        "H2 Wie verwenden wir Ihre personenbezogene Daten?",
+        "H2 Wie geben wir personenbezogene Daten weiter?",
+        "H2 Beziehung mit Shopify",
+        "H2 Websites und Links von Drittanbietern",
+        "H2 Daten von Kindern",
+        "H2 Sicherheit und Aufbewahrung Ihrer Daten",
+        "H2 Ihre Rechte und Möglichkeiten",
+        "H2 Beschwerden",
+        "H2 Internationale Übertragungen",
+        "H2 Änderungen an dieser Datenschutzerklärung",
+        "H2 Kontakt"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Search | Wandini",
+      "url": "/en/search?q=flowers",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "flowers"
+      ],
+      "headings": [
+        "H1 flowers",
+        "H2 Products",
+        "H3 Abstract Flowers Wall Mural in Pastel Colors",
+        "H3 Wall Mural Elegant Flowers in Teal and Gold",
+        "H3 Wall Mural Vibrant Flowers at Night",
+        "H3 Wall Mural Peonies with Delicate Flowers in the Evening Light",
+        "H3 Koi Wall Mural with Lotus Flowers",
+        "H3 Wall Mural Tropical Flowers with Monstera Leaves",
+        "H3 Coral Red Flowers Wall Mural",
+        "H3 Wall Mural Pastel Flowers on a Teal Background",
+        "H3 Wall Mural Blue Flower with Golden Accents",
+        "H3 Leopard Wall Mural in a Tropical Flower Paradise",
+        "H3 Golden Wildflowers Wall Mural in Morning Light",
+        "H3 Wall Mural Delicate Peonies in Pastel Shades"
+      ],
+      "navs": [
+        "Quick actions",
+        "Result pages",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Natur Blumen | Wandini",
+      "url": "/similar-products/blumen--natur",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Natur Blumen"
+      ],
+      "headings": [
+        "H1 Natur Blumen",
+        "H2 Fototapete Goldene Wildblumen im Morgenlicht",
+        "H2 Fototapete Ausdrucksstarke Blumenkomposition",
+        "H2 Fototapete Abstrakte Blütenkomposition in Pastellfarben",
+        "H2 Fototapete Zarte Blütenblätter in Pastellfarben",
+        "H2 Fototapete Elegante Dahlien auf schwarzem Hintergrund",
+        "H2 Fototapete Leuchtende Blüten bei Nacht",
+        "H2 Fototapete Elegante Blüten in Petrol und Gold",
+        "H2 Fototapete Blaue Blüte mit goldenen Akzenten",
+        "H2 Fototapete Zarte Pfingstrosen in Rosé"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Frequently Asked Questions (FAQ) | Wandini",
+      "url": "/en/pages/faq",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Frequently Asked Questions (FAQ)"
+      ],
+      "headings": [
+        "H1 Frequently Asked Questions (FAQ)",
+        "H2 Still have a question?"
+      ],
+      "navs": [
+        "Quick actions",
+        "Breadcrumb",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Contact | Wandini",
+      "url": "/en/pages/contact",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Contact"
+      ],
+      "headings": [
+        "H1 Contact",
+        "H2 How can we help?"
+      ],
+      "navs": [
+        "Quick actions",
+        "Breadcrumb",
+        "Contact pages",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Reviews | Wandini",
+      "url": "/en/pages/reviews",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Reviews of Wandini Wall Murals"
+      ],
+      "headings": [
+        "H1 Reviews of Wandini Wall Murals",
+        "H2 Inspiration for your home",
+        "H3 Unsere Kleine liebt ihre neue Wand",
+        "H3 Sieht richtig hochwertig aus",
+        "H3 Toller Blickfang",
+        "H3 Unser Flur ist nicht wiederzuerkennen",
+        "H3 Wunderschöne Farben",
+        "H3 Super fürs Kinderzimmer",
+        "H3 Passt perfekt in unser Wohnzimmer ·",
+        "H3 Genau das Richtige fürs Babyzimmer",
+        "H2 Your experience. Your space."
+      ],
+      "navs": [
+        "Quick actions",
+        "Breadcrumb",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Wall Murals | Wandini",
+      "url": "/en/collections/wall-murals",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Wall Murals"
+      ],
+      "headings": [
+        "H1 Wall Murals",
+        "H2 Koi Wall Mural with Lotus Flowers",
+        "H2 Wall Mural Black Marble with Gold Veining",
+        "H2 Magical Unicorn Wall Mural with Hearts and Rainbow for Girls’ Rooms",
+        "H2 Dreamy Whale Wall Mural Above the Clouds",
+        "H2 Coral Red Flowers Wall Mural",
+        "H2 Wall Mural Turquoise Marble with Coral",
+        "H2 Wall Mural Snow-Capped Mountain Above the Clouds",
+        "H2 Wall Mural White Onyx",
+        "H2 Wall Mural Mint-Coloured Marble with Gold"
+      ],
+      "navs": [
+        "Quick actions",
+        "Breadcrumb",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Fototapeten nach Maß | Wandini",
+      "url": "/",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Deine Wand. Dein Motiv."
+      ],
+      "headings": [
+        "H1 Deine Wand. Dein Motiv.",
+        "H2 Bestseller",
+        "H3 Fototapete Aquarell Safari mit Heißluftballons",
+        "H3 Fototapete Eleganter Pfau im romantischen Garten",
+        "H3 Fototapete Elegante Pfingstrosen im Abendlicht",
+        "H3 Fototapete Weißer Onyx",
+        "H3 Fototapete Korallenrote Blüten",
+        "H3 Fototapete Ausdrucksstarke Blumenkomposition",
+        "H2 Fototapeten für jeden Raum",
+        "H2 Deine Fototapete. Passgenau. Einfach gemacht.",
+        "H3 Motiv auswählen",
+        "H3 Wandmaße eingeben",
+        "H3 Material wählen",
+        "H3 Einfach selbst anbringen",
+        "H2 Noch unsicher beim Material?",
+        "H2 Räume verändern. Wände verzaubern.",
+        "H2 Inspiration für dein Zuhause",
+        "H3 Unsere Kleine liebt ihre neue Wand",
+        "H3 Sieht richtig hochwertig aus",
+        "H3 Toller Blickfang",
+        "H3 Unser Flur ist nicht wiederzuerkennen",
+        "H3 Wunderschöne Farben",
+        "H3 Super fürs Kinderzimmer",
+        "H3 Passt perfekt in unser Wohnzimmer ·",
+        "H3 Genau das Richtige fürs Babyzimmer"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Watercolor Safari Wall Mural with Hot Air Balloons | Wandini",
+      "url": "/en/products/watercolor-safari-wall-mural-with-hot-air-balloons?Quality=Selbstklebend",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Watercolor Safari Wall Mural with Hot Air Balloons"
+      ],
+      "headings": [
+        "H2 Description",
+        "H1 Watercolor Safari Wall Mural with Hot Air Balloons",
+        "H2 Similar motifs",
+        "H3 Explore all similar motifs",
+        "H3 Watercolor Hot Air Balloon Wall Mural with Rabbits",
+        "H3 Retro Sports Car Wall Mural with Palm Trees at Sunset",
+        "H3 Pastel Rainbow Wall Mural with Floral Landscape",
+        "H3 Watercolor Safari Wall Mural with Jungle Animals",
+        "H3 Watercolor Woodland Animals Wall Mural with Deer and Rabbits"
+      ],
+      "navs": [
+        "Quick actions",
+        "Breadcrumb",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Sample Set | Wandini",
+      "url": "/en/products/sample-set",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Sample Set"
+      ],
+      "headings": [
+        "H1 Sample Set",
+        "H2 Description",
+        "H3 Feel. Compare. Decide."
+      ],
+      "navs": [
+        "Quick actions",
+        "Breadcrumb",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Bestseller | Wandini",
+      "url": "/en/collections/bestseller",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Bestseller"
+      ],
+      "headings": [
+        "H1 Bestseller",
+        "H2 Coral Red Flowers Wall Mural",
+        "H2 Wall Mural White Onyx",
+        "H2 Wall Mural Mint-Coloured Marble with Gold",
+        "H2 Wall Mural Elegant Lilies in Delicate Blush-Pink Tones",
+        "H2 Watercolor Safari Wall Mural with Hot Air Balloons",
+        "H2 Wall Mural Elegant Peonies in the Evening Light",
+        "H2 Wall Mural Expressive Floral Composition",
+        "H2 Elegant Peacock Wall Mural in a Romantic Garden"
+      ],
+      "navs": [
+        "Quick actions",
+        "Breadcrumb",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Wall Mural Accessories | Wandini",
+      "url": "/en/collections/wall-mural-accessories",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Wall Mural Accessories"
+      ],
+      "headings": [
+        "H1 Wall Mural Accessories",
+        "H2 Add-On Medium-Strength Special Adhesive",
+        "H2 Add-On High-Strength Special Adhesive",
+        "H2 Add-On Wallpapering Set",
+        "H2 Sample Set",
+        "H2 Add-On Wall Cleaner",
+        "H2 Add-On Protective Sealer for Wall Murals",
+        "H2 Add-On Primer Plus",
+        "H2 Add-On Primer"
+      ],
+      "navs": [
+        "Quick actions",
+        "Breadcrumb",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Inspiration & Guides | Wandini",
+      "url": "/en/blogs",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Blog"
+      ],
+      "headings": [
+        "H1 Blog",
+        "H2 Neuigkeiten"
+      ],
+      "navs": [
+        "Quick actions",
+        "Breadcrumb",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Policies",
+      "url": "/en/policies",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Policies"
+      ],
+      "headings": [
+        "H1 Policies"
+      ],
+      "navs": [
+        "Quick actions",
+        "Breadcrumb",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Privacy Policy",
+      "url": "/en/policies/privacy-policy",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Privacy Policy"
+      ],
+      "headings": [
+        "H1 Privacy Policy",
+        "H2 Personal Information We Collect or Process",
+        "H2 Personal Information Sources",
+        "H2 How We Use Your Personal Information",
+        "H2 How We Disclose Personal Information",
+        "H2 Relationship with Shopify",
+        "H2 Third Party Websites and Links",
+        "H2 Children's Data",
+        "H2 Security and Retention of Your Information",
+        "H2 Your Rights and Choices",
+        "H2 Complaints",
+        "H2 International Transfers",
+        "H2 Changes to This Privacy Policy",
+        "H2 Contact"
+      ],
+      "navs": [
+        "Quick actions",
+        "Breadcrumb",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Cart | Wandini",
+      "url": "/en/cart",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Cart"
+      ],
+      "headings": [
+        "H1 Cart",
+        "H2 Your cart is empty",
+        "H2 Matching accessories",
+        "H3 Add-On Wallpapering Set",
+        "H3 Add-On High-Strength Special Adhesive",
+        "H3 Add-On Medium-Strength Special Adhesive"
+      ],
+      "navs": [
+        "Quick actions",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "We couldn't find this wall.",
+      "url": "/en/does-not-exist-semantic-audit",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "We couldn't find this wall."
+      ],
+      "headings": [
+        "H1 We couldn't find this wall."
+      ],
+      "navs": [
+        "Quick actions",
+        "Footer"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Weiter zur Kasse?",
+      "url": "/cart/123:1",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Warenkorb"
+      ],
+      "headings": [
+        "H1 Warenkorb",
+        "H2 Ihr Warenkorb ist leer",
+        "H2 Passendes Zubehör",
+        "H3 Add-On Tapezier-Set",
+        "H3 Add-On Spezialkleister High",
+        "H3 Add-On Spezialkleister Medium"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "title": "Rabattcode anwenden?",
+      "url": "/discount/SEMANTIC-AUDIT",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Rabattcode anwenden?"
+      ],
+      "headings": [
+        "H1 Rabattcode anwenden?"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    }
+  ],
+  "interactionSnapshots": [
+    {
+      "name": "desktop home",
+      "title": "Fototapeten nach Maß | Wandini",
+      "url": "/",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Deine Wand. Dein Motiv."
+      ],
+      "headings": [
+        "H1 Deine Wand. Dein Motiv.",
+        "H2 Bestseller",
+        "H3 Fototapete Aquarell Safari mit Heißluftballons",
+        "H3 Fototapete Eleganter Pfau im romantischen Garten",
+        "H3 Fototapete Elegante Pfingstrosen im Abendlicht",
+        "H3 Fototapete Weißer Onyx",
+        "H3 Fototapete Korallenrote Blüten",
+        "H3 Fototapete Ausdrucksstarke Blumenkomposition",
+        "H2 Fototapeten für jeden Raum",
+        "H2 Deine Fototapete. Passgenau. Einfach gemacht.",
+        "H3 Motiv auswählen",
+        "H3 Wandmaße eingeben",
+        "H3 Material wählen",
+        "H3 Einfach selbst anbringen",
+        "H2 Noch unsicher beim Material?",
+        "H2 Räume verändern. Wände verzaubern.",
+        "H2 Inspiration für dein Zuhause",
+        "H3 Unsere Kleine liebt ihre neue Wand",
+        "H3 Sieht richtig hochwertig aus",
+        "H3 Toller Blickfang",
+        "H3 Unser Flur ist nicht wiederzuerkennen",
+        "H3 Wunderschöne Farben",
+        "H3 Super fürs Kinderzimmer",
+        "H3 Passt perfekt in unser Wohnzimmer ·",
+        "H3 Genau das Richtige fürs Babyzimmer"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Sprache",
+        "Hauptnavigation",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "name": "cart drawer open",
+      "title": "Fototapeten nach Maß | Wandini",
+      "url": "/",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Deine Wand. Dein Motiv."
+      ],
+      "headings": [
+        "H1 Deine Wand. Dein Motiv.",
+        "H2 Bestseller",
+        "H3 Fototapete Aquarell Safari mit Heißluftballons",
+        "H3 Fototapete Eleganter Pfau im romantischen Garten",
+        "H3 Fototapete Elegante Pfingstrosen im Abendlicht",
+        "H3 Fototapete Weißer Onyx",
+        "H3 Fototapete Korallenrote Blüten",
+        "H3 Fototapete Ausdrucksstarke Blumenkomposition",
+        "H2 Fototapeten für jeden Raum",
+        "H2 Deine Fototapete. Passgenau. Einfach gemacht.",
+        "H3 Motiv auswählen",
+        "H3 Wandmaße eingeben",
+        "H3 Material wählen",
+        "H3 Einfach selbst anbringen",
+        "H2 Noch unsicher beim Material?",
+        "H2 Räume verändern. Wände verzaubern.",
+        "H2 Inspiration für dein Zuhause",
+        "H3 Unsere Kleine liebt ihre neue Wand",
+        "H3 Sieht richtig hochwertig aus",
+        "H3 Toller Blickfang",
+        "H3 Unser Flur ist nicht wiederzuerkennen",
+        "H3 Wunderschöne Farben",
+        "H3 Super fürs Kinderzimmer",
+        "H3 Passt perfekt in unser Wohnzimmer ·",
+        "H3 Genau das Richtige fürs Babyzimmer"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Sprache",
+        "Hauptnavigation",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "name": "cart drawer closed with Escape",
+      "title": "Fototapeten nach Maß | Wandini",
+      "url": "/",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Deine Wand. Dein Motiv."
+      ],
+      "headings": [
+        "H1 Deine Wand. Dein Motiv.",
+        "H2 Bestseller",
+        "H3 Fototapete Aquarell Safari mit Heißluftballons",
+        "H3 Fototapete Eleganter Pfau im romantischen Garten",
+        "H3 Fototapete Elegante Pfingstrosen im Abendlicht",
+        "H3 Fototapete Weißer Onyx",
+        "H3 Fototapete Korallenrote Blüten",
+        "H3 Fototapete Ausdrucksstarke Blumenkomposition",
+        "H2 Fototapeten für jeden Raum",
+        "H2 Deine Fototapete. Passgenau. Einfach gemacht.",
+        "H3 Motiv auswählen",
+        "H3 Wandmaße eingeben",
+        "H3 Material wählen",
+        "H3 Einfach selbst anbringen",
+        "H2 Noch unsicher beim Material?",
+        "H2 Räume verändern. Wände verzaubern.",
+        "H2 Inspiration für dein Zuhause",
+        "H3 Unsere Kleine liebt ihre neue Wand",
+        "H3 Sieht richtig hochwertig aus",
+        "H3 Toller Blickfang",
+        "H3 Unser Flur ist nicht wiederzuerkennen",
+        "H3 Wunderschöne Farben",
+        "H3 Super fürs Kinderzimmer",
+        "H3 Passt perfekt in unser Wohnzimmer ·",
+        "H3 Genau das Richtige fürs Babyzimmer"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Sprache",
+        "Hauptnavigation",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "name": "desktop search results",
+      "title": "Fototapeten nach Maß | Wandini",
+      "url": "/",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Deine Wand. Dein Motiv."
+      ],
+      "headings": [
+        "H1 Deine Wand. Dein Motiv.",
+        "H2 Bestseller",
+        "H3 Fototapete Aquarell Safari mit Heißluftballons",
+        "H3 Fototapete Eleganter Pfau im romantischen Garten",
+        "H3 Fototapete Elegante Pfingstrosen im Abendlicht",
+        "H3 Fototapete Weißer Onyx",
+        "H3 Fototapete Korallenrote Blüten",
+        "H3 Fototapete Ausdrucksstarke Blumenkomposition",
+        "H2 Fototapeten für jeden Raum",
+        "H2 Deine Fototapete. Passgenau. Einfach gemacht.",
+        "H3 Motiv auswählen",
+        "H3 Wandmaße eingeben",
+        "H3 Material wählen",
+        "H3 Einfach selbst anbringen",
+        "H2 Noch unsicher beim Material?",
+        "H2 Räume verändern. Wände verzaubern.",
+        "H2 Inspiration für dein Zuhause",
+        "H3 Unsere Kleine liebt ihre neue Wand",
+        "H3 Sieht richtig hochwertig aus",
+        "H3 Toller Blickfang",
+        "H3 Unser Flur ist nicht wiederzuerkennen",
+        "H3 Wunderschöne Farben",
+        "H3 Super fürs Kinderzimmer",
+        "H3 Passt perfekt in unser Wohnzimmer ·",
+        "H3 Genau das Richtige fürs Babyzimmer"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Sprache",
+        "Hauptnavigation",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "name": "desktop search closed with Escape",
+      "title": "Fototapeten nach Maß | Wandini",
+      "url": "/",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Deine Wand. Dein Motiv."
+      ],
+      "headings": [
+        "H1 Deine Wand. Dein Motiv.",
+        "H2 Bestseller",
+        "H3 Fototapete Aquarell Safari mit Heißluftballons",
+        "H3 Fototapete Eleganter Pfau im romantischen Garten",
+        "H3 Fototapete Elegante Pfingstrosen im Abendlicht",
+        "H3 Fototapete Weißer Onyx",
+        "H3 Fototapete Korallenrote Blüten",
+        "H3 Fototapete Ausdrucksstarke Blumenkomposition",
+        "H2 Fototapeten für jeden Raum",
+        "H2 Deine Fototapete. Passgenau. Einfach gemacht.",
+        "H3 Motiv auswählen",
+        "H3 Wandmaße eingeben",
+        "H3 Material wählen",
+        "H3 Einfach selbst anbringen",
+        "H2 Noch unsicher beim Material?",
+        "H2 Räume verändern. Wände verzaubern.",
+        "H2 Inspiration für dein Zuhause",
+        "H3 Unsere Kleine liebt ihre neue Wand",
+        "H3 Sieht richtig hochwertig aus",
+        "H3 Toller Blickfang",
+        "H3 Unser Flur ist nicht wiederzuerkennen",
+        "H3 Wunderschöne Farben",
+        "H3 Super fürs Kinderzimmer",
+        "H3 Passt perfekt in unser Wohnzimmer ·",
+        "H3 Genau das Richtige fürs Babyzimmer"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Sprache",
+        "Hauptnavigation",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "name": "mobile menu open",
+      "title": "Fototapeten nach Maß | Wandini",
+      "url": "/",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Deine Wand. Dein Motiv."
+      ],
+      "headings": [
+        "H1 Deine Wand. Dein Motiv.",
+        "H2 Bestseller",
+        "H3 Fototapete Aquarell Safari mit Heißluftballons",
+        "H3 Fototapete Eleganter Pfau im romantischen Garten",
+        "H3 Fototapete Elegante Pfingstrosen im Abendlicht",
+        "H3 Fototapete Weißer Onyx",
+        "H3 Fototapete Korallenrote Blüten",
+        "H3 Fototapete Ausdrucksstarke Blumenkomposition",
+        "H2 Fototapeten für jeden Raum",
+        "H2 Deine Fototapete. Passgenau. Einfach gemacht.",
+        "H3 Motiv auswählen",
+        "H3 Wandmaße eingeben",
+        "H3 Material wählen",
+        "H3 Einfach selbst anbringen",
+        "H2 Noch unsicher beim Material?",
+        "H2 Räume verändern. Wände verzaubern.",
+        "H2 Inspiration für dein Zuhause",
+        "H3 Unsere Kleine liebt ihre neue Wand",
+        "H3 Sieht richtig hochwertig aus",
+        "H3 Toller Blickfang",
+        "H3 Unser Flur ist nicht wiederzuerkennen",
+        "H3 Wunderschöne Farben",
+        "H3 Super fürs Kinderzimmer",
+        "H3 Passt perfekt in unser Wohnzimmer ·",
+        "H3 Genau das Richtige fürs Babyzimmer"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Mobile Hauptnavigation",
+        "Sprache",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "name": "mobile submenu open",
+      "title": "Fototapeten nach Maß | Wandini",
+      "url": "/",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Deine Wand. Dein Motiv."
+      ],
+      "headings": [
+        "H1 Deine Wand. Dein Motiv.",
+        "H2 Bestseller",
+        "H3 Fototapete Aquarell Safari mit Heißluftballons",
+        "H3 Fototapete Eleganter Pfau im romantischen Garten",
+        "H3 Fototapete Elegante Pfingstrosen im Abendlicht",
+        "H3 Fototapete Weißer Onyx",
+        "H3 Fototapete Korallenrote Blüten",
+        "H3 Fototapete Ausdrucksstarke Blumenkomposition",
+        "H2 Fototapeten für jeden Raum",
+        "H2 Deine Fototapete. Passgenau. Einfach gemacht.",
+        "H3 Motiv auswählen",
+        "H3 Wandmaße eingeben",
+        "H3 Material wählen",
+        "H3 Einfach selbst anbringen",
+        "H2 Noch unsicher beim Material?",
+        "H2 Räume verändern. Wände verzaubern.",
+        "H2 Inspiration für dein Zuhause",
+        "H3 Unsere Kleine liebt ihre neue Wand",
+        "H3 Sieht richtig hochwertig aus",
+        "H3 Toller Blickfang",
+        "H3 Unser Flur ist nicht wiederzuerkennen",
+        "H3 Wunderschöne Farben",
+        "H3 Super fürs Kinderzimmer",
+        "H3 Passt perfekt in unser Wohnzimmer ·",
+        "H3 Genau das Richtige fürs Babyzimmer"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Mobile Hauptnavigation",
+        "Sprache",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "name": "filters open",
+      "title": "Fototapeten | Wandini",
+      "url": "/collections/fototapeten",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Fototapeten"
+      ],
+      "headings": [
+        "H1 Fototapeten",
+        "H2 Filter",
+        "H2 Fototapete Koi mit Lotusblüten",
+        "H2 Fototapete Schwarzer Marmor mit Goldadern",
+        "H2 Fototapete Magisches Einhorn mit Herzen und Regenbogen für Mädchenzimmer",
+        "H2 Fototapete Traumwal über den Wolken",
+        "H2 Fototapete Korallenrote Blüten",
+        "H2 Fototapete Türkiser Marmor mit Koralle",
+        "H2 Fototapete Schneeberg über den Wolken",
+        "H2 Fototapete Weißer Onyx",
+        "H2 Fototapete Mintfarbener Marmor mit Gold"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "name": "filter group toggled",
+      "title": "Fototapeten | Wandini",
+      "url": "/collections/fototapeten",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Fototapeten"
+      ],
+      "headings": [
+        "H1 Fototapeten",
+        "H2 Filter",
+        "H2 Fototapete Koi mit Lotusblüten",
+        "H2 Fototapete Schwarzer Marmor mit Goldadern",
+        "H2 Fototapete Magisches Einhorn mit Herzen und Regenbogen für Mädchenzimmer",
+        "H2 Fototapete Traumwal über den Wolken",
+        "H2 Fototapete Korallenrote Blüten",
+        "H2 Fototapete Türkiser Marmor mit Koralle",
+        "H2 Fototapete Schneeberg über den Wolken",
+        "H2 Fototapete Weißer Onyx",
+        "H2 Fototapete Mintfarbener Marmor mit Gold"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "name": "filters closed with Escape",
+      "title": "Fototapeten | Wandini",
+      "url": "/collections/fototapeten",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Fototapeten"
+      ],
+      "headings": [
+        "H1 Fototapeten",
+        "H2 Filter",
+        "H2 Fototapete Koi mit Lotusblüten",
+        "H2 Fototapete Schwarzer Marmor mit Goldadern",
+        "H2 Fototapete Magisches Einhorn mit Herzen und Regenbogen für Mädchenzimmer",
+        "H2 Fototapete Traumwal über den Wolken",
+        "H2 Fototapete Korallenrote Blüten",
+        "H2 Fototapete Türkiser Marmor mit Koralle",
+        "H2 Fototapete Schneeberg über den Wolken",
+        "H2 Fototapete Weißer Onyx",
+        "H2 Fototapete Mintfarbener Marmor mit Gold"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "name": "FAQ arrow-key tab",
+      "title": "Häufig gestellte Fragen (FAQ) | Wandini",
+      "url": "/pages/faq",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Häufig gestellte Fragen (FAQ)"
+      ],
+      "headings": [
+        "H1 Häufig gestellte Fragen (FAQ)",
+        "H2 Ihre Frage ist noch offen?"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    },
+    {
+      "name": "PDP materials tab",
+      "title": "Fototapete Aquarell Safari mit Heißluftballons | Wandini",
+      "url": "/products/fototapete-aquarell-safari-mit-heissluftballons?Quality=Selbstklebend",
+      "mains": 1,
+      "visibleMains": 1,
+      "h1": [
+        "Fototapete Aquarell Safari mit Heißluftballons"
+      ],
+      "headings": [
+        "H2 Welches Material?",
+        "H3 Glatt",
+        "H3 Feinprägung",
+        "H3 Selbstklebend",
+        "H3 Nahtlos",
+        "H3 Noch unsicher beim Material?",
+        "H1 Fototapete Aquarell Safari mit Heißluftballons",
+        "H2 Ähnliche Motive",
+        "H3 Alle ähnlichen Motive entdecken",
+        "H3 Fototapete Aquarell Heißluftballons mit Hasen",
+        "H3 Fototapete Retro Sportwagen mit Palmen bei Sonnenuntergang",
+        "H3 Fototapete Pastell Regenbogen mit Blumenlandschaft",
+        "H3 Fototapete Aquarell Safari mit Dschungeltieren",
+        "H3 Fototapete Aquarell Waldtiere mit Rehen und Hasen"
+      ],
+      "navs": [
+        "Schnellzugriff",
+        "Breadcrumb",
+        "Fußzeile"
+      ],
+      "duplicateIds": [],
+      "broken": [],
+      "invalid": 0,
+      "missingAlt": 0,
+      "unnamedInputs": []
+    }
+  ],
+  "styleComparisons": [
+    {
+      "path": "/",
+      "width": 1440,
+      "count": 24,
+      "differences": []
+    },
+    {
+      "path": "/collections/fototapeten",
+      "width": 1440,
+      "count": 14,
+      "differences": []
+    },
+    {
+      "path": "/collections/bestseller",
+      "width": 1440,
+      "count": 13,
+      "differences": []
+    },
+    {
+      "path": "/products/fototapete-aquarell-safari-mit-heissluftballons",
+      "width": 1440,
+      "count": 5,
+      "differences": []
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "count": 24,
+      "differences": []
+    },
+    {
+      "path": "/collections/fototapeten",
+      "width": 390,
+      "count": 14,
+      "differences": []
+    },
+    {
+      "path": "/collections/bestseller",
+      "width": 390,
+      "count": 13,
+      "differences": []
+    },
+    {
+      "path": "/products/fototapete-aquarell-safari-mit-heissluftballons",
+      "width": 390,
+      "count": 5,
+      "differences": []
+    }
+  ],
+  "validation": {
+    "typecheck": "passed",
+    "tests": "57 files, 789 tests passed",
+    "build": "passed; process exit 0",
+    "lint": "2 pre-existing errors in Shopify maintenance scripts"
+  }
+}

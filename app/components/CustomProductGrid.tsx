@@ -31,6 +31,7 @@ export function CustomProductGrid({products}: CustomProductGridProps) {
         return (
           <CustomProductCard
             key={product.id}
+            headingLevel="h2"
             productId={product.id}
             title={product.title}
             images={

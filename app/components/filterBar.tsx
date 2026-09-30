@@ -336,7 +336,7 @@ export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
         id={drawerId}
         ref={dialogRef}
         className={`filters-drawer ${isUpdating ? 'is-updating' : ''}`}
-        aria-labelledby={drawerTitleId}
+        aria-labelledby={isDrawerOpen ? drawerTitleId : undefined}
         onCancel={closeDrawer}
         onClose={() => {
           setIsDrawerOpen(false);
@@ -435,7 +435,7 @@ export function FilterBar({filters, isUpdating = false}: FilterBarProps) {
                         className="filter-group__toggle"
                         onClick={() => toggleFilterGroup(filter.id)}
                         aria-expanded={isExpanded}
-                        aria-controls={optionsId}
+                        aria-controls={isExpanded ? optionsId : undefined}
                       >
                         <span className="filter-group__heading">
                           <span className="filter-group__title">

@@ -48,7 +48,14 @@ function formatPrice(price: ProductMoney, locale: SelectedLocale) {
   }
 }
 
-export function BestsellerCard({product}: {product: BestsellerProduct}) {
+export function BestsellerCard({
+  product,
+  headingLevel = 'h3',
+}: {
+  product: BestsellerProduct;
+  headingLevel?: 'h2' | 'h3';
+}) {
+  const Heading = headingLevel;
   const {locale} = useTranslation();
   const primaryImage = product.images.nodes[0] ?? null;
   const listingImage = product.images.nodes[1] ?? primaryImage;
@@ -90,7 +97,7 @@ export function BestsellerCard({product}: {product: BestsellerProduct}) {
       ) : null}
 
       <div className="all-product-info">
-        <div className="all-product-title">{product.title}</div>
+        <Heading className="all-product-title">{product.title}</Heading>
         <div className="all-product-subtitle bestseller-product-price">
           Ab {price} / m²
         </div>
@@ -162,7 +169,7 @@ export default function AllProdutsNew({
       onMouseLeave={() => setIsMouseOver(false)}
     >
       <div className="seperator">
-        <h3 id="bestseller-products-title">{resolvedSectionTitle}</h3>
+        <h2 id="bestseller-products-title">{resolvedSectionTitle}</h2>
       </div>
 
       <div
@@ -189,6 +196,7 @@ export default function AllProdutsNew({
 
       {scrollSnaps.length > 1 ? (
         <div
+          role="group"
           className="allProductsDots"
           aria-label={t('home.bestSellingSlides')}
         >

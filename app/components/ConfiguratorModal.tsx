@@ -101,7 +101,8 @@ function ConfiguratorStepGuide({step}: {step: ConfiguratorStep}) {
   const currentStepNumber = currentStepIndex + 1;
 
   return (
-    <nav
+    <div
+      role="group"
       className="configuratorStepGuide"
       aria-label={t('configurator.progress')}
     >
@@ -138,7 +139,7 @@ function ConfiguratorStepGuide({step}: {step: ConfiguratorStep}) {
           })}
         </ol>
       </div>
-    </nav>
+    </div>
   );
 }
 

@@ -155,7 +155,8 @@ export default function Blog() {
       </div>
 
       <div
-        className="blog-handle-feed"
+        role="group"
+          className="blog-handle-feed"
         aria-label={t('blog.articlesLabel', {title: blog.title})}
       >
         <div className="container mx-auto">

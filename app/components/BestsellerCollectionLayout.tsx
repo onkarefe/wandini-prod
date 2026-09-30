@@ -57,7 +57,7 @@ function ProductSlot({
 
   return (
     <div className={`bestseller-collection__slot ${slotClassName}`}>
-      <BestsellerCard product={product} />
+      <BestsellerCard product={product} headingLevel="h2" />
     </div>
   );
 }
@@ -111,11 +111,13 @@ export default function BestsellerCollectionLayout({
       </header>
 
       <div
+        role="group"
         className="bestseller-collection__lookbook container mx-auto"
         aria-label={t('collection.productsLabel', {title: collection.title})}
       >
         {blocks.map(({pattern, products: blockProducts, productOffset}) => (
-          <section
+          <div
+            role="group"
             className={`bestseller-collection__block ${pattern.className} bestseller-collection__block--count-${blockProducts.length}`}
             aria-label={t('collection.bestSellingRange', {
               start: productOffset + 1,
@@ -126,7 +128,7 @@ export default function BestsellerCollectionLayout({
             {blockProducts.map((product, index) =>
               renderSlot(product, pattern.slotClassNames[index]),
             )}
-          </section>
+          </div>
         ))}
       </div>
 

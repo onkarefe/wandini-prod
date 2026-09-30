@@ -24,8 +24,8 @@ export function CustomCart({layout, cart: originalCart}: CustomCartProps) {
   return (
     <div className={className}>
       <CartEmpty hidden={hasLines} />
-      <div className="cart-details" aria-label={t('cart.items')}>
-        <ul>
+      <div className="cart-details">
+        <ul aria-label={t('cart.items')}>
           {(cart?.lines?.nodes ?? []).map((line) => (
             <CartLineItem key={line.id} line={line} layout={layout} />
           ))}

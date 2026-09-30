@@ -23,7 +23,7 @@ import {
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {LanguageSwitcher} from '~/components/LanguageSwitcher';
-import {Link, NavLink, usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {Link, NavLink} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
 
 type FieldRecord = {
@@ -455,7 +455,7 @@ function MobileNavigation({
                   <button
                     className="dhx-mobileExpand"
                     type="button"
-                    aria-controls={submenuId}
+                    aria-controls={isOpen ? submenuId : undefined}
                     aria-expanded={isOpen}
                     aria-label={t('navigation.submenu', {
                       label: item.title || t('navigation.menu'),
@@ -514,7 +514,7 @@ function MobileMegaMenu({
 
         return (
           <section className="dhx-mobileColumn" key={column.id || columnTitle}>
-            {columnTitle ? <h3>{columnTitle}</h3> : null}
+            {columnTitle ? <h2>{columnTitle}</h2> : null}
             <ul>
               {columnItems.map((columnItem) => {
                 const label = value(columnItem, 'label') ?? '';
@@ -620,9 +620,6 @@ function DesktopSearch({
               {t('search.inputLabel')}
             </label>
             <input
-              aria-autocomplete="list"
-              aria-controls="desktop-command-results"
-              aria-expanded={isOpen}
               defaultValue={defaultValue}
               autoComplete="off"
               data-desktop-command-search="true"
@@ -644,7 +641,6 @@ function DesktopSearch({
                 isMobileExpanded ? 'search.submit' : 'search.placeholder',
               )}
               ref={inputRef}
-              role="combobox"
               type="search"
             />
             <button type="submit" aria-label={t('search.submitLabel')}>
@@ -660,7 +656,7 @@ function DesktopSearch({
         onClose={close}
       >
         {({items, total, term, state, closeSearch}) => {
-          if (!isOpen || !term.current) return null;
+          if (!isOpen || !term.current) return <datalist id={datalistId} />;
 
           const searchUrl = `${SEARCH_ENDPOINT}?${new URLSearchParams({
             q: term.current,
@@ -670,6 +666,7 @@ function DesktopSearch({
             <div
               className="dhx-results"
               id="desktop-command-results"
+              role="region"
               aria-label={t('search.suggestions')}
               aria-live="polite"
             >
@@ -777,7 +774,7 @@ function DesktopActions({
       <button
         className="dhx-menuToggle"
         type="button"
-        aria-controls="dhx-mobile-navigation"
+        aria-controls={isMenuOpen ? 'dhx-mobile-navigation' : undefined}
         aria-expanded={isMenuOpen}
         aria-label={
           isMenuOpen ? t('navigation.closeMenu') : t('navigation.openMenu')
@@ -806,12 +803,11 @@ function CartAction({
   const {t} = useTranslation();
   const {open} = useAside();
   const {publish, shop, cart, prevCart} = useAnalytics();
-  const cartPath = usePrefixPathWithLocale('/cart');
 
   return (
-    <a
+    <button
+      type="button"
       className="dhx-cart"
-      href={cartPath}
       aria-label={t('navigation.openCart')}
       title={t('navigation.cart')}
       onClick={(event) => {
@@ -830,7 +826,7 @@ function CartAction({
         <BagIcon />
         {count !== null && count > 0 ? <b>{count}</b> : null}
       </span>
-    </a>
+    </button>
   );
 }
 
@@ -869,7 +865,7 @@ function DesktopMegaMenu({
                 className="dhx-megaColumn"
                 key={column.id || columnTitle}
               >
-                {columnTitle ? <h3>{columnTitle}</h3> : null}
+                {columnTitle ? <h2>{columnTitle}</h2> : null}
                 <ul>
                   {items.map((item) => {
                     const label = value(item, 'label') ?? '';

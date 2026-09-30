@@ -181,7 +181,7 @@ export default function Blogs() {
   const breadcrumbJsonLd = buildBreadcrumbStructuredData(breadcrumbItems);
 
   return (
-    <main className="blogs-page">
+    <div className="blogs-page">
       {breadcrumbJsonLd ? (
         <script
           type="application/ld+json"
@@ -194,7 +194,7 @@ export default function Blogs() {
       <section className="blogs-hero">
         <div className="container mx-auto">
           {kicker ? <p className="blogs-kicker">{kicker}</p> : null}
-          {title ? <h1 className="blogs-title">{title}</h1> : null}
+          {title ? <h1 className="blogs-title">{title}</h1> : <h1 className="sr-only">{t('blog.blog')}</h1>}
           {intro ? <p className="blogs-intro">{intro}</p> : null}
         </div>
       </section>
@@ -243,7 +243,7 @@ export default function Blogs() {
           </PaginatedResourceSection>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
 

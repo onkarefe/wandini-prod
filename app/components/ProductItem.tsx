@@ -9,12 +9,15 @@ import {useVariantUrl} from '~/lib/variants';
 export function ProductItem({
   product,
   loading,
+  headingLevel = 'h3',
 }: {
   product:
     | CollectionItemFragment
     | RecommendedProductFragment;
   loading?: 'eager' | 'lazy';
+  headingLevel?: 'h2' | 'h3';
 }) {
+  const Heading = headingLevel;
   const variantUrl = useVariantUrl(product.handle);
   const image = product.featuredImage;
   return (
@@ -33,7 +36,7 @@ export function ProductItem({
           loading={loading}
         />
       )}
-      <h4>{product.title}</h4>
+      <Heading className="product-item__title">{product.title}</Heading>
       <small>
         <Money data={product.priceRange.minVariantPrice} />
       </small>

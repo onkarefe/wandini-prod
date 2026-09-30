@@ -22,7 +22,7 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
-import {Link, NavLink, usePrefixPathWithLocale} from '~/lib/i18n-router';
+import {Link, NavLink} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
 
 type FieldRecord = {
@@ -216,9 +216,6 @@ function HeaderSearch() {
             </label>
             <input
               autoComplete="off"
-              aria-autocomplete="list"
-              aria-controls="header-search-results"
-              aria-expanded={isOpen}
               defaultValue={defaultValue}
               data-header-predictive-search-input="true"
               enterKeyHint="search"
@@ -235,7 +232,6 @@ function HeaderSearch() {
               }}
               placeholder={t('search.placeholder')}
               ref={inputRef}
-              role="combobox"
               type="search"
             />
           </>
@@ -248,7 +244,7 @@ function HeaderSearch() {
         onClose={closeResults}
       >
         {({items, total, term, state, closeSearch}) => {
-          if (!isOpen || !term.current) return null;
+          if (!isOpen || !term.current) return <datalist id={queriesDatalistId} />;
 
           const {collections, products, queries} = items;
           const searchUrl = `${SEARCH_ENDPOINT}?${new URLSearchParams({
@@ -260,6 +256,7 @@ function HeaderSearch() {
               className="h-desktopSearchResults"
               id="header-search-results"
               aria-live="polite"
+              role="region"
               aria-label={t('search.suggestions')}
             >
               <SearchResultsPredictive.Queries
@@ -958,11 +955,10 @@ function CartBadge({
   const {open} = useAside();
   const {t} = useTranslation();
   const {publish, shop, cart, prevCart} = useAnalytics();
-  const cartPath = usePrefixPathWithLocale('/cart');
 
   return (
-    <a
-      href={cartPath}
+    <button
+      type="button"
       className="h-cartBox"
       aria-label={t('navigation.cart')}
       onClick={(e) => {
@@ -1002,6 +998,6 @@ function CartBadge({
       {showLabel ? (
         <span className="wh-actionLabel">{t('navigation.cart')}</span>
       ) : null}
-    </a>
+    </button>
   );
 }

@@ -612,7 +612,8 @@ export default function WallpaperProductLayout({
                 >
                   {materialStartingPrice && (
                     <div
-                      className="productStartingPrice"
+                      role="group"
+        className="productStartingPrice"
                       aria-label={t('product.startingPriceLabel')}
                     >
                       <span className="productStartingPriceLabel">

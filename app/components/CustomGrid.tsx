@@ -104,7 +104,7 @@ export default function CustomGrid({
     <section className="custom-6-grid container mx-auto">
       {sectionTitle?.trim() ? (
         <div className="seperator">
-          <h3>{sectionTitle.trim()}</h3>
+          <h2>{sectionTitle.trim()}</h2>
         </div>
       ) : null}
 

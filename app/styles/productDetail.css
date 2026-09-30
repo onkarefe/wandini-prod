@@ -318,7 +318,8 @@
 
 /* Variant Buttons */
 
-.product-options h5 {
+.product-options h2 {
+  line-height: inherit;
   font-size: 16px;
   font-weight: 600;
   padding-bottom: 8px;
@@ -374,13 +375,14 @@
   gap: 16px;
 }
 
-.propertyBox li {
+.propertyBox [role="listitem"] {
+  margin-bottom: 0.5rem;
   position: relative;
   padding-left: 24px;
   width: max-content;
 }
 
-.propertyBox li::before {
+.propertyBox [role="listitem"]::before {
   content: '✔'; /* Tik işareti */
   position: absolute;
   left: 0;

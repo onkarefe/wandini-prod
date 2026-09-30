@@ -41,7 +41,7 @@ export default function HeroSection({
                 <div className="container mx-auto hero-ContentContainer">
                     <div className="hero-TitleBox">
                         <p className="hero-st1">{st1}</p>
-                        <h1 className="hero-mainTitle">{title}</h1>
+                        {title.trim() ? <h1 className="hero-mainTitle">{title}</h1> : <div className="hero-mainTitle" />}
                         <p className="hero-st2">{st2}</p>
                         {buttonText && buttonHref ? (
                             <Link

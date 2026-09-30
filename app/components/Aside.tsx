@@ -2,6 +2,7 @@ import {
   createContext,
   type ReactNode,
   useContext,
+  useId,
   useEffect,
   useState,
 } from 'react';
@@ -36,6 +37,7 @@ export function Aside({
   const {t} = useTranslation();
   const {type: activeType, close} = useAside();
   const expanded = type === activeType;
+  const headingId = useId();
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -56,15 +58,25 @@ export function Aside({
 
   return (
     <div
-      aria-modal
+      aria-modal={expanded || undefined}
+      aria-hidden={!expanded}
+      aria-labelledby={headingId}
       className={`overlay overlay--${type} ${expanded ? 'expanded' : ''} !z-[51]`}
       role="dialog"
     >
-      <button className="close-outside" onClick={close} />
+      <button
+        type="button"
+        className="close-outside"
+        onClick={close}
+        aria-label={t('common.close')}
+      />
       <aside className={`aside-panel aside-panel--${type}`}>
         <header>
-          <h3>{heading}</h3>
+          <h2 className="aside-title" id={headingId}>
+            {heading}
+          </h2>
           <button
+            type="button"
             className="close reset"
             onClick={close}
             aria-label={t('common.close')}
@@ -72,7 +84,7 @@ export function Aside({
             &times;
           </button>
         </header>
-        <main>{children}</main>
+        <div className="aside-content">{children}</div>
       </aside>
     </div>
   );

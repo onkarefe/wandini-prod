@@ -237,6 +237,8 @@
 }
 
 .bestseller-collection .all-product-title {
+  margin: 0;
+  line-height: inherit;
   font-size: 18px;
   font-weight: bold;
 }

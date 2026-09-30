@@ -101,7 +101,8 @@ export default function Collections() {
   const breadcrumbJsonLd = buildBreadcrumbStructuredData(breadcrumbItems);
 
   return (
-    <main className="collection-page">
+    <div className="collection-page">
+      <h1 className="sr-only">{seoFallbackTitle}</h1>
       {breadcrumbJsonLd ? (
         <script
           type="application/ld+json"
@@ -120,7 +121,7 @@ export default function Collections() {
           />
         ))}
       </div>
-    </main>
+    </div>
   );
 }
 

@@ -54,6 +54,7 @@ function ReviewStars({rating}: {rating: number}) {
   return (
     <div
       className="customer-reviews-page__stars"
+      role="img"
       aria-label={t('reviews.rating', {rating})}
     >
       {getStarStates(rating).map(({position, state}) => (
@@ -539,11 +540,11 @@ export default function CustomerReviewsPage({
   steps,
 }: CustomerReviewsPageProps) {
   return (
-    <main className="customer-reviews-page">
+    <div className="customer-reviews-page">
       <ReviewsHero hero={hero} />
       <ReviewsShowcase reviews={reviews} sectionTitle={reviewsSectionTitle} />
       <ExperienceSteps content={steps} />
       <CustomerReviewForm />
-    </main>
+    </div>
   );
 }

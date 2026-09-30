@@ -59,8 +59,11 @@ aside header {
   padding: 0 20px;
 }
 
-aside header h3 {
+aside header .aside-title {
   margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
 }
 
 aside header .close {
@@ -80,7 +83,7 @@ aside header h2 {
   margin-top: 0;
 }
 
-aside main {
+aside .aside-content {
   margin: 16px;
 }
 
@@ -581,4 +584,12 @@ button.reset:hover:not(:has(> *)) {
 
 a:hover {
   text-decoration: none;
+}
+
+/* Preserve the original H4 presentation for product-list titles. */
+.product-item__title {
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  margin: 0.5rem 0;
 }

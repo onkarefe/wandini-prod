@@ -269,7 +269,9 @@
   z-index: 2;
 }
 
-.seperator h3 {
+.seperator h2 {
+  margin: 0;
+  line-height: inherit;
   background-color: white;
   display: inline-block;
   padding: 0 16px;
@@ -396,6 +398,8 @@
 }
 
 .all-product-title {
+  margin: 0;
+  line-height: inherit;
   font-weight: bold;
   font-size: 18px;
 }
@@ -1127,7 +1131,7 @@
   text-align: center;
 }
 
-.uberUnsHomepage__content h3 {
+.uberUnsHomepage__content h2 {
   width: auto;
   max-width: 18ch;
   margin: 0 0 20px;
@@ -1196,7 +1200,7 @@
     line-height: 1.65;
   }
 
-  .uberUnsHomepage__content h3 {
+  .uberUnsHomepage__content h2 {
     width: 100%;
     margin-bottom: 14px;
     font-size: 28px;
@@ -1217,7 +1221,7 @@
   background-color: #e1e1df;
 }
 
-.CustomerRevs-section .seperator h3 {
+.CustomerRevs-section .seperator h2 {
   color: #181818;
   font-size: clamp(24px, 2.3vw, 32px);
   font-weight: 600;

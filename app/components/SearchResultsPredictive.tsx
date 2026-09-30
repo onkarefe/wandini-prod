@@ -37,7 +37,7 @@ type PartialPredictiveSearchResult<
   ItemType extends keyof PredictiveSearchItems,
   ExtraProps extends keyof SearchResultsPredictiveArgs = 'term' | 'closeSearch',
 > = Pick<PredictiveSearchItems, ItemType> &
-  Pick<SearchResultsPredictiveArgs, ExtraProps>;
+  Pick<SearchResultsPredictiveArgs, ExtraProps> & {headingLevel?: 'h2' | 'h3'};
 
 type SearchResultsPredictiveProps = {
   children: (args: SearchResultsPredictiveArgs) => React.ReactNode;
@@ -90,13 +90,16 @@ function SearchResultsPredictiveProducts({
   term,
   products,
   closeSearch,
+  headingLevel: Heading = 'h2',
 }: PartialPredictiveSearchResult<'products'>) {
   const {t} = useTranslation();
   if (!products.length) return null;
 
   return (
     <section className="predictive-search-result">
-      <h2>{t('search.products')}</h2>
+      <Heading className="predictive-search-result__title">
+        {t('search.products')}
+      </Heading>
       <ul>
         {products.map((product) => {
           const productUrl = urlWithTrackingParams({
@@ -135,13 +138,16 @@ function SearchResultsPredictiveCollections({
   term,
   collections,
   closeSearch,
+  headingLevel: Heading = 'h2',
 }: PartialPredictiveSearchResult<'collections'>) {
   const {t} = useTranslation();
   if (!collections.length) return null;
 
   return (
     <section className="predictive-search-result">
-      <h2>{t('search.collections')}</h2>
+      <Heading className="predictive-search-result__title">
+        {t('search.collections')}
+      </Heading>
       <ul>
         {collections.map((collection) => {
           const collectionUrl = urlWithTrackingParams({
@@ -174,13 +180,16 @@ function SearchResultsPredictivePages({
   term,
   pages,
   closeSearch,
+  headingLevel: Heading = 'h2',
 }: PartialPredictiveSearchResult<'pages'>) {
   const {t} = useTranslation();
   if (!pages.length) return null;
 
   return (
     <section className="predictive-search-result predictive-search-result--links">
-      <h2>{t('search.pages')}</h2>
+      <Heading className="predictive-search-result__title">
+        {t('search.pages')}
+      </Heading>
       <ul>
         {pages.map((page) => (
           <li className="predictive-search-result-item" key={page.id}>
@@ -208,13 +217,16 @@ function SearchResultsPredictiveArticles({
   term,
   articles,
   closeSearch,
+  headingLevel: Heading = 'h2',
 }: PartialPredictiveSearchResult<'articles'>) {
   const {t} = useTranslation();
   if (!articles.length) return null;
 
   return (
     <section className="predictive-search-result">
-      <h2>{t('search.magazine')}</h2>
+      <Heading className="predictive-search-result__title">
+        {t('search.magazine')}
+      </Heading>
       <ul>
         {articles.map((article) => {
           const articleUrl = urlWithTrackingParams({
@@ -249,8 +261,6 @@ function SearchResultsPredictiveQueries({
 }: PartialPredictiveSearchResult<'queries', never> & {
   queriesDatalistId: string;
 }) {
-  if (!queries.length) return null;
-
   return (
     <datalist id={queriesDatalistId}>
       {queries.map((suggestion) =>

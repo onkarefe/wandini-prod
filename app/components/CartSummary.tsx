@@ -35,7 +35,7 @@ export function CartSummary({ cart, layout }: CartSummaryProps) {
     : cart?.cost?.subtotalAmount;
 
   return (
-    <div aria-labelledby="cart-summary" className={className}>
+    <div role="group" aria-label={t('cart.summary')} className={className}>
       <dl className="cart-subtotal">
         <dt>{t('cart.subtotal')}</dt>
         <dd>
@@ -85,13 +85,15 @@ function CartDiscounts({
       <dl hidden={!codes.length}>
         <div>
           <dt>{t('cart.discountCode')}</dt>
-          <UpdateDiscountForm>
-            <div className="cart-discount">
-              <code>{codes?.join(', ')}</code>
+          <dd style={{margin: 0}}>
+            <UpdateDiscountForm>
+              <div className="cart-discount">
+                <code>{codes?.join(', ')}</code>
               &nbsp;
-              <button>{t('cart.remove')}</button>
-            </div>
-          </UpdateDiscountForm>
+                <button type="submit">{t('cart.remove')}</button>
+              </div>
+            </UpdateDiscountForm>
+          </dd>
         </div>
       </dl>
 
@@ -101,6 +103,7 @@ function CartDiscounts({
           <input
             type="text"
             name="discountCode"
+            aria-label={t('cart.discountCode')}
             placeholder={t('cart.discountCode')}
           />
           &nbsp;
@@ -171,7 +174,8 @@ function CartGiftCard({
         <dl>
           <dt>{t('cart.giftCard')}</dt>
           {giftCardCodes.map((giftCard) => (
-            <RemoveGiftCardForm key={giftCard.id} giftCardId={giftCard.id}>
+            <dd key={giftCard.id} style={{margin: 0}}>
+              <RemoveGiftCardForm giftCardId={giftCard.id}>
               <div className="cart-discount">
                 <code>***{giftCard.lastCharacters}</code>
                 &nbsp;
@@ -179,7 +183,8 @@ function CartGiftCard({
                 &nbsp;
                 <button type="submit">{t('cart.remove')}</button>
               </div>
-            </RemoveGiftCardForm>
+              </RemoveGiftCardForm>
+            </dd>
           ))}
         </dl>
       )}
@@ -194,6 +199,7 @@ function CartGiftCard({
           <input
             type="text"
             name="giftCardCode"
+            aria-label={t('cart.giftCard')}
             placeholder={t('cart.giftCard')}
             ref={giftCardCodeInput}
           />

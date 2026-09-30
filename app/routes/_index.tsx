@@ -590,6 +590,7 @@ export default function Homepage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{__html: stringifyJsonLd(onlineStoreJsonLd)}}
       />
+      {!data.hero.title?.trim() ? <h1 className="sr-only">{shop?.name || 'Wandini'}</h1> : null}
       <HeroSection
         title={data.hero.title}
         st1={data.hero.st1}
@@ -632,10 +633,10 @@ function FeaturedCollection({
     >
       {image && (
         <div className="featured-collection-image">
-          <Image data={image} sizes="100vw" />
+          <Image data={image} alt={image.altText || collection.title} sizes="100vw" />
         </div>
       )}
-      <h1>{collection.title}</h1>
+      <h2>{collection.title}</h2>
     </Link>
   );
 }

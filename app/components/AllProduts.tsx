@@ -39,7 +39,7 @@ function CollectionCardContent({item}: {item: CollectionSwiperItem}) {
       ) : null}
 
       <div className="all-product-info">
-        <div className="all-product-title">{item.title}</div>
+        <h3 className="all-product-title">{item.title}</h3>
         <div className="all-product-subtitle">{item.subtitle}</div>
       </div>
     </>
@@ -108,7 +108,7 @@ export default function AllProduts({
       onMouseLeave={() => setIsMouseOver(false)}
     >
       <div className="seperator">
-        <h3>{resolvedSectionTitle}</h3>
+        <h2>{resolvedSectionTitle}</h2>
       </div>
 
       <div
@@ -165,7 +165,8 @@ export default function AllProduts({
 
       {scrollSnaps.length > 1 ? (
         <div
-          className="allProductsDots"
+          role="group"
+        className="allProductsDots"
           aria-label={t('collection.slides')}
         >
           {scrollSnaps.map((_, index) => (

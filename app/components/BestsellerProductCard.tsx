@@ -2,12 +2,13 @@ import {
   useCallback,
   useEffect,
   useState,
+  useId,
   type FocusEvent,
   type MouseEvent,
 } from 'react';
 import {useTranslation} from '~/i18n/useTranslation';
 import useEmblaCarousel from 'embla-carousel-react';
-import {useFetcher, useLocation, useNavigate} from 'react-router';
+import {useFetcher, useLocation} from 'react-router';
 import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import type {WishlistActionData} from '~/lib/wishlist';
 import {formatLocaleCurrency, formatLocaleNumber} from '~/lib/locale-format';
@@ -97,6 +98,7 @@ export default function BestsellerProductCard({
   showSimilarMotifsButton = false,
   similarProductsUrl,
 }: BestsellerProductCardProps) {
+  const titleId = useId();
   const {locale, t} = useTranslation();
   const displayImages =
     images.length > 1
@@ -104,7 +106,6 @@ export default function BestsellerProductCard({
       : images.slice(0, 1);
   const fetcher = useFetcher<WishlistActionData>();
   const location = useLocation();
-  const navigate = useNavigate();
   const loginPath = usePrefixPathWithLocale('/account/login');
   const fetcherLoginUrl = usePrefixPathWithLocale(fetcher.data?.loginUrl ?? '');
   const localizedSimilarProductsUrl = usePrefixPathWithLocale(
@@ -218,7 +219,7 @@ export default function BestsellerProductCard({
   return (
     <article
       className="bestseller-card"
-      aria-labelledby={`product-${productId}`}
+      aria-labelledby={titleId}
       onMouseEnter={showMotifImage}
       onMouseLeave={showListingImage}
       onFocusCapture={showMotifImage}
@@ -241,19 +242,14 @@ export default function BestsellerProductCard({
           </button>
 
           {showSimilarMotifsButton && similarProductsUrl ? (
-            <button
-              type="button"
+            <Link
+              to={localizedSimilarProductsUrl}
               className="bestseller-card__action bestseller-card__similar"
               aria-label={similarMotifsLabel}
               title={similarMotifsLabel}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                void navigate(localizedSimilarProductsUrl);
-              }}
             >
               <SimilarMotifsIcon />
-            </button>
+            </Link>
           ) : null}
         </div>
 
@@ -297,7 +293,8 @@ export default function BestsellerProductCard({
 
         {hasMultipleImages ? (
           <div
-            className="bestseller-card__dots"
+            role="group"
+        className="bestseller-card__dots"
             aria-label={t('productCard.images')}
           >
             {displayImages.map((image, imageIndex) => (
@@ -320,9 +317,9 @@ export default function BestsellerProductCard({
 
       <div className="bestseller-card__body">
         <div className="bestseller-card__details">
-          <h2 className="bestseller-card__title" id={`product-${productId}`}>
+          <h3 className="bestseller-card__title" id={titleId}>
             <Link to={productUrl}>{title}</Link>
-          </h2>
+          </h3>
           {priceLabel ? (
             <p className="bestseller-card__price">{priceLabel}</p>
           ) : null}

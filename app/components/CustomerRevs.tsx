@@ -107,6 +107,7 @@ function CustomerReviewStars({rating}: {rating: number}) {
   return (
     <div
       className="customerReviewStars"
+      role="img"
       aria-label={t('reviews.rating', {rating})}
     >
       {starStates.map(({position, state}) => (
@@ -167,7 +168,7 @@ export default function CustomerRevs({
     <section className="container CustomerRevs-section">
       {sectionTitle?.trim() ? (
         <div className="seperator">
-          <h3>{sectionTitle.trim()}</h3>
+          <h2>{sectionTitle.trim()}</h2>
         </div>
       ) : null}
 
@@ -240,7 +241,8 @@ export default function CustomerRevs({
 
       {scrollSnaps.length > 1 ? (
         <div
-          className="customerReviewsDots"
+          role="group"
+        className="customerReviewsDots"
           aria-label={t('reviews.list')}
         >
           {scrollSnaps.map((scrollSnap, index) => (

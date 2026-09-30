@@ -554,7 +554,7 @@ function DefaultCollectionLayout({
               );
 
               return (
-                <CustomProductCard
+                <CustomProductCard headingLevel="h2"
                   key={product.id}
                   productId={product.id}
                   title={product.title}

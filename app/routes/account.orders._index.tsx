@@ -228,6 +228,7 @@ function OrderSearchForm({
       </div>
 
       <form
+        role="search"
         ref={formRef}
         onSubmit={handleSubmit}
         className="account-orders__filters"

@@ -136,7 +136,7 @@ export default function SearchPage() {
   const showResults = !error && Boolean(term) && hasResults;
 
   return (
-    <main className="search-page" aria-busy={isSearching}>
+    <div className="search-page" aria-busy={isSearching}>
       <div className="search-page__container">
         <header
           className={`search-page__header${showResults ? ' search-page__header--results' : ''}`}
@@ -229,7 +229,7 @@ export default function SearchPage() {
           data={{searchTerm: term, searchResults: result}}
         />
       </div>
-    </main>
+    </div>
   );
 }
 

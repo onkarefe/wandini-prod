@@ -105,7 +105,7 @@ export default function Kontakt({title, data}: KontaktProps) {
   );
 
   return (
-    <main className="kontakt-page">
+    <div className="kontakt-page">
       <section className="kontakt-page__hero container mx-auto">
         <header className="kontakt-page__header">
           <h1 className="kontakt-page__title">{title}</h1>
@@ -178,7 +178,7 @@ export default function Kontakt({title, data}: KontaktProps) {
       ) : null}
 
       <KontaktForm />
-    </main>
+    </div>
   );
 }
 
