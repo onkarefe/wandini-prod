@@ -180,6 +180,7 @@ export const en = {
   'product.inStock': 'In stock',
   'product.currentlyUnavailable': 'Currently unavailable',
   'product.quantity': 'Quantity',
+  'product.variant': 'Variant',
   'product.decreaseQuantity': 'Decrease quantity',
   'product.increaseQuantity': 'Increase quantity',
   'product.accessories': 'Accessories',

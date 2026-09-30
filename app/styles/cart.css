@@ -654,7 +654,38 @@
 }
 
 .cart-upsell-card__footer {
+  min-width: 0;
   padding: 0 12px 12px;
+}
+
+.cart-upsell-card__variant {
+  min-width: 0;
+  margin-bottom: 10px;
+}
+
+.cart-upsell-card__variant-label {
+  display: block;
+  margin-bottom: 5px;
+  color: #424245;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.cart-upsell-card__variant-select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 7px 8px;
+  border: 1px solid #d2d2d7;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #1d1d1f;
+  font: inherit;
+  font-size: 0.72rem;
 }
 
 .cart-upsell-card__footer form {
@@ -693,6 +724,7 @@
 .order-summary__code-input button:focus-visible,
 .order-summary__applied-code button:focus-visible,
 .cart-upsell-card__product-link:focus-visible,
+.cart-upsell-card__variant-select:focus-visible,
 .cart-upsell-card__button:focus-visible,
 .custom-cart-line--page .aside-itemRemove:focus-visible {
   outline: 2px solid #1d1d1f;
@@ -811,6 +843,10 @@
 
   .cart-upsell-card__body {
     align-self: end;
+  }
+
+  .cart-upsell-card__footer {
+    grid-column: 2;
   }
 
   .cart-upsell-card__body h3 {

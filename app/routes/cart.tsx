@@ -261,15 +261,7 @@ export async function loader({context}: Route.LoaderArgs) {
                 handle: reference.handle,
                 title: reference.title,
                 image: reference.featuredImage ?? null,
-                variant: reference.selectedOrFirstAvailableVariant
-                  ? {
-                      id: reference.selectedOrFirstAvailableVariant.id,
-                      availableForSale:
-                        reference.selectedOrFirstAvailableVariant
-                          .availableForSale,
-                      price: reference.selectedOrFirstAvailableVariant.price,
-                    }
-                  : null,
+                variants: reference.variants.nodes,
               } satisfies CartUpsellProduct,
             ]
           : [],
@@ -386,15 +378,19 @@ const CART_UPSELL_PRODUCTS_QUERY = `#graphql
                 width
                 height
               }
-              selectedOrFirstAvailableVariant(
-                ignoreUnknownOptions: true
-                caseInsensitiveMatch: true
-              ) {
-                id
-                availableForSale
-                price {
-                  amount
-                  currencyCode
+              variants(first: 50) {
+                nodes {
+                  id
+                  title
+                  availableForSale
+                  price {
+                    amount
+                    currencyCode
+                  }
+                  selectedOptions {
+                    name
+                    value
+                  }
                 }
               }
             }

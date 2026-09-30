@@ -179,6 +179,7 @@ export const de = {
   'product.inStock': 'Auf Lager',
   'product.currentlyUnavailable': 'Derzeit nicht verfügbar',
   'product.quantity': 'Menge',
+  'product.variant': 'Variante',
   'product.decreaseQuantity': 'Menge verringern',
   'product.increaseQuantity': 'Menge erhöhen',
   'product.accessories': 'Zubehör',

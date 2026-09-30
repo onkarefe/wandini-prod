@@ -1269,17 +1269,22 @@ export type CartUpsellProductsQuery = {
                     'url' | 'altText' | 'width' | 'height'
                   >
                 >;
-                selectedOrFirstAvailableVariant?: StorefrontAPI.Maybe<
-                  Pick<
-                    StorefrontAPI.ProductVariant,
-                    'id' | 'availableForSale'
-                  > & {
-                    price: Pick<
-                      StorefrontAPI.MoneyV2,
-                      'amount' | 'currencyCode'
-                    >;
-                  }
-                >;
+                variants: {
+                  nodes: Array<
+                    Pick<
+                      StorefrontAPI.ProductVariant,
+                      'id' | 'title' | 'availableForSale'
+                    > & {
+                      price: Pick<
+                        StorefrontAPI.MoneyV2,
+                        'amount' | 'currencyCode'
+                      >;
+                      selectedOptions: Array<
+                        Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
+                      >;
+                    }
+                  >;
+                };
               })
         >;
       }>;
@@ -2631,7 +2636,7 @@ interface GeneratedQueryTypes {
     return: BlogsQuery;
     variables: BlogsQueryVariables;
   };
-  '#graphql\n  query CartUpsellProducts(\n    $country: CountryCode\n    $language: LanguageCode\n    $collectionHandle: String!\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $collectionHandle) {\n      cartUpsellProducts: metafield(\n        namespace: "custom"\n        key: "cart_upsell_products"\n      ) {\n        references(first: 3) {\n          nodes {\n            __typename\n            ... on Product {\n              id\n              handle\n              title\n              featuredImage {\n                url\n                altText\n                width\n                height\n              }\n              selectedOrFirstAvailableVariant(\n                ignoreUnknownOptions: true\n                caseInsensitiveMatch: true\n              ) {\n                id\n                availableForSale\n                price {\n                  amount\n                  currencyCode\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query CartUpsellProducts(\n    $country: CountryCode\n    $language: LanguageCode\n    $collectionHandle: String!\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $collectionHandle) {\n      cartUpsellProducts: metafield(\n        namespace: "custom"\n        key: "cart_upsell_products"\n      ) {\n        references(first: 3) {\n          nodes {\n            __typename\n            ... on Product {\n              id\n              handle\n              title\n              featuredImage {\n                url\n                altText\n                width\n                height\n              }\n              variants(first: 50) {\n                nodes {\n                  id\n                  title\n                  availableForSale\n                  price {\n                    amount\n                    currencyCode\n                  }\n                  selectedOptions {\n                    name\n                    value\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: CartUpsellProductsQuery;
     variables: CartUpsellProductsQueryVariables;
   };
