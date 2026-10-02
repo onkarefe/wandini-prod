@@ -31,6 +31,9 @@ import ts from 'typescript';
 import {describe, expect, it} from 'vitest';
 import {Aside} from '~/components/Aside';
 import {ProductDetailTabs} from '~/components/ProductDetailTabs';
+import FAQ, {type FAQCategory, type FAQCopy} from '~/components/FAQ';
+import {RichText} from '@shopify/hydrogen';
+import {createTranslator} from '~/i18n';
 import {Breadcrumbs} from '~/components/ProductBreadcrumb';
 import AllProdutsNew, {BestsellerCard} from '~/components/AllProdutsNew';
 import CustomProductCard from '~/components/CustomProductCard';
@@ -96,6 +99,47 @@ const product = {
   title: 'Wallpaper',
   images: {nodes: []},
   priceRange: {minVariantPrice: {amount: '10', currencyCode: 'EUR'}},
+};
+
+const faqCategories: FAQCategory[] = [
+  'Ordering',
+  'Materials',
+  'Delivery',
+  'Care',
+].map((title, categoryIndex) => ({
+  id: `category-${categoryIndex}`,
+  title,
+  items: [0, 1].map((itemIndex) => ({
+    id: `item-${categoryIndex}-${itemIndex}`,
+    handle:
+      categoryIndex === 1 && itemIndex === 0
+        ? 'kann-ich-die-materialien-vor-der-bestellung-testen'
+        : `item-${categoryIndex}-${itemIndex}`,
+    question: `${title} question ${itemIndex + 1}?`,
+    answer: JSON.stringify({
+      type: 'root',
+      children: [
+        {
+          type: 'paragraph',
+          children: [
+            {type: 'text', value: `${title} answer ${itemIndex + 1}.`},
+          ],
+        },
+      ],
+    }),
+  })),
+}));
+
+const faqCopy: FAQCopy = {
+  contactEyebrow: 'Contact',
+  contactTitle: 'Still have questions?',
+  contactDescription: 'Send us your question.',
+  fullNameLabel: 'Full name',
+  emailLabel: 'Email',
+  phoneLabel: 'Phone',
+  questionLabel: 'Question',
+  submitLabel: 'Send',
+  submittingLabel: 'Sending',
 };
 
 describe('storefront semantic invariants', () => {
@@ -193,10 +237,98 @@ describe('storefront semantic invariants', () => {
     expectResolvedRelationships(html);
   });
 
+  it.each([GERMAN_LOCALE, ENGLISH_LOCALE])(
+    'renders every FAQ question and answer in ordered persistent SSR panels (%s)',
+    async (locale) => {
+      const html = await markup(
+        createElement(FAQ, {
+          title: 'FAQ',
+          categories: faqCategories,
+          copy: faqCopy,
+        }),
+        locale,
+      );
+      const tabs = [...html.matchAll(/<button\b[^>]*role="tab"[^>]*>/g)].map(
+        ([tag]) => tag,
+      );
+      const panels = [...html.matchAll(/<div\b[^>]*role="tabpanel"[^>]*>/g)];
+      expect(tabs).toHaveLength(faqCategories.length);
+      expect(panels).toHaveLength(faqCategories.length);
+      panels.forEach(([panel], index) => {
+        const tabId = attributes(tabs[index], 'id');
+        const panelId = attributes(panel, 'id');
+        expect(tabId).toHaveLength(1);
+        expect(panelId).toHaveLength(1);
+        expect(attributes(tabs[index], 'aria-controls')).toEqual(panelId);
+        expect(attributes(panel, 'aria-labelledby')).toEqual(tabId);
+        expect(attributes(tabs[index], 'aria-selected')).toEqual([
+          String(index === 0),
+        ]);
+        expect(attributes(tabs[index], 'tabindex')).toEqual([
+          index === 0 ? '0' : '-1',
+        ]);
+        expect(panel.includes(' hidden=""')).toBe(index !== 0);
+        const start = panels[index].index!;
+        const end =
+          panels[index + 1]?.index ?? html.indexOf('</section>', start);
+        const body = html.slice(start, end);
+        const category = faqCategories[index];
+        expect(body.match(/<details\b/g)).toHaveLength(category.items.length);
+        expect(body.match(/<summary\b/g)).toHaveLength(category.items.length);
+        category.items.forEach((item, itemIndex) => {
+          expect(body).toContain(item.question);
+          expect(body).toContain(
+            `<p>${category.title} answer ${itemIndex + 1}.</p>`,
+          );
+        });
+      });
+      expect(
+        [...html.matchAll(/<summary\b[^>]*><span>(.*?)<\/span>/g)].map(
+          (match) => match[1],
+        ),
+      ).toEqual(
+        faqCategories.flatMap((category) =>
+          category.items.map((item) => item.question),
+        ),
+      );
+      const t = createTranslator(locale);
+      expect(html).toContain(
+        `class="faq-page__sample-set-link" href="${t('faq.sampleSetUrl')}"`,
+      );
+      expect(html).toContain(t('faq.sampleSetCta'));
+      expect(html.match(/class="faq-page__sample-set-link"/g)).toHaveLength(1);
+      expect(html.match(/<h1\b/g)).toHaveLength(1);
+      expect(html.match(/<h2\b/g)).toHaveLength(1);
+      expect(html).toContain('>FAQ</h1>');
+      expectResolvedRelationships(html);
+    },
+  );
+
+  it('preserves the FAQ empty state and contact form markup', async () => {
+    const empty = await markup(
+      createElement(FAQ, {title: 'FAQ', categories: [], copy: faqCopy}),
+    );
+    const populated = await markup(
+      createElement(FAQ, {
+        title: 'FAQ',
+        categories: faqCategories,
+        copy: faqCopy,
+      }),
+    );
+    expect(attributes(empty, 'role')).not.toContain('tablist');
+    expect(attributes(empty, 'role')).not.toContain('tab');
+    expect(attributes(empty, 'role')).not.toContain('tabpanel');
+    expect(empty).not.toContain('<details');
+    expect(empty).toContain('>FAQ</h1>');
+    const contactSection = (html: string) =>
+      html.slice(html.indexOf('<section class="faq-contact"'));
+    expect(contactSection(empty)).toBe(contactSection(populated));
+  });
+
   // Use installed Chromium and the existing React UMD builds; no DOM test dependency.
-  it.skipIf(!chromium)(
-    'preserves panel DOM nodes through clicks and keyboard navigation',
-    () => {
+  it.skipIf(!chromium).each(['ProductDetailTabs', 'FAQ'] as const)(
+    '%s preserves panel DOM nodes through clicks and keyboard navigation',
+    (componentName) => {
       const directory = mkdtempSync(join(tmpdir(), 'product-detail-tabs-'));
       try {
         const require = createRequire(import.meta.url);
@@ -216,7 +348,7 @@ describe('storefront semantic invariants', () => {
         );
         const component = ts.transpileModule(
           readFileSync(
-            new URL('../components/ProductDetailTabs.tsx', import.meta.url),
+            new URL('../components/' + componentName + '.tsx', import.meta.url),
             'utf8',
           ),
           {
@@ -228,24 +360,53 @@ describe('storefront semantic invariants', () => {
           },
         ).outputText;
         const css = readFileSync(
-          new URL('../styles/ProductDetailTabs.css', import.meta.url),
+          new URL('../styles/' + componentName + '.css', import.meta.url),
           'utf8',
+        );
+        const answerHtml = Object.fromEntries(
+          faqCategories.flatMap((category) =>
+            category.items.map((item) => [
+              item.answer,
+              renderToStaticMarkup(
+                createElement(RichText, {data: item.answer}),
+              ),
+            ]),
+          ),
         );
         const html = `<!doctype html><style>${css}</style><div id="root"></div><pre id="result">pending</pre>
         <script>${react}</script><script>${reactDOM}</script>
         <script>
           const exports = {};
+          const isFAQ = ${JSON.stringify(componentName === 'FAQ')};
+          const faqCategories = ${JSON.stringify(faqCategories)};
+          const faqAnswers = ${JSON.stringify(answerHtml)};
+          const Form = React.forwardRef((props, ref) => React.createElement('form', {...props, ref}));
+          // SSR assertions above use real dependencies; browser adapters isolate tab interactions.
           function require(name) {
             if (name === 'react') return React;
-            if (name === '~/i18n/useTranslation') return {useTranslation: () => ({t: () => 'Information'})};
+            if (name === '~/i18n/useTranslation') return {useTranslation: () => ({t: (key) => key === 'faq.sampleSetUrl' ? '/sample-set' : key === 'faq.sampleSetCta' ? 'Sample set' : 'Information'})};
+            if (name === 'react-router') return {
+              useFetcher: () => ({state: 'idle', Form}),
+              Link: ({to, ...props}) => React.createElement('a', {...props, href: to}),
+            };
+            if (name === '@shopify/hydrogen') return {
+              RichText: ({data, ...props}) => React.createElement('div', {...props, dangerouslySetInnerHTML: {__html: faqAnswers[data]}}),
+            };
             throw new Error('Unexpected import: ' + name);
           }
           ${component}
           try {
             function check(condition, message) { if (!condition) throw new Error(message); }
-            const contents = ['Description content', 'Information content', 'Materials content', 'Delivery content'];
+            const contents = isFAQ
+              ? faqCategories.map(category => category.items.map((item, index) =>
+                item.question + category.title + ' answer ' + (index + 1) + '.' +
+                (item.handle === 'kann-ich-die-materialien-vor-der-bestellung-testen' ? 'Sample set' : '')
+              ).join(''))
+              : ['Description content', 'Information content', 'Materials content', 'Delivery content'];
             ReactDOM.flushSync(() => ReactDOM.createRoot(document.getElementById('root')).render(
-              React.createElement(exports.ProductDetailTabs, {
+              React.createElement(isFAQ ? exports.default : exports.ProductDetailTabs, isFAQ ? {
+                title: 'FAQ', categories: faqCategories, copy: ${JSON.stringify(faqCopy)}
+              } : {
                 tabTitles: ['Description', 'Information', 'Materials', 'Delivery'],
                 tabContents: contents.map(text => React.createElement('p', {key: text}, text))
               })
@@ -253,9 +414,21 @@ describe('storefront semantic invariants', () => {
             const tabs = [...document.querySelectorAll('[role="tab"]')];
             const panels = [...document.querySelectorAll('[role="tabpanel"]')];
             const children = panels.map(panel => panel.firstChild);
+            const details = [...document.querySelectorAll('details')];
+            if (isFAQ) {
+              check(details.length === 8, 'All FAQ details must exist');
+              check(document.querySelectorAll('summary').length === 8, 'FAQ summaries must remain');
+              details[0].querySelector('summary').click();
+              check(details[0].open, 'Summary must open its details');
+            }
             check(tabs.length === 4 && panels.length === 4, 'All tabs and panels must exist');
             function verify(active) {
               check(document.querySelectorAll('[role="tabpanel"]').length === 4, 'Panel count changed');
+              if (isFAQ) {
+                check(details.every(item => item.isConnected), 'FAQ item was removed');
+                check(details[0].open, 'Details state was lost while changing categories');
+                check(document.querySelector('.faq-page__sample-set-link').getAttribute('href') === '/sample-set', 'Sample CTA was lost');
+              }
               panels.forEach((panel, index) => {
                 check(panel.isConnected && document.getElementById(panel.id) === panel, 'Panel was replaced');
                 check(panel.firstChild === children[index] && panel.textContent === contents[index], 'Content was replaced');

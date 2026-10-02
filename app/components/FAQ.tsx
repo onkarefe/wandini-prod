@@ -63,9 +63,6 @@ export default function FAQ({title, categories, copy}: FAQProps) {
   const activeCategory =
     categories.find((category) => category.id === activeCategoryId) ??
     categories[0];
-  const activeCategoryIndex = activeCategory
-    ? categories.indexOf(activeCategory)
-    : -1;
   const isSubmitting = fetcher.state !== 'idle';
 
   useEffect(() => {
@@ -122,7 +119,7 @@ export default function FAQ({title, categories, copy}: FAQProps) {
                       key={category.id}
                       type="button"
                       role="tab"
-                      aria-controls={`${tabGroupId}-panel`}
+                      aria-controls={`${tabGroupId}-panel-${index}`}
                       aria-selected={isActive}
                       tabIndex={isActive ? 0 : -1}
                       onClick={() => setActiveCategoryId(category.id)}
@@ -135,15 +132,17 @@ export default function FAQ({title, categories, copy}: FAQProps) {
               </div>
             </div>
 
-            {activeCategory ? (
+            {categories.map((category, index) => (
               <div
+                key={category.id}
                 className="faq-page__panel"
-                id={`${tabGroupId}-panel`}
+                id={`${tabGroupId}-panel-${index}`}
                 role="tabpanel"
-                aria-labelledby={`${tabGroupId}-tab-${activeCategoryIndex}`}
+                aria-labelledby={`${tabGroupId}-tab-${index}`}
+                hidden={category.id !== activeCategory?.id}
               >
                 <div className="faq-page__questions">
-                  {activeCategory.items.map((item) => (
+                  {category.items.map((item) => (
                     <details className="faq-page__item" key={item.id}>
                       <summary className="faq-page__question">
                         <span>{item.question}</span>
@@ -167,7 +166,7 @@ export default function FAQ({title, categories, copy}: FAQProps) {
                   ))}
                 </div>
               </div>
-            ) : null}
+            ))}
           </>
         ) : null}
       </section>
