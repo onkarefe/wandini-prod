@@ -6,9 +6,19 @@ import AccountProfile from '~/routes/account.profile';
 import AccountAddresses from '~/routes/account.addresses';
 import AccountFavorites from '~/routes/account.favorites';
 import Article from '~/routes/blogs.$blogHandle.$articleHandle';
-import {readFileSync, readdirSync} from 'node:fs';
-import {fileURLToPath} from 'node:url';
-import {join} from 'node:path';
+import {
+  readFileSync,
+  readdirSync,
+  existsSync,
+  mkdtempSync,
+  writeFileSync,
+  rmSync,
+} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {createRequire} from 'node:module';
+import {tmpdir} from 'node:os';
+import {fileURLToPath, pathToFileURL} from 'node:url';
+import {join, dirname, basename} from 'node:path';
 import {createElement, Fragment, type ReactElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {
@@ -27,6 +37,16 @@ import CustomProductCard from '~/components/CustomProductCard';
 import BestsellerProductCard from '~/components/BestsellerProductCard';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {GERMAN_LOCALE, ENGLISH_LOCALE, type SelectedLocale} from '~/lib/locale';
+
+const chromium = [
+  process.env.CHROME_BIN,
+  'C:/Program Files/Google/Chrome/Application/chrome.exe',
+  'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+  '/usr/bin/chromium',
+  '/usr/bin/chromium-browser',
+  '/usr/bin/google-chrome',
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+].find((path): path is string => Boolean(path && existsSync(path)));
 
 async function markup(
   element: ReactElement,
@@ -113,46 +133,205 @@ describe('storefront semantic invariants', () => {
     },
   );
 
-  it('connects only the active tab to the mounted shared panel without a hidden heading', async () => {
+  it('renders every tab content in SSR with only the first panel visible', async () => {
+    const tabContents = [
+      'Description content',
+      'Product information content',
+      'Materials content',
+      'Delivery content',
+    ];
     const html = await markup(
       createElement(ProductDetailTabs, {
-        tabTitles: ['Description', 'Materials', 'Delivery'],
-        tabContents: [
-          'Description content',
-          'Materials content',
-          'Delivery content',
-        ],
+        tabTitles: ['Description', 'Information', 'Materials', 'Delivery'],
+        tabContents,
       }),
     );
-    expect(
-      attributes(html, 'role').filter((role) => role === 'tab'),
-    ).toHaveLength(3);
-    expect(
-      attributes(html, 'role').filter((role) => role === 'tabpanel'),
-    ).toHaveLength(1);
-    expect(attributes(html, 'aria-selected')).toEqual([
-      'true',
-      'false',
-      'false',
-    ]);
     const tabs = [...html.matchAll(/<button\b[^>]*role="tab"[^>]*>/g)].map(
       ([tag]) => tag,
     );
-    const panel = html.match(/<div\b[^>]*role="tabpanel"[^>]*>/)?.[0] ?? '';
-    const activeTab = tabs[0];
-    expect(attributes(activeTab, 'aria-controls')).toHaveLength(1);
-    expect(
-      tabs.slice(1).map((tab) => attributes(tab, 'aria-controls')),
-    ).toEqual([[], []]);
-    expect(attributes(activeTab, 'aria-controls')).toEqual(
-      attributes(panel, 'id'),
-    );
-    expect(attributes(panel, 'aria-labelledby')).toEqual(
-      attributes(activeTab, 'id'),
-    );
-    expect(html).not.toMatch(/<h2\b[^>]*>Description<\/h2>/);
+    const panels = [
+      ...html.matchAll(/<div\b[^>]*role="tabpanel"[^>]*>(.*?)<\/div>/g),
+    ];
+    expect(tabs).toHaveLength(4);
+    expect(panels).toHaveLength(4);
+    panels.forEach(([panel, content], index) => {
+      expect(content).toBe(tabContents[index]);
+      expect(panel.includes(' hidden=""')).toBe(index !== 0);
+      expect(attributes(tabs[index], 'aria-controls')).toEqual(
+        attributes(panel, 'id'),
+      );
+      expect(attributes(panel, 'aria-labelledby')).toEqual(
+        attributes(tabs[index], 'id'),
+      );
+      expect(attributes(tabs[index], 'aria-selected')).toEqual([
+        String(index === 0),
+      ]);
+      expect(attributes(tabs[index], 'tabindex')).toEqual([
+        index === 0 ? '0' : '-1',
+      ]);
+    });
+    expect(html).not.toMatch(/<h[1-6]\b/);
     expectResolvedRelationships(html);
   });
+
+  it('keeps IDs unique across multiple tab components', async () => {
+    const props = {
+      tabTitles: ['Description', 'Materials'],
+      tabContents: ['Text', 'Details'],
+    };
+    const html = await markup(
+      createElement(
+        Fragment,
+        null,
+        createElement(ProductDetailTabs, props),
+        createElement(ProductDetailTabs, props),
+      ),
+    );
+    expect(
+      attributes(html, 'role').filter((role) => role === 'tabpanel'),
+    ).toHaveLength(4);
+    expectResolvedRelationships(html);
+  });
+
+  // Use installed Chromium and the existing React UMD builds; no DOM test dependency.
+  it.skipIf(!chromium)(
+    'preserves panel DOM nodes through clicks and keyboard navigation',
+    () => {
+      const directory = mkdtempSync(join(tmpdir(), 'product-detail-tabs-'));
+      try {
+        const require = createRequire(import.meta.url);
+        const react = readFileSync(
+          join(
+            dirname(require.resolve('react/package.json')),
+            'umd/react.development.js',
+          ),
+          'utf8',
+        );
+        const reactDOM = readFileSync(
+          join(
+            dirname(require.resolve('react-dom/package.json')),
+            'umd/react-dom.development.js',
+          ),
+          'utf8',
+        );
+        const component = ts.transpileModule(
+          readFileSync(
+            new URL('../components/ProductDetailTabs.tsx', import.meta.url),
+            'utf8',
+          ),
+          {
+            compilerOptions: {
+              module: ts.ModuleKind.CommonJS,
+              jsx: ts.JsxEmit.React,
+              target: ts.ScriptTarget.ES2022,
+            },
+          },
+        ).outputText;
+        const css = readFileSync(
+          new URL('../styles/ProductDetailTabs.css', import.meta.url),
+          'utf8',
+        );
+        const html = `<!doctype html><style>${css}</style><div id="root"></div><pre id="result">pending</pre>
+        <script>${react}</script><script>${reactDOM}</script>
+        <script>
+          const exports = {};
+          function require(name) {
+            if (name === 'react') return React;
+            if (name === '~/i18n/useTranslation') return {useTranslation: () => ({t: () => 'Information'})};
+            throw new Error('Unexpected import: ' + name);
+          }
+          ${component}
+          try {
+            function check(condition, message) { if (!condition) throw new Error(message); }
+            const contents = ['Description content', 'Information content', 'Materials content', 'Delivery content'];
+            ReactDOM.flushSync(() => ReactDOM.createRoot(document.getElementById('root')).render(
+              React.createElement(exports.ProductDetailTabs, {
+                tabTitles: ['Description', 'Information', 'Materials', 'Delivery'],
+                tabContents: contents.map(text => React.createElement('p', {key: text}, text))
+              })
+            ));
+            const tabs = [...document.querySelectorAll('[role="tab"]')];
+            const panels = [...document.querySelectorAll('[role="tabpanel"]')];
+            const children = panels.map(panel => panel.firstChild);
+            check(tabs.length === 4 && panels.length === 4, 'All tabs and panels must exist');
+            function verify(active) {
+              check(document.querySelectorAll('[role="tabpanel"]').length === 4, 'Panel count changed');
+              panels.forEach((panel, index) => {
+                check(panel.isConnected && document.getElementById(panel.id) === panel, 'Panel was replaced');
+                check(panel.firstChild === children[index] && panel.textContent === contents[index], 'Content was replaced');
+                check(panel.hidden === (index !== active), 'Incorrect hidden attribute');
+                check((getComputedStyle(panel).display !== 'none') === (index === active), 'Incorrect visibility');
+                check(tabs[index].getAttribute('aria-controls') === panel.id, 'Incorrect aria-controls');
+                check(panel.getAttribute('aria-labelledby') === tabs[index].id, 'Incorrect aria-labelledby');
+                check(tabs[index].getAttribute('aria-selected') === String(index === active), 'Incorrect selection');
+                check(tabs[index].tabIndex === (index === active ? 0 : -1), 'Incorrect tabIndex');
+              });
+            }
+            verify(0);
+            ReactDOM.flushSync(() => tabs[2].click());
+            verify(2);
+            ReactDOM.flushSync(() => tabs[0].click());
+            verify(0);
+            tabs[0].focus();
+            for (const [key, expected] of [['ArrowLeft', 3], ['ArrowRight', 0], ['ArrowRight', 1], ['ArrowLeft', 0], ['End', 3], ['Home', 0]]) {
+              const event = new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true});
+              ReactDOM.flushSync(() => document.activeElement.dispatchEvent(event));
+              check(event.defaultPrevented, 'Navigation default was not prevented');
+              check(document.activeElement === tabs[expected], 'Focus did not follow keyboard navigation');
+              verify(expected);
+            }
+            const ignored = new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true});
+            ReactDOM.flushSync(() => tabs[0].dispatchEvent(ignored));
+            check(!ignored.defaultPrevented && document.activeElement === tabs[0], 'Unrelated key changed behavior');
+            verify(0);
+            document.getElementById('result').textContent = 'passed';
+          } catch (error) {
+            document.getElementById('result').textContent = 'failed: ' + error.message;
+          }
+        </script>`;
+        const file = join(directory, 'tabs.html');
+        writeFileSync(file, html);
+        const output = execFileSync(
+          chromium!,
+          [
+            '--headless',
+            '--disable-gpu',
+            '--no-first-run',
+            '--no-default-browser-check',
+            '--disable-extensions',
+            '--disable-background-networking',
+            '--user-data-dir=' + join(directory, 'profile'),
+            '--dump-dom',
+            pathToFileURL(file).href,
+          ],
+          {
+            encoding: 'utf8',
+            timeout: 20_000,
+            maxBuffer: 4 * 1024 * 1024,
+            windowsHide: true,
+            stdio: ['ignore', 'pipe', 'pipe'],
+          },
+        );
+        expect(output.match(/<pre id="result">(.*?)<\/pre>/)?.[1]).toBe(
+          'passed',
+        );
+      } finally {
+        // mkdtemp created this directory under the OS temporary directory.
+        if (
+          dirname(directory) === tmpdir() &&
+          basename(directory).startsWith('product-detail-tabs-')
+        ) {
+          rmSync(directory, {
+            recursive: true,
+            force: true,
+            maxRetries: 5,
+            retryDelay: 100,
+          });
+        }
+      }
+    },
+    30_000,
+  );
 
   it('keeps empty suggestions mounted as the input list target', async () => {
     const html = await markup(

@@ -63,9 +63,7 @@ export function ProductDetailTabs({
               type="button"
               role="tab"
               id={`${tabsId}-tab-${index}`}
-              aria-controls={
-                activeTab === index ? `${tabsId}-panel` : undefined
-              }
+              aria-controls={`${tabsId}-panel-${index}`}
               aria-selected={activeTab === index}
               tabIndex={activeTab === index ? 0 : -1}
             >
@@ -80,15 +78,19 @@ export function ProductDetailTabs({
       </div>
 
       <div className="custom-tabs-content">
-        <div
-          className="customTabContent"
-          role="tabpanel"
-          id={`${tabsId}-panel`}
-          aria-labelledby={`${tabsId}-tab-${activeTab}`}
-          tabIndex={0}
-        >
-          {tabContents[activeTab]}
-        </div>
+        {tabContents.slice(0, tabCount).map((content, index) => (
+          <div
+            key={`${tabsId}-panel-${index}`}
+            className="customTabContent"
+            role="tabpanel"
+            id={`${tabsId}-panel-${index}`}
+            aria-labelledby={`${tabsId}-tab-${index}`}
+            hidden={activeTab !== index}
+            tabIndex={0}
+          >
+            {content}
+          </div>
+        ))}
       </div>
     </div>
   );
