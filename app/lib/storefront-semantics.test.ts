@@ -1,4 +1,4 @@
-import {meta as policiesMeta} from '~/routes/policies._index';
+import Policies, {meta as policiesMeta} from '~/routes/policies._index';
 import {meta as rootMeta} from '~/root';
 import {getRobotsDirective} from '~/lib/seo';
 import AccountLayout from '~/routes/account';
@@ -680,63 +680,192 @@ describe('nested account and article route outlines', () => {
     },
   );
 
-  it('renders a blog article with one page title and named hero image', async () => {
-    const article = {
-      id: 'article',
-      handle: 'example',
-      title: 'Article title',
-      publishedAt: '2026-01-01T12:00:00Z',
-      contentHtml: '<h2>Article section</h2><p>Article text.</p>',
-      excerpt: 'Excerpt',
-      author: {name: 'Author'},
-      image: {
-        url: 'https://cdn.shopify.com/article.jpg',
-        width: 800,
-        height: 600,
-        altText: '',
-      },
-    };
-    const routes = [
-      {
-        id: 'root',
-        path: '/',
-        loader: () => ({selectedLocale: ENGLISH_LOCALE}),
-        element: createElement('main', null, createElement(Outlet)),
-        children: [
-          {
-            path: '*',
-            element: createElement(Article),
-            loader: () => ({
-              article,
-              relatedArticles: [],
-              blogHandle: 'news',
-              blogTitle: 'News',
-              canonicalUrl: 'https://www.wandini.shop/en/blogs/news/example',
-            }),
-          },
-        ],
-      },
-    ];
-    const handler = createStaticHandler(routes);
-    const context = await handler.query(
-      new Request('https://www.wandini.shop/en/blogs/news/example'),
-    );
-    if (context instanceof Response) throw new Error('Unexpected redirect');
-    const html = renderToStaticMarkup(
-      createElement(StaticRouterProvider, {
-        router: createStaticRouter(handler.dataRoutes, context),
-        context,
-        hydrate: false,
-      }),
-    );
-    expect(html.match(/<main\b/g)).toHaveLength(1);
-    expect(html.match(/<h1\b/g)).toHaveLength(1);
-    expect(html).toContain('alt="Article title"');
-    expectResolvedRelationships(html);
-  });
+  it.each([
+    [GERMAN_LOCALE, ''],
+    [ENGLISH_LOCALE, ''],
+    [ENGLISH_LOCALE, 'Editorial hero'],
+  ] as const)(
+    'renders a blog article with one page title and named hero image (%s, %s)',
+    async (locale, altText) => {
+      const article = {
+        id: 'article',
+        handle: 'example',
+        title: 'Article title',
+        publishedAt: '2026-01-01T12:00:00Z',
+        contentHtml: '<h2>Article section</h2><p>Article text.</p>',
+        excerpt: 'Excerpt',
+        author: {name: 'Author'},
+        image: {
+          url: 'https://cdn.shopify.com/article.jpg',
+          width: 800,
+          height: 600,
+          altText,
+        },
+      };
+      const routes = [
+        {
+          id: 'root',
+          path: '/',
+          loader: () => ({selectedLocale: locale}),
+          element: createElement('main', null, createElement(Outlet)),
+          children: [
+            {
+              path: '*',
+              element: createElement(Article),
+              loader: () => ({
+                article,
+                relatedArticles: [
+                  {
+                    ...article,
+                    id: 'related-one',
+                    handle: 'related-one',
+                    title: 'Related one',
+                    excerpt: 'Related excerpt 1',
+                    image: {...article.image, altText: 'Related image'},
+                  },
+                  {
+                    ...article,
+                    id: 'related-two',
+                    handle: 'related-two',
+                    title: 'Related two',
+                    excerpt: 'Related excerpt 2',
+                    image: {...article.image, altText: ''},
+                  },
+                ],
+                blogHandle: 'news',
+                blogTitle: 'News',
+                canonicalUrl: 'https://www.wandini.shop/en/blogs/news/example',
+              }),
+            },
+          ],
+        },
+      ];
+      const handler = createStaticHandler(routes);
+      const context = await handler.query(
+        new Request('https://www.wandini.shop/en/blogs/news/example'),
+      );
+      if (context instanceof Response) throw new Error('Unexpected redirect');
+      const html = renderToStaticMarkup(
+        createElement(StaticRouterProvider, {
+          router: createStaticRouter(handler.dataRoutes, context),
+          context,
+          hydrate: false,
+        }),
+      );
+      expect(html.match(/<main\b/g)).toHaveLength(1);
+      expect(html.match(/<h1\b/g)).toHaveLength(1);
+      expect(html).toContain(`alt="${altText || 'Article title'}"`);
+      expect(html).toContain(
+        '<h1 id="blog-article-title" class="blog-detail-title">Article title</h1>',
+      );
+      expect(html).toContain(
+        '<article class="blog-detail-main" aria-labelledby="blog-article-title">',
+      );
+      expect(html).toContain(
+        `<aside class="blog-detail-sidebar" aria-label="${createTranslator(locale)('blog.moreInCategory')}">`,
+      );
+      const cards = [
+        ...html.matchAll(
+          /<article class="blog-detail-related-card">([\s\S]*?)<\/article>/g,
+        ),
+      ].map((match) => match[1]);
+      expect(cards).toHaveLength(2);
+      const prefix = locale.language === 'EN' ? '/en' : '';
+      expect(cards.map((card) => attributes(card, 'href'))).toEqual([
+        [prefix + '/blogs/news/related-one'],
+        [prefix + '/blogs/news/related-two'],
+      ]);
+      cards.forEach((card, index) => {
+        expect(card).toContain(index === 0 ? 'Related one' : 'Related two');
+        expect(card).toContain('Related excerpt ' + (index + 1));
+        expect(card).toContain('class="blog-detail-related-card__date"');
+      });
+      expect(cards[0]).toContain('alt="Related image"');
+      expect(cards[1]).toContain('alt="Related two"');
+      expect(html).toContain('<h2>Article section</h2><p>Article text.</p>');
+      expect(html).toContain('<span aria-current="page">Article title</span>');
+      expectResolvedRelationships(html);
+    },
+  );
 });
 
 describe('document title fallbacks', () => {
+  it.each([GERMAN_LOCALE, ENGLISH_LOCALE])(
+    'renders policy links as a list with unchanged URLs and breadcrumbs (%s)',
+    async (locale) => {
+      const policies = [
+        'privacy-policy',
+        'shipping-policy',
+        'terms-of-service',
+        'refund-policy',
+        'subscription-policy',
+      ].map((handle) => ({id: handle, handle, title: handle}));
+      const prefix = locale.language === 'EN' ? '/en' : '';
+      const canonicalUrl = 'https://www.wandini.shop' + prefix + '/policies';
+      const title = createTranslator(locale)('policies.title');
+      const routes = [
+        {
+          id: 'root',
+          path: '/',
+          loader: () => ({selectedLocale: locale}),
+          element: createElement(Outlet),
+          children: [
+            {
+              path: '*',
+              element: createElement(Policies),
+              loader: () => ({policies, canonicalUrl}),
+            },
+          ],
+        },
+      ];
+      const handler = createStaticHandler(routes);
+      const context = await handler.query(new Request(canonicalUrl));
+      if (context instanceof Response) throw new Error('Unexpected redirect');
+      const html = renderToStaticMarkup(
+        createElement(StaticRouterProvider, {
+          router: createStaticRouter(handler.dataRoutes, context),
+          context,
+          hydrate: false,
+        }),
+      );
+      expect(html).not.toContain('<fieldset');
+      expect(html.match(/<h1\b/g)).toHaveLength(1);
+      expect(html).toContain(`<h1>${title}</h1>`);
+      const list =
+        html.match(/<div class="policies">[\s\S]*?<ul>([\s\S]*?)<\/ul>/)?.[1] ??
+        '';
+      expect(list.match(/<li\b/g)).toHaveLength(policies.length);
+      expect(attributes(list, 'href')).toEqual(
+        policies.map(({handle}) => prefix + '/policies/' + handle),
+      );
+      policies.forEach(({title}) =>
+        expect(list).toContain('>' + title + '</a>'),
+      );
+      expect(html).toContain('aria-label="Breadcrumb"');
+      expect(html).toContain(`<span aria-current="page">${title}</span>`);
+      expect(html).toContain(
+        'href="https://www.wandini.shop' + (prefix || '/') + '"',
+      );
+      const schemas = [
+        ...html.matchAll(
+          /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,
+        ),
+      ].map(
+        (match) =>
+          JSON.parse(match[1]) as {
+            '@type': string;
+            itemListElement: Array<{name: string; item: string}>;
+          },
+      );
+      expect(
+        schemas
+          .find((schema) => schema['@type'] === 'BreadcrumbList')
+          ?.itemListElement.at(-1),
+      ).toMatchObject({name: title, item: canonicalUrl});
+      expectResolvedRelationships(html);
+    },
+  );
+
   it.each([
     ['/policies', 'Richtlinien'],
     ['/en/policies', 'Policies'],

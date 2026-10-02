@@ -79,13 +79,13 @@ export default function Policies() {
       </div>
       <div className="policies">
         <h1>{t('policies.title')}</h1>
-        <div>
+        <ul>
           {policies.map((policy) => (
-            <fieldset key={policy.id}>
+            <li key={policy.id}>
               <Link to={`/policies/${policy.handle}`}>{policy.title}</Link>
-            </fieldset>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </>
   );

@@ -72,6 +72,14 @@
 }
 
 .blog-detail-sidebar {
+  /* Keep the content landmark separate from the global drawer styles. */
+  position: static;
+  top: auto;
+  right: auto;
+  height: auto;
+  background: transparent;
+  box-shadow: none;
+  transition: none;
   width: calc(33.333% - 16px);
   flex: 0 0 calc(33.333% - 16px);
   min-width: 0;

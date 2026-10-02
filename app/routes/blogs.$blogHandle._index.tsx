@@ -12,6 +12,7 @@ import {Link} from '~/lib/i18n-router';
 import {
   buildResourceSeoAlternateUrls,
   buildSeoMetadata,
+  normalizeSeoText,
   resolvePaginationSeoPolicy,
 } from '~/lib/seo';
 import {formatLocaleDate} from '~/lib/locale-format';
@@ -39,13 +40,22 @@ function stringifyJsonLd(data: unknown) {
 
 export const meta: Route.MetaFunction = ({data, params}) => {
   const blog = data?.blog;
+  const articles = blog?.articles.nodes ?? [];
 
   return buildSeoMetadata({
     title: {
       explicit: blog?.seo?.title,
       fallback: blog?.title,
     },
-    description: {explicit: blog?.seo?.description},
+    description: {
+      explicit: blog?.seo?.description,
+      fallback:
+        articles.find((article) => normalizeSeoText(article.excerpt))
+          ?.excerpt ??
+        articles.find((article) => normalizeSeoText(article.contentHtml))
+          ?.contentHtml,
+      systemFallback: blog?.title,
+    },
     canonicalUrl: data?.canonicalUrl ?? `/blogs/${params.blogHandle ?? ''}`,
     preservePagination: true,
     robots: data?.listingRobots ?? 'index,follow',

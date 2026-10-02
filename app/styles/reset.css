@@ -82,7 +82,8 @@ section[data-react-aria-top-layer][aria-live='polite'] {
   padding: 0;
 }
 
-fieldset {
+fieldset,
+.policies > ul > li {
   display: flex;
   flex-direction: column;
   margin-bottom: 0.5rem;

@@ -277,7 +277,9 @@ export default function Article() {
         <div className="blog-detail-header-wrap">
           <div className="blog-detail-header">
             <p className="blog-detail-kicker">{blogTitle}</p>
-            <h1 className="blog-detail-title">{title}</h1>
+            <h1 id="blog-article-title" className="blog-detail-title">
+              {title}
+            </h1>
             <div className="blog-detail-meta">
               <time dateTime={article.publishedAt}>{publishedDate}</time>
               {author?.name ? <span>{author.name}</span> : null}
@@ -286,7 +288,10 @@ export default function Article() {
         </div>
 
         <div className="blog-detail-shell">
-          <div className="blog-detail-main">
+          <article
+            className="blog-detail-main"
+            aria-labelledby="blog-article-title"
+          >
             {image ? (
               <div className="blog-detail-hero-media">
                 <Image
@@ -302,9 +307,12 @@ export default function Article() {
               dangerouslySetInnerHTML={{__html: contentHtml}}
               className="blog-detail-body"
             />
-          </div>
+          </article>
 
-          <div className="blog-detail-sidebar">
+          <aside
+            className="blog-detail-sidebar"
+            aria-label={t('blog.moreInCategory')}
+          >
             <div className="blog-detail-sidebar__inner">
               <p className="blog-detail-sidebar__eyebrow">
                 {t('blog.moreInCategory')}
@@ -322,7 +330,7 @@ export default function Article() {
                   );
 
                   return (
-                    <div
+                    <article
                       className="blog-detail-related-card"
                       key={relatedArticle.id ?? relatedArticle.handle}
                     >
@@ -356,12 +364,12 @@ export default function Article() {
                           </span>
                         </div>
                       </Link>
-                    </div>
+                    </article>
                   );
                 })}
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </div>
