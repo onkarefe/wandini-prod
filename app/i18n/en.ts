@@ -486,6 +486,11 @@ export const en = {
     'The map loads only after you consent to analytics and marketing.',
   'contact.privacySettings': 'Privacy settings',
   'contact.eyebrow': 'Contact',
+  'contact.emailContact.eyebrow': 'DIRECT CONTACT',
+  'contact.emailContact.message':
+    'Have a question or want to get in touch? Simply send us an email. Our team will get back to you as soon as possible.',
+  'contact.emailContact.cta': 'Send an email',
+  'contact.emailContact.subject': 'Contact Wandini',
   'contact.title': 'How can we help?',
   'contact.description':
     'Send us a message. Our team will be happy to help you personally and reliably.',
@@ -503,6 +508,11 @@ export const en = {
   'faq.contactDescription':
     'Send us a message. Our team will be happy to help.',
   'faq.question': 'Your question',
+  'faq.emailContact.eyebrow': 'DIRECT CONTACT',
+  'faq.emailContact.message':
+    'Still have a question or need personal assistance? Send us an email directly. Our team will get back to you as soon as possible.',
+  'faq.emailContact.cta': 'Send an email',
+  'faq.emailContact.subject': 'Question for Wandini',
   'faq.send': 'Send question',
   'faq.sampleSetCta': 'Order Sample Set →',
   'faq.sampleSetUrl': '/en/products/sample-set',
@@ -510,6 +520,16 @@ export const en = {
   'faq.success': 'Thank you. Your question was sent successfully.',
   'faq.error': 'Your question could not be sent right now. Please try again.',
   'reviews.formKicker': 'Your perspective',
+  'reviews.emailContact.kicker': 'Your perspective',
+  'reviews.emailContact.title': 'Your experience. Your space.',
+  'reviews.emailContact.introduction':
+    "We'd love to hear about your experience with Wandini.",
+  'reviews.emailContact.message':
+    'Send us your review and, if you like, a photo of your space by email.',
+  'reviews.emailContact.followUp':
+    'Our team will get back to you as soon as possible.',
+  'reviews.emailContact.cta': 'Share your experience by email',
+  'reviews.emailContact.subject': 'My experience with Wandini',
   'reviews.formTitle': 'Your experience. Your space.',
   'reviews.formDescription':
     'How does your Wandini wall mural feel in everyday life? Share your impressions and show us how the motif became part of your home.',

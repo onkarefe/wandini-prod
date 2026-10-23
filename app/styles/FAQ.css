@@ -306,6 +306,88 @@
   gap: 30px clamp(24px, 3vw, 44px);
 }
 
+.faq-contact__email-panel {
+  display: flex;
+  align-self: stretch;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.faq-contact__email-eyebrow {
+  margin-bottom: 18px;
+  color: #796a58;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.faq-contact__email-message {
+  max-width: 42ch;
+  margin: 0;
+  color: #696158;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.faq-contact__email-address {
+  max-width: 100%;
+  margin-top: 24px;
+  color: #282521;
+  font-size: clamp(1.4rem, 2.5vw, 2.25rem);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+}
+
+.faq-contact__email-cta {
+  display: inline-flex;
+  min-width: 210px;
+  max-width: 100%;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 32px;
+  padding: 16px 28px;
+  border: 1px solid #332f2a;
+  border-radius: 0;
+  background: #332f2a;
+  color: #fff;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.faq-contact__email-cta:hover {
+  background: transparent;
+  color: #332f2a;
+}
+
+.faq-contact__email-address:focus-visible,
+.faq-contact__email-cta:focus-visible {
+  outline: 2px solid #332f2a;
+  outline-offset: 4px;
+}
+
+@media (max-width: 767.98px) {
+  .faq-contact__email-cta {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 .faq-contact__field {
   display: flex;
   min-width: 0;

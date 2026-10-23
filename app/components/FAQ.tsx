@@ -6,6 +6,8 @@ import {useTranslation} from '~/i18n/useTranslation';
 const SAMPLE_SET_FAQ_HANDLE =
   'kann-ich-die-materialien-vor-der-bestellung-testen';
 
+const ENABLE_FAQ_CONTACT_FORM = false;
+
 export type FAQItem = {
   id: string;
   handle: string;
@@ -178,6 +180,7 @@ export default function FAQ({title, categories, copy}: FAQProps) {
             <p>{copy.contactDescription}</p>
           </header>
 
+          {ENABLE_FAQ_CONTACT_FORM ? (
           <fetcher.Form
             className="faq-contact__form"
             method="post"
@@ -312,8 +315,35 @@ export default function FAQ({title, categories, copy}: FAQProps) {
               </div>
             </footer>
           </fetcher.Form>
+          ) : (
+            <FAQEmailContact />
+          )}
         </div>
       </section>
+    </div>
+  );
+}
+
+function FAQEmailContact() {
+  const {t} = useTranslation();
+  const email = 'info@wandini.shop';
+  const subject = encodeURIComponent(t('faq.emailContact.subject'));
+  const mailto = `mailto:${email}?subject=${subject}`;
+
+  return (
+    <div className="faq-contact__form faq-contact__email-panel">
+      <span className="faq-contact__email-eyebrow">
+        {t('faq.emailContact.eyebrow')}
+      </span>
+      <p className="faq-contact__email-message">
+        {t('faq.emailContact.message')}
+      </p>
+      <a className="faq-contact__email-address" href={mailto}>
+        {email}
+      </a>
+      <a className="faq-contact__email-cta" href={mailto}>
+        {t('faq.emailContact.cta')}
+      </a>
     </div>
   );
 }

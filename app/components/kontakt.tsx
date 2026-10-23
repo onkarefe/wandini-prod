@@ -32,6 +32,8 @@ type KontaktProps = {
   data: KontaktPageData;
 };
 
+const ENABLE_KONTAKT_FORM = false;
+
 function ArrowIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -177,8 +179,45 @@ export default function Kontakt({title, data}: KontaktProps) {
         </section>
       ) : null}
 
-      <KontaktForm />
+      {ENABLE_KONTAKT_FORM ? <KontaktForm /> : <KontaktEmailContact />}
     </div>
+  );
+}
+
+function KontaktEmailContact() {
+  const {t} = useTranslation();
+  const email = 'info@wandini.shop';
+  const subject = encodeURIComponent(t('contact.emailContact.subject'));
+  const mailto = `mailto:${email}?subject=${subject}`;
+
+  return (
+    <section
+      className="kontakt-form kontakt-email-contact"
+      aria-labelledby="kontakt-form-title"
+    >
+      <div className="kontakt-form__inner container mx-auto">
+        <header className="kontakt-form__header">
+          <span className="kontakt-form__eyebrow">{t('contact.eyebrow')}</span>
+          <h2 id="kontakt-form-title">{t('contact.title')}</h2>
+          <p>{t('contact.description')}</p>
+        </header>
+
+        <div className="kontakt-form__form kontakt-email-contact__panel">
+          <span className="kontakt-email-contact__eyebrow">
+            {t('contact.emailContact.eyebrow')}
+          </span>
+          <p className="kontakt-email-contact__message">
+            {t('contact.emailContact.message')}
+          </p>
+          <a className="kontakt-email-contact__address" href={mailto}>
+            {email}
+          </a>
+          <a className="kontakt-email-contact__cta" href={mailto}>
+            {t('contact.emailContact.cta')}
+          </a>
+        </div>
+      </div>
+    </section>
   );
 }
 

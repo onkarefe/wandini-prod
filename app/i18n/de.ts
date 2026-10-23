@@ -496,6 +496,11 @@ export const de = {
     'Die Karte wird erst nach Ihrer Zustimmung zu Analyse und Marketing geladen.',
   'contact.privacySettings': 'Datenschutzeinstellungen',
   'contact.eyebrow': 'Kontakt',
+  'contact.emailContact.eyebrow': 'DIREKTKONTAKT',
+  'contact.emailContact.message':
+    'Du hast eine Frage oder möchtest uns etwas mitteilen? Schreib uns einfach eine E-Mail. Unser Team meldet sich so schnell wie möglich bei dir.',
+  'contact.emailContact.cta': 'E-Mail schreiben',
+  'contact.emailContact.subject': 'Kontaktanfrage an Wandini',
   'contact.title': 'Wie können wir dir helfen?',
   'contact.description':
     'Schreib uns eine Nachricht. Unser Team kümmert sich persönlich und zuverlässig um dein Anliegen.',
@@ -514,6 +519,11 @@ export const de = {
   'faq.contactDescription':
     'Schreiben Sie uns. Unser Team hilft Ihnen persönlich und zuverlässig weiter.',
   'faq.question': 'Ihre Frage',
+  'faq.emailContact.eyebrow': 'DIREKTKONTAKT',
+  'faq.emailContact.message':
+    'Sie haben noch eine Frage oder benötigen persönliche Unterstützung? Schreiben Sie uns direkt per E-Mail. Unser Team meldet sich so schnell wie möglich bei Ihnen.',
+  'faq.emailContact.cta': 'E-Mail schreiben',
+  'faq.emailContact.subject': 'Frage an Wandini',
   'faq.send': 'Frage senden',
   'faq.sampleSetCta': 'Muster-Set bestellen →',
   'faq.sampleSetUrl': '/products/muster-set',
@@ -522,6 +532,16 @@ export const de = {
   'faq.error':
     'Ihre Frage konnte gerade nicht gesendet werden. Bitte versuchen Sie es erneut.',
   'reviews.formKicker': 'Ihre Perspektive',
+  'reviews.emailContact.kicker': 'Deine Perspektive',
+  'reviews.emailContact.title': 'Deine Erfahrung. Dein Raum.',
+  'reviews.emailContact.introduction':
+    'Wir freuen uns darauf, deine Erfahrung mit Wandini kennenzulernen.',
+  'reviews.emailContact.message':
+    'Sende uns deine Bewertung und gerne auch ein Foto deines Raums per E-Mail.',
+  'reviews.emailContact.followUp':
+    'Unser Team meldet sich so schnell wie möglich bei dir.',
+  'reviews.emailContact.cta': 'Erfahrung per E-Mail teilen',
+  'reviews.emailContact.subject': 'Meine Erfahrung mit Wandini',
   'reviews.formTitle': 'Deine Erfahrung. Dein Raum.',
   'reviews.formDescription':
     'Wie wirkt deine Wandini Fototapete in deinem Zuhause? Teile deine Erfahrungen mit uns und zeige uns, wie das Motiv deinen Raum bereichert.',

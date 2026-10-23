@@ -1,7 +1,9 @@
 import {createElement, type FormHTMLAttributes} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import CustomerReviewsPage from '~/components/customer-reviews-page';
+import CustomerReviewsPage, {
+  CustomerReviewForm,
+} from '~/components/customer-reviews-page';
 import {createTranslator} from '~/i18n';
 import type {CustomerReviewActionData} from '~/lib/customer-review.server';
 
@@ -84,9 +86,12 @@ const page = {
     ],
   },
 };
-function render(props = page) {
+function render() {
   ui.cursor = 0;
   ui.effects = [];
+  return renderToStaticMarkup(createElement(CustomerReviewForm));
+}
+function renderPage(props = page) {
   return renderToStaticMarkup(createElement(CustomerReviewsPage, props));
 }
 function flushEffects() {
@@ -118,6 +123,46 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('customer review form and display', () => {
+  it.each(['DE', 'EN'] as const)(
+    'renders email contact instead of the form in %s without mounting its fetcher',
+    (language) => {
+      ui.language = language;
+      ui.formProps = undefined;
+      ui.data = {ok: true};
+      const html = renderPage();
+      const t = createTranslator({language});
+      for (const key of [
+        'title',
+        'introduction',
+        'message',
+        'followUp',
+        'cta',
+      ] as const) {
+        const escaped = renderToStaticMarkup(
+          createElement('span', null, t(`reviews.emailContact.${key}`)),
+        ).slice(6, -7);
+        expect(html).toContain(escaped);
+      }
+      const subject =
+        language === 'DE'
+          ? 'Meine Erfahrung mit Wandini'
+          : 'My experience with Wandini';
+      const hrefs = [...html.matchAll(/href="(mailto:[^"]+)"/g)].map(
+        (match) => match[1],
+      );
+      expect(hrefs).toEqual(
+        Array(2).fill(
+          `mailto:info@wandini.shop?subject=${encodeURIComponent(subject)}`,
+        ),
+      );
+      expect(html).toContain('>info@wandini.shop</a>');
+      expect(html).not.toMatch(
+        /<form\b|<input\b|<textarea\b|\/api\/customer-review/,
+      );
+      expect(html).not.toContain(t('reviews.success'));
+      expect(ui.formProps).toBeUndefined();
+    },
+  );
   it('retains Unicode in localized review feedback', () => {
     expect(createTranslator({language: 'DE'})('reviews.success')).toContain(
       'pr\u00fcfen',
@@ -270,7 +315,7 @@ describe('customer review form and display', () => {
     expect(html).not.toContain('value="' + attack);
   });
   it('preserves hero, review list, aggregate/half-star rating and journey rendering', () => {
-    const html = render();
+    const html = renderPage();
     for (const text of [
       'Hero title',
       'Hero description',
@@ -289,7 +334,7 @@ describe('customer review form and display', () => {
     expect(html).toContain('customer-reviews-page__journey-index');
   });
   it('escapes HTML in displayed metaobject text', () => {
-    const html = render({
+    const html = renderPage({
       ...page,
       reviews: [
         {...page.reviews[0], customerComment: '<script>alert(1)</script>'},

@@ -23,6 +23,8 @@ type CustomerReviewsPageProps = {
 
 type StarState = 'full' | 'half' | 'empty';
 
+const ENABLE_CUSTOMER_REVIEW_FORM = false;
+
 function ArrowIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -533,6 +535,47 @@ function CustomerReviewForm() {
   );
 }
 
+function CustomerReviewEmailContact() {
+  const {t} = useTranslation();
+  const email = 'info@wandini.shop';
+  const mailto = `mailto:${email}?subject=${encodeURIComponent(t('reviews.emailContact.subject'))}`;
+
+  return (
+    <section
+      className="customer-reviews-page__submission customer-reviews-page__email-contact"
+      aria-labelledby="customer-review-email-title"
+    >
+      <div className="customer-reviews-page__submission-inner container mx-auto">
+        <header className="customer-reviews-page__submission-header">
+          <span className="customer-reviews-page__submission-kicker">
+            {t('reviews.emailContact.kicker')}
+          </span>
+          <h2 id="customer-review-email-title">
+            {t('reviews.emailContact.title')}
+          </h2>
+          <p>{t('reviews.emailContact.introduction')}</p>
+        </header>
+        <div className="customer-reviews-page__email-content">
+          <p className="customer-reviews-page__email-message">
+            {t('reviews.emailContact.message')}
+          </p>
+          <a className="customer-reviews-page__email-address" href={mailto}>
+            {email}
+          </a>
+          <p className="customer-reviews-page__email-follow-up">
+            {t('reviews.emailContact.followUp')}
+          </p>
+          <a className="customer-reviews-page__email-cta" href={mailto}>
+            {t('reviews.emailContact.cta')}
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export {CustomerReviewForm};
+
 export default function CustomerReviewsPage({
   hero,
   reviews,
@@ -544,7 +587,11 @@ export default function CustomerReviewsPage({
       <ReviewsHero hero={hero} />
       <ReviewsShowcase reviews={reviews} sectionTitle={reviewsSectionTitle} />
       <ExperienceSteps content={steps} />
-      <CustomerReviewForm />
+      {ENABLE_CUSTOMER_REVIEW_FORM ? (
+        <CustomerReviewForm />
+      ) : (
+        <CustomerReviewEmailContact />
+      )}
     </div>
   );
 }
