@@ -211,7 +211,7 @@ describe('shared visible breadcrumbs and BreadcrumbList', () => {
     expectVisibleBreadcrumbMatchesStructuredData(items);
   });
 
-  it('keeps the global SEO kill switch disabled', () => {
-    expect(SEO_ENABLED).toBe(false);
+  it('runs schema and breadcrumb coverage with production SEO enabled', () => {
+    expect(SEO_ENABLED).toBe(true);
   });
 });

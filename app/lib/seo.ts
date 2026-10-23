@@ -9,10 +9,10 @@ import {
 /**
  * Global search-engine switch.
  *
- * Keep this `false` while the storefront is under development. Change only
- * this value to `true` when the site is ready to be crawled and indexed.
+ * Public route policies are active. The server, robots.txt, and sitemap
+ * handlers separately require the configured canonical production origin.
  */
-export const SEO_ENABLED = false;
+export const SEO_ENABLED = true;
 
 export const SEO_BRAND = 'Wandini';
 export const GENERATED_META_DESCRIPTION_MAX_LENGTH = 160;

@@ -265,7 +265,7 @@ describe('Product breadcrumb', () => {
 });
 
 describe('Product SEO safety', () => {
-  it('keeps the global SEO kill switch disabled', () => {
-    expect(SEO_ENABLED).toBe(false);
+  it('runs product structured data coverage with production SEO enabled', () => {
+    expect(SEO_ENABLED).toBe(true);
   });
 });

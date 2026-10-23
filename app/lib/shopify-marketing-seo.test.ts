@@ -159,7 +159,7 @@ describe('Shopify marketing SEO resolution', () => {
     });
   });
 
-  it('supports route noindex while the global kill switch remains authoritative', () => {
+  it('preserves CMS noindex after production SEO activation', () => {
     const resolved = resolveShopifyMarketingSeo({
       settings: GLOBAL_SETTINGS,
       page: {...SEO_PAGE, noindex: true},
@@ -174,11 +174,14 @@ describe('Shopify marketing SEO resolution', () => {
     expect(resolveRobotsDirective('noindex,follow', true)).toBe(
       'noindex,follow',
     );
-    expect(SEO_ENABLED).toBe(false);
+    expect(SEO_ENABLED).toBe(true);
     expect(metadata).toContainEqual({
       name: 'robots',
-      content: SEO_DISABLED_ROBOTS_DIRECTIVE,
+      content: 'noindex,follow',
     });
+    expect(resolveRobotsDirective('noindex,follow', false)).toBe(
+      SEO_DISABLED_ROBOTS_DIRECTIVE,
+    );
   });
 });
 

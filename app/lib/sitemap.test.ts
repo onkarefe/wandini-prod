@@ -10,6 +10,8 @@ import {
   resolveSitemapLastmod,
 } from './sitemap.server';
 import {SEO_ENABLED} from './seo';
+import {loader as indexLoader} from '../routes/[sitemap.xml]';
+import {loader as childLoader} from '../routes/sitemap.$type.$page[.xml]';
 
 const RESOURCE_CASES = [
   {type: 'products', typename: 'Product'},
@@ -17,6 +19,128 @@ const RESOURCE_CASES = [
   {type: 'pages', typename: 'Page'},
   {type: 'blogs', typename: 'Blog'},
 ] as const;
+
+describe('sitemap HTTP responses after activation', () => {
+  const origin = 'https://production.example';
+
+  it('serves the production index with resource and article children', async () => {
+    const query = vi.fn(async (document: string) => {
+      if (document.includes('ArticleSitemapConnection')) {
+        return {
+          articles: {
+            nodes: [{id: 'article-1'}],
+            pageInfo: {hasNextPage: false},
+          },
+        };
+      }
+      return Object.fromEntries(
+        RESOURCE_CASES.map(({type}) => [type, {pagesCount: {count: 1}}]),
+      );
+    });
+    const response = await indexLoader({
+      request: new Request(`${origin}/sitemap.xml`),
+      context: {
+        env: {PUBLIC_CANONICAL_ORIGIN: origin},
+        storefront: {query, CacheLong: () => ({})},
+      },
+    } as never);
+    expect(response.status).toBe(200);
+    const xml = await response.text();
+    for (const type of [
+      'products',
+      'collections',
+      'pages',
+      'blogs',
+      'articles',
+    ]) {
+      expect(xml).toContain(`<loc>${origin}/sitemap/${type}/1.xml</loc>`);
+    }
+    expect(xml).not.toMatch(/\/cart|\/account|\/checkout|\/api\//);
+    expect(response.headers.has('X-Robots-Tag')).toBe(false);
+  });
+
+  it.each(RESOURCE_CASES)(
+    'serves reciprocal localized $type child XML',
+    async ({type, typename}) => {
+      const query = vi.fn(async (document: string) => {
+        if (document.includes('LocalizedSitemapResources')) {
+          return {
+            sitemap: {
+              resources: {
+                hasNextPage: false,
+                items: [
+                  {handle: 'de-handle', updatedAt: '2026-08-01T00:00:00Z'},
+                ],
+              },
+            },
+          };
+        }
+        if (document.includes('SitemapResourceIdentities')) {
+          return {
+            resource0: {
+              __typename: typename,
+              id: 'resource-1',
+              handle: 'de-handle',
+            },
+          };
+        }
+        return {
+          nodes: [
+            {__typename: typename, id: 'resource-1', handle: 'en-handle'},
+          ],
+        };
+      });
+      const response = await childLoader({
+        request: new Request(`${origin}/sitemap/${type}/1.xml`),
+        params: {type, page: '1'},
+        context: {
+          env: {PUBLIC_CANONICAL_ORIGIN: origin},
+          storefront: {query, CacheLong: () => ({})},
+        },
+      } as never);
+      const xml = await response.text();
+      expect(response.status).toBe(200);
+      expect(response.headers.get('Content-Type')).toContain('application/xml');
+      expect(xml).toContain(`<loc>${origin}/${type}/de-handle</loc>`);
+      expect(xml).toContain(`<loc>${origin}/en/${type}/en-handle</loc>`);
+      for (const locale of ['de-DE', 'en-DE', 'x-default']) {
+        expect(xml.match(new RegExp(`hreflang="${locale}"`, 'g'))).toHaveLength(
+          2,
+        );
+      }
+      expect(response.headers.has('X-Robots-Tag')).toBe(false);
+    },
+  );
+
+  it.each([
+    ['http://localhost:3000', origin],
+    ['https://preview.oxygen.example', origin],
+    ['https://staging.example', origin],
+    ['https://alternate.example', origin],
+    [origin, undefined],
+    [origin, `${origin}?invalid=1`],
+  ])(
+    'blocks index and children on %s with origin %s before querying Shopify',
+    async (requestOrigin, configuredOrigin) => {
+      const query = vi.fn();
+      const context = {
+        env: {PUBLIC_CANONICAL_ORIGIN: configuredOrigin},
+        storefront: {query},
+      };
+      for (const loader of [indexLoader, childLoader]) {
+        const response = await loader({
+          request: new Request(`${requestOrigin}/sitemap/products/1.xml`),
+          params: {type: 'products', page: '1'},
+          context,
+        } as never);
+        expect(response.status).toBe(404);
+        expect(response.headers.get('X-Robots-Tag')).toContain('noindex');
+        expect(response.headers.get('Cache-Control')).toBe('no-store');
+      }
+      expect(query).not.toHaveBeenCalled();
+    },
+  );
+});
 
 describe('localized sitemap contract', () => {
   it.each(RESOURCE_CASES)(
@@ -261,7 +385,7 @@ describe('localized sitemap contract', () => {
     expect(xml).toMatch(/hreflang=.en-DE./);
     expect(xml).not.toMatch(/\/(?:de-de|en-us|en-en)(?:\/|<)/i);
     expect(xml).not.toMatch(/[?](?:cursor|direction|sort|f)=/);
-    expect(SEO_ENABLED).toBe(false);
+    expect(SEO_ENABLED).toBe(true);
   });
 
   it('owns every Article exactly once across cursor page boundaries', async () => {

@@ -315,12 +315,24 @@ describe('Wandini SEO core', () => {
     );
   });
 
-  it('keeps the global SEO kill switch authoritative', () => {
-    expect(SEO_ENABLED).toBe(false);
+  it('enables indexing for eligible production pages', () => {
+    expect(SEO_ENABLED).toBe(true);
     expect(resolveRobotsDirective('index,follow', SEO_ENABLED)).toBe(
-      SEO_DISABLED_ROBOTS_DIRECTIVE,
+      'index,follow',
     );
+    expect(
+      buildSeoMetadata({title: {fallback: 'Home'}, canonicalUrl: '/'}),
+    ).toContainEqual({name: 'robots', content: 'index,follow'});
   });
+
+  it.each(['index,follow', 'noindex,follow'])(
+    'keeps the disabled helper authoritative over %s',
+    (directive) => {
+      expect(resolveRobotsDirective(directive, false)).toBe(
+        SEO_DISABLED_ROBOTS_DIRECTIVE,
+      );
+    },
+  );
 
   it('allows an explicit route noindex policy when SEO is enabled', () => {
     expect(resolveRobotsDirective('noindex,follow', true)).toBe(
