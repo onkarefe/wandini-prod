@@ -1,14 +1,6 @@
-import {Await, useLoaderData, useRouteLoaderData} from 'react-router';
+import {useLoaderData, useRouteLoaderData} from 'react-router';
 import type { Route } from './+types/_index';
-import { Suspense } from 'react';
-import { Image } from '@shopify/hydrogen';
-import {Link} from '~/lib/i18n-router';
 import type {RootLoader} from '~/root';
-import type {
-  FeaturedCollectionFragment,
-  RecommendedProductsQuery,
-} from 'storefrontapi.generated';
-import { ProductItem } from '~/components/ProductItem';
 import HeroSection from '~/components/HeroSection';
 import UspBar from '~/components/UspBar';
 import AllProdutsNew, {
@@ -26,7 +18,6 @@ import {
   buildSeoMetadata,
 } from '~/lib/seo';
 import {createTranslator} from '~/i18n';
-import {useTranslation} from '~/i18n/useTranslation';
 import {getLocaleFromI18n} from '~/lib/locale';
 import {buildCanonicalRequestUrl} from '~/lib/canonical-origin';
 import {loadShopifySeoPage} from '~/lib/shopify-marketing-seo.server';
@@ -103,16 +94,14 @@ export function links() {
 }
 
 export async function loader(args: Route.LoaderArgs) {
-  // Start fetching non-critical data without blocking time to first byte
-  const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
+  // Keep CMS-dependent section heights in the initial HTML. Null Suspense
+  // fallbacks would move subsequent sections and the footer when data arrives.
   const [criticalData, shopifySeoPage] = await Promise.all([
     loadCriticalData(args),
     loadShopifySeoPage(args.context.storefront, 'homepage'),
   ]);
 
-  return { ...deferredData, ...criticalData, shopifySeoPage };
+  return { ...criticalData, shopifySeoPage };
 }
 
 function safeJsonArray(input: unknown): string[] {
@@ -205,15 +194,14 @@ function normalizeReferenceImage(
 }
 
 /**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
+ * Keep every active section in SSR because CMS content determines its height.
+ * Hero and USP data are required; optional sections use their existing empty states.
  */
 async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   const t = createTranslator(getLocaleFromI18n(context.storefront.i18n));
   const [
-    { collections },
     heroRes,
-    uspRes,
+    uspItems,
     bestsellerRes,
     customGridRes,
     stepByStepRes,
@@ -221,15 +209,28 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     uberUnsRes,
     customerReviewsRes,
   ] = await Promise.all([
-    context.storefront.query(FEATURED_COLLECTION_QUERY),
-    context.storefront.query(HERO_QUERY),
-    context.storefront.query(USPBAR_QUERY),
-    context.storefront.query(BESTSELLER_PRODUCTS_QUERY),
-    context.storefront.query(CUSTOM_GRID_QUERY),
-    context.storefront.query(STEP_BY_STEP_QUERY),
-    context.storefront.query(EXAMPLE_SET_HOMEPAGE_QUERY),
-    context.storefront.query(UBER_UNS_QUERY),
-    context.storefront.query(CUSTOMER_REVIEWS_QUERY),
+    context.storefront.query(HERO_QUERY, {
+      cache: context.storefront.CacheLong(),
+    }),
+    loadUspItems(context),
+    // Preserve the default product cache policy for bestseller prices.
+    context.storefront.query(BESTSELLER_PRODUCTS_QUERY)
+      .catch(homepageSectionFallback),
+    context.storefront.query(CUSTOM_GRID_QUERY, {
+      cache: context.storefront.CacheLong(),
+    }).catch(homepageSectionFallback),
+    context.storefront.query(STEP_BY_STEP_QUERY, {
+      cache: context.storefront.CacheLong(),
+    }).catch(homepageSectionFallback),
+    context.storefront.query(EXAMPLE_SET_HOMEPAGE_QUERY, {
+      cache: context.storefront.CacheLong(),
+    }).catch(homepageSectionFallback),
+    context.storefront.query(UBER_UNS_QUERY, {
+      cache: context.storefront.CacheLong(),
+    }).catch(homepageSectionFallback),
+    context.storefront.query(CUSTOMER_REVIEWS_QUERY, {
+      cache: context.storefront.CacheLong(),
+    }).catch(homepageSectionFallback),
   ]);
 
   const nodes = heroRes?.metaobjects?.nodes ?? [];
@@ -259,52 +260,6 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
     buttonAction: heroMap.button_action ?? '',
     backgroundImage: heroMap.background ?? null,
   };
-
-  const uspNodes = uspRes?.metaobjects?.nodes ?? [];
-  const uspNode =
-    uspNodes.find((n: any) => n.handle === 'main' || n.handle === 'homepage') ??
-    uspNodes[0] ??
-    null;
-
-  // fields -> key/value map
-  const uspMap = Object.fromEntries(
-    (uspNode?.fields ?? []).map((f: any) => [f.key, f.value]),
-  );
-
-  // Admin’de ‘usp_subtitles’ yerine yanlışlıkla ‘ust_subtitles’ kaydı olabilir, ikisini de dene
-  const titles = safeJsonArray(uspMap.usp_titles);
-  const subtitles = safeJsonArray(uspMap.usp_subtitles ?? uspMap.ust_subtitles);
-  const iconIds = safeJsonArray(uspMap.usp_icons);
-
-  // GID -> MediaImage.image çöz
-  const iconsRes =
-    iconIds.length > 0
-      ? await context.storefront.query(USPBAR_ICONS_QUERY, {
-        variables: { ids: iconIds },
-      })
-      : { nodes: [] };
-
-  const imagesById: Record<string, any> = Object.fromEntries(
-    (iconsRes?.nodes ?? [])
-      .filter(Boolean)
-      .map((n: any) => [n.id, n.image ?? null]),
-  );
-
-  // Dizileri hizala (kısaya göre kırp)
-  const count = Math.min(
-    titles.length || 0,
-    subtitles.length || 0,
-    iconIds.length || 0,
-  );
-
-  const uspItems =
-    count > 0
-      ? Array.from({ length: count }).map((_, i) => ({
-        icon: imagesById[iconIds[i]] ?? null, // {url,altText,width,height}
-        title: titles[i] ?? '',
-        subtitle: subtitles[i] ?? '',
-      }))
-      : [];
 
   const bestsellerCollection = bestsellerRes?.collection ?? null;
   const bestsellerProducts: BestsellerProduct[] =
@@ -532,9 +487,7 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
       ),
     ),
     hero,
-    featuredCollection: collections.nodes[0],
     uspItems,
-    uspNode,
     bestsellerProducts,
     bestsellerSectionTitle,
     customGridItems,
@@ -547,23 +500,45 @@ async function loadCriticalData({ context, request }: Route.LoaderArgs) {
   };
 }
 
-/**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- */
-function loadDeferredData({ context }: Route.LoaderArgs) {
-  const recommendedProducts = context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY)
-    .catch((error: Error) => {
-      // Log query errors, but don't throw them so the page can still render
-      console.error(error);
-      return null;
-    });
+function homepageSectionFallback(error: unknown) {
+  console.error('Homepage section unavailable', error);
+  return null;
+}
 
-  return {
-    recommendedProducts,
-  };
+async function loadUspItems(context: Route.LoaderArgs['context']) {
+  const uspRes = await context.storefront.query(USPBAR_QUERY, {
+    cache: context.storefront.CacheLong(),
+  });
+  const uspNodes = uspRes?.metaobjects?.nodes ?? [];
+  const uspNode =
+    uspNodes.find((node) => node.handle === 'main' || node.handle === 'homepage') ??
+    uspNodes[0] ??
+    null;
+  const uspMap = Object.fromEntries(
+    (uspNode?.fields ?? []).map((field) => [field.key, field.value]),
+  );
+  const titles = safeJsonArray(uspMap.usp_titles);
+  const subtitles = safeJsonArray(uspMap.usp_subtitles ?? uspMap.ust_subtitles);
+  const iconIds = safeJsonArray(uspMap.usp_icons);
+  const count = Math.min(titles.length, subtitles.length, iconIds.length);
+  if (!count) return [];
+
+  // Start the dependent lookup as soon as USP data arrives, independently of
+  // slower homepage sections. Fetch each displayed ID once; retain CMS order.
+  const iconsRes = await context.storefront.query(USPBAR_ICONS_QUERY, {
+    cache: context.storefront.CacheLong(),
+    variables: {ids: [...new Set(iconIds.slice(0, count))]},
+  }).catch(homepageSectionFallback);
+  const imagesById = new Map(
+    (iconsRes?.nodes ?? []).flatMap((node) =>
+      node && 'id' in node && 'image' in node ? [[node.id, node.image] as const] : [],
+    ),
+  );
+  return Array.from({length: count}, (_, index) => ({
+    icon: imagesById.get(iconIds[index]) ?? null,
+    title: titles[index] ?? '',
+    subtitle: subtitles[index] ?? '',
+  }));
 }
 
 export default function Homepage() {
@@ -599,7 +574,7 @@ export default function Homepage() {
         buttonAction={data.hero.buttonAction}
         backgroundImage={data.hero.backgroundImage}
       />
-      <UspBar items={data.uspItems} node={data.uspNode} />
+      <UspBar items={data.uspItems} />
       <AllProdutsNew
         products={data.bestsellerProducts ?? []}
         sectionTitle={data.bestsellerSectionTitle}
@@ -619,70 +594,23 @@ export default function Homepage() {
   );
 }
 
-function FeaturedCollection({
-  collection,
-}: {
-  collection: FeaturedCollectionFragment;
-}) {
-  if (!collection) return null;
-  const image = collection?.image;
-  return (
-    <Link
-      className="featured-collection"
-      to={`/collections/${collection.handle}`}
-    >
-      {image && (
-        <div className="featured-collection-image">
-          <Image data={image} alt={image.altText || collection.title} sizes="100vw" />
-        </div>
-      )}
-      <h2>{collection.title}</h2>
-    </Link>
-  );
-}
-
-function RecommendedProducts({
-  products,
-}: {
-  products: Promise<RecommendedProductsQuery | null>;
-}) {
-  const {t} = useTranslation();
-
-  return (
-    <div className="recommended-products">
-      <h2>{t('home.recommendedProducts')}</h2>
-      <Suspense fallback={<div>{t('common.loading')}</div>}>
-        <Await resolve={products}>
-          {(response) => (
-            <div className="recommended-products-grid">
-              {response
-                ? response.products.nodes.map((product) => (
-                  <ProductItem key={product.id} product={product} />
-                ))
-                : null}
-            </div>
-          )}
-        </Await>
-      </Suspense>
-      <br />
-    </div>
-  );
-}
-
 // --- HERO METAOBJECT QUERY ---
 const HERO_QUERY = `#graphql
-  query HeroSections($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
+  query HeroSections($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     metaobjects(type: "hero_div", first: 10) {
       nodes {
-        id
         handle
         fields {
           key
           value
           reference {
             ... on MediaImage {
-              image { url altText width height }
+              image {
+                url
+                altText
+                width
+                height
+              }
             }
             ... on GenericFile {
               url
@@ -699,23 +627,13 @@ const HERO_QUERY = `#graphql
 
 // usp query
 const USPBAR_QUERY = `#graphql
-  query UspBarMetaobjects($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
+  query UspBarMetaobjects($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     metaobjects(type: "uspbar", first: 5) {
       nodes {
-        id
         handle
         fields {
           key
           value
-          reference {
-            ... on MediaImage {
-              image { url altText width height }
-            }
-            ... on GenericFile {
-              url
-            }
-          }
         }
       }
     }
@@ -723,27 +641,24 @@ const USPBAR_QUERY = `#graphql
 ` as const;
 
 const USPBAR_ICONS_QUERY = `#graphql
-  query UspBarIcons(
-    $country: CountryCode
-    $ids: [ID!]!
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
+  query UspBarIcons($country: CountryCode, $ids: [ID!]!, $language: LanguageCode) @inContext(country: $country, language: $language) {
     nodes(ids: $ids) {
       ... on MediaImage {
         id
-        image { url altText width height }
+        image {
+          url
+          altText
+          width
+          height
+        }
       }
     }
   }
 ` as const;
 
 const BESTSELLER_PRODUCTS_QUERY = `#graphql
-  query BestsellerProductsHomepage(
-    $country: CountryCode
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
+  query BestsellerProductsHomepage($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     collection(handle: "bestseller") {
-      id
       title
       products(first: 6) {
         nodes {
@@ -772,40 +687,15 @@ const BESTSELLER_PRODUCTS_QUERY = `#graphql
 ` as const;
 
 const CUSTOM_GRID_QUERY = `#graphql
-  query CustomGridMetaobjects($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
+  query CustomGridMetaobjects($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     metaobjects(type: "custom_grid", first: 1) {
       nodes {
-        id
-        handle
         fields {
           key
           value
-          type
-          reference {
-            ... on MediaImage {
-              id
-              image {
-                url
-                altText
-                width
-                height
-              }
-            }
-            ... on GenericFile {
-              id
-              url
-            }
-            ... on Collection {
-              id
-              handle
-              title
-            }
-          }
           references(first: 6) {
             nodes {
               ... on MediaImage {
-                id
                 image {
                   url
                   altText
@@ -814,13 +704,10 @@ const CUSTOM_GRID_QUERY = `#graphql
                 }
               }
               ... on GenericFile {
-                id
                 url
               }
               ... on Collection {
-                id
                 handle
-                title
               }
             }
           }
@@ -831,41 +718,20 @@ const CUSTOM_GRID_QUERY = `#graphql
 ` as const;
 
 const STEP_BY_STEP_QUERY = `#graphql
-  query StepByStepMetaobject($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
+  query StepByStepMetaobject($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     metaobjects(type: "step_by_step", first: 1) {
       nodes {
-        id
-        handle
-        type
         fields {
           key
           value
-          type
           reference {
-            ... on MediaImage {
-              id
-              image {
-                url
-                altText
-                width
-                height
-              }
-            }
-            ... on GenericFile {
-              id
-              url
-            }
             ... on Collection {
-              id
               handle
-              title
             }
           }
           references(first: 10) {
             nodes {
               ... on MediaImage {
-                id
                 image {
                   url
                   altText
@@ -874,13 +740,7 @@ const STEP_BY_STEP_QUERY = `#graphql
                 }
               }
               ... on GenericFile {
-                id
                 url
-              }
-              ... on Collection {
-                id
-                handle
-                title
               }
             }
           }
@@ -891,22 +751,14 @@ const STEP_BY_STEP_QUERY = `#graphql
 ` as const;
 
 const EXAMPLE_SET_HOMEPAGE_QUERY = `#graphql
-  query ExampleSetHomepageMetaobject(
-    $country: CountryCode
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
+  query ExampleSetHomepageMetaobject($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     metaobjects(type: "example_set_homepage", first: 1) {
       nodes {
-        id
-        handle
-        type
         fields {
           key
           value
-          type
           reference {
             ... on MediaImage {
-              id
               image {
                 url
                 altText
@@ -915,7 +767,6 @@ const EXAMPLE_SET_HOMEPAGE_QUERY = `#graphql
               }
             }
             ... on GenericFile {
-              id
               url
             }
             ... on Product {
@@ -931,22 +782,14 @@ const EXAMPLE_SET_HOMEPAGE_QUERY = `#graphql
 ` as const;
 
 const UBER_UNS_QUERY = `#graphql
-  query UberUnsHomepageMetaobject(
-    $country: CountryCode
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
+  query UberUnsHomepageMetaobject($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     metaobjects(type: "uber_uns", first: 1) {
       nodes {
-        id
-        handle
-        type
         fields {
           key
           value
-          type
           reference {
             ... on MediaImage {
-              id
               image {
                 url
                 altText
@@ -955,7 +798,6 @@ const UBER_UNS_QUERY = `#graphql
               }
             }
             ... on GenericFile {
-              id
               url
             }
           }
@@ -966,38 +808,15 @@ const UBER_UNS_QUERY = `#graphql
 ` as const;
 
 const CUSTOMER_REVIEWS_QUERY = `#graphql
-  query CustomerReviewsMetaobject(
-    $country: CountryCode
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
+  query CustomerReviewsMetaobject($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     metaobjects(type: "customer_reviews", first: 1) {
       nodes {
-        id
-        handle
-        type
         fields {
           key
           value
-          type
-          reference {
-            ... on MediaImage {
-              id
-              image {
-                url
-                altText
-                width
-                height
-              }
-            }
-            ... on GenericFile {
-              id
-              url
-            }
-          }
           references(first: 10) {
             nodes {
               ... on MediaImage {
-                id
                 image {
                   url
                   altText
@@ -1006,64 +825,11 @@ const CUSTOMER_REVIEWS_QUERY = `#graphql
                 }
               }
               ... on GenericFile {
-                id
                 url
               }
             }
           }
         }
-      }
-    }
-  }
-` as const;
-
-const FEATURED_COLLECTION_QUERY = `#graphql
-  fragment FeaturedCollection on Collection {
-    id
-    title
-    image {
-      id
-      url
-      altText
-      width
-      height
-    }
-    handle
-  }
-  query FeaturedCollection($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
-    collections(first: 1, sortKey: UPDATED_AT, reverse: true) {
-      nodes {
-        ...FeaturedCollection
-      }
-    }
-  }
-` as const;
-
-const RECOMMENDED_PRODUCTS_QUERY = `#graphql
-  fragment RecommendedProduct on Product {
-    id
-    title
-    handle
-    priceRange {
-      minVariantPrice {
-        amount
-        currencyCode
-      }
-    }
-    featuredImage {
-      id
-      url
-      altText
-      width
-      height
-    }
-  }
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
-    products(first: 4, sortKey: UPDATED_AT, reverse: true) {
-      nodes {
-        ...RecommendedProduct
       }
     }
   }

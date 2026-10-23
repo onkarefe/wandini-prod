@@ -30,6 +30,18 @@ export type AccountFavoritesProductsQuery = {
   >;
 };
 
+export type RecommendedProductFragment = Pick<
+  StorefrontAPI.Product,
+  'id' | 'title' | 'handle'
+> & {
+  priceRange: {
+    minVariantPrice: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+  };
+  featuredImage?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+  >;
+};
+
 export type MoneyFragment = Pick<
   StorefrontAPI.MoneyV2,
   'currencyCode' | 'amount'
@@ -723,7 +735,7 @@ export type HeroSectionsQueryVariables = StorefrontAPI.Exact<{
 export type HeroSectionsQuery = {
   metaobjects: {
     nodes: Array<
-      Pick<StorefrontAPI.Metaobject, 'id' | 'handle'> & {
+      Pick<StorefrontAPI.Metaobject, 'handle'> & {
         fields: Array<
           Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'> & {
             reference?: StorefrontAPI.Maybe<
@@ -753,22 +765,8 @@ export type UspBarMetaobjectsQueryVariables = StorefrontAPI.Exact<{
 export type UspBarMetaobjectsQuery = {
   metaobjects: {
     nodes: Array<
-      Pick<StorefrontAPI.Metaobject, 'id' | 'handle'> & {
-        fields: Array<
-          Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'> & {
-            reference?: StorefrontAPI.Maybe<
-              | Pick<StorefrontAPI.GenericFile, 'url'>
-              | {
-                  image?: StorefrontAPI.Maybe<
-                    Pick<
-                      StorefrontAPI.Image,
-                      'url' | 'altText' | 'width' | 'height'
-                    >
-                  >;
-                }
-            >;
-          }
-        >;
+      Pick<StorefrontAPI.Metaobject, 'handle'> & {
+        fields: Array<Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'>>;
       }
     >;
   };
@@ -801,7 +799,7 @@ export type BestsellerProductsHomepageQueryVariables = StorefrontAPI.Exact<{
 
 export type BestsellerProductsHomepageQuery = {
   collection?: StorefrontAPI.Maybe<
-    Pick<StorefrontAPI.Collection, 'id' | 'title'> & {
+    Pick<StorefrontAPI.Collection, 'title'> & {
       products: {
         nodes: Array<
           Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
@@ -833,40 +831,26 @@ export type CustomGridMetaobjectsQueryVariables = StorefrontAPI.Exact<{
 
 export type CustomGridMetaobjectsQuery = {
   metaobjects: {
-    nodes: Array<
-      Pick<StorefrontAPI.Metaobject, 'id' | 'handle'> & {
-        fields: Array<
-          Pick<StorefrontAPI.MetaobjectField, 'key' | 'value' | 'type'> & {
-            reference?: StorefrontAPI.Maybe<
-              | Pick<StorefrontAPI.Collection, 'id' | 'handle' | 'title'>
-              | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
-              | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+    nodes: Array<{
+      fields: Array<
+        Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'> & {
+          references?: StorefrontAPI.Maybe<{
+            nodes: Array<
+              | Pick<StorefrontAPI.Collection, 'handle'>
+              | Pick<StorefrontAPI.GenericFile, 'url'>
+              | {
                   image?: StorefrontAPI.Maybe<
                     Pick<
                       StorefrontAPI.Image,
                       'url' | 'altText' | 'width' | 'height'
                     >
                   >;
-                })
+                }
             >;
-            references?: StorefrontAPI.Maybe<{
-              nodes: Array<
-                | Pick<StorefrontAPI.Collection, 'id' | 'handle' | 'title'>
-                | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
-                | (Pick<StorefrontAPI.MediaImage, 'id'> & {
-                    image?: StorefrontAPI.Maybe<
-                      Pick<
-                        StorefrontAPI.Image,
-                        'url' | 'altText' | 'width' | 'height'
-                      >
-                    >;
-                  })
-              >;
-            }>;
-          }
-        >;
-      }
-    >;
+          }>;
+        }
+      >;
+    }>;
   };
 };
 
@@ -877,40 +861,28 @@ export type StepByStepMetaobjectQueryVariables = StorefrontAPI.Exact<{
 
 export type StepByStepMetaobjectQuery = {
   metaobjects: {
-    nodes: Array<
-      Pick<StorefrontAPI.Metaobject, 'id' | 'handle' | 'type'> & {
-        fields: Array<
-          Pick<StorefrontAPI.MetaobjectField, 'key' | 'value' | 'type'> & {
-            reference?: StorefrontAPI.Maybe<
-              | Pick<StorefrontAPI.Collection, 'id' | 'handle' | 'title'>
-              | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
-              | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+    nodes: Array<{
+      fields: Array<
+        Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'> & {
+          reference?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.Collection, 'handle'>
+          >;
+          references?: StorefrontAPI.Maybe<{
+            nodes: Array<
+              | Pick<StorefrontAPI.GenericFile, 'url'>
+              | {
                   image?: StorefrontAPI.Maybe<
                     Pick<
                       StorefrontAPI.Image,
                       'url' | 'altText' | 'width' | 'height'
                     >
                   >;
-                })
+                }
             >;
-            references?: StorefrontAPI.Maybe<{
-              nodes: Array<
-                | Pick<StorefrontAPI.Collection, 'id' | 'handle' | 'title'>
-                | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
-                | (Pick<StorefrontAPI.MediaImage, 'id'> & {
-                    image?: StorefrontAPI.Maybe<
-                      Pick<
-                        StorefrontAPI.Image,
-                        'url' | 'altText' | 'width' | 'height'
-                      >
-                    >;
-                  })
-              >;
-            }>;
-          }
-        >;
-      }
-    >;
+          }>;
+        }
+      >;
+    }>;
   };
 };
 
@@ -921,26 +893,24 @@ export type ExampleSetHomepageMetaobjectQueryVariables = StorefrontAPI.Exact<{
 
 export type ExampleSetHomepageMetaobjectQuery = {
   metaobjects: {
-    nodes: Array<
-      Pick<StorefrontAPI.Metaobject, 'id' | 'handle' | 'type'> & {
-        fields: Array<
-          Pick<StorefrontAPI.MetaobjectField, 'key' | 'value' | 'type'> & {
-            reference?: StorefrontAPI.Maybe<
-              | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
-              | (Pick<StorefrontAPI.MediaImage, 'id'> & {
-                  image?: StorefrontAPI.Maybe<
-                    Pick<
-                      StorefrontAPI.Image,
-                      'url' | 'altText' | 'width' | 'height'
-                    >
-                  >;
-                })
-              | Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'>
-            >;
-          }
-        >;
-      }
-    >;
+    nodes: Array<{
+      fields: Array<
+        Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'> & {
+          reference?: StorefrontAPI.Maybe<
+            | Pick<StorefrontAPI.GenericFile, 'url'>
+            | {
+                image?: StorefrontAPI.Maybe<
+                  Pick<
+                    StorefrontAPI.Image,
+                    'url' | 'altText' | 'width' | 'height'
+                  >
+                >;
+              }
+            | Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'>
+          >;
+        }
+      >;
+    }>;
   };
 };
 
@@ -951,25 +921,23 @@ export type UberUnsHomepageMetaobjectQueryVariables = StorefrontAPI.Exact<{
 
 export type UberUnsHomepageMetaobjectQuery = {
   metaobjects: {
-    nodes: Array<
-      Pick<StorefrontAPI.Metaobject, 'id' | 'handle' | 'type'> & {
-        fields: Array<
-          Pick<StorefrontAPI.MetaobjectField, 'key' | 'value' | 'type'> & {
-            reference?: StorefrontAPI.Maybe<
-              | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
-              | (Pick<StorefrontAPI.MediaImage, 'id'> & {
-                  image?: StorefrontAPI.Maybe<
-                    Pick<
-                      StorefrontAPI.Image,
-                      'url' | 'altText' | 'width' | 'height'
-                    >
-                  >;
-                })
-            >;
-          }
-        >;
-      }
-    >;
+    nodes: Array<{
+      fields: Array<
+        Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'> & {
+          reference?: StorefrontAPI.Maybe<
+            | Pick<StorefrontAPI.GenericFile, 'url'>
+            | {
+                image?: StorefrontAPI.Maybe<
+                  Pick<
+                    StorefrontAPI.Image,
+                    'url' | 'altText' | 'width' | 'height'
+                  >
+                >;
+              }
+          >;
+        }
+      >;
+    }>;
   };
 };
 
@@ -980,105 +948,25 @@ export type CustomerReviewsMetaobjectQueryVariables = StorefrontAPI.Exact<{
 
 export type CustomerReviewsMetaobjectQuery = {
   metaobjects: {
-    nodes: Array<
-      Pick<StorefrontAPI.Metaobject, 'id' | 'handle' | 'type'> & {
-        fields: Array<
-          Pick<StorefrontAPI.MetaobjectField, 'key' | 'value' | 'type'> & {
-            reference?: StorefrontAPI.Maybe<
-              | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
-              | (Pick<StorefrontAPI.MediaImage, 'id'> & {
+    nodes: Array<{
+      fields: Array<
+        Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'> & {
+          references?: StorefrontAPI.Maybe<{
+            nodes: Array<
+              | Pick<StorefrontAPI.GenericFile, 'url'>
+              | {
                   image?: StorefrontAPI.Maybe<
                     Pick<
                       StorefrontAPI.Image,
                       'url' | 'altText' | 'width' | 'height'
                     >
                   >;
-                })
+                }
             >;
-            references?: StorefrontAPI.Maybe<{
-              nodes: Array<
-                | Pick<StorefrontAPI.GenericFile, 'id' | 'url'>
-                | (Pick<StorefrontAPI.MediaImage, 'id'> & {
-                    image?: StorefrontAPI.Maybe<
-                      Pick<
-                        StorefrontAPI.Image,
-                        'url' | 'altText' | 'width' | 'height'
-                      >
-                    >;
-                  })
-              >;
-            }>;
-          }
-        >;
-      }
-    >;
-  };
-};
-
-export type FeaturedCollectionFragment = Pick<
-  StorefrontAPI.Collection,
-  'id' | 'title' | 'handle'
-> & {
-  image?: StorefrontAPI.Maybe<
-    Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
-  >;
-};
-
-export type FeaturedCollectionQueryVariables = StorefrontAPI.Exact<{
-  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
-  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
-}>;
-
-export type FeaturedCollectionQuery = {
-  collections: {
-    nodes: Array<
-      Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'> & {
-        image?: StorefrontAPI.Maybe<
-          Pick<
-            StorefrontAPI.Image,
-            'id' | 'url' | 'altText' | 'width' | 'height'
-          >
-        >;
-      }
-    >;
-  };
-};
-
-export type RecommendedProductFragment = Pick<
-  StorefrontAPI.Product,
-  'id' | 'title' | 'handle'
-> & {
-  priceRange: {
-    minVariantPrice: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
-  };
-  featuredImage?: StorefrontAPI.Maybe<
-    Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
-  >;
-};
-
-export type RecommendedProductsQueryVariables = StorefrontAPI.Exact<{
-  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
-  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
-}>;
-
-export type RecommendedProductsQuery = {
-  products: {
-    nodes: Array<
-      Pick<StorefrontAPI.Product, 'id' | 'title' | 'handle'> & {
-        priceRange: {
-          minVariantPrice: Pick<
-            StorefrontAPI.MoneyV2,
-            'amount' | 'currencyCode'
-          >;
-        };
-        featuredImage?: StorefrontAPI.Maybe<
-          Pick<
-            StorefrontAPI.Image,
-            'id' | 'url' | 'altText' | 'width' | 'height'
-          >
-        >;
-      }
-    >;
+          }>;
+        }
+      >;
+    }>;
   };
 };
 
@@ -2580,49 +2468,41 @@ interface GeneratedQueryTypes {
     return: SimilarProductsCardsQuery;
     variables: SimilarProductsCardsQueryVariables;
   };
-  '#graphql\n  query HeroSections($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    metaobjects(type: "hero_div", first: 10) {\n      nodes {\n        id\n        handle\n        fields {\n          key\n          value\n          reference {\n            ... on MediaImage {\n              image { url altText width height }\n            }\n            ... on GenericFile {\n              url\n            }\n            ... on Collection {\n              handle\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query HeroSections($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {\n    metaobjects(type: "hero_div", first: 10) {\n      nodes {\n        handle\n        fields {\n          key\n          value\n          reference {\n            ... on MediaImage {\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              url\n            }\n            ... on Collection {\n              handle\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: HeroSectionsQuery;
     variables: HeroSectionsQueryVariables;
   };
-  '#graphql\n  query UspBarMetaobjects($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    metaobjects(type: "uspbar", first: 5) {\n      nodes {\n        id\n        handle\n        fields {\n          key\n          value\n          reference {\n            ... on MediaImage {\n              image { url altText width height }\n            }\n            ... on GenericFile {\n              url\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query UspBarMetaobjects($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {\n    metaobjects(type: "uspbar", first: 5) {\n      nodes {\n        handle\n        fields {\n          key\n          value\n        }\n      }\n    }\n  }\n': {
     return: UspBarMetaobjectsQuery;
     variables: UspBarMetaobjectsQueryVariables;
   };
-  '#graphql\n  query UspBarIcons(\n    $country: CountryCode\n    $ids: [ID!]!\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    nodes(ids: $ids) {\n      ... on MediaImage {\n        id\n        image { url altText width height }\n      }\n    }\n  }\n': {
+  '#graphql\n  query UspBarIcons($country: CountryCode, $ids: [ID!]!, $language: LanguageCode) @inContext(country: $country, language: $language) {\n    nodes(ids: $ids) {\n      ... on MediaImage {\n        id\n        image {\n          url\n          altText\n          width\n          height\n        }\n      }\n    }\n  }\n': {
     return: UspBarIconsQuery;
     variables: UspBarIconsQueryVariables;
   };
-  '#graphql\n  query BestsellerProductsHomepage(\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: "bestseller") {\n      id\n      title\n      products(first: 6) {\n        nodes {\n          id\n          handle\n          title\n          images(first: 2) {\n            nodes {\n              id\n              url\n              altText\n              width\n              height\n            }\n          }\n          priceRange {\n            minVariantPrice {\n              amount\n              currencyCode\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query BestsellerProductsHomepage($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {\n    collection(handle: "bestseller") {\n      title\n      products(first: 6) {\n        nodes {\n          id\n          handle\n          title\n          images(first: 2) {\n            nodes {\n              id\n              url\n              altText\n              width\n              height\n            }\n          }\n          priceRange {\n            minVariantPrice {\n              amount\n              currencyCode\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: BestsellerProductsHomepageQuery;
     variables: BestsellerProductsHomepageQueryVariables;
   };
-  '#graphql\n  query CustomGridMetaobjects($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    metaobjects(type: "custom_grid", first: 1) {\n      nodes {\n        id\n        handle\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n            ... on Collection {\n              id\n              handle\n              title\n            }\n          }\n          references(first: 6) {\n            nodes {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                id\n                url\n              }\n              ... on Collection {\n                id\n                handle\n                title\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query CustomGridMetaobjects($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {\n    metaobjects(type: "custom_grid", first: 1) {\n      nodes {\n        fields {\n          key\n          value\n          references(first: 6) {\n            nodes {\n              ... on MediaImage {\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                url\n              }\n              ... on Collection {\n                handle\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: CustomGridMetaobjectsQuery;
     variables: CustomGridMetaobjectsQueryVariables;
   };
-  '#graphql\n  query StepByStepMetaobject($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    metaobjects(type: "step_by_step", first: 1) {\n      nodes {\n        id\n        handle\n        type\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n            ... on Collection {\n              id\n              handle\n              title\n            }\n          }\n          references(first: 10) {\n            nodes {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                id\n                url\n              }\n              ... on Collection {\n                id\n                handle\n                title\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query StepByStepMetaobject($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {\n    metaobjects(type: "step_by_step", first: 1) {\n      nodes {\n        fields {\n          key\n          value\n          reference {\n            ... on Collection {\n              handle\n            }\n          }\n          references(first: 10) {\n            nodes {\n              ... on MediaImage {\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                url\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: StepByStepMetaobjectQuery;
     variables: StepByStepMetaobjectQueryVariables;
   };
-  '#graphql\n  query ExampleSetHomepageMetaobject(\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    metaobjects(type: "example_set_homepage", first: 1) {\n      nodes {\n        id\n        handle\n        type\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n            ... on Product {\n              id\n              handle\n              title\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query ExampleSetHomepageMetaobject($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {\n    metaobjects(type: "example_set_homepage", first: 1) {\n      nodes {\n        fields {\n          key\n          value\n          reference {\n            ... on MediaImage {\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              url\n            }\n            ... on Product {\n              id\n              handle\n              title\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: ExampleSetHomepageMetaobjectQuery;
     variables: ExampleSetHomepageMetaobjectQueryVariables;
   };
-  '#graphql\n  query UberUnsHomepageMetaobject(\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    metaobjects(type: "uber_uns", first: 1) {\n      nodes {\n        id\n        handle\n        type\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query UberUnsHomepageMetaobject($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {\n    metaobjects(type: "uber_uns", first: 1) {\n      nodes {\n        fields {\n          key\n          value\n          reference {\n            ... on MediaImage {\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              url\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: UberUnsHomepageMetaobjectQuery;
     variables: UberUnsHomepageMetaobjectQueryVariables;
   };
-  '#graphql\n  query CustomerReviewsMetaobject(\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    metaobjects(type: "customer_reviews", first: 1) {\n      nodes {\n        id\n        handle\n        type\n        fields {\n          key\n          value\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n            ... on GenericFile {\n              id\n              url\n            }\n          }\n          references(first: 10) {\n            nodes {\n              ... on MediaImage {\n                id\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                id\n                url\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query CustomerReviewsMetaobject($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {\n    metaobjects(type: "customer_reviews", first: 1) {\n      nodes {\n        fields {\n          key\n          value\n          references(first: 10) {\n            nodes {\n              ... on MediaImage {\n                image {\n                  url\n                  altText\n                  width\n                  height\n                }\n              }\n              ... on GenericFile {\n                url\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
     return: CustomerReviewsMetaobjectQuery;
     variables: CustomerReviewsMetaobjectQueryVariables;
-  };
-  '#graphql\n  fragment FeaturedCollection on Collection {\n    id\n    title\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n    handle\n  }\n  query FeaturedCollection($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    collections(first: 1, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...FeaturedCollection\n      }\n    }\n  }\n': {
-    return: FeaturedCollectionQuery;
-    variables: FeaturedCollectionQueryVariables;
-  };
-  '#graphql\n  fragment RecommendedProduct on Product {\n    id\n    title\n    handle\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    products(first: 4, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...RecommendedProduct\n      }\n    }\n  }\n': {
-    return: RecommendedProductsQuery;
-    variables: RecommendedProductsQueryVariables;
   };
   '#graphql\n  query Article(\n    $articleHandle: String!\n    $blogHandle: String!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    blog(handle: $blogHandle) {\n      title\n      handle\n      articleByHandle(handle: $articleHandle) {\n        id\n        handle\n        title\n        contentHtml\n        publishedAt\n        author: authorV2 {\n          name\n        }\n        image {\n          id\n          altText\n          url\n          width\n          height\n        }\n        seo {\n          description\n          title\n        }\n      }\n      articles(first: 12) {\n        nodes {\n          id\n          handle\n          title\n          excerpt\n          publishedAt\n          image {\n            id\n            altText\n            url\n            width\n            height\n          }\n        }\n      }\n    }\n  }\n': {
     return: ArticleQuery;
