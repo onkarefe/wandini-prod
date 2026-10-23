@@ -1,6 +1,7 @@
 import type {Storefront} from '@shopify/hydrogen';
 import {
   getMetafieldTextValue,
+  filterSimilarProducts,
   getSimilarProductsTarget,
   parseSimilarProductsSlug,
   rankSimilarProducts,
@@ -58,17 +59,20 @@ function resolveTarget(
   const parts = parseSimilarProductsSlug(slug);
   if (parts) {
     // Resolve the two independently encoded fields; no reference-product slug search.
-    const matches = products
-      .filter(
-        (product) =>
-          slugifySimilarPart(getMetafieldTextValue(product.mainMotif) ?? '') ===
-            parts.motif &&
-          slugifySimilarPart(getMetafieldTextValue(product.mainTheme) ?? '') ===
-            parts.theme,
+    let source: SimilarProductsCandidate | undefined;
+    for (const product of products) {
+      if (
+        product.availableForSale !== false &&
+        (!source || product.id < source.id) &&
+        slugifySimilarPart(getMetafieldTextValue(product.mainMotif) ?? '') ===
+          parts.motif &&
+        slugifySimilarPart(getMetafieldTextValue(product.mainTheme) ?? '') ===
+          parts.theme
       )
-      .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-    const source = matches[0];
-    const target = source && getSimilarProductsTarget(source);
+        source = product;
+    }
+    if (!source) return null;
+    const target = getSimilarProductsTarget(source);
     return target
       ? {
           slug: target.slug,
@@ -93,6 +97,7 @@ function resolveTarget(
       .replace(/^-|-$/g, '');
   const groups = new Map<string, ResolvedTarget>();
   for (const product of products) {
+    if (product.availableForSale === false) continue;
     const target = getSimilarProductsTarget(product);
     if (!target) continue;
     const oldSlug = `${oldPart(target.mainMotif)}-${oldPart(target.mainTheme)}`;
@@ -119,6 +124,7 @@ export async function getSimilarProductsPageData({
   excludeProductId,
   sourceHandle = '',
   productIds,
+  imageCount = 2,
 }: {
   storefront: Storefront;
   slug?: string;
@@ -127,7 +133,17 @@ export async function getSimilarProductsPageData({
   excludeProductId?: string | null;
   sourceHandle?: string;
   productIds?: string[];
+  imageCount?: 1 | 2;
 }) {
+  // A source handle can repair even a malformed slug after a grouping edit.
+  // Without one, only canonical or recognized legacy slugs can resolve.
+  if (
+    slug &&
+    !sourceHandle &&
+    !parseSimilarProductsSlug(slug) &&
+    !/-(fototapeten|wall-murals)$/.test(slug)
+  )
+    return null;
   const candidates = await fetchSimilarProductsCandidates(storefront);
   const sourceProduct = sourceHandle
     ? candidates.find((product) => product.handle === sourceHandle)
@@ -136,35 +152,44 @@ export async function getSimilarProductsPageData({
   if (slug && sourceProduct && !sourceTarget) return null;
   // A known source makes a stale group URL safely recoverable after a metafield edit.
   const target = resolveTarget(
-    candidates.filter((product) => product.availableForSale !== false),
+    candidates,
     slug && sourceTarget ? sourceTarget.slug : slug,
   );
   if (!target) return null;
   const sourceProductId = excludeProductId || sourceProduct?.id || null;
-  const ranked = rankSimilarProducts({
-    products: candidates,
-    target: target.slug ? target : null,
-    excludeProductId: sourceProductId,
-  });
   const start = Number.isFinite(offset) ? Math.max(0, Math.floor(offset)) : 0;
   const size = Number.isFinite(pageSize)
     ? Math.min(250, Math.max(1, Math.floor(pageSize)))
     : 15;
   // Keep the first request's order across publication/metafield changes.
   // IDs stay in loader/form data, never in the URL.
-  const orderedIds = productIds ?? ranked.map(({id}) => id);
+  const orderedIds =
+    productIds ??
+    rankSimilarProducts({
+      products: candidates,
+      target: target.slug ? target : null,
+      excludeProductId: sourceProductId,
+    }).map(({id}) => id);
   const slots = orderedIds.slice(start, start + size);
-  const eligibleIds = new Set(ranked.map(({id}) => id));
-  const ids = slots.filter(
-    (id) => eligibleIds.has(id) && id !== sourceProductId,
-  );
+  // A submitted sequence needs eligibility checks, never another full ranking.
+  // On the first page every ranked ID is already eligible.
+  const requestedIds = new Set(slots);
+  const eligibleIds = productIds
+    ? new Set(
+        filterSimilarProducts(
+          candidates.filter(({id}) => requestedIds.has(id)),
+          sourceProductId,
+        ).map(({id}) => id),
+      )
+    : null;
+  const ids = eligibleIds ? slots.filter((id) => eligibleIds.has(id)) : slots;
   const data = ids.length
     ? await storefront.query<{nodes: (SimilarProductsBaseProduct | null)[]}>(
         SIMILAR_PRODUCTS_CARDS_QUERY,
         {
           // Check current publication/availability when hydrating the requested cards.
           cache: storefront.CacheNone(),
-          variables: {...storefront.i18n, ids},
+          variables: {...storefront.i18n, ids, imageCount},
         },
       )
     : {nodes: []};
@@ -217,6 +242,7 @@ const SIMILAR_PRODUCTS_CARDS_QUERY = `#graphql
     $country: CountryCode
     $language: LanguageCode
     $ids: [ID!]!
+    $imageCount: Int!
   ) @inContext(country: $country, language: $language) {
     nodes(ids: $ids) {
       ... on Product {
@@ -227,7 +253,7 @@ const SIMILAR_PRODUCTS_CARDS_QUERY = `#graphql
         mainMotif: metafield(namespace: "custom", key: "main_motif") { value }
         mainTheme: metafield(namespace: "custom", key: "main_theme") { value }
         priceRange { minVariantPrice { amount currencyCode } }
-        images(first: 3) { nodes { url altText width height } }
+        images(first: $imageCount) { nodes { url altText width height } }
       }
     }
   }

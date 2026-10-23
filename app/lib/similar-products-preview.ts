@@ -49,6 +49,7 @@ export async function getSimilarMotifsPreview({
     slug: target.slug,
     excludeProductId: sourceProductId,
     pageSize: 5,
+    imageCount: 1,
   });
   if (!page || !page.items.length) return null;
 

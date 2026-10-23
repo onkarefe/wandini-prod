@@ -123,6 +123,29 @@ export function parseSimilarProductsSlug(slug: string) {
   return {motif: parts[0], theme: parts[1]};
 }
 
+export function filterSimilarProducts<T extends SimilarProductsCandidate>(
+  products: T[],
+  excludeProductId?: string | null,
+) {
+  const seen = new Set<string>();
+  return products.filter((product) => {
+    if (
+      product.id === excludeProductId ||
+      seen.has(product.id) ||
+      product.availableForSale === false
+    )
+      return false;
+    // Keep unrelated accessories out of fallback recommendations.
+    if (
+      !getMetafieldTextValue(product.mainMotif) &&
+      !getMetafieldTextValue(product.mainTheme)
+    )
+      return false;
+    seen.add(product.id);
+    return true;
+  });
+}
+
 export function rankSimilarProducts<T extends SimilarProductsCandidate>({
   products,
   target,
@@ -145,27 +168,21 @@ export function rankSimilarProducts<T extends SimilarProductsCandidate>({
         theme;
     return sameMotif && sameTheme ? 0 : sameMotif ? 1 : sameTheme ? 2 : 3;
   };
-  const seen = new Set<string>();
-  return products
-    .filter((product) => {
-      if (
-        product.id === excludeProductId ||
-        seen.has(product.id) ||
-        product.availableForSale === false
+  return (
+    filterSimilarProducts(products, excludeProductId)
+      // Normalize each eligible product once, rather than during every comparison.
+      .map((product) => ({product, tier: tier(product)}))
+      .sort(
+        (a, b) =>
+          a.tier - b.tier ||
+          (a.product.id < b.product.id
+            ? -1
+            : a.product.id > b.product.id
+              ? 1
+              : 0),
       )
-        return false;
-      // Keep unrelated accessories out of fallback recommendations.
-      if (
-        !getMetafieldTextValue(product.mainMotif) &&
-        !getMetafieldTextValue(product.mainTheme)
-      )
-        return false;
-      seen.add(product.id);
-      return true;
-    })
-    .sort(
-      (a, b) => tier(a) - tier(b) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
-    );
+      .map(({product}) => product)
+  );
 }
 
 export function mergeSimilarProductsById(

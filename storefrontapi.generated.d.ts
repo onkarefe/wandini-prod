@@ -700,6 +700,7 @@ export type SimilarProductsCardsQueryVariables = StorefrontAPI.Exact<{
   ids:
     | Array<StorefrontAPI.Scalars['ID']['input']>
     | StorefrontAPI.Scalars['ID']['input'];
+  imageCount: StorefrontAPI.Scalars['Int']['input'];
 }>;
 
 export type SimilarProductsCardsQuery = {
@@ -2464,7 +2465,7 @@ interface GeneratedQueryTypes {
     return: SimilarProductsCandidatesQuery;
     variables: SimilarProductsCandidatesQueryVariables;
   };
-  '#graphql\n  query SimilarProductsCards(\n    $country: CountryCode\n    $language: LanguageCode\n    $ids: [ID!]!\n  ) @inContext(country: $country, language: $language) {\n    nodes(ids: $ids) {\n      ... on Product {\n        id\n        handle\n        title\n        availableForSale\n        mainMotif: metafield(namespace: "custom", key: "main_motif") { value }\n        mainTheme: metafield(namespace: "custom", key: "main_theme") { value }\n        priceRange { minVariantPrice { amount currencyCode } }\n        images(first: 3) { nodes { url altText width height } }\n      }\n    }\n  }\n': {
+  '#graphql\n  query SimilarProductsCards(\n    $country: CountryCode\n    $language: LanguageCode\n    $ids: [ID!]!\n    $imageCount: Int!\n  ) @inContext(country: $country, language: $language) {\n    nodes(ids: $ids) {\n      ... on Product {\n        id\n        handle\n        title\n        availableForSale\n        mainMotif: metafield(namespace: "custom", key: "main_motif") { value }\n        mainTheme: metafield(namespace: "custom", key: "main_theme") { value }\n        priceRange { minVariantPrice { amount currencyCode } }\n        images(first: $imageCount) { nodes { url altText width height } }\n      }\n    }\n  }\n': {
     return: SimilarProductsCardsQuery;
     variables: SimilarProductsCardsQueryVariables;
   };

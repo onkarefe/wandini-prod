@@ -274,7 +274,51 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
         reverse,
         imageCount,
       },
-    }) as Promise<CustomCollectionQuery>,
+    }).then(async (initialData) => {
+      let collection = initialData.collection;
+      if (!collection) {
+        throw new Response(`Collection ${handle} not found`, {status: 404});
+      }
+
+      // The CMS type is only known now. Keep ordinary pagination in one query,
+      // and overlap translated-handle resolution with the bestseller reload.
+      const resourceId = collection.id;
+      const languageLinks = resolveResourceLanguageSwitchLinks({
+        storefront,
+        request,
+        resourceId,
+        resourceType: 'Collection',
+      });
+      if (isBestsellerCollection(collection)) {
+        const bestsellerData = await storefront.query(CUSTOM_COLLECTION_QUERY, {
+          variables: {
+            handle,
+            first: 250,
+            filters: [],
+            sortKey: 'BEST_SELLING',
+            reverse: false,
+            // Lookbook cards use primary + listing. Room shaping still needs
+            // its full set to locate the exact mockup before rendering.
+            imageCount: roomCode ? imageCount : 2,
+          },
+        });
+        collection = bestsellerData.collection ?? collection;
+      }
+
+      redirectIfHandleIsLocalized(request, {handle, data: collection});
+      return {
+        collection,
+        languageSwitchLinks:
+          collection.id === resourceId
+            ? await languageLinks
+            : await resolveResourceLanguageSwitchLinks({
+                storefront,
+                request,
+                resourceId: collection.id,
+                resourceType: 'Collection',
+              }),
+      };
+    }),
     loadCustomerWishlistState({
       customerAccount,
       env: context.env,
@@ -287,23 +331,6 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   if (!collection) {
     throw new Response(`Collection ${handle} not found`, {status: 404});
-  }
-
-  if (isBestsellerCollection(collection)) {
-    const bestsellerData = (await storefront.query(CUSTOM_COLLECTION_QUERY, {
-      variables: {
-        handle,
-        first: 250,
-        filters: [],
-        sortKey: 'BEST_SELLING',
-        reverse: false,
-        imageCount: getCollectionImageCount(handle),
-      },
-    })) as CustomCollectionQuery;
-
-    collection =
-      (bestsellerData.collection as CollectionWithSeo | null | undefined) ??
-      collection;
   }
 
   if (roomCode) {
@@ -319,13 +346,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     };
   }
 
-  redirectIfHandleIsLocalized(request, {handle, data: collection});
-  const languageSwitchLinks = await resolveResourceLanguageSwitchLinks({
-    storefront,
-    request,
-    resourceId: collection.id,
-    resourceType: 'Collection',
-  });
+  const {languageSwitchLinks} = data;
 
   return {
     collection,
