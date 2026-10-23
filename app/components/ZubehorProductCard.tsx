@@ -5,11 +5,17 @@ import {Link, usePrefixPathWithLocale} from '~/lib/i18n-router';
 import type {WishlistActionData} from '~/lib/wishlist';
 import {formatLocaleCurrency} from '~/lib/locale-format';
 import type {SelectedLocale} from '~/lib/locale';
+import {
+  ACCESSORY_CARD_SIZES,
+  responsiveImageProps,
+} from '~/lib/responsive-image';
 import '../styles/wishlistFeedback.css';
 
 type ProductImage = {
   url: string;
   altText?: string | null;
+  width?: number | null;
+  height?: number | null;
 };
 
 type ProductPrice = {
@@ -155,10 +161,11 @@ export function ZubehorProductCard({
         <div className="zubehor-product-card__media">
           {image ? (
             <img
-              src={image.url}
+              {...responsiveImageProps(image, ACCESSORY_CARD_SIZES)}
               alt={image.altText || title}
               className="zubehor-product-card__image"
               loading="lazy"
+              decoding="async"
             />
           ) : (
             <span

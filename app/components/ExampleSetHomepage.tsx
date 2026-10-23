@@ -1,4 +1,6 @@
 import {Link} from '~/lib/i18n-router';
+import {Image} from '@shopify/hydrogen';
+import {shopifyImageLoader} from '~/lib/responsive-image';
 
 export type ExampleSetHomepageImage = {
   url: string;
@@ -83,13 +85,24 @@ export default function ExampleSetHomepage({content}: ExampleSetHomepageProps) {
 
         {image?.url ? (
           <div className="exampleSetHomepage__media">
-            <img
+            <Image
               className="exampleSetHomepage__image"
-              src={image.url}
+              data={image}
+              loader={shopifyImageLoader}
+              sizes={
+                hasText
+                  ? '(min-width: 1536px) 372px, (min-width: 1280px) 308px, (min-width: 1024px) 244px, (min-width: 768px) 360px, min(520px, 100vw)'
+                  : '(min-width: 1280px) 600px, (min-width: 1024px) 504px, (min-width: 768px) 600px, min(520px, 100vw)'
+              }
+              srcSetOptions={{
+                startingWidth: 240,
+                incrementSize: 240,
+                intervals: 5,
+                placeholderWidth: 600,
+              }}
               alt={image.altText ?? title}
-              width={image.width}
-              height={image.height}
               loading="lazy"
+              decoding="async"
             />
           </div>
         ) : null}

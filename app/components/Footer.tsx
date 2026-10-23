@@ -181,6 +181,8 @@ export function Footer({
                       height={724}
                       alt={header.shop.name || 'Wandini'}
                       className="footer-logo-img"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
 

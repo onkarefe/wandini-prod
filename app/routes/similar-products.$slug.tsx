@@ -333,6 +333,8 @@ function SimilarProductsContent({
                   product.images?.nodes?.map((image) => ({
                     url: image.url,
                     altText: image.altText ?? undefined,
+                    width: image.width,
+                    height: image.height,
                   })) ?? []
                 }
                 productUrl={`/products/${product.handle}`}

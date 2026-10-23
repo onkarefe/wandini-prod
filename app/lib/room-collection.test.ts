@@ -254,7 +254,7 @@ describe('collection route and card wiring', () => {
     expect(cardSource).toContain(
       'const listingImage = images[1] ?? primaryImage;',
     );
-    expect(cardSource).toContain('src={listingImage.url}');
-    expect(cardSource).toContain('src={primaryImage.url}');
+    expect(cardSource).toContain('responsiveImageProps(listingImage, imageSizes)');
+    expect(cardSource).toContain('responsiveImageProps(primaryImage, imageSizes)');
   });
 });

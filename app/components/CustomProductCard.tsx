@@ -6,6 +6,7 @@ import type {WishlistActionData} from '~/lib/wishlist';
 import {formatLocaleCurrency} from '~/lib/locale-format';
 import {getSimilarProductsRootPath} from '~/lib/similar-products';
 import type {SelectedLocale} from '~/lib/locale';
+import {PRODUCT_CARD_SIZES, responsiveImageProps} from '~/lib/responsive-image';
 import '../styles/customProductCard.css';
 import '../styles/wishlistFeedback.css';
 
@@ -18,7 +19,13 @@ interface CustomProductCardProps {
   headingLevel?: 'h2' | 'h3';
   productId: string;
   title: string;
-  images: {url: string; altText?: string}[];
+  images: {
+    url: string;
+    altText?: string;
+    width?: number | null;
+    height?: number | null;
+  }[];
+  imageSizes?: string;
   productUrl: string;
   showSimilarMotifsButton?: boolean;
   similarProductsUrl?: string;
@@ -80,6 +87,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
   productId,
   title,
   images,
+  imageSizes = PRODUCT_CARD_SIZES,
   productUrl,
   showSimilarMotifsButton = false,
   similarProductsUrl,
@@ -200,7 +208,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
         {listingImage ? (
           <div className="custom-product-card__media">
             <img
-              src={listingImage.url}
+              {...responsiveImageProps(listingImage, imageSizes)}
               alt={listingImage.altText || title}
               className="custom-product-card__image custom-product-card__image--listing"
               loading="lazy"
@@ -208,7 +216,7 @@ export const CustomProductCard: React.FC<CustomProductCardProps> = ({
             />
             {hasHoverImage && primaryImage ? (
               <img
-                src={primaryImage.url}
+                {...responsiveImageProps(primaryImage, imageSizes)}
                 alt=""
                 aria-hidden="true"
                 className="custom-product-card__image custom-product-card__image--primary"

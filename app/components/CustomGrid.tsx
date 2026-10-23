@@ -1,6 +1,7 @@
 import type {CSSProperties} from 'react';
 import {Link} from '~/lib/i18n-router';
 import {useTranslation} from '~/i18n/useTranslation';
+import {shopifyImageWidth} from '~/lib/responsive-image';
 
 export type CustomGridItem = {
   id: string;
@@ -29,10 +30,23 @@ const TILE_CLASS_NAMES = [
   'cgBox6',
 ] as const;
 
-function getTileStyle(imageUrl?: string): CSSProperties | undefined {
-  return imageUrl
+function getTileStyle(
+  image: CustomGridItem['image'],
+  index: number,
+): CSSProperties | undefined {
+  // At the largest container, tiles are 760px wide and up to 700px tall.
+  // Account for cover scaling of landscape sources without changing the crop.
+  const height = index === 0 || index === 5 ? 700 : 342;
+  const width =
+    image?.width && image.height
+      ? Math.min(
+          image.width,
+          Math.ceil(Math.max(800, (height * image.width) / image.height) * 2),
+        )
+      : 1600;
+  return image?.url
     ? {
-        backgroundImage: `url("${imageUrl}")`,
+        backgroundImage: `url("${shopifyImageWidth(image.url, width)}")`,
       }
     : undefined;
 }
@@ -47,7 +61,7 @@ function CustomGridTile({
   const {t} = useTranslation();
   const tileClassName = TILE_CLASS_NAMES[index] ?? TILE_CLASS_NAMES[0];
   const className = `${tileClassName} cgBoxMain`;
-  const style = getTileStyle(item.image?.url);
+  const style = getTileStyle(item.image, index);
 
   if (item.link) {
     return (

@@ -1,4 +1,6 @@
 import wandIcon from '~/assets/Icons/wand.png';
+import {Image} from '@shopify/hydrogen';
+import {shopifyImageLoader} from '~/lib/responsive-image';
 
 export type UberUnsHomepageImage = {
   url: string;
@@ -41,13 +43,24 @@ export default function UberUnsHomepage({content}: UberUnsHomepageProps) {
       >
         {sectionImage?.url ? (
           <div className="uberUnsHomepage__media">
-            <img
+            <Image
               className="uberUnsHomepage__image"
-              src={sectionImage.url}
+              data={sectionImage}
+              loader={shopifyImageLoader}
+              sizes={
+                hasText
+                  ? '(min-width: 1536px) 983px, (min-width: 1280px) 817px, (min-width: 1024px) 650px, (min-width: 768px) 484px, (min-width: 640px) 608px, calc(100vw - 32px)'
+                  : '(min-width: 1536px) 1536px, (min-width: 1280px) 1280px, (min-width: 1024px) 1024px, (min-width: 768px) 768px, (min-width: 640px) 608px, calc(100vw - 32px)'
+              }
+              srcSetOptions={{
+                startingWidth: 320,
+                incrementSize: 320,
+                intervals: hasText ? 7 : 10,
+                placeholderWidth: 800,
+              }}
               alt={sectionImage.altText ?? sectionTitle}
-              width={sectionImage.width}
-              height={sectionImage.height}
               loading="lazy"
+              decoding="async"
             />
           </div>
         ) : null}

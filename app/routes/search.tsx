@@ -274,6 +274,7 @@ function ProductResults({
                     key={product.id}
                     productId={product.id}
                     title={product.title}
+                    imageSizes="(max-width: 539px) calc(100vw - 1.7rem - 2px), (max-width: 640px) calc((100vw - 1.7rem - clamp(0.8rem, 1.4vw, 1.4rem)) / 2 - 2px), (max-width: 899px) calc((94vw - clamp(0.8rem, 1.4vw, 1.4rem)) / 2 - 2px), calc((min(1440px, 100vw - clamp(1rem, 3vw, 3rem) * 2) - clamp(0.8rem, 1.4vw, 1.4rem) * 2) / 3 - 2px)"
                     images={product.images.nodes.map((image) => ({
                       url: image.url,
                       altText: image.altText ?? undefined,

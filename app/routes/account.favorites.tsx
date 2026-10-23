@@ -178,6 +178,7 @@ export default function AccountFavorites() {
                 key={product.id}
                 productId={product.id}
                 title={product.title}
+                imageSizes="(max-width: 640px) calc(100vw - 34px), (max-width: 767.98px) calc((min(640px, 100vw - 40px) - 18px) / 2 - 2px), (max-width: 860px) calc((min(768px, 100vw - 40px) - 18px) / 2 - 2px), (max-width: 1023.98px) 255px, (max-width: 1080px) calc((min(1024px, 100vw - 48px) - 254px) / 2 - 2px), (max-width: 1279.98px) 235.34px, (max-width: 1535.98px) calc((min(1280px, 100vw - 48px) - 312px) / 3 - 2px), calc((min(1536px, 100vw - 48px) - 312px) / 3 - 2px)"
                 images={product.images.nodes.map((image) => ({
                   url: image.url,
                   altText: image.altText ?? undefined,
